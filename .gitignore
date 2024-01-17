@@ -1,4 +1,8 @@
-glfw/
-vulkan/
+./glfw/
+./vulkan/
+./.cache/
+./build/
 
 exec
+exec_engine
+compile_commands.json
