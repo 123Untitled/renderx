@@ -5,15 +5,15 @@
 REPO_PATH='https://github.com/glfw/glfw.git'
 REPO_DIR='glfw_repo'
 BUILD_DIR=$REPO_DIR'/build'
-INSTALL_DIR='glfw'
+INSTALL_DIR='external/glfw'
 
 
 if [[ -d $REPO_DIR ]]; then
-	rm -rfv $REPO_DIR
+	rm -rf $REPO_DIR
 fi
 
 if [[ -d $INSTALL_DIR ]]; then
-	rm -rfv $INSTALL_DIR
+	rm -rf $INSTALL_DIR
 fi
 
 if ! git clone $REPO_PATH $REPO_DIR; then
@@ -26,7 +26,7 @@ if ! command -v cmake &> '/dev/null'; then
 	exit 1
 fi
 
-if ! mkdir $BUILD_DIR $INSTALL_DIR; then
+if ! mkdir -p $BUILD_DIR $INSTALL_DIR; then
 	echo "failed to create build and install directories"
 	exit 1
 fi
@@ -42,5 +42,5 @@ CMAKE_FLAGS=(
 cmake -S $REPO_DIR -B $BUILD_DIR $CMAKE_FLAGS
 cmake --build $BUILD_DIR --target install --config Release
 
-rm -rfv $REPO_DIR
+rm -rf $REPO_DIR
 
