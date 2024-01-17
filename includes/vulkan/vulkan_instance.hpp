@@ -45,11 +45,11 @@ namespace vulkan {
 
 				std::vector<const char*> extensions = glfw::system::vulkan_required_extensions();
 
+// check macos system
+#if defined(__APPLE__) && defined(__MACH__)
 				extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-
-
-
 				create.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
 				create.enabledExtensionCount   = static_cast<::uint32_t>(extensions.size());
 				create.ppEnabledExtensionNames = extensions.data();
