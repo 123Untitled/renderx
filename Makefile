@@ -89,7 +89,7 @@ override CXXFLAGS += -Weffc++ -Wpedantic
 # unused suppression
 override CXXFLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
 					 -Wno-unused-private-field -Wno-unused-local-typedef \
-					 -Wno-unused-but-set-variable -Wno-unused-function 
+					 -Wno-unused-function 
 
 # optimization
 override CXXFLAGS += -Winline
@@ -103,12 +103,16 @@ override CXXFLAGS += -Wshadow
 
 
 
+# -- E X T E R N A L ----------------------------------------------------------
+
+# external directory
+override EXTDIR := external
 
 
 # -- G L F W  S E T T I N G S -------------------------------------------------
 
 # glfw directory
-override GLFW_DIR := glfw
+override GLFW_DIR := $(EXTDIR)/glfw
 
 # glfw include directory
 override GLFW_INCLUDE := $(GLFW_DIR)/include
@@ -120,7 +124,7 @@ override GLFW_LIB := $(GLFW_DIR)/lib
 # -- V U L K A N  S E T T I N G S ---------------------------------------------
 
 # vulkan directory
-override VULKAN_DIR := $(shell echo $$VULKAN_SDK)
+override VULKAN_DIR := $(shell source $(EXTDIR)/vulkan/setup-env.sh && echo $$VULKAN_SDK)
 
 # vulkan include directory
 override VULKAN_INCLUDE := $(VULKAN_DIR)/include
@@ -163,18 +167,20 @@ override SUBJSNDIR := $(SUBSRCDIR:$(SRCDIR)/%=$(JSNDIR)/%)
 override SUB_INCLUDE := $(shell find $(INCDIR) -type d)
 
 
-
-
-
 # linker flags
-override LDFLAGS := -L$(GLFW_LIB) -lglfw3 \
-					-L$(VULKAN_LIB) -lvulkan \
-					-framework Cocoa -framework IOKit
+override LDFLAGS := -L$(GLFW_LIB) -lglfw3 -L$(VULKAN_LIB) -lvulkan
+
+
+override OS := $(shell uname -s)
+
+ifeq ($(OS), Darwin)
+    override LDFLAGS += -framework Cocoa -framework IOKit
+else
+    override LDFLAGS += -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
+endif
 
 # include flags
 override INCLUDES := $(addprefix -I, $(SUB_INCLUDE) $(GLFW_INCLUDE) $(VULKAN_INCLUDE))
-
-
 
 # dependency flags
 override DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
@@ -210,7 +216,7 @@ all: intro $(GLFW_DIR) objs $(EXEC) $(COMPILE_COMMANDS)
 # executable
 $(EXEC): $(OBJS)
 	@echo "linking $@"
-	@$(CXX) $(LDFLAGS) $^ -o $@
+	@$(CXX) $^ -o $@ $(LDFLAGS)
 	@file $(EXEC)
 
 # launch threads
