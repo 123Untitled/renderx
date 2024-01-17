@@ -1,7 +1,6 @@
-./glfw/
-./vulkan/
-./.cache/
-./build/
+external/
+build/
+.cache/
 
 exec
 exec_engine
