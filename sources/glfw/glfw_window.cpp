@@ -1,6 +1,7 @@
 #include "glfw_window.hpp"
 
 
+/* default constructor */
 glfw::window::window(void) noexcept
 : _window{nullptr} {
 
@@ -14,15 +15,23 @@ glfw::window::window(void) noexcept
 
 	if (_window == nullptr)
 		return;
-
-	while (!::glfwWindowShouldClose(_window)) {
-		::glfwPollEvents();
-	}
+	std::cout << "glfw window created." << std::endl;
 }
 
-
-
+/* destructor */
 glfw::window::~window(void) noexcept {
-	if (_window != nullptr)
-		::glfwDestroyWindow(_window);
+	if (_window == nullptr)
+		return;
+	::glfwDestroyWindow(_window);
+	std::cout << "glfw window destroyed." << std::endl;
 }
+
+/* should close */
+auto glfw::window::should_close(void) const noexcept -> bool {
+	return ::glfwWindowShouldClose(_window);
+}
+
+///* ::GLFWwindow* conversion operator */
+//glfw::window::operator ::GLFWwindow*(void) noexcept {
+//	return _window;
+//}

@@ -50,6 +50,9 @@ namespace glfw {
 			/* vulkan required extensions */
 			static auto vulkan_required_extensions(void) -> std::vector<const char*>;
 
+			/* is vulkan supported */
+			static auto is_vulkan_supported(void) -> bool;
+
 
 		private:
 
@@ -63,6 +66,9 @@ namespace glfw {
 
 			/* shared */
 			static auto shared(void) noexcept -> self&;
+
+			/* error callback */
+			static auto error_callback(int, const char*) noexcept -> void;
 
 
 			// -- private members ---------------------------------------------

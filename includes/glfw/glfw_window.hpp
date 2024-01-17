@@ -37,6 +37,18 @@ namespace glfw {
 			~window(void) noexcept;
 
 
+			// -- public conversion operators ---------------------------------
+
+			///* ::GLFWwindow* conversion operator */
+			//operator ::GLFWwindow*(void) noexcept;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* should close */
+			auto should_close(void) const noexcept -> bool;
+
+
 		private:
 
 			// -- private members ---------------------------------------------
