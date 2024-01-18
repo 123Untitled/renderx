@@ -41,7 +41,7 @@ namespace vulkan {
 				create.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 				create.pApplicationInfo = &info;
 
-				extension_properties();
+				//extension_properties();
 
 				std::vector<const char*> extensions = glfw::system::vulkan_required_extensions();
 
@@ -99,6 +99,11 @@ namespace vulkan {
 
 			/* VkInstance conversion operator */
 			operator const ::VkInstance&(void) const noexcept {
+				return _instance;
+			}
+
+			/* VkInstance conversion operator */
+			operator ::VkInstance&(void) noexcept {
 				return _instance;
 			}
 

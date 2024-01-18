@@ -102,6 +102,10 @@ override CXXFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowi
 override CXXFLAGS += -Wshadow
 
 
+# -- O P E R A T I N G  S Y S T E M -------------------------------------------
+
+override OS := $(shell uname -s)
+
 
 # -- E X T E R N A L ----------------------------------------------------------
 
@@ -123,8 +127,15 @@ override GLFW_LIB := $(GLFW_DIR)/lib
 
 # -- V U L K A N  S E T T I N G S ---------------------------------------------
 
+ifeq ($(OS), Darwin)
+    override SCRIPT_VULKAN := $(HOME)/VulkanSDK/1.3.268.1/setup-env.sh
+endif
+ifeq ($(OS), Linux)
+    override SCRIPT_VULKAN := $(EXTDIR)/vulkan/setup-env.sh
+endif
+
 # vulkan directory
-override VULKAN_DIR := $(shell source $(EXTDIR)/vulkan/setup-env.sh && echo $$VULKAN_SDK)
+override VULKAN_DIR := $(shell source $(SCRIPT_VULKAN) > /dev/null 2>&1 && echo $$VULKAN_SDK)
 
 # vulkan include directory
 override VULKAN_INCLUDE := $(VULKAN_DIR)/include
@@ -171,11 +182,11 @@ override SUB_INCLUDE := $(shell find $(INCDIR) -type d)
 override LDFLAGS := -L$(GLFW_LIB) -lglfw3 -L$(VULKAN_LIB) -lvulkan
 
 
-override OS := $(shell uname -s)
 
 ifeq ($(OS), Darwin)
     override LDFLAGS += -framework Cocoa -framework IOKit
-else
+endif
+ifeq ($(OS), Linux)
     override LDFLAGS += -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
 endif
 
@@ -190,48 +201,67 @@ override CMPFLAGS = -MJ $(JSNDIR)/$*.json
 
 
 
+# -- C O L O R S --------------------------------------------------------------
+
+define COLOR
+	@printf "\e[7;32m %s \e[0m\n" $(1)
+endef
+
+define LINES
+	@printf "\e[90m%s\e[0m\n" '-----------------------------------------------'
+endef
+
+define LOGO
+@echo -e '\x1b[32m'\
+'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n'\
+'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n'\
+' ╱         ╱         ╱         ╱         ╱\n'\
+'╱         ╱         ╱        ▁╱       ▁▁╱ \n'\
+'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱\n'
+endef
 
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re intro
-	# shaders
+.PHONY: all clean fclean re intro shaders
 
+
+# -- R U L E S ----------------------------------------------------------------
+
+all: intro $(GLFW_DIR) shaders objs $(EXEC) $(COMPILE_COMMANDS)
+	@$(call LINES)
+	$(call COLOR,"done ◝(ᵔᵕᵔ)◜")
+	echo
 
 intro:
-	@echo "\x1b[32mM A K E\x1b[0m"
-
-
-#shaders:
-#	@$(MAKE) --silent -C $(SHADIR)
-
-
-all: intro $(GLFW_DIR) objs $(EXEC) $(COMPILE_COMMANDS)
-	@echo "\x1b[32mD O N E\x1b[0m"
+	$(call LOGO)
 
 # shaders
-
+shaders:
+	@$(MAKE) --silent --directory=$(SHADIR)
+	$(call LINES)
 
 
 # executable
 $(EXEC): $(OBJS)
-	@echo "linking $@"
-	@$(CXX) $^ -o $@ $(LDFLAGS)
-	@file $(EXEC)
+	@echo "  linking: $@"
+	$(CXX) $^ -o $@ $(LDFLAGS)
+	file $(EXEC)
 
 # launch threads
 objs:
+	$(call COLOR,"compiling project")
 	@$(MAKE) --silent -j8 $(OBJS)
 
 # compilation
 -include $(DEPS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile | $(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR)
-	@echo "compiling $<"
-	@$(CXX) $(STD) $(DEBUG) $(CXXFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS) -c $< -o $@
+	@echo "compiling: $<"
+	$(CXX) $(STD) $(DEBUG) $(CXXFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS) -c $< -o $@
 
 # create directories
 $(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR):
-	@mkdir -pv $@
+	@mkdir -p $@
 
 # compile commands
 $(COMPILE_COMMANDS): $(JSNS)
@@ -239,19 +269,23 @@ $(COMPILE_COMMANDS): $(JSNS)
 	@echo "[\n"$$(cat $(JSNS) | sed '$$s/,\s*$$//')"\n]" | jq > $@
 
 
+# clean
 clean:
-	@rm -rvf $(BLDDIR) $(COMPILE_COMMANDS) .cache
+	@rm -rf $(BLDDIR) $(COMPILE_COMMANDS) .cache
+	$(MAKE) --silent --directory=$(SHADIR) clean
 
-#@$(MAKE) --silent -C $(SHADIR) clean
-
+# fclean
 fclean: clean
-	@rm -rvf $(EXEC) $(GLFW_DIR)
+	@rm -rf $(EXEC) $(GLFW_DIR)
+	$(MAKE) --silent --directory=$(SHADIR) fclean
 
 
+# glfw
 $(GLFW_DIR):
-	@tools/install_glfw.sh
+	@$(call LINES)
+	@$(call COLOR,"installing glfw")
+	tools/install_glfw.sh
 
-#@$(MAKE) --silent -C $(SHADIR) fclean
-
+# re
 re: fclean all
 

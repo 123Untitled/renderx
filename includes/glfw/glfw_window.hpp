@@ -43,6 +43,15 @@ namespace glfw {
 			//operator ::GLFWwindow*(void) noexcept;
 
 
+			// -- public address operators ------------------------------------
+
+			/* ::GLFWwindow* address operator */
+			auto operator&(void) noexcept -> ::GLFWwindow* {
+				return _window;
+			}
+
+
+
 			// -- public accessors --------------------------------------------
 
 			/* should close */

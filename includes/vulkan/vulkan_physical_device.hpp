@@ -16,24 +16,82 @@ namespace vulkan {
 
 		public:
 
+			// -- public types ------------------------------------------------
+
+			/* self type */
+			using self = vulkan::physical_device;
+
+
 			// -- public lifecycle --------------------------------------------
 
-			/* instance constructor */
-			physical_device(const vulkan::instance& instance)
-			: _device{VK_NULL_HANDLE} {
+			/* copy constructor */
+			physical_device(const self& other) noexcept
+			: _device{other._device} {}
 
-				::uint32_t count = 0;
-				::VkResult result = ::vkEnumeratePhysicalDevices(instance, &count, nullptr);
+			/* move constructor */
+			physical_device(self&& other) noexcept
+			: self{other} /* copy */ {}
+
+			/* destructor */
+			~physical_device(void) noexcept = default;
+
+
+
+			// -- public static methods ---------------------------------------
+
+			/* pick physical device */
+			static auto pick(const vulkan::instance& instance) noexcept -> self {
+
+				auto devices = self::enumerate_physical_devices(instance);
+
+				for (const auto& device : devices) {
+					if (self::is_device_suitable(device) == true) {
+						return self{device};
+					}
+				}
+				std::cerr << "error: failed to find a suitable physical device" << std::endl;
+				return {};
+			}
+
+
+			// -- public convertion operators ---------------------------------
+
+			/* underlying */
+			auto underlying(void) const noexcept -> ::VkPhysicalDevice {
+				return _device;
+			}
+
+
+		private:
+
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			physical_device(void) noexcept
+			: _device{VK_NULL_HANDLE} {}
+
+			/* ::VkPhysicalDevice constructor */
+			physical_device(::VkPhysicalDevice device) noexcept
+			: _device{device} {}
+
+
+
+			// -- private static methods --------------------------------------
+
+			/* enumerate physical devices */
+			static auto enumerate_physical_devices(const vulkan::instance& instance) -> std::vector<::VkPhysicalDevice> {
+
+				::uint32_t  count = 0;
+				::VkResult result = ::vkEnumeratePhysicalDevices(instance,
+																 &count, nullptr);
 
 				if (result != VK_SUCCESS) {
 					std::cerr << "error: failed to get physical device count" << std::endl;
-					return;
-				}
+					return {}; }
 
 				if (count == 0) {
 					std::cerr << "error: no physical devices found" << std::endl;
-					return;
-				}
+					return {}; }
 
 				std::vector<::VkPhysicalDevice> devices;
 				devices.resize(count);
@@ -42,39 +100,16 @@ namespace vulkan {
 
 				if (result != VK_SUCCESS) {
 					std::cerr << "error: failed to enumerate physical devices" << std::endl;
-					return;
+					return {};
 				}
 
-				for (const auto& device : devices) {
-
-					if (this->is_device_suitable(device) == true) {
-						_device = device;
-						break;
-					}
-				}
-
-				if (_device == VK_NULL_HANDLE) {
-					std::cerr << "error: failed to find a suitable physical device" << std::endl;
-					return;
-				}
-
+				std::cout << "found " << count << " physical devices" << std::endl;
+				return devices;
 			}
 
-
-			// -- public convertion operators ---------------------------------
-
-			/* const ::VkPhysicalDevice reference conversion operator */
-			operator const ::VkPhysicalDevice&(void) const noexcept {
-				return _device;
-			}
-
-
-		private:
-
-			// -- private methods ---------------------------------------------
 
 			/* is device suitable */
-			bool is_device_suitable(const ::VkPhysicalDevice& device) const noexcept {
+			static bool is_device_suitable(const ::VkPhysicalDevice& device) noexcept {
 
 				::VkPhysicalDeviceProperties properties;
 				::VkPhysicalDeviceFeatures   features;
@@ -84,8 +119,8 @@ namespace vulkan {
 
 				std::cout << "check device: " << properties.deviceName << std::endl;
 
-					device_type(properties);
-				device_features(features);
+				//	device_type(properties);
+				//device_features(features);
 
 				return true;
 				return (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
@@ -94,8 +129,9 @@ namespace vulkan {
 			}
 
 
+
 			/* device type */
-			auto device_type(const ::VkPhysicalDeviceProperties& properties) const noexcept -> void {
+			static auto device_type(const ::VkPhysicalDeviceProperties& properties) noexcept -> void {
 				// switch over device type
 				switch (properties.deviceType) {
 					case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
@@ -120,7 +156,7 @@ namespace vulkan {
 			}
 
 			/* device features */
-			auto device_features(const ::VkPhysicalDeviceFeatures& features) const noexcept -> void {
+			static auto device_features(const ::VkPhysicalDeviceFeatures& features) noexcept -> void {
 				// switch over device features
 
 				std::cout << "                     robustBufferAccess: " << features.robustBufferAccess << std::endl;
@@ -178,7 +214,6 @@ namespace vulkan {
 				std::cout << "                 sparseResidencyAliased: " << features.sparseResidencyAliased << std::endl;
 				std::cout << "                variableMultisampleRate: " << features.variableMultisampleRate << std::endl;
 				std::cout << "                       inheritedQueries: " << features.inheritedQueries << std::endl;
-
 			}
 
 
@@ -186,7 +221,6 @@ namespace vulkan {
 
 			/* device */
 			::VkPhysicalDevice _device;
-
 
 	};
 
