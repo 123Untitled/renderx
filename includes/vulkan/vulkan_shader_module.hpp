@@ -29,54 +29,19 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			shader_module(void) noexcept
-			: _module{nullptr}, _device{nullptr} {
-			}
+			shader_module(void) noexcept;
 
 			/* path constructor */
-			shader_module(vulkan::logical_device& device, const std::string& path)
-			: _module{nullptr}, _device{device.underlying()} {
-
-				std::ifstream file{path, std::ios::ate | std::ios::binary};
-				if (!file.is_open()) {
-					std::cerr << "failed to open shader file: " << path << std::endl;
-					return;
-				}
-
-				std::vector<char> buffer;
-				std::size_t size = static_cast<std::size_t>(file.tellg());
-				buffer.resize(size);
-				file.seekg(0);
-				file.read(buffer.data(), static_cast<std::streamsize>(size));
-				file.close();
-
-				::VkShaderModuleCreateInfo info{};
-				info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-				info.codeSize = size;
-				info.pCode = reinterpret_cast<const std::uint32_t*>(buffer.data());
-
-				::VkResult result = ::vkCreateShaderModule(_device, &info, nullptr, &_module);
-
-				if (result != VK_SUCCESS) {
-					std::cerr << "failed to create shader module: " << result << std::endl;
-					return;
-				}
-
-			}
+			shader_module(const vulkan::logical_device&, const std::string&);
 
 			/* deleted copy constructor */
 			shader_module(const self&) = delete;
 
 			/* move constructor */
-			shader_module(self&& other) noexcept
-			: _module{other._module}, _device{other._device} {
-				other.init();
-			}
+			shader_module(self&&) noexcept;
 
 			/* destructor */
-			~shader_module(void) noexcept {
-				free();
-			}
+			~shader_module(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -85,33 +50,38 @@ namespace vulkan {
 			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
-				if (this == &other)
-					return *this;
-				free();
-				_module = other._module;
-				_device = other._device;
-				other.init();
-				return *this;
-			}
+			auto operator=(self&&) noexcept -> self&;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* underlying */
+			auto underlying(void) noexcept -> ::VkShaderModule&;
+
+			/* const underlying */
+			auto underlying(void) const noexcept -> const ::VkShaderModule&;
 
 
 		private:
 
+			// -- private static methods --------------------------------------
+
+			/* create shader module */
+			static auto create_shader_module(const vulkan::logical_device&,
+											 const ::VkShaderModuleCreateInfo&,
+											 ::VkShaderModule&) noexcept -> ::VkResult;
+
+			/* create shader module info */
+			static auto create_shader_module_info(const std::vector<char>&) noexcept -> ::VkShaderModuleCreateInfo;
+
+
 			// -- private methods ---------------------------------------------
 
 			/* free */
-			auto free(void) noexcept -> void {
-				if (_module == nullptr)
-					return;
-				::vkDestroyShaderModule(_device, _module, nullptr);
-			}
+			auto free(void) noexcept -> void;
 
 			/* init */
-			auto init(void) noexcept -> void {
-				_module = nullptr;
-				_device = nullptr;
-			}
+			auto init(void) noexcept -> void;
 
 
 			// -- private members ---------------------------------------------
@@ -140,6 +110,20 @@ namespace vulkan {
 
 
 	};
+
+
+	template <::VkShaderStageFlagBits stage>
+	auto create_pipeline_shader_stage_info(const vulkan::shader_module& module) noexcept -> ::VkPipelineShaderStageCreateInfo {
+		return ::VkPipelineShaderStageCreateInfo{
+			.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			.pNext  = nullptr,
+			.flags  = 0,
+			.stage  = stage,
+			.module = module.underlying(),
+			.pName  = "main",
+			.pSpecializationInfo = nullptr
+		};
+	}
 
 
 } // namespace vulkan

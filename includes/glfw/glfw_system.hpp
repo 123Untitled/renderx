@@ -1,9 +1,13 @@
 #ifndef ENGINE_GLFW_SYSTEM_HPP
 #define ENGINE_GLFW_SYSTEM_HPP
 
+#define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <iostream>
+#include "os.hpp"
+#include "exceptions.hpp"
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
@@ -59,7 +63,7 @@ namespace glfw {
 			// -- private lifecycle -------------------------------------------
 
 			/* default constructor */
-			system(void) noexcept;
+			system(void);
 
 
 			// -- private static methods --------------------------------------

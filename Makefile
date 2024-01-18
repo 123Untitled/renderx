@@ -80,9 +80,6 @@ override CXXFLAGS := -Wall -Wextra
 # warning impact
 override CXXFLAGS += -Werror
 
-# objective-c
-override CXXFLAGS += -fno-objc-arc
-
 # standard respect
 override CXXFLAGS += -Weffc++ -Wpedantic
 
@@ -93,7 +90,6 @@ override CXXFLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
 
 # optimization
 override CXXFLAGS += -Winline
-
 
 # type conversion
 override CXXFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
@@ -268,15 +264,16 @@ $(COMPILE_COMMANDS): $(JSNS)
 	@echo "creating $@"
 	@echo "[\n"$$(cat $(JSNS) | sed '$$s/,\s*$$//')"\n]" | jq > $@
 
-
 # clean
-clean:
-	@rm -rf $(BLDDIR) $(COMPILE_COMMANDS) .cache
+clean: intro
+	$(call LINES)
+	@$(call COLOR,"cleaning project")
+	@rm -rfv $(BLDDIR) $(COMPILE_COMMANDS) .cache
 	$(MAKE) --silent --directory=$(SHADIR) clean
 
 # fclean
 fclean: clean
-	@rm -rf $(EXEC) $(GLFW_DIR)
+	@rm -rfv $(EXEC) $(GLFW_DIR)
 	$(MAKE) --silent --directory=$(SHADIR) fclean
 
 

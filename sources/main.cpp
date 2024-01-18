@@ -16,6 +16,8 @@
 #include "meta_vertex.hpp"
 #include "basic_vertex.hpp"
 
+#include "exceptions.hpp"
+
 
 namespace vulkan {
 
@@ -65,7 +67,7 @@ namespace engine {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			renderer(void) noexcept
+			renderer(void)
 			:	_window{},
 				_instance{},
 				_surface{_instance, _window},
@@ -108,11 +110,18 @@ namespace engine {
 
 
 
+
 int main(void) {
 
-	engine::renderer renderer;
-
-	renderer.run();
+	try {
+		engine::renderer renderer;
+		renderer.run();
+	} catch (const engine::exception& except) {
+		except.print();
+		return 1;
+	}
+	return 0;
+}
 
 	//vulkan::shader_module module;
 	//vulkan::shader_library library;
@@ -125,5 +134,3 @@ int main(void) {
 
 	//vulkan::queue_families families{device};
 
-	return 0;
-}

@@ -1,9 +1,9 @@
 #ifndef ENGINE_GLFW_WINDOW_HPP
 #define ENGINE_GLFW_WINDOW_HPP
 
-#include <GLFW/glfw3.h>
 #include "glfw_system.hpp"
 
+#include "exceptions.hpp"
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
@@ -25,7 +25,7 @@ namespace glfw {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			window(void) noexcept;
+			window(void);
 
 			/* deleted copy constructor */
 			window(const self&) = delete;
@@ -35,12 +35,6 @@ namespace glfw {
 
 			/* destructor */
 			~window(void) noexcept;
-
-
-			// -- public conversion operators ---------------------------------
-
-			///* ::GLFWwindow* conversion operator */
-			//operator ::GLFWwindow*(void) noexcept;
 
 
 			// -- public address operators ------------------------------------

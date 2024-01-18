@@ -1,7 +1,6 @@
 #ifndef ENGINE_VULKAN_SURFACE_HPP
 #define ENGINE_VULKAN_SURFACE_HPP
 
-
 #include "glfw_window.hpp"
 #include "vulkan_instance.hpp"
 
@@ -25,24 +24,14 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			surface(vulkan::instance& instance, glfw::window& window) noexcept
-			: _surface{nullptr}, _instance{&instance} {
-				::VkResult result = ::glfwCreateWindowSurface(instance, &window, nullptr, &_surface);
-				if (result != VK_SUCCESS) {
-					std::cerr << "failed to create vulkan surface: " << result << std::endl;
-					return;
-				}
-			}
+			/* instance and window constructor */
+			surface(const vulkan::instance&, glfw::window&);
 
 			/* deleted copy constructor */
 			surface(const self&) = delete;
 
 			/* move constructor */
-			surface(self&& other) noexcept
-			: _surface{other._surface}, _instance{other._instance} {
-				other.init();
-			}
+			surface(self&&) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -51,23 +40,16 @@ namespace vulkan {
 			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
-				if (this == &other)
-					return *this;
-				free();
-				 _surface = other._surface;
-				_instance = other._instance;
-				other.init();
-				return *this;
-			}
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public accessors --------------------------------------------
 
 			/* underlying */
-			auto underlying(void) const noexcept -> ::VkSurfaceKHR {
-				return _surface;
-			}
+			auto underlying(void) noexcept -> ::VkSurfaceKHR&;
+
+			/* const underlying */
+			auto underlying(void) const noexcept -> const ::VkSurfaceKHR&;
 
 
 		private:
@@ -75,17 +57,10 @@ namespace vulkan {
 			// -- private methods ---------------------------------------------
 
 			/* free */
-			auto free(void) noexcept -> void {
-				if (_surface == nullptr)
-					return;
-				::vkDestroySurfaceKHR(*_instance, _surface, nullptr);
-			}
+			auto free(void) noexcept -> void;
 
 			/* init */
-			auto init(void) noexcept -> void {
-				_surface = nullptr;
-				_instance = nullptr;
-			}
+			auto init(void) noexcept -> void;
 
 
 			// -- private members ---------------------------------------------
@@ -93,13 +68,12 @@ namespace vulkan {
 			/* surface */
 			::VkSurfaceKHR _surface;
 
-			/* instance pointer */
-			vulkan::instance* _instance;
+			/* instance */
+			::VkInstance _instance;
 
-	};
+	}; // class surface
 
-
-}
+} // namespace vulkan
 
 #endif // ENGINE_VULKAN_SURFACE_HPP
 

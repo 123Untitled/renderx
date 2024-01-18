@@ -29,46 +29,21 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			logical_device(void) noexcept
-			: _device{nullptr}, _priority{1.0f} {
-			}
+			logical_device(void) noexcept;
 
-			/* physical device constructor */
-			logical_device(vulkan::physical_device& pdevice, const vulkan::surface& surface) noexcept
-			: _device{nullptr}, _priority{1.0f} {
+			/* physical device and surface constructor */
+			logical_device(const vulkan::physical_device&,
+						   const vulkan::surface&);
 
-				::VkDeviceQueueCreateInfo queue_info = self::create_device_queue_info(pdevice, surface, _priority);
-
-				::VkPhysicalDeviceFeatures features{}; /* not implemented */
-				std::memset(&features, 0, sizeof(features));
-
-				::VkDeviceCreateInfo device_info = self::create_device_info(queue_info, features);
-
-				::VkResult result = ::vkCreateDevice(pdevice.underlying(),
-													 &device_info,
-													 nullptr,
-													 &_device);
-
-				if (result != VK_SUCCESS) {
-					std::cerr << "failed to create logical device: " << result << std::endl;
-					return;
-				}
-
-			}
 
 			/* deleted copy constructor */
 			logical_device(const self&) = delete;
 
 			/* move constructor */
-			logical_device(self&& other) noexcept
-			: _device{other._device}, _priority{other._priority} {
-				other.init();
-			}
+			logical_device(self&&) noexcept;
 
 			/* destructor */
-			~logical_device(void) noexcept {
-				free();
-			}
+			~logical_device(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -77,89 +52,44 @@ namespace vulkan {
 			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
-				if (this == &other)
-					return *this;
-				free();
-				  _device = other._device;
-				_priority = other._priority;
-				other.init();
-				return *this;
-			}
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public accessors --------------------------------------------
 
 			/* underlying */
-			auto underlying(void) noexcept -> ::VkDevice& {
-				return _device;
-			}
+			auto underlying(void) noexcept -> ::VkDevice&;
 
 			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkDevice& {
-				return _device;
-			}
+			auto underlying(void) const noexcept -> const ::VkDevice&;
 
 
 		private:
 
 			// -- private static methods --------------------------------------
 
-			/* create device info */
-			static auto create_device_info(::VkDeviceQueueCreateInfo& queue_info,
-										   ::VkPhysicalDeviceFeatures& features) noexcept -> ::VkDeviceCreateInfo {
+			/* create device */
+			static auto create_device(const vulkan::physical_device&,
+									  const ::VkDeviceCreateInfo&) -> ::VkDevice;
 
-				return ::VkDeviceCreateInfo{
-							.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-							.pNext                   = nullptr,
-							.flags                   = 0,
-							.queueCreateInfoCount    = 1,
-							.pQueueCreateInfos       = &queue_info,
-							.enabledLayerCount       = 0,
-							.ppEnabledLayerNames     = nullptr,
-							.enabledExtensionCount   = 0,
-							.ppEnabledExtensionNames = nullptr,
-							.pEnabledFeatures        = &features
-				};
-			}
+			/* create device info */
+			static auto create_device_info(::VkDeviceQueueCreateInfo&,
+										   ::VkPhysicalDeviceFeatures&) noexcept -> ::VkDeviceCreateInfo;
 
 			/* create device queue info */
-			static auto create_device_queue_info(vulkan::physical_device& pdevice,
-												 const vulkan::surface& surface,
-												 float& priority) noexcept -> ::VkDeviceQueueCreateInfo {
-
-				::int32_t index = vulkan::queue_families::find(pdevice, surface);
-
-				if (index == -1) {
-					std::cerr << "failed to find queue family with graphics bit set" << std::endl;
-				}
-
-				return ::VkDeviceQueueCreateInfo{
-							.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-							.pNext            = nullptr,
-							.flags            = 0,
-							.queueFamilyIndex = static_cast<::uint32_t>(index),
-							.queueCount       = 1,
-							.pQueuePriorities = &priority
-				};
-			}
+			static auto create_device_queue_info(const vulkan::physical_device&,
+												 const vulkan::surface&,
+												 float&) -> ::VkDeviceQueueCreateInfo;
 
 
 
 			// -- private methods ---------------------------------------------
 
 			/* free */
-			auto free(void) noexcept -> void {
-				if (_device == nullptr)
-					return;
-				::vkDestroyDevice(_device, nullptr);
-			}
+			auto free(void) noexcept -> void;
 
 			/* init */
-			auto init(void) noexcept -> void {
-				_device = nullptr;
-				_priority = 1.0f;
-			}
+			auto init(void) noexcept -> void;
 
 
 			// -- private members ---------------------------------------------

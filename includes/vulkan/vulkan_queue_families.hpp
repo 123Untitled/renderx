@@ -48,7 +48,7 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* find */
-			static auto find(const vulkan::physical_device& device, const vulkan::surface& surface) -> ::int32_t {
+			static auto find(const vulkan::physical_device& device, const vulkan::surface& surface) -> ::uint32_t {
 				// get queue families
 				static const auto families = self::enumerate(device);
 
@@ -57,15 +57,13 @@ namespace vulkan {
 					if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 						VkBool32 present = false;
 						VkResult result = ::vkGetPhysicalDeviceSurfaceSupportKHR(device.underlying(), i, surface.underlying(), &present);
-						if (result != VK_SUCCESS) {
-							std::cerr << "failed to get physical device surface support: " << result << std::endl;
-							return -1;
-						}
+						if (result != VK_SUCCESS)
+							throw engine::exception{"failed to get physical device surface support"};
 						if (present == VK_TRUE)
-							return static_cast<::int32_t>(i);
+							return i;
 					}
 				}
-				return -1;
+				throw engine::exception{"failed to find suitable queue family"};
 			}
 
 
@@ -80,11 +78,8 @@ namespace vulkan {
 				// get number of queue families
 				::vkGetPhysicalDeviceQueueFamilyProperties(device.underlying(), &count, nullptr);
 				// check number of queue families
-				if (count == 0) {
-					std::cerr << "error: no queue families found" << std::endl;
-					return {};
-				}
-				std::cout << "queue family count: " << count << std::endl;
+				if (count == 0)
+					throw engine::exception{"failed to find queue families"};
 				// new vector of queue families properties
 				std::vector<::VkQueueFamilyProperties> families;
 				// allocate memory
@@ -96,6 +91,38 @@ namespace vulkan {
 			}
 
 	}; // class queue_families
+
+
+	// -- Q U E U E -----------------------------------------------------------
+
+	class queue final {
+
+		public:
+
+			// -- public types ------------------------------------------------
+
+			/* self type */
+			using self = vulkan::queue;
+
+
+			// -- public lifecycle --------------------------------------------
+
+			/* device and queue family index constructor */
+			//queue(const vulkan::logical_device& device, ::uint32_t index) noexcept
+			//: _queue{nullptr} {
+			//
+			//	::vkGetDeviceQueue(device.underlying(), index, 0, &_queue);
+			//}
+
+
+		private:
+
+			// -- private members ---------------------------------------------
+
+			/* queue */
+			::VkQueue _queue;
+
+	};
 
 } // namespace vulkan
 

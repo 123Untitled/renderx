@@ -95,7 +95,7 @@ $(OUTDIR):
 	@mkdir -p $@
 
 clean:
-	@rm -rf $(VERT_SPIRV) $(FRAG_SPIRV) $(OUTDIR)
+	@rm -rfv $(VERT_SPIRV) $(FRAG_SPIRV) $(OUTDIR)
 
 fclean: clean
 

@@ -1,14 +1,14 @@
 #include "glfw_system.hpp"
+#include <vulkan/vulkan.h>
 
 
 /* default constructor */
-glfw::system::system(void) noexcept
+glfw::system::system(void)
 : _initialized{false} {
 	if (::glfwInit() != GLFW_TRUE)
-		return;
+		throw engine::exception{"failed to initialize glfw."};
 	_initialized = true;
-	static_cast<void>(glfwSetErrorCallback(glfw::system::error_callback));
-	std::cout << "glfw initialized." << std::endl;
+	static_cast<void>(::glfwSetErrorCallback(glfw::system::error_callback));
 }
 
 /* destructor */
@@ -16,7 +16,6 @@ glfw::system::~system(void) noexcept {
 	if (_initialized == false)
 		return;
 	::glfwTerminate();
-	std::cout << "glfw terminated." << std::endl;
 }
 
 /* is initialized */
@@ -34,14 +33,18 @@ auto glfw::system::vulkan_required_extensions(void) -> std::vector<const char*> 
 	const char** extensions = ::glfwGetRequiredInstanceExtensions(&count);
 
 	if (extensions == nullptr) {
-		std::cerr << "error: failed to get glfw required instance extensions" << std::endl;
-		return {};
+		throw engine::exception{"failed to get glfw required instance extensions."};
 	}
 
 	std::vector<const char*> result;
 	result.resize(count);
 	for (::uint32_t i = 0; i < count; ++i)
 		result[i] = extensions[i];
+
+// check macos system
+#if defined(ENGINE_OS_MACOS)
+	result.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
 
 	return result;
 }
