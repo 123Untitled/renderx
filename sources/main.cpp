@@ -1,7 +1,6 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include "os.hpp"
-#include <simd/simd.h>
 
 #include "glfw_window.hpp"
 #include "glfw_events.hpp"
