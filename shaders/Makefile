@@ -20,12 +20,22 @@ override SHELL := $(shell which zsh)
 
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
+
 # get compiler
-override GLSLC := $(shell command -v glslc 2> /dev/null)
+GLSLC ?=
+
+ifndef MAKECMDGOALS
 
 # check if compiler exists
 ifndef GLSLC
-$(error "glslc not found")
+    $(error "glslc path not set")
+else
+    override RESULT := $(shell command -v $(GLSLC) 2> /dev/null)
+    ifndef RESULT
+        $(error "invalid glslc path")
+    endif
+endif
+
 endif
 
 # vertex shader flags
