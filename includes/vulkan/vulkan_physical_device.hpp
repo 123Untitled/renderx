@@ -3,6 +3,7 @@
 
 #include <vulkan/vulkan.h>
 #include "vulkan_instance.hpp"
+#include "vulkan_surface.hpp"
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
@@ -24,6 +25,10 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
+			/* default constructor */
+			physical_device(void) noexcept;
+
+
 			/* copy constructor */
 			physical_device(const self&) noexcept;
 
@@ -43,13 +48,6 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self&;
 
 
-
-			// -- public static methods ---------------------------------------
-
-			/* pick physical device */
-			static auto pick(const vulkan::instance&) -> self;
-
-
 			// -- public accessors --------------------------------------------
 
 			/* underlying */
@@ -60,12 +58,49 @@ namespace vulkan {
 
 
 
+			/* is support surface and queue family */
+			auto is_support(const vulkan::surface&, ::uint32_t) const -> bool;
+
+
+
+			/* extensions */
+			auto extensions(void) const -> xns::vector<::VkExtensionProperties>;
+
+			/* capabilities */
+			auto capabilities(const vulkan::surface&) const -> ::VkSurfaceCapabilitiesKHR;
+
+			/* formats */
+			auto formats(const vulkan::surface&) const -> xns::vector<::VkSurfaceFormatKHR>;
+
+			/* present modes */
+			auto present_modes(const vulkan::surface&) const -> xns::vector<::VkPresentModeKHR>;
+
+			/* properties */
+			auto properties(void) const -> ::VkPhysicalDeviceProperties;
+
+			/* features */
+			auto features(void) const -> ::VkPhysicalDeviceFeatures;
+
+
+
+			/* info */
+			auto info(void) const noexcept -> void {
+
+				::VkPhysicalDeviceProperties properties;
+				::vkGetPhysicalDeviceProperties(_device, &properties);
+				std::cout << "device name: " << properties.deviceName << std::endl;
+			}
+
+
 		private:
 
-			// -- private lifecycle -------------------------------------------
+			// -- friends -----------------------------------------------------
 
-			/* default constructor */
-			physical_device(void) noexcept;
+			/* xns allocator as friend */
+			friend class xns::allocator<self>;
+
+
+			// -- private lifecycle -------------------------------------------
 
 			/* ::VkPhysicalDevice constructor */
 			physical_device(const ::VkPhysicalDevice&) noexcept;
@@ -73,11 +108,13 @@ namespace vulkan {
 
 			// -- private static methods --------------------------------------
 
-			/* enumerate physical devices */
-			static auto enumerate(const vulkan::instance&) -> std::vector<::VkPhysicalDevice>;
 
 			/* is device suitable */
-			static auto is_suitable(const ::VkPhysicalDevice&) noexcept -> bool;
+			static auto is_suitable(const ::VkPhysicalDevice&,
+									const std::vector<::VkExtensionProperties>&,
+									const ::VkSurfaceCapabilitiesKHR&,
+									const std::vector<::VkSurfaceFormatKHR>&,
+									const std::vector<::VkPresentModeKHR>&) noexcept -> bool;
 
 			/* device type */
 			static auto type(const ::VkPhysicalDeviceProperties&) noexcept -> void;

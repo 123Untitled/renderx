@@ -8,10 +8,18 @@
 #include "glfw_system.hpp"
 #include "exceptions.hpp"
 
+#include <xns>
+
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
+	// -- forward declarations ------------------------------------------------
+
+	/* physical device */
+	class physical_device;
+
 
 	// -- V U L K A N  I N S T A N C E ----------------------------------------
 
@@ -57,13 +65,18 @@ namespace vulkan {
 			/* const underlying */
 			auto underlying(void) const noexcept -> const ::VkInstance&;
 
+			/* physical devices */
+			auto physical_devices(void) const -> xns::vector<vulkan::physical_device>;
+
+			/* physical devices count */
+			auto physical_devices_count(void) const -> ::uint32_t;
 
 		private:
 
 			// -- private static methods --------------------------------------
 
 			/* enumerate extensions */
-			static auto enumerate_extensions(void) -> std::vector<::VkExtensionProperties>;
+			static auto extensions(void) -> std::vector<::VkExtensionProperties>;
 
 			/* create application info */
 			static auto create_application_info(void) noexcept -> ::VkApplicationInfo;
@@ -77,6 +90,11 @@ namespace vulkan {
 
 
 			// -- private methods ---------------------------------------------
+
+
+
+
+
 
 			/* free */
 			auto free(void) noexcept -> void;

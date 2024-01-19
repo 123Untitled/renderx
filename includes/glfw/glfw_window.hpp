@@ -25,7 +25,10 @@ namespace glfw {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			window(void);
+			window(void) noexcept;
+
+			/* width and height constructor */
+			window(const int, const int);
 
 			/* deleted copy constructor */
 			window(const self&) = delete;
@@ -37,22 +40,37 @@ namespace glfw {
 			~window(void) noexcept;
 
 
-			// -- public address operators ------------------------------------
+			// -- public assignment operators ---------------------------------
 
-			/* ::GLFWwindow* address operator */
-			auto operator&(void) noexcept -> ::GLFWwindow* {
-				return _window;
-			}
+			/* deleted copy assignment operator */
+			auto operator=(const self&) -> self& = delete;
 
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public accessors --------------------------------------------
+
+			/* underlying pointer */
+			auto underlying(void) noexcept -> ::GLFWwindow*;
+
+			/* const underlying pointer */
+			auto underlying(void) const noexcept -> const ::GLFWwindow*;
 
 			/* should close */
 			auto should_close(void) const noexcept -> bool;
 
 
 		private:
+
+			// -- private methods ---------------------------------------------
+
+			/* free */
+			auto free(void) noexcept -> void;
+
+			/* init */
+			auto init(void) noexcept -> void;
+
 
 			// -- private members ---------------------------------------------
 

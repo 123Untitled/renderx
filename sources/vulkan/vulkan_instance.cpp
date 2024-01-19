@@ -1,4 +1,5 @@
 #include "vulkan_instance.hpp"
+#include "vulkan_physical_device.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -56,11 +57,40 @@ auto vulkan::instance::underlying(void) const noexcept -> const ::VkInstance& {
 	return _instance;
 }
 
+/* physical devices */
+auto vulkan::instance::physical_devices(void) const -> xns::vector<vulkan::physical_device> {
+
+	::uint32_t count = self::physical_devices_count();
+
+	xns::vector<::VkPhysicalDevice> devices{};
+	devices.resize(count);
+
+	if (::vkEnumeratePhysicalDevices(_instance, &count, devices.data()) != VK_SUCCESS)
+		throw engine::exception{"failed to get physical devices"};
+
+	xns::vector<vulkan::physical_device> result{};
+	result.reserve(count);
+
+	for (const auto& device : devices)
+		result.emplace_back(device);
+
+	return result;
+}
+
+/* physical devices count */
+auto vulkan::instance::physical_devices_count(void) const -> ::uint32_t {
+	::uint32_t count = 0;
+	if (::vkEnumeratePhysicalDevices(_instance, &count, nullptr) != VK_SUCCESS)
+		engine::fatal("failed to get number of physical devices");
+	return count;
+}
+
+
 
 // -- private static methods --------------------------------------------------
 
 /* enumerate extensions */
-auto vulkan::instance::enumerate_extensions(void) -> std::vector<::VkExtensionProperties> {
+auto vulkan::instance::extensions(void) -> std::vector<::VkExtensionProperties> {
 
 	::uint32_t count = 0;
 

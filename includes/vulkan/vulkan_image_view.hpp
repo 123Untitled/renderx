@@ -28,27 +28,16 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			image_view(const vulkan::logical_device& device) noexcept
-			: _view{nullptr}, _device{device.underlying()} {
-				// create image view info
-				auto info = self::create_image_view_info();
-				// create image view
-				auto result = self::create_image_view(device, info, _view);
-			}
+			image_view(const vulkan::logical_device&, ::VkImage&, ::VkFormat&);
 
 			/* deleted copy constructor */
 			image_view(const self&) = delete;
 
 			/* move constructor */
-			image_view(self&& other) noexcept
-			: _view{other._view} {
-				other.init();
-			}
+			image_view(self&&) noexcept;
 
 			/* destructor */
-			~image_view(void) noexcept {
-				free();
-			}
+			~image_view(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -57,68 +46,39 @@ namespace vulkan {
 			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
-				if (this == &other)
-					return *this;
-				free();
-				  _view = other._view;
-				_device = other._device;
-				other.init();
-				return *this;
-			}
+			auto operator=(self&&) noexcept -> self&;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* underlying */
+			auto underlying(void) noexcept -> ::VkImageView&;
+
+			/* const underlying */
+			auto underlying(void) const noexcept -> const ::VkImageView&;
+
 
 
 		private:
 
-			// -- private methods ---------------------------------------------
+			// -- private static methods --------------------------------------
 
 			/* create image view */
-			static auto create_image_view(const vulkan::logical_device& device,
-										  const ::VkImageViewCreateInfo& info,
-												::VkImageView& view) noexcept -> ::VkResult {
-				return ::vkCreateImageView(device.underlying(), &info, nullptr, &view);
-			}
+			static auto create_image_view(const vulkan::logical_device&,
+										  const ::VkImageViewCreateInfo&) -> ::VkImageView;
 
 			/* create image view info */
-			static auto create_image_view_info(void) noexcept -> ::VkImageViewCreateInfo {
-				return ::VkImageViewCreateInfo{
-					.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-					.pNext      = nullptr,
-					.flags      = 0,
-					.image      = nullptr, // not implemented
-					.viewType   = VK_IMAGE_VIEW_TYPE_2D,
-					.format     = VK_FORMAT_UNDEFINED, // not implemented
-					.components = {
-						.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-					},
-					.subresourceRange   = {
-						.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-						.baseMipLevel   = 0,
-						.levelCount     = 1,
-						.baseArrayLayer = 0,
-						.layerCount     = 1,
-					}
-				};
-			}
+			static auto create_image_view_info(::VkImage&,
+											  ::VkFormat&) noexcept -> ::VkImageViewCreateInfo;
 
 			
 			// -- private methods ---------------------------------------------
 
 			/* free */
-			auto free(void) noexcept -> void {
-				if (_view == nullptr)
-					return;
-				::vkDestroyImageView(_device, _view, nullptr);
-			}
+			auto free(void) noexcept -> void;
 
 			/* init */
-			auto init(void) noexcept -> void {
-				  _view = VK_NULL_HANDLE;
-				_device = VK_NULL_HANDLE;
-			}
+			auto init(void) noexcept -> void;
 
 
 			// -- private members ---------------------------------------------

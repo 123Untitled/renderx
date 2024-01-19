@@ -1,14 +1,19 @@
 #include "vulkan_surface.hpp"
+#include "vulkan_physical_device.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
+
+/* default constructor */
+vulkan::surface::surface(void) noexcept
+: _surface{nullptr}, _instance{nullptr} {}
 
 /* instance and window constructor */
 vulkan::surface::surface(const vulkan::instance& instance, glfw::window& window)
 : _surface{nullptr}, _instance{instance.underlying()} {
 	// create surface
 	if (::glfwCreateWindowSurface(instance.underlying(),
-								 &window, nullptr, &_surface) != VK_SUCCESS)
+								 window.underlying(), nullptr, &_surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
 }
 
@@ -44,6 +49,7 @@ auto vulkan::surface::underlying(void) noexcept -> ::VkSurfaceKHR& {
 auto vulkan::surface::underlying(void) const noexcept -> const ::VkSurfaceKHR& {
 	return _surface;
 }
+
 
 
 // -- private methods ---------------------------------------------------------

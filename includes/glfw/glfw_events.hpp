@@ -52,6 +52,7 @@ namespace glfw {
 				static int i = 0;
 
 				while (window.should_close() == false) {
+					break;
 					::glfwWaitEvents();
 					//::glfwPollEvents();
 					std::cout << "glfw event loop: " << i++ << std::endl;

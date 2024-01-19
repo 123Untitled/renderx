@@ -76,11 +76,6 @@ namespace vulkan {
 			static auto create_device_info(::VkDeviceQueueCreateInfo&,
 										   ::VkPhysicalDeviceFeatures&) noexcept -> ::VkDeviceCreateInfo;
 
-			/* create device queue info */
-			static auto create_device_queue_info(const vulkan::physical_device&,
-												 const vulkan::surface&,
-												 float&) -> ::VkDeviceQueueCreateInfo;
-
 
 
 			// -- private methods ---------------------------------------------

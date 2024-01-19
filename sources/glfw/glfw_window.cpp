@@ -2,26 +2,60 @@
 
 
 /* default constructor */
-glfw::window::window(void)
+glfw::window::window(void) noexcept
+: _window{nullptr} {}
+
+/* width and height constructor */
+glfw::window::window(const int width, const int height)
 : _window{nullptr} {
 
 	if (glfw::system::is_initialized() == false)
-		return;
+		throw engine::exception{"glfw system is not initialized."};
 
 	::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	::glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-	_window = ::glfwCreateWindow(640, 480, "engine", nullptr, nullptr);
+	_window = ::glfwCreateWindow(width, height, "engine", nullptr, nullptr);
 
 	if (_window == nullptr)
 		throw engine::exception{"failed to create glfw window."};
 }
 
+/* move constructor */
+glfw::window::window(self&& other) noexcept
+: _window{other._window} {
+	other.init();
+}
+
 /* destructor */
 glfw::window::~window(void) noexcept {
-	if (_window == nullptr)
-		return;
-	::glfwDestroyWindow(_window);
+	free();
+}
+
+
+// -- public assignment operators ---------------------------------------------
+
+/* move assignment operator */
+auto glfw::window::operator=(self&& other) noexcept -> self& {
+	if (this == &other)
+		return *this;
+	free();
+	_window = other._window;
+	other.init();
+	return *this;
+}
+
+
+// -- public accessors --------------------------------------------------------
+
+/* underlying pointer */
+auto glfw::window::underlying(void) noexcept -> ::GLFWwindow* {
+	return _window;
+}
+
+/* const underlying pointer */
+auto glfw::window::underlying(void) const noexcept -> const ::GLFWwindow* {
+	return _window;
 }
 
 /* should close */
@@ -29,7 +63,17 @@ auto glfw::window::should_close(void) const noexcept -> bool {
 	return ::glfwWindowShouldClose(_window);
 }
 
-///* ::GLFWwindow* conversion operator */
-//glfw::window::operator ::GLFWwindow*(void) noexcept {
-//	return _window;
-//}
+
+// -- private methods ---------------------------------------------------------
+
+/* free */
+auto glfw::window::free(void) noexcept -> void {
+	if (_window == nullptr)
+		return;
+	::glfwDestroyWindow(_window);
+}
+
+/* init */
+auto glfw::window::init(void) noexcept -> void {
+	_window = nullptr;
+}

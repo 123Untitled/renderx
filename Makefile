@@ -20,6 +20,13 @@ override SHELL := $(shell which zsh)
 override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules
 
 
+
+# -- O P E R A T I N G  S Y S T E M -------------------------------------------
+
+override OS := $(shell uname -s)
+
+
+
 # -- T A R G E T S ------------------------------------------------------------
 
 # project name
@@ -30,6 +37,7 @@ override EXEC := exec_$(PROJECT)
 
 # compile commands for clangd
 override COMPILE_COMMANDS = compile_commands.json
+
 
 
 # -- D I R E C T O R I E S ----------------------------------------------------
@@ -54,6 +62,55 @@ override JSNDIR := $(BLDDIR)/json
 
 # shader directory
 override SHADIR := shaders
+
+# external directory
+override EXTDIR := external
+
+
+
+
+# -- G L F W  S E T T I N G S -------------------------------------------------
+
+# glfw directory
+override GLFW_DIR := $(EXTDIR)/glfw
+
+# glfw include directory
+override GLFW_INCLUDE := $(GLFW_DIR)/include
+
+# glfw library directory
+override GLFW_LIB := $(GLFW_DIR)/lib
+
+
+# -- X N S  S E T T I N G S ---------------------------------------------------
+
+# xns directory
+override XNS_DIR := $(EXTDIR)/xns
+
+# xns include directory
+override XNS_INCLUDE := $(XNS_DIR)
+
+# xns library directory
+override XNS_LIB := $(XNS_DIR)
+
+
+
+# -- V U L K A N  S E T T I N G S ---------------------------------------------
+
+ifeq ($(OS), Darwin)
+    override SCRIPT_VULKAN := $(HOME)/VulkanSDK/1.3.268.1/setup-env.sh
+endif
+ifeq ($(OS), Linux)
+    override SCRIPT_VULKAN := $(EXTDIR)/vulkan/setup-env.sh
+endif
+
+# vulkan directory
+override VULKAN_DIR := $(shell source $(SCRIPT_VULKAN) > /dev/null 2>&1 && echo $$VULKAN_SDK)
+
+# vulkan include directory
+override VULKAN_INCLUDE := $(VULKAN_DIR)/include
+
+# vulkan library directory
+override VULKAN_LIB := $(VULKAN_DIR)/lib
 
 
 
@@ -97,57 +154,26 @@ override CXXFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowi
 # shadowing
 override CXXFLAGS += -Wshadow
 
+# linker flags
+override LDFLAGS := -L$(GLFW_LIB) -lglfw3 -L$(VULKAN_LIB) -lvulkan -L$(XNS_LIB) -lxns
 
-# -- O P E R A T I N G  S Y S T E M -------------------------------------------
-
-override OS := $(shell uname -s)
-
-
-# -- E X T E R N A L ----------------------------------------------------------
-
-# external directory
-override EXTDIR := external
-
-
-# -- G L F W  S E T T I N G S -------------------------------------------------
-
-# glfw directory
-override GLFW_DIR := $(EXTDIR)/glfw
-
-# glfw include directory
-override GLFW_INCLUDE := $(GLFW_DIR)/include
-
-# glfw library directory
-override GLFW_LIB := $(GLFW_DIR)/lib
-
-
-# -- V U L K A N  S E T T I N G S ---------------------------------------------
-
+# os dependent linker flags
 ifeq ($(OS), Darwin)
-    override SCRIPT_VULKAN := $(HOME)/VulkanSDK/1.3.268.1/setup-env.sh
+    override LDFLAGS += -framework Cocoa -framework IOKit
 endif
 ifeq ($(OS), Linux)
-    override SCRIPT_VULKAN := $(EXTDIR)/vulkan/setup-env.sh
+    override LDFLAGS += -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
 endif
 
-# vulkan directory
-override VULKAN_DIR := $(shell source $(SCRIPT_VULKAN) > /dev/null 2>&1 && echo $$VULKAN_SDK)
+# dependency flags
+override DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
-# vulkan include directory
-override VULKAN_INCLUDE := $(VULKAN_DIR)/include
-
-# vulkan library directory
-override VULKAN_LIB := $(VULKAN_DIR)/lib
-
-
-
-
-
+# compile commands flags
+override CMPFLAGS = -MJ $(JSNDIR)/$*.json
 
 
 
 # -- S O U R C E S ------------------------------------------------------------
-
 
 # get all source files
 override SRCS := $(shell find $(SRCDIR) -type f -name '*.cpp')
@@ -174,26 +200,10 @@ override SUBJSNDIR := $(SUBSRCDIR:$(SRCDIR)/%=$(JSNDIR)/%)
 override SUB_INCLUDE := $(shell find $(INCDIR) -type d)
 
 
-# linker flags
-override LDFLAGS := -L$(GLFW_LIB) -lglfw3 -L$(VULKAN_LIB) -lvulkan
-
-
-
-ifeq ($(OS), Darwin)
-    override LDFLAGS += -framework Cocoa -framework IOKit
-endif
-ifeq ($(OS), Linux)
-    override LDFLAGS += -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
-endif
 
 # include flags
-override INCLUDES := $(addprefix -I, $(SUB_INCLUDE) $(GLFW_INCLUDE) $(VULKAN_INCLUDE))
+override INCLUDES := $(addprefix -I, $(SUB_INCLUDE) $(GLFW_INCLUDE) $(VULKAN_INCLUDE) $(XNS_INCLUDE))
 
-# dependency flags
-override DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
-
-# compile commands flags
-override CMPFLAGS = -MJ $(JSNDIR)/$*.json
 
 
 
@@ -219,15 +229,15 @@ endef
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re intro shaders
+.PHONY: all clean fclean re intro shaders xns
 
 
 # -- R U L E S ----------------------------------------------------------------
 
-all: intro $(GLFW_DIR) shaders objs $(EXEC) $(COMPILE_COMMANDS)
+all: intro $(GLFW_DIR) xns shaders objs $(EXEC) $(COMPILE_COMMANDS)
 	@$(call LINES)
 	$(call COLOR,"done ◝(ᵔᵕᵔ)◜")
-	echo
+	echo -n '\n'
 
 intro:
 	$(call LOGO)
@@ -273,7 +283,7 @@ clean: intro
 
 # fclean
 fclean: clean
-	@rm -rfv $(EXEC) $(GLFW_DIR)
+	@rm -rfv $(EXEC) $(EXTDIR)
 	$(MAKE) --silent --directory=$(SHADIR) fclean
 
 
@@ -282,6 +292,12 @@ $(GLFW_DIR):
 	@$(call LINES)
 	@$(call COLOR,"installing glfw")
 	tools/install_glfw.sh
+
+# xns
+xns:
+	@$(call LINES)
+	@$(call COLOR,"installing xns")
+	tools/install_xns.sh
 
 # re
 re: fclean all

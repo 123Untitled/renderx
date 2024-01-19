@@ -3,11 +3,17 @@
 
 #include "glfw_window.hpp"
 #include "vulkan_instance.hpp"
+//#include "vulkan_physical_device.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
+	// -- forward declarations ------------------------------------------------
+
+	/* physical device */
+	class physical_device;
 
 
 	// -- S U R F A C E -------------------------------------------------------
@@ -23,6 +29,9 @@ namespace vulkan {
 
 
 			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			surface(void) noexcept;
 
 			/* instance and window constructor */
 			surface(const vulkan::instance&, glfw::window&);

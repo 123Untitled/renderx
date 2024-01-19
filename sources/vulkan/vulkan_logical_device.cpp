@@ -1,4 +1,5 @@
 #include "vulkan_logical_device.hpp"
+#include "vulkan_queue.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -12,8 +13,11 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 									   const vulkan::surface& surface)
 : _device{nullptr}, _priority{1.0f} {
 
+	// get queue family index
+	auto index = vulkan::queue_families::find(pdevice, surface);
+
 	// create device queue info
-	auto queue_info = self::create_device_queue_info(pdevice, surface, _priority);
+	auto queue_info = vulkan::queue::create_queue_info(index, _priority);
 
 	::VkPhysicalDeviceFeatures features{}; /* not implemented */
 	std::memset(&features, 0, sizeof(features));
@@ -81,6 +85,10 @@ auto vulkan::logical_device::create_device(const vulkan::physical_device& pdevic
 /* create device info */
 auto vulkan::logical_device::create_device_info(::VkDeviceQueueCreateInfo& queue_info,
 												::VkPhysicalDeviceFeatures& features) noexcept -> ::VkDeviceCreateInfo {
+	static constexpr const char* extensions[] = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
 	return ::VkDeviceCreateInfo{
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = nullptr,
@@ -89,25 +97,9 @@ auto vulkan::logical_device::create_device_info(::VkDeviceQueueCreateInfo& queue
 		.pQueueCreateInfos       = &queue_info,
 		.enabledLayerCount       = 0,
 		.ppEnabledLayerNames     = nullptr,
-		.enabledExtensionCount   = 0,
-		.ppEnabledExtensionNames = nullptr,
+		.enabledExtensionCount   = 1,
+		.ppEnabledExtensionNames = extensions,
 		.pEnabledFeatures        = &features
-	};
-}
-
-/* create device queue info */
-auto vulkan::logical_device::create_device_queue_info(const vulkan::physical_device& pdevice,
-													  const vulkan::surface& surface,
-													  float& priority) -> ::VkDeviceQueueCreateInfo {
-	// return device queue create info
-	return ::VkDeviceQueueCreateInfo{
-				.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-				.pNext            = nullptr,
-				.flags            = 0,
-				// get queue family index
-				.queueFamilyIndex = vulkan::queue_families::find(pdevice, surface),
-				.queueCount       = 1,
-				.pQueuePriorities = &priority
 	};
 }
 
