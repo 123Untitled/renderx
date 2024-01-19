@@ -42,6 +42,9 @@ override COMPILE_COMMANDS = compile_commands.json
 
 # -- D I R E C T O R I E S ----------------------------------------------------
 
+# root directory
+override ROOTDIR := $(shell pwd)
+
 # build directory
 override BLDDIR := build
 
@@ -64,7 +67,7 @@ override JSNDIR := $(BLDDIR)/json
 override SHADIR := shaders
 
 # external directory
-override EXTDIR := external
+override EXTDIR := $(ROOTDIR)/external
 
 
 
@@ -96,15 +99,16 @@ override XNS_LIB := $(XNS_DIR)
 
 # -- V U L K A N  S E T T I N G S ---------------------------------------------
 
+# vulkan directory
 ifeq ($(OS), Darwin)
-    override SCRIPT_VULKAN := $(HOME)/VulkanSDK/1.3.268.1/setup-env.sh
+    override VULKAN_DIR := $(EXTDIR)/vulkan/macOS
 endif
 ifeq ($(OS), Linux)
-    override SCRIPT_VULKAN := $(EXTDIR)/vulkan/setup-env.sh
+    override VULKAN_DIR := $(EXTDIR)/vulkan/x86_64
 endif
 
-# vulkan directory
-override VULKAN_DIR := $(shell source $(SCRIPT_VULKAN) > /dev/null 2>&1 && echo $$VULKAN_SDK)
+# glslc compiler
+override GLSLC := $(VULKAN_DIR)/bin/glslc
 
 # vulkan include directory
 override VULKAN_INCLUDE := $(VULKAN_DIR)/include
@@ -244,7 +248,7 @@ intro:
 
 # shaders
 shaders:
-	@$(MAKE) --silent --directory=$(SHADIR)
+	@$(MAKE) --silent --directory=$(SHADIR) GLSLC=$(GLSLC)
 	$(call LINES)
 
 
@@ -283,7 +287,7 @@ clean: intro
 
 # fclean
 fclean: clean
-	@rm -rfv $(EXEC) $(EXTDIR)
+	@rm -rfv $(EXEC) $(GLFW_DIR) $(XNS_DIR)
 	$(MAKE) --silent --directory=$(SHADIR) fclean
 
 
