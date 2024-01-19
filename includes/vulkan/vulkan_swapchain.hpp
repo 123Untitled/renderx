@@ -33,7 +33,7 @@ namespace vulkan {
 			/* logical device and surface constructor */
 			swapchain(const vulkan::logical_device&,
 					  const vulkan::surface&,
-					  const ::VkSurfaceCapabilitiesKHR&,
+					  const vulkan::surface_capabilities&,
 					  const ::VkSurfaceFormatKHR&,
 					  const ::VkPresentModeKHR&,
 					  const ::VkExtent2D&);
@@ -93,7 +93,7 @@ namespace vulkan {
 			xns::vector<::VkImage> _images;
 
 			/* format */
-			::VkSurfaceFormatKHR _format;
+			::VkFormat _format;
 
 			/* extent */
 			::VkExtent2D _extent;

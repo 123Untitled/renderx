@@ -4,10 +4,16 @@
 #include <vulkan/vulkan.h>
 #include "vulkan_instance.hpp"
 #include "vulkan_surface.hpp"
+#include "vulkan_surface_capabilities.hpp"
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
+	// -- forward declarations ------------------------------------------------
+
+	/* extension properties */
+	class extension_properties;
 
 
 	// -- P H Y S I C A L  D E V I C E ----------------------------------------
@@ -64,10 +70,11 @@ namespace vulkan {
 
 
 			/* extensions */
-			auto extensions(void) const -> xns::vector<::VkExtensionProperties>;
+			auto extensions(void) const -> xns::vector<vulkan::extension_properties>;
 
 			/* capabilities */
-			auto capabilities(const vulkan::surface&) const -> ::VkSurfaceCapabilitiesKHR;
+			auto capabilities(const vulkan::surface&) const -> vulkan::surface_capabilities;
+
 
 			/* formats */
 			auto formats(const vulkan::surface&) const -> xns::vector<::VkSurfaceFormatKHR>;

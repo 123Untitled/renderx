@@ -10,13 +10,13 @@ vulkan::swapchain::swapchain(void) noexcept
 /* logical device and surface constructor */
 vulkan::swapchain::swapchain(const vulkan::logical_device& device,
 							 const vulkan::surface& surface,
-							 const ::VkSurfaceCapabilitiesKHR& capabilities,
+							 const vulkan::surface_capabilities& capabilities,
 							 const ::VkSurfaceFormatKHR& format,
 							 const ::VkPresentModeKHR& mode,
 							 const ::VkExtent2D& extent)
 : _swapchain{nullptr},
   _images{},
-  _format{format},
+  _format{format.format},
   _extent{extent},
   _device{device.underlying()} {
 
@@ -25,17 +25,24 @@ vulkan::swapchain::swapchain(const vulkan::logical_device& device,
 	info.pNext = nullptr;
 	info.flags = 0;
 	info.surface = surface.underlying();
-	info.minImageCount = capabilities.minImageCount + 1;
+	info.minImageCount = capabilities.min_image_count() + 1; // for triple buffering
 	info.imageFormat = format.format; // not implemented
 	info.imageColorSpace = format.colorSpace; // not implemented
 	info.imageExtent = extent; // not implemented
 	info.imageArrayLayers = 1; // for stereoscopic 3D applications
 	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // see later for post-processing
 	/* VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing */
-	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE; // not implemented !!!
-	info.queueFamilyIndexCount = 0; // not implemented !!!
-	info.pQueueFamilyIndices = nullptr; // not implemented !!!
-	info.preTransform = capabilities.currentTransform; // need to read tutorial
+
+
+	// not implemented !!!
+	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	// not implemented !!!
+	info.queueFamilyIndexCount = 0;
+	// not implemented !!!
+	info.pQueueFamilyIndices = nullptr;
+
+
+	info.preTransform = capabilities.current_transform(); // need to read tutorial
 	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // for blending with other windows
 	info.presentMode = mode; // not implemented
 	info.clipped = VK_TRUE; // not implemented

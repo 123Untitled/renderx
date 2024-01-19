@@ -1,4 +1,5 @@
 #include "vulkan_physical_device.hpp"
+#include "vulkan_extension_properties.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -61,30 +62,13 @@ auto vulkan::physical_device::is_support(const vulkan::surface& surface,
 
 
 /* extensions */
-auto vulkan::physical_device::extensions(void) const -> xns::vector<::VkExtensionProperties> {
-
-	::uint32_t count = 0;
-
-	if (::vkEnumerateDeviceExtensionProperties(_device, nullptr, &count, nullptr) != VK_SUCCESS)
-		throw engine::exception{"failed to get physical device extension count"};
-
-	if (count == 0) return {};
-
-	xns::vector<::VkExtensionProperties> extensions;
-	extensions.resize(count);
-
-	if (::vkEnumerateDeviceExtensionProperties(_device, nullptr, &count, extensions.data()) != VK_SUCCESS)
-		throw engine::exception{"failed to enumerate physical device extensions"};
-
-	return extensions;
+auto vulkan::physical_device::extensions(void) const -> xns::vector<vulkan::extension_properties> {
+	return vulkan::extension_properties::get(*this);
 }
 
 /* capabilities */
-auto vulkan::physical_device::capabilities(const vulkan::surface& surface) const -> ::VkSurfaceCapabilitiesKHR {
-	::VkSurfaceCapabilitiesKHR capabilities{};
-	if (::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_device, surface.underlying(), &capabilities) != VK_SUCCESS)
-		throw engine::exception{"failed to enumerate surface capabilities"};
-	return capabilities;
+auto vulkan::physical_device::capabilities(const vulkan::surface& surface) const -> vulkan::surface_capabilities {
+	return vulkan::surface_capabilities{*this, surface};
 }
 
 /* formats */

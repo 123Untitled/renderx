@@ -12,6 +12,7 @@
 #include "vulkan_surface.hpp"
 #include "vulkan_shader_module.hpp"
 #include "vulkan_swapchain.hpp"
+#include "vulkan_extension_properties.hpp"
 
 #include "meta_vertex.hpp"
 #include "basic_vertex.hpp"
@@ -21,36 +22,6 @@
 
 #include <xns>
 
-namespace vulkan {
-
-	class vertex_descriptor final {
-
-		public:
-
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = vulkan::vertex_descriptor;
-
-			/* vertex input binding description */
-			using binding = ::VkVertexInputBindingDescription;
-
-			/* vertex input attribute description */
-			using attribute = ::VkVertexInputAttributeDescription;
-
-
-			// -- public lifecycle --------------------------------------------
-
-
-		private:
-
-			// -- private members ---------------------------------------------
-
-			/* vertex input binding descriptions */
-			std::vector<binding> _bindings;
-
-	};
-}
 
 namespace engine {
 
@@ -76,65 +47,64 @@ namespace engine {
 				_pdevice{},
 				_ldevice{} {
 
+				// create window
 				 _window = glfw::window{800, 600};
+				// create surface
 				_surface = vulkan::surface{_instance, _window};
-
-				auto devices = _instance.physical_devices();
-
-				for (const auto& device : devices) {
-
-					auto extensions   = device.extensions();
-					auto capabilities = device.capabilities(_surface);
-					auto formats      = device.formats(_surface);
-					auto modes        = device.present_modes(_surface);
-
-					if (is_suitable(device, extensions, capabilities, formats, modes) == true) {
-						device.info();
-						_pdevice = device;
-						_ldevice = vulkan::logical_device{_pdevice, _surface};
+				// pick physical device
+				auto choice = pick_physical_device();
+				// assign physical device
+				_pdevice = xns::get<vulkan::physical_device>(choice);
+				// create logical device
+				_ldevice = vulkan::logical_device{_pdevice, _surface};
 
 
-						::VkSurfaceFormatKHR format = [](const auto& formats) {
-							for (const auto& f : formats) {
-								if (f.format == VK_FORMAT_B8G8R8A8_SRGB
-									&& f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-									return f;
-								}
-							}
-							return formats[0];
-						}(formats);
+				// get formats
+				const auto& formats = xns::get<xns::vector<::VkSurfaceFormatKHR>>(choice);
+				// get modes
+				const auto& modes = xns::get<xns::vector<::VkPresentModeKHR>>(choice);
+				// get capabilities
+				const auto& capabilities = xns::get<vulkan::surface_capabilities>(choice);
 
-						::VkPresentModeKHR mode = [](const auto& modes) {
-							for (const auto& m : modes) {
-								if (m == VK_PRESENT_MODE_MAILBOX_KHR) {
-									return m;
-								}
-							}
-							return VK_PRESENT_MODE_FIFO_KHR;
-						}(modes);
 
-						::VkExtent2D extent = [](const auto& capabilities, auto& window) -> ::VkExtent2D {
-							if (capabilities.currentExtent.width != UINT32_MAX) {
-								return capabilities.currentExtent;
-							}
-							int width, height;
-							::glfwGetFramebufferSize(window.underlying(), &width, &height);
-							::VkExtent2D extent = {
-								.width  = xns::clamp(static_cast<uint32_t>(width),  capabilities.minImageExtent.width,
-																					capabilities.maxImageExtent.width),
-								.height = xns::clamp(static_cast<uint32_t>(height), capabilities.minImageExtent.height,
-																					capabilities.maxImageExtent.height),
-							};
-							return extent;
-
-						}(capabilities, _window);
-
-						_swapchain = vulkan::swapchain{_ldevice, _surface, capabilities, format, mode, extent};
-						return;
+				::VkSurfaceFormatKHR format = [](const auto& formats) {
+					for (const auto& f : formats) {
+						if (f.format == VK_FORMAT_B8G8R8A8_SRGB
+								&& f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+							return f;
+						}
 					}
-				}
-				// no suitable physical device found
-				throw engine::exception{"failed to find suitable physical device"};
+					return formats[0];
+				}(formats);
+
+				::VkPresentModeKHR mode = [](const auto& modes) {
+					for (const auto& m : modes) {
+						if (m == VK_PRESENT_MODE_MAILBOX_KHR) {
+							return m;
+						}
+					}
+					return VK_PRESENT_MODE_FIFO_KHR;
+				}(modes);
+
+
+				::VkExtent2D extent = [](const auto& capabilities, auto& window) -> ::VkExtent2D {
+					if (capabilities.current_extent().width != UINT32_MAX) {
+						return capabilities.current_extent();
+					}
+					int width, height;
+					::glfwGetFramebufferSize(window.underlying(), &width, &height);
+					::VkExtent2D extent = {
+						.width  = xns::clamp(static_cast<uint32_t>(width),  capabilities.min_image_extent().width,
+								capabilities.max_image_extent().width),
+						.height = xns::clamp(static_cast<uint32_t>(height), capabilities.min_image_extent().height,
+								capabilities.max_image_extent().height),
+					};
+					return extent;
+
+				}(capabilities, _window);
+
+
+				_swapchain = vulkan::swapchain{_ldevice, _surface, capabilities, format, mode, extent};
 
 			}
 
@@ -149,19 +119,48 @@ namespace engine {
 
 		private:
 
+			/* pick physical device */
+			auto pick_physical_device(void) const -> xns::tuple<vulkan::physical_device,
+													 vulkan::surface_capabilities,
+													 xns::vector<::VkSurfaceFormatKHR>,
+													 xns::vector<::VkPresentModeKHR>> {
+				// get physical devices
+				auto devices = _instance.physical_devices();
+				// loop over devices
+				for (const auto& device : devices) {
+
+					auto extensions   = device.extensions();
+					auto capabilities = device.capabilities(_surface);
+					auto formats      = device.formats(_surface);
+					auto modes        = device.present_modes(_surface);
+
+					if (not is_suitable(device, extensions, capabilities, formats, modes) == true)
+						continue;
+
+
+					return {device, capabilities,
+							xns::move(formats),
+							xns::move(modes)};
+				}
+				// no suitable physical device found
+				throw engine::exception{"failed to find suitable physical device"};
+			}
+
+
 			/* is device suitable */
 			auto is_suitable(const vulkan::physical_device& device,
-							 const xns::vector<::VkExtensionProperties>& extensions,
-							 const ::VkSurfaceCapabilitiesKHR& capabilities,
+							 const xns::vector<vulkan::extension_properties>& extensions,
+							 const vulkan::surface_capabilities& capabilities,
 							 const xns::vector<::VkSurfaceFormatKHR>& formats,
-							 const xns::vector<::VkPresentModeKHR>& modes) noexcept -> bool {
+							 const xns::vector<::VkPresentModeKHR>& modes) const noexcept -> bool {
 
 				auto properties = device.properties();
 				auto features   = device.features();
 
 				bool swapchain = false;
+
 				for (const auto& extension : extensions) {
-					if (std::string{extension.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME) {
+					if (extension.name() == VK_KHR_SWAPCHAIN_EXTENSION_NAME) {
 						swapchain = true;
 						break;
 					}
