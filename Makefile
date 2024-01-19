@@ -101,7 +101,7 @@ override XNS_LIB := $(XNS_DIR)
 
 # vulkan directory
 ifeq ($(OS), Darwin)
-    override VULKAN_DIR := $(EXTDIR)/vulkan/macOS
+    override VULKAN_DIR := /Users/untitled/VulkanSDK/1.3.268.1/macOS
 endif
 ifeq ($(OS), Linux)
     override VULKAN_DIR := $(EXTDIR)/vulkan/x86_64
