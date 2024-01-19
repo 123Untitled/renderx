@@ -1,6 +1,7 @@
 external/
 build/
 .cache/
+.nvimlog
 
 **/*.spv
 
