@@ -1,9 +1,15 @@
 #ifndef ENGINE_BASIC_VERTEX_HPP
 #define ENGINE_BASIC_VERTEX_HPP
 
+#include "os.hpp"
+
+#if defined(ENGINE_OS_APPLE)
 #include <simd/simd.h>
+#endif
+
 #include <vulkan/vulkan.h>
 #include <array>
+#include <xns>
 
 // -- E N G I N E  N A M E S P A C E ------------------------------------------
 
@@ -16,10 +22,12 @@ namespace engine {
 		private:
 
 			/* position */
-			simd::float3 _position;
+			xns::array<float, 3> _position;
+			//simd::float3 _position;
 
 			/* color */
-			simd::float4 _color;
+			xns::array<float, 4> _color;
+			//simd::float4 _color;
 
 
 		public:
@@ -39,7 +47,8 @@ namespace engine {
 			}
 
 			/* position and color constructor */
-			basic_vertex(const simd::float3& position, const simd::float4& color) noexcept
+			basic_vertex(const xns::array<float, 3>& position, const xns::array<float, 4>& color) noexcept
+			//basic_vertex(const simd::float3& position, const simd::float4& color) noexcept
 			: _position{position}, _color{color} {
 			}
 
@@ -73,16 +82,16 @@ namespace engine {
 				// double: VK_FORMAT_R64_SFLOAT         (a double-precision (64-bit) float)
 
 
-				static constexpr std::array attribute {
+				static constexpr xns::array attribute {
 					::VkVertexInputAttributeDescription{
-						.binding  = 0, // binding index
 						.location = 0, // shader location
+						.binding  = 0, // binding index
 						.format   = VK_FORMAT_R32G32B32_SFLOAT,
 						.offset   = offsetof(self, _position)
 					},
 					::VkVertexInputAttributeDescription{
-						.binding  = 0, // binding index
 						.location = 1, // shader location
+						.binding  = 0, // binding index
 						.format   = VK_FORMAT_R32G32B32A32_SFLOAT,
 						.offset   = offsetof(self, _color)
 					}
