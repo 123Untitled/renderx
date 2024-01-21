@@ -33,14 +33,17 @@ namespace vulkan {
 			/* default constructor */
 			surface(void) noexcept;
 
-			/* instance and window constructor */
-			surface(const vulkan::instance&, glfw::window&);
+			/* window constructor */
+			surface(glfw::window&);
 
 			/* deleted copy constructor */
 			surface(const self&) = delete;
 
 			/* move constructor */
 			surface(self&&) noexcept;
+
+			/* destructor */
+			~surface(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -52,13 +55,11 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self&;
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkSurfaceKHR&;
+			/* VkSurfaceKHR conversion operator */
+			operator const ::VkSurfaceKHR&() const noexcept;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkSurfaceKHR&;
 
 
 		private:
@@ -76,9 +77,6 @@ namespace vulkan {
 
 			/* surface */
 			::VkSurfaceKHR _surface;
-
-			/* instance */
-			::VkInstance _instance;
 
 	}; // class surface
 

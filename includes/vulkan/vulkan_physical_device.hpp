@@ -34,7 +34,6 @@ namespace vulkan {
 			/* default constructor */
 			physical_device(void) noexcept;
 
-
 			/* copy constructor */
 			physical_device(const self&) noexcept;
 
@@ -54,13 +53,25 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self&;
 
 
+
+
+
+			// -- public conversion operators ---------------------------------
+
+			/* VkPhysicalDevice conversion operator */
+			operator const ::VkPhysicalDevice&() const noexcept;
+
+
 			// -- public accessors --------------------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkPhysicalDevice&;
+			/* supports swapchain */
+			auto supports_swapchain(void) const noexcept -> bool;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkPhysicalDevice&;
+			/* have formats */
+			auto have_formats(const vulkan::surface&) const -> bool;
+
+			/* have present modes */
+			auto have_present_modes(const vulkan::surface&) const -> bool;
 
 
 
@@ -109,19 +120,11 @@ namespace vulkan {
 
 			// -- private lifecycle -------------------------------------------
 
-			/* ::VkPhysicalDevice constructor */
+			/* VkPhysicalDevice constructor */
 			physical_device(const ::VkPhysicalDevice&) noexcept;
 
 
 			// -- private static methods --------------------------------------
-
-
-			/* is device suitable */
-			static auto is_suitable(const ::VkPhysicalDevice&,
-									const std::vector<::VkExtensionProperties>&,
-									const ::VkSurfaceCapabilitiesKHR&,
-									const std::vector<::VkSurfaceFormatKHR>&,
-									const std::vector<::VkPresentModeKHR>&) noexcept -> bool;
 
 			/* device type */
 			static auto type(const ::VkPhysicalDeviceProperties&) noexcept -> void;

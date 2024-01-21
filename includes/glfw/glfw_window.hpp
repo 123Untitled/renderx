@@ -63,6 +63,12 @@ namespace glfw {
 
 		private:
 
+			// -- private static methods --------------------------------------
+
+			/* resize callback */
+			static auto resize_callback(::GLFWwindow*, const int, const int) noexcept -> void;
+
+
 			// -- private methods ---------------------------------------------
 
 			/* free */

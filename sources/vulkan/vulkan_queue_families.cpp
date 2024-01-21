@@ -27,7 +27,7 @@ auto vulkan::queue_families::enumerate(const vulkan::physical_device& device) ->
 
 	::uint32_t count = 0;
 	// get number of queue families
-	::vkGetPhysicalDeviceQueueFamilyProperties(device.underlying(), &count, nullptr);
+	::vkGetPhysicalDeviceQueueFamilyProperties(device, &count, nullptr);
 	// check number of queue families
 	if (count == 0)
 		throw engine::exception{"failed to find queue families"};
@@ -36,7 +36,7 @@ auto vulkan::queue_families::enumerate(const vulkan::physical_device& device) ->
 	// allocate memory
 	families.resize(count);
 	// get queue families
-	::vkGetPhysicalDeviceQueueFamilyProperties(device.underlying(), &count, families.data());
+	::vkGetPhysicalDeviceQueueFamilyProperties(device, &count, families.data());
 	// return queue families
 	return families;
 }

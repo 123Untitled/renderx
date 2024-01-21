@@ -68,7 +68,7 @@ namespace engine {
 				// VK_VERTEX_INPUT_RATE_VERTEX:   Move to the next data entry after each vertex
 				// VK_VERTEX_INPUT_RATE_INSTANCE: Move to the next data entry after each instance
 				static constexpr ::VkVertexInputBindingDescription binding {
-					.binding   = 0,
+					.binding   = 0, // index in binding array
 					.stride    = sizeof(self),
 					.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
 				};

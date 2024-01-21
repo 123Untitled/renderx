@@ -7,7 +7,7 @@
 vulkan::image_view::image_view(const vulkan::logical_device& device,
 									::VkImage& image,
 									::VkFormat& format)
-: _view{nullptr}, _device{device.underlying()} {
+: _view{nullptr}, _device{device} {
 	// create image view info
 	auto info = self::create_image_view_info(image, format);
 	// create image view
@@ -60,7 +60,7 @@ auto vulkan::image_view::create_image_view(const vulkan::logical_device& device,
 										   const ::VkImageViewCreateInfo& info) -> ::VkImageView {
 	::VkImageView view;
 	// create image view
-	if (::vkCreateImageView(device.underlying(), &info, nullptr, &view) != VK_SUCCESS)
+	if (::vkCreateImageView(device, &info, nullptr, &view) != VK_SUCCESS)
 		throw engine::exception{"failed to create image view"};
 	return view;
 }

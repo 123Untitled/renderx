@@ -1,16 +1,14 @@
 #include "vulkan_shader_module.hpp"
+#include "vulkan_logical_device.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
 
-/* default constructor */
-vulkan::shader_module::shader_module(void) noexcept
-: _module{nullptr}, _device{nullptr} {}
-
 /* path constructor */
 vulkan::shader_module::shader_module(const vulkan::logical_device& device,
 									 const std::string& path)
-: _module{nullptr}, _device{device.underlying()} {
+: _module{VK_NULL_HANDLE} {
+
 
 	std::ifstream file{path, std::ios::ate | std::ios::binary};
 	if (!file.is_open()) {
@@ -38,42 +36,23 @@ vulkan::shader_module::shader_module(const vulkan::logical_device& device,
 
 }
 
-/* move constructor */
-vulkan::shader_module::shader_module(self&& other) noexcept
-: _module{other._module}, _device{other._device} {
-	other.init();
-}
 
-/* destructor */
-vulkan::shader_module::~shader_module(void) noexcept {
-	free();
-}
+// -- public conversion operators ---------------------------------------------
 
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::shader_module::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	free();
-	_module = other._module;
-	_device = other._device;
-	other.init();
-	return *this;
-}
-
-
-// -- public accessors --------------------------------------------------------
-
-/* underlying */
-auto vulkan::shader_module::underlying(void) noexcept -> ::VkShaderModule& {
+/* VkShaderModule conversion operator */
+vulkan::shader_module::operator ::VkShaderModule(void) noexcept {
 	return _module;
 }
 
-/* const underlying */
-auto vulkan::shader_module::underlying(void) const noexcept -> const ::VkShaderModule& {
-	return _module;
+
+// -- public modifiers --------------------------------------------------------
+
+/* destroy */
+auto vulkan::shader_module::destroy(const vulkan::logical_device& device) noexcept -> void {
+	if (_module == VK_NULL_HANDLE)
+		return;
+	::vkDestroyShaderModule(device, _module, nullptr);
+	_module = VK_NULL_HANDLE;
 }
 
 
@@ -83,7 +62,7 @@ auto vulkan::shader_module::underlying(void) const noexcept -> const ::VkShaderM
 auto vulkan::shader_module::create_shader_module(const vulkan::logical_device& device,
 												 const ::VkShaderModuleCreateInfo& info,
 												 ::VkShaderModule& module) noexcept -> ::VkResult {
-	return ::vkCreateShaderModule(device.underlying(), &info, nullptr, &module);
+	return ::vkCreateShaderModule(device, &info, nullptr, &module);
 }
 
 /* create shader module info */
@@ -98,17 +77,3 @@ auto vulkan::shader_module::create_shader_module_info(const std::vector<char>& c
 }
 
 
-// -- private methods ---------------------------------------------------------
-
-/* free */
-auto vulkan::shader_module::free(void) noexcept -> void {
-	if (_module == VK_NULL_HANDLE)
-		return;
-	::vkDestroyShaderModule(_device, _module, nullptr);
-}
-
-/* init */
-auto vulkan::shader_module::init(void) noexcept -> void {
-	_module = VK_NULL_HANDLE;
-	_device = VK_NULL_HANDLE;
-}

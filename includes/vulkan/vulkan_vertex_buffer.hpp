@@ -1,12 +1,11 @@
-#ifndef ENGINE_VULKAN_FRAMEBUFFER_HPP
-#define ENGINE_VULKAN_FRAMEBUFFER_HPP
+#ifndef ENGINE_VULKAN_VERTEX_BUFFER_HPP
+#define ENGINE_VULKAN_VERTEX_BUFFER_HPP
 
 
-// vulkan headers
 #include <vulkan/vulkan.h>
-#include "exceptions.hpp"
 
-#include "vulkan_renderpass.hpp"
+#include "vulkan_logical_device.hpp"
+#include "basic_vertex.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -14,32 +13,31 @@
 namespace vulkan {
 
 
-	// -- F R A M E B U F F E R -----------------------------------------------
+	// -- V E R T E X  B U F F E R --------------------------------------------
 
-	class framebuffer final {
-
+	class vertex_buffer final {
 
 		public:
 
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::framebuffer;
+			using self = vulkan::vertex_buffer;
 
 
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			framebuffer(const vulkan::renderpass&, ::uint32_t, ::uint32_t);
+			vertex_buffer(const vulkan::logical_device&);
 
 			/* deleted copy constructor */
-			framebuffer(const self&) = delete;
+			vertex_buffer(const self&) = delete;
 
 			/* move constructor */
-			framebuffer(self&&) noexcept;
+			vertex_buffer(self&&) noexcept;
 
 			/* destructor */
-			~framebuffer(void) noexcept;
+			~vertex_buffer(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -51,19 +49,13 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self&;
 
 
-			// -- public modifiers --------------------------------------------
+			// -- public methods ----------------------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			/* render */
+			auto render(const ::VkCommandBuffer&) const noexcept -> void;
 
 
 		private:
-
-			// -- private static methods --------------------------------------
-
-			/* create */
-			static auto create(::VkFramebufferCreateInfo&) -> ::VkFramebuffer;
-
 
 			// -- private methods ---------------------------------------------
 
@@ -76,14 +68,14 @@ namespace vulkan {
 
 			// -- private members ---------------------------------------------
 
-			/* buffer */
-			::VkFramebuffer _buffer;
+			/* vertex buffer */
+			VkBuffer _buffer;
 
-			/* logical device */
-			::VkDevice _device;
+			/* vertex buffer memory */
+			VkDeviceMemory _memory;
 
-	}; // class framebuffer
+	}; // class vertex_buffer
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_FRAMEBUFFER_HPP
+#endif // ENGINE_VULKAN_VERTEX_BUFFER_HPP

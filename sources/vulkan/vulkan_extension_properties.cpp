@@ -5,66 +5,70 @@
 
 /* default constructor */
 vulkan::extension_properties::extension_properties(void) noexcept
-: _name{}, _version{0} {}
+: _properties{} {}
+
+/* copy constructor */
+vulkan::extension_properties::extension_properties(const self& other) noexcept
+: _properties{other._properties} {}
 
 /* move constructor */
 vulkan::extension_properties::extension_properties(self&& other) noexcept
-: _name{xns::move(other._name)}, _version{other._version} {}
+: self{other} /* copy */ {}
 
 
 // -- public assignment operators ---------------------------------------------
 
+/* copy assignment operator */
+auto vulkan::extension_properties::operator=(const self& other) noexcept -> self& {
+	_properties = other._properties;
+	return *this;
+}
+
 /* move assignment operator */
 auto vulkan::extension_properties::operator=(self&& other) noexcept -> self& {
-	_name = xns::move(other._name);
-	_version = other._version;
-	return *this;
+	return self::operator=(other); /* copy */
 }
 
 
 // -- public accessors --------------------------------------------------------
 
 /* name */
-auto vulkan::extension_properties::name(void) const noexcept -> const xns::string& {
-	return _name;
+auto vulkan::extension_properties::name(void) const noexcept -> xns::string_view {
+	return xns::string_view{_properties.extensionName};
 }
 
 /* version */
 auto vulkan::extension_properties::version(void) const noexcept -> xns::u32 {
-	return _version;
+	return _properties.specVersion;
+}
+
+/* support swapchain */
+auto vulkan::extension_properties::supports_swapchain(void) const noexcept -> bool {
+	return xns::string_view{_properties.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
 
 // -- public static methods ---------------------------------------------------
 
 /* get all extension properties */
-auto vulkan::extension_properties::get(const vulkan::physical_device& device)
+auto vulkan::extension_properties::extensions(const vulkan::physical_device& device)
 		-> xns::vector<self> {
 
 	::uint32_t count = 0;
 
-	if (::vkEnumerateDeviceExtensionProperties(device.underlying(),
-												nullptr,
-												&count,
-												nullptr) != VK_SUCCESS)
+	if (::vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr)
+		!= VK_SUCCESS)
 		throw engine::exception{"failed to get physical device extension count"};
 
 	if (count == 0) return {};
 
-	xns::vector<::VkExtensionProperties> extensions;
+	xns::vector<self> extensions;
 	extensions.resize(count);
 
-	if (::vkEnumerateDeviceExtensionProperties(device.underlying(), nullptr, &count, extensions.data()) != VK_SUCCESS)
+	auto data = reinterpret_cast<::VkExtensionProperties*>(extensions.data());
+
+	if (::vkEnumerateDeviceExtensionProperties(device, nullptr, &count, data) != VK_SUCCESS)
 		throw engine::exception{"failed to enumerate physical device extensions"};
 
-	xns::vector<self> result;
-	result.reserve(count);
-
-	for (const auto& ext : extensions) {
-		result.emplace_back();
-		result.back()._name    = xns::string{ext.extensionName};
-		result.back()._version = ext.specVersion;
-	}
-
-	return result;
+	return extensions;
 }

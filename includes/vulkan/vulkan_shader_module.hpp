@@ -7,12 +7,17 @@
 #include <iostream>
 #include <vector>
 
-#include "vulkan_logical_device.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
+	// -- forward declarations ------------------------------------------------
+
+	/* logical device */
+	class logical_device;
+
 
 	// -- S H A D E R  M O D U L E --------------------------------------------
 
@@ -28,38 +33,41 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			shader_module(void) noexcept;
+			/* deleted default constructor */
+			shader_module(void) = delete;
 
-			/* path constructor */
+			/* logical device and path constructor */
 			shader_module(const vulkan::logical_device&, const std::string&);
 
 			/* deleted copy constructor */
-			shader_module(const self&) = delete;
+			shader_module(const self&) = default;
 
-			/* move constructor */
-			shader_module(self&&) noexcept;
+			/* deleted move constructor */
+			shader_module(self&&) noexcept = default;
 
 			/* destructor */
-			~shader_module(void) noexcept;
+			~shader_module(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			auto operator=(const self&) -> self& = default;
 
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			/* deleted move assignment operator */
+			auto operator=(self&&) noexcept -> self& = default;
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkShaderModule&;
+			/* VkShaderModule conversion operator */
+			operator ::VkShaderModule(void) noexcept;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkShaderModule&;
+
+			// -- public modifiers --------------------------------------------
+
+			/* destroy */
+			auto destroy(const vulkan::logical_device&) noexcept -> void;
 
 
 		private:
@@ -75,43 +83,18 @@ namespace vulkan {
 			static auto create_shader_module_info(const std::vector<char>&) noexcept -> ::VkShaderModuleCreateInfo;
 
 
-			// -- private methods ---------------------------------------------
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-			/* init */
-			auto init(void) noexcept -> void;
-
-
 			// -- private members ---------------------------------------------
 
 			/* shader module */
 			::VkShaderModule _module;
 
-			/* vulkan device */
-			::VkDevice _device;
-
-
 	}; // class shader_module
 
 
 
-	class shader_library final {
-
-		public:
-
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = vulkan::shader_library;
 
 
-
-
-	};
-
-
+	/*
 	template <::VkShaderStageFlagBits stage>
 	auto create_pipeline_shader_stage_info(const vulkan::shader_module& module) noexcept -> ::VkPipelineShaderStageCreateInfo {
 		return ::VkPipelineShaderStageCreateInfo{
@@ -119,11 +102,11 @@ namespace vulkan {
 			.pNext  = nullptr,
 			.flags  = 0,
 			.stage  = stage,
-			.module = module.underlying(),
+			.module = module,
 			.pName  = "main",
 			.pSpecializationInfo = nullptr
 		};
-	}
+	}*/
 
 
 } // namespace vulkan

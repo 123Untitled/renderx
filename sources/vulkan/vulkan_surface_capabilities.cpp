@@ -6,13 +6,11 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* physical device and surface constructor */
-vulkan::surface_capabilities::surface_capabilities(const vulkan::physical_device& physical_device,
+vulkan::surface_capabilities::surface_capabilities(const vulkan::physical_device& pdevice,
 												   const vulkan::surface& surface)
 : _capabilities{} {
 	// get surface capabilities
-	auto result = ::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device.underlying(),
-															  surface.underlying(),
-															  &_capabilities);
+	auto result = ::vkGetPhysicalDeviceSurfaceCapabilitiesKHR(pdevice, surface, &_capabilities);
 	if (result != VK_SUCCESS) {
 		throw engine::exception("failed to get surface capabilities");
 	}

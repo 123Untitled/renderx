@@ -4,6 +4,9 @@
 
 #include <vulkan/vulkan.h>
 #include "vulkan_logical_device.hpp"
+#include "vulkan_semaphore.hpp"
+#include "vulkan_command_buffer.hpp"
+#include "vulkan_swapchain.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -25,6 +28,9 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
+			/* default constructor */
+			queue(void) noexcept = default;
+
 			/* device and queue family index constructor */
 			queue(const vulkan::logical_device&, const ::uint32_t) noexcept;
 
@@ -33,6 +39,23 @@ namespace vulkan {
 
 			/* create queue info */
 			static auto create_queue_info(const ::uint32_t, const float&) noexcept -> ::VkDeviceQueueCreateInfo;
+
+
+			// -- public methods ----------------------------------------------
+
+			/* submit */
+			auto submit(const vulkan::semaphore* wait,
+						::uint32_t wait_count,
+						const vulkan::semaphore* signal,
+						::uint32_t signal_count,
+						const vulkan::command_buffer* buffers,
+						::uint32_t buffer_count) const -> void;
+
+			/* present */
+			auto present(const vulkan::swapchain&,
+						 ::uint32_t,
+						const vulkan::semaphore* wait,
+						 ::uint32_t wait_count) const -> bool;
 
 
 		private:

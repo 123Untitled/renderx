@@ -5,9 +5,14 @@
 /* default constructor */
 glfw::system::system(void)
 : _initialized{false} {
+	// initialize glfw
 	if (::glfwInit() != GLFW_TRUE)
 		throw engine::exception{"failed to initialize glfw."};
+	// check vulkan support
+	if (::glfwVulkanSupported() == GLFW_FALSE)
+		throw engine::exception{"glfw: vulkan is not supported."};
 	_initialized = true;
+	// set error callback
 	static_cast<void>(::glfwSetErrorCallback(glfw::system::error_callback));
 }
 
@@ -24,7 +29,7 @@ auto glfw::system::is_initialized(void) noexcept -> bool {
 }
 
 /* vulkan required extensions */
-auto glfw::system::vulkan_required_extensions(void) -> std::vector<const char*> {
+auto glfw::system::vulkan_required_extensions(void) -> xns::vector<const char*> {
 
 	if (glfw::system::is_initialized() == false)
 		return {};
@@ -32,30 +37,30 @@ auto glfw::system::vulkan_required_extensions(void) -> std::vector<const char*> 
 	::uint32_t        count = 0;
 	const char** extensions = ::glfwGetRequiredInstanceExtensions(&count);
 
-	if (extensions == nullptr) {
+	if (extensions == nullptr)
 		throw engine::exception{"failed to get glfw required instance extensions."};
-	}
 
-	std::vector<const char*> result;
-	result.resize(count);
-	for (::uint32_t i = 0; i < count; ++i)
-		result[i] = extensions[i];
+	xns::vector<const char*> result;
+	result.reserve(count);
 
 // check macos system
 #if defined(ENGINE_OS_MACOS)
 	result.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+	result.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 #endif
+// validation layers check
+#if defined(ENGINE_VL_DEBUG)
+	result.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+	for (::uint32_t i = 0; i < count; ++i)
+		result.push_back(extensions[i]);
+
+
 
 	return result;
 }
 
-/* is vulkan supported */
-auto glfw::system::is_vulkan_supported(void) -> bool {
-	self& instance = shared();
-	if (instance._initialized == false)
-		return false;
-	return ::glfwVulkanSupported() == GLFW_TRUE;
-}
 
 /* shared */
 auto glfw::system::shared(void) noexcept -> self& {

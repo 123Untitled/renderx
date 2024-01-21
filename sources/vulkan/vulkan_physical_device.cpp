@@ -31,21 +31,46 @@ auto vulkan::physical_device::operator=(self&& other) noexcept -> self& {
 }
 
 
-// -- public static methods ---------------------------------------------------
 
+// -- public conversion operators ---------------------------------------------
 
+/* VkPhysicalDevice conversion operator */
+vulkan::physical_device::operator const ::VkPhysicalDevice&() const noexcept {
+	return _device;
+}
 
 // -- public accessors --------------------------------------------------------
 
-/* underlying */
-auto vulkan::physical_device::underlying(void) noexcept -> ::VkPhysicalDevice& {
-	return _device;
+/* supports swapchain */
+auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
+	auto extensions = vulkan::extension_properties::extensions(*this);
+
+	for (const auto& extension : extensions)
+		if (extension.supports_swapchain())
+			return true;
+	return false;
 }
 
-/* const underlying */
-auto vulkan::physical_device::underlying(void) const noexcept -> const ::VkPhysicalDevice& {
-	return _device;
+/* have formats */
+auto vulkan::physical_device::have_formats(const vulkan::surface& surface) const -> bool {
+	::uint32_t count = 0;
+
+	if (::vkGetPhysicalDeviceSurfaceFormatsKHR(_device, surface, &count, nullptr) != VK_SUCCESS)
+		throw engine::exception{"failed to query number of surface formats"};
+
+	return bool{count > 0};
 }
+
+/* have present modes */
+auto vulkan::physical_device::have_present_modes(const vulkan::surface& surface) const -> bool {
+	::uint32_t count = 0;
+
+	if (::vkGetPhysicalDeviceSurfacePresentModesKHR(_device, surface, &count, nullptr) != VK_SUCCESS)
+		throw engine::exception{"failed to query number of present modes"};
+
+	return bool{count > 0};
+}
+
 
 /* is support surface and queue family */
 auto vulkan::physical_device::is_support(const vulkan::surface& surface,
@@ -53,7 +78,7 @@ auto vulkan::physical_device::is_support(const vulkan::surface& surface,
 
 	::VkBool32 present = false;
 	if (::vkGetPhysicalDeviceSurfaceSupportKHR(_device, family,
-												surface.underlying(),
+												surface,
 												&present) != VK_SUCCESS)
 		throw engine::exception{"failed to get physical device surface support"};
 	return present == VK_TRUE;
@@ -63,7 +88,7 @@ auto vulkan::physical_device::is_support(const vulkan::surface& surface,
 
 /* extensions */
 auto vulkan::physical_device::extensions(void) const -> xns::vector<vulkan::extension_properties> {
-	return vulkan::extension_properties::get(*this);
+	return vulkan::extension_properties::extensions(*this);
 }
 
 /* capabilities */
@@ -76,7 +101,7 @@ auto vulkan::physical_device::formats(const vulkan::surface& surface) const -> x
 
 	::uint32_t count = 0;
 
-	if (::vkGetPhysicalDeviceSurfaceFormatsKHR(_device, surface.underlying(), &count, nullptr) != VK_SUCCESS)
+	if (::vkGetPhysicalDeviceSurfaceFormatsKHR(_device, surface, &count, nullptr) != VK_SUCCESS)
 		throw engine::exception{"failed to query number of surface formats"};
 
 	if (count == 0)
@@ -85,7 +110,7 @@ auto vulkan::physical_device::formats(const vulkan::surface& surface) const -> x
 	xns::vector<::VkSurfaceFormatKHR> formats;
 	formats.resize(count);
 
-	if (::vkGetPhysicalDeviceSurfaceFormatsKHR(_device, surface.underlying(), &count, formats.data()) != VK_SUCCESS)
+	if (::vkGetPhysicalDeviceSurfaceFormatsKHR(_device, surface, &count, formats.data()) != VK_SUCCESS)
 		throw engine::exception{"failed to query surface formats"};
 
 	return formats;
@@ -96,7 +121,7 @@ auto vulkan::physical_device::present_modes(const vulkan::surface& surface) cons
 
 	::uint32_t count = 0;
 
-	if (::vkGetPhysicalDeviceSurfacePresentModesKHR(_device, surface.underlying(), &count, nullptr) != VK_SUCCESS)
+	if (::vkGetPhysicalDeviceSurfacePresentModesKHR(_device, surface, &count, nullptr) != VK_SUCCESS)
 		throw engine::exception{"failed to query number of present modes"};
 
 	if (count == 0)
@@ -105,7 +130,7 @@ auto vulkan::physical_device::present_modes(const vulkan::surface& surface) cons
 	xns::vector<::VkPresentModeKHR> modes;
 	modes.resize(count);
 
-	if (::vkGetPhysicalDeviceSurfacePresentModesKHR(_device, surface.underlying(), &count, modes.data()) != VK_SUCCESS)
+	if (::vkGetPhysicalDeviceSurfacePresentModesKHR(_device, surface, &count, modes.data()) != VK_SUCCESS)
 		throw engine::exception{"failed to query present modes"};
 
 	return modes;
@@ -129,7 +154,7 @@ auto vulkan::physical_device::features(void) const -> ::VkPhysicalDeviceFeatures
 
 // -- private lifecycle -------------------------------------------------------
 
-/* ::VkPhysicalDevice constructor */
+/* VkPhysicalDevice constructor */
 vulkan::physical_device::physical_device(const ::VkPhysicalDevice& device) noexcept
 : _device{device} {}
 
@@ -137,42 +162,6 @@ vulkan::physical_device::physical_device(const ::VkPhysicalDevice& device) noexc
 
 // -- private static methods --------------------------------------------------
 
-
-/* is device suitable */
-auto vulkan::physical_device::is_suitable(const ::VkPhysicalDevice& device,
-										  const std::vector<::VkExtensionProperties>& extensions,
-										  const ::VkSurfaceCapabilitiesKHR& capabilities,
-										  const std::vector<::VkSurfaceFormatKHR>& formats,
-										  const std::vector<::VkPresentModeKHR>& modes) noexcept -> bool {
-
-	::VkPhysicalDeviceProperties properties;
-	::VkPhysicalDeviceFeatures   features;
-
-	::vkGetPhysicalDeviceProperties(device, &properties);
-	::vkGetPhysicalDeviceFeatures(device, &features);
-
-	std::cout << "check device: " << properties.deviceName << std::endl;
-
-
-	bool swapchain = false;
-	for (const auto& extension : extensions) {
-		if (std::string{extension.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME) {
-			swapchain = true;
-			break;
-		}
-	}
-
-	//	device_type(properties);
-	//device_features(features);
-
-	return swapchain == true
-		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-			|| properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
-		&& (formats.empty() == false)
-		&& (modes.empty() == false);
-		
-		//&& features.geometryShader;
-}
 
 /* device type */
 auto vulkan::physical_device::type(const ::VkPhysicalDeviceProperties& properties) noexcept -> void {

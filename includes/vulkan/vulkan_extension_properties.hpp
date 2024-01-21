@@ -30,8 +30,8 @@ namespace vulkan {
 			/* default constructor */
 			extension_properties(void) noexcept;
 
-			/* deleted copy constructor */
-			extension_properties(const self&) = delete;
+			/* copy constructor */
+			extension_properties(const self&) noexcept;
 
 			/* move constructor */
 			extension_properties(self&&) noexcept;
@@ -42,8 +42,8 @@ namespace vulkan {
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
 
 			/* move assignment operator */
 			auto operator=(self&&) noexcept -> self&;
@@ -52,29 +52,35 @@ namespace vulkan {
 			// -- public accessors --------------------------------------------
 
 			/* name */
-			auto name(void) const noexcept -> const xns::string&;
+			auto name(void) const noexcept -> xns::string_view;
 
 			/* version */
 			auto version(void) const noexcept -> xns::u32;
+
+			/* support swapchain */
+			auto supports_swapchain(void) const noexcept -> bool;
 
 
 			// -- public static methods ---------------------------------------
 
 			/* get all extension properties */
-			static auto get(const vulkan::physical_device&) -> xns::vector<self>;
+			static auto extensions(const vulkan::physical_device&) -> xns::vector<self>;
 
 
 		private:
 
 			// -- private members ---------------------------------------------
 
-			/* name */
-			xns::string _name;
-
-			/* version */
-			xns::u32 _version;
+			/* properties */
+			::VkExtensionProperties _properties;
 
 	}; // class extension_properties
+
+
+	/* assert extension properties size matches */
+	static_assert(sizeof(vulkan::extension_properties) == sizeof(::VkExtensionProperties),
+				"): EXTENSION_PROPERTIES SIZE MISMATCH! :(");
+
 
 } // namespace vulkan
 

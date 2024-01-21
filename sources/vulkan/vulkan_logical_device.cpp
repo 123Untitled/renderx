@@ -26,6 +26,7 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 	auto device_info = self::create_device_info(queue_info, features);
 	// create device
 	_device = self::create_device(pdevice, device_info);
+
 }
 
 /* move constructor */
@@ -54,16 +55,20 @@ auto vulkan::logical_device::operator=(self&& other) noexcept -> self& {
 }
 
 
-// -- public accessors --------------------------------------------------------
+// -- public conversion operators ---------------------------------------------
 
-/* underlying */
-auto vulkan::logical_device::underlying(void) noexcept -> ::VkDevice& {
+/* VkDevice conversion operator */
+vulkan::logical_device::operator const ::VkDevice&(void) const noexcept {
 	return _device;
 }
 
-/* const underlying */
-auto vulkan::logical_device::underlying(void) const noexcept -> const ::VkDevice& {
-	return _device;
+
+// -- public methods ----------------------------------------------------------
+
+/* wait idle */
+auto vulkan::logical_device::wait_idle(void) const -> void {
+	if (::vkDeviceWaitIdle(_device) != VK_SUCCESS)
+		throw engine::exception{"failed to wait device idle"};
 }
 
 
@@ -75,18 +80,25 @@ auto vulkan::logical_device::create_device(const vulkan::physical_device& pdevic
 
 	::VkDevice device{nullptr};
 
-	if (auto result = ::vkCreateDevice(pdevice.underlying(), &info, nullptr, &device);
+	if (auto result = ::vkCreateDevice(pdevice, &info, nullptr, &device);
 		result != VK_SUCCESS)
 		throw engine::exception{"failed to create logical device"};
 
 	return device;
 }
 
+
 /* create device info */
 auto vulkan::logical_device::create_device_info(::VkDeviceQueueCreateInfo& queue_info,
 												::VkPhysicalDeviceFeatures& features) noexcept -> ::VkDeviceCreateInfo {
-	static constexpr const char* extensions[] = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	static constexpr xns::array extensions = {
+		// swapchain extension
+		(const char*)VK_KHR_SWAPCHAIN_EXTENSION_NAME
+#if defined(ENGINE_OS_MACOS)
+			,
+		// portability subset extension
+		(const char*)"VK_KHR_portability_subset" // VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME not defined ???
+#endif
 	};
 
 	return ::VkDeviceCreateInfo{
@@ -97,8 +109,8 @@ auto vulkan::logical_device::create_device_info(::VkDeviceQueueCreateInfo& queue
 		.pQueueCreateInfos       = &queue_info,
 		.enabledLayerCount       = 0,
 		.ppEnabledLayerNames     = nullptr,
-		.enabledExtensionCount   = 1,
-		.ppEnabledExtensionNames = extensions,
+		.enabledExtensionCount   = static_cast<::uint32_t>(extensions.size()),
+		.ppEnabledExtensionNames = extensions.data(),
 		.pEnabledFeatures        = &features
 	};
 }

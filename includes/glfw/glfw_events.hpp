@@ -46,18 +46,14 @@ namespace glfw {
 			auto operator=(self&&) -> self& = delete;
 
 
-			/* run */
-			auto run(const glfw::window& window) -> void {
+			/* poll */
+			auto poll(void) -> void {
+				::glfwPollEvents();
+			}
 
-				static int i = 0;
-
-				while (window.should_close() == false) {
-					break;
-					::glfwWaitEvents();
-					//::glfwPollEvents();
-					std::cout << "glfw event loop: " << i++ << std::endl;
-				}
-
+			/* wait */
+			auto wait(void) -> void {
+				::glfwWaitEvents();
 			}
 
 		private:

@@ -19,6 +19,12 @@ glfw::window::window(const int width, const int height)
 
 	if (_window == nullptr)
 		throw engine::exception{"failed to create glfw window."};
+
+	static void* user_data = nullptr;
+	::glfwSetWindowUserPointer(_window, user_data);
+
+	// set resize callback
+	static_cast<void>(::glfwSetWindowSizeCallback(_window, self::resize_callback));
 }
 
 /* move constructor */
@@ -61,6 +67,20 @@ auto glfw::window::underlying(void) const noexcept -> const ::GLFWwindow* {
 /* should close */
 auto glfw::window::should_close(void) const noexcept -> bool {
 	return ::glfwWindowShouldClose(_window);
+}
+
+
+// -- private static methods --------------------------------------------------
+
+/* resize callback */
+auto glfw::window::resize_callback(::GLFWwindow* window,
+									   const int width,
+									   const int height) noexcept -> void {
+
+	// get user pointer
+	void* user = ::glfwGetWindowUserPointer(window);
+
+	std::cout << "resize callback [" << width << ", " << height << "]" << std::endl;
 }
 
 

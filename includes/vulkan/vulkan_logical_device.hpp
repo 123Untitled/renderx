@@ -9,10 +9,22 @@
 #include "vulkan_queue_families.hpp"
 #include "vulkan_surface.hpp"
 
+#include "shader_library.hpp"
+
+#include "os.hpp"
+
+// -- forward declarations ----------------------------------------------------
+
+//namespace engine {
+//	/* shader library */
+//	template <xns::basic_string_literal...>
+//	class shader_library;
+//}
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
 
 	// -- D E V I C E ---------------------------------------------------------
 
@@ -55,13 +67,18 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self&;
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkDevice&;
+			/* VkDevice conversion operator */
+			operator const ::VkDevice&(void) const noexcept;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkDevice&;
+
+			// -- public methods ----------------------------------------------
+
+			/* wait idle */
+			auto wait_idle(void) const -> void;
+
+
 
 
 		private:

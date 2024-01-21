@@ -4,10 +4,11 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include <GLFW/glfw3.h>
-#include <vector>
 #include <iostream>
+
 #include "os.hpp"
 #include "exceptions.hpp"
+#include <xns>
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
@@ -52,10 +53,7 @@ namespace glfw {
 			static auto is_initialized(void) noexcept -> bool;
 
 			/* vulkan required extensions */
-			static auto vulkan_required_extensions(void) -> std::vector<const char*>;
-
-			/* is vulkan supported */
-			static auto is_vulkan_supported(void) -> bool;
+			static auto vulkan_required_extensions(void) -> xns::vector<const char*>;
 
 
 		private:

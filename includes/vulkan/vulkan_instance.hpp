@@ -5,8 +5,10 @@
 #include <vector>
 #include <iostream>
 
+
 #include "glfw_system.hpp"
 #include "exceptions.hpp"
+
 
 #include <xns>
 
@@ -15,10 +17,14 @@
 
 namespace vulkan {
 
+
 	// -- forward declarations ------------------------------------------------
 
 	/* physical device */
 	class physical_device;
+
+	/* surface */
+	class surface;
 
 
 	// -- V U L K A N  I N S T A N C E ----------------------------------------
@@ -35,14 +41,11 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			instance(void);
-
 			/* deleted copy constructor */
 			instance(const self&) = delete;
 
-			/* move constructor */
-			instance(self&&) noexcept;
+			/* deleted move constructor */
+			instance(self&&) noexcept = delete;
 
 			/* destructor */
 			~instance(void) noexcept;
@@ -53,60 +56,72 @@ namespace vulkan {
 			/* deleted copy assignment operator */
 			auto operator=(const self&) -> self& = delete;
 
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			/* deleted move assignment operator */
+			auto operator=(self&&) noexcept -> self& = delete;
+
+
+			// -- public conversion operators ---------------------------------
+
+			/* VkInstance conversion operator */
+			operator const ::VkInstance&(void) const noexcept;
 
 
 			// -- public accessors --------------------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkInstance&;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkInstance&;
+
+			// -- public static methods ---------------------------------------
+
+			/* shared */
+			static auto shared(void) -> self&;
 
 			/* physical devices */
-			auto physical_devices(void) const -> xns::vector<vulkan::physical_device>;
+			static auto physical_devices(void) -> xns::vector<vulkan::physical_device>;
 
-			/* physical devices count */
-			auto physical_devices_count(void) const -> ::uint32_t;
+			/* pick physical device */
+			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
+
 
 		private:
 
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			instance(void);
+
+
 			// -- private static methods --------------------------------------
 
-			/* enumerate extensions */
-			static auto extensions(void) -> std::vector<::VkExtensionProperties>;
+			/* extension properties */
+			static auto extension_properties(void) -> std::vector<::VkExtensionProperties>;
 
-			/* create application info */
-			static auto create_application_info(void) noexcept -> ::VkApplicationInfo;
-
-			/* create instance info */
-			static auto create_instance_info(const ::VkApplicationInfo&,
-											 const std::vector<const char*>&) noexcept -> ::VkInstanceCreateInfo;
-
-			/* create instance */
-			static auto create_instance(const ::VkInstanceCreateInfo&) -> ::VkInstance;
+			/* layer properties */
+			static auto layer_properties(void) -> xns::vector<::VkLayerProperties>;
 
 
-			// -- private methods ---------------------------------------------
+			/* callback */
+			#if defined(ENGINE_VL_DEBUG)
 
+			using message_severity = ::VkDebugUtilsMessageSeverityFlagBitsEXT;
+			using message_type     = ::VkDebugUtilsMessageTypeFlagsEXT;
+			using callback_data    = ::VkDebugUtilsMessengerCallbackDataEXT;
 
-
-
-
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-			/* init */
-			auto init(void) noexcept -> void;
+			/* callback */
+			static VKAPI_ATTR VkBool32 VKAPI_CALL callback(const message_severity,
+														   const message_type,
+														   const callback_data*, void*);
+			#endif
 
 
 			// -- private members ---------------------------------------------
 
 			/* instance */
 			::VkInstance _instance;
+
+			/* debug messenger */
+			#if defined(ENGINE_VL_DEBUG)
+			::VkDebugUtilsMessengerEXT _messenger;
+			#endif
 
 	};
 

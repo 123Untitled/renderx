@@ -6,21 +6,27 @@
 
 /* default constructor */
 vulkan::surface::surface(void) noexcept
-: _surface{nullptr}, _instance{nullptr} {}
+: _surface{nullptr} {}
 
-/* instance and window constructor */
-vulkan::surface::surface(const vulkan::instance& instance, glfw::window& window)
-: _surface{nullptr}, _instance{instance.underlying()} {
+/* window constructor */
+vulkan::surface::surface(glfw::window& window)
+: _surface{nullptr} {
+
 	// create surface
-	if (::glfwCreateWindowSurface(instance.underlying(),
+	if (::glfwCreateWindowSurface(vulkan::instance::shared(),
 								 window.underlying(), nullptr, &_surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
 }
 
 /* move constructor */
 vulkan::surface::surface(self&& other) noexcept
-: _surface{other._surface}, _instance{other._instance} {
+: _surface{other._surface} {
 	other.init();
+}
+
+/* destructor */
+vulkan::surface::~surface(void) noexcept {
+	free();
 }
 
 
@@ -32,23 +38,19 @@ auto vulkan::surface::operator=(self&& other) noexcept -> self& {
 		return *this;
 	free();
 	 _surface = other._surface;
-	_instance = other._instance;
 	other.init();
 	return *this;
 }
 
 
-// -- public accessors --------------------------------------------------------
+// -- public conversion operators ---------------------------------------------
 
-/* underlying */
-auto vulkan::surface::underlying(void) noexcept -> ::VkSurfaceKHR& {
+/* VkSurfaceKHR conversion operator */
+vulkan::surface::operator const ::VkSurfaceKHR&(void) const noexcept {
 	return _surface;
 }
 
-/* const underlying */
-auto vulkan::surface::underlying(void) const noexcept -> const ::VkSurfaceKHR& {
-	return _surface;
-}
+
 
 
 
@@ -58,12 +60,12 @@ auto vulkan::surface::underlying(void) const noexcept -> const ::VkSurfaceKHR& {
 auto vulkan::surface::free(void) noexcept -> void {
 	if (_surface == nullptr)
 		return;
-	::vkDestroySurfaceKHR(_instance, _surface, nullptr);
+	// destroy surface
+	::vkDestroySurfaceKHR(vulkan::instance::shared(), _surface, nullptr);
 }
 
 /* init */
 auto vulkan::surface::init(void) noexcept -> void {
 	_surface = nullptr;
-	_instance = nullptr;
 }
 
