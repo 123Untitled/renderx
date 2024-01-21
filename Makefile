@@ -176,6 +176,9 @@ override DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 override CMPFLAGS = -MJ $(JSNDIR)/$*.json
 
 
+# defines
+override DEFINES := -DENGINE_VL_DEBUG
+
 
 # -- S O U R C E S ------------------------------------------------------------
 
@@ -267,7 +270,7 @@ objs:
 -include $(DEPS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile | $(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR)
 	@echo "compiling: $<"
-	$(CXX) $(STD) $(DEBUG) $(CXXFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS) -c $< -o $@
+	$(CXX) $(STD) $(DEBUG) $(DEFINES) $(CXXFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS) -c $< -o $@
 
 # create directories
 $(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR):
