@@ -4,16 +4,14 @@
 #include <vulkan/vulkan.h>
 #include "vulkan_instance.hpp"
 #include "vulkan_surface.hpp"
-#include "vulkan_surface_capabilities.hpp"
+
+#include "vk_typedefs.hpp"
+#include "vk_functions.hpp"
+
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
-
-	// -- forward declarations ------------------------------------------------
-
-	/* extension properties */
-	class extension_properties;
 
 
 	// -- P H Y S I C A L  D E V I C E ----------------------------------------
@@ -59,7 +57,7 @@ namespace vulkan {
 			// -- public conversion operators ---------------------------------
 
 			/* VkPhysicalDevice conversion operator */
-			operator const ::VkPhysicalDevice&() const noexcept;
+			operator const vk::physical_device&() const noexcept;
 
 
 			// -- public accessors --------------------------------------------
@@ -67,76 +65,53 @@ namespace vulkan {
 			/* supports swapchain */
 			auto supports_swapchain(void) const noexcept -> bool;
 
-			/* have formats */
-			auto have_formats(const vulkan::surface&) const -> bool;
+			/* have surface formats */
+			auto have_surface_formats(const vulkan::surface&) const -> bool;
 
 			/* have present modes */
 			auto have_present_modes(const vulkan::surface&) const -> bool;
 
-
-
 			/* is support surface and queue family */
-			auto is_support(const vulkan::surface&, ::uint32_t) const -> bool;
+			auto is_support_surface_and_queue_family(const vulkan::surface&, const vk::u32) const -> bool;
 
+			/* extension properties */
+			auto extension_properties(void) const -> vk::vector<vk::extension_properties>;
 
+			/* surface capabilities */
+			auto surface_capabilities(const vulkan::surface&) const -> vk::surface_capabilities;
 
-			/* extensions */
-			auto extensions(void) const -> xns::vector<vulkan::extension_properties>;
+			/* surface formats */
+			auto surface_formats(const vulkan::surface&) const -> vk::vector<vk::surface_format>;
 
-			/* capabilities */
-			auto capabilities(const vulkan::surface&) const -> vulkan::surface_capabilities;
-
-
-			/* formats */
-			auto formats(const vulkan::surface&) const -> xns::vector<::VkSurfaceFormatKHR>;
-
-			/* present modes */
-			auto present_modes(const vulkan::surface&) const -> xns::vector<::VkPresentModeKHR>;
+			/* surface present modes */
+			auto surface_present_modes(const vulkan::surface&) const -> vk::vector<vk::present_mode>;
 
 			/* properties */
-			auto properties(void) const -> ::VkPhysicalDeviceProperties;
+			auto properties(void) const -> vk::physical_device_properties;
 
 			/* features */
-			auto features(void) const -> ::VkPhysicalDeviceFeatures;
+			auto features(void) const -> vk::physical_device_features;
 
-
-
-			/* info */
-			auto info(void) const noexcept -> void {
-
-				::VkPhysicalDeviceProperties properties;
-				::vkGetPhysicalDeviceProperties(_device, &properties);
-				std::cout << "device name: " << properties.deviceName << std::endl;
-			}
 
 
 		private:
 
 			// -- friends -----------------------------------------------------
 
-			/* xns allocator as friend */
-			friend class xns::allocator<self>;
+			/* vk vector allocator as friend */
+			friend typename vk::vector<self>::allocator;
 
 
 			// -- private lifecycle -------------------------------------------
 
 			/* VkPhysicalDevice constructor */
-			physical_device(const ::VkPhysicalDevice&) noexcept;
-
-
-			// -- private static methods --------------------------------------
-
-			/* device type */
-			static auto type(const ::VkPhysicalDeviceProperties&) noexcept -> void;
-
-			/* device features */
-			static auto features(const ::VkPhysicalDeviceFeatures&) noexcept -> void;
+			physical_device(const vk::physical_device&) noexcept;
 
 
 			// -- private members ---------------------------------------------
 
 			/* device */
-			::VkPhysicalDevice _device;
+			vk::physical_device _device;
 
 	};
 

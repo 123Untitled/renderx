@@ -23,14 +23,14 @@ auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> v
 		//	device_type(properties);
 		//device_features(features);
 
-		auto capabilities = device.capabilities(surface);
+		//auto capabilities = device.surface_capabilities(surface);
 
 		auto properties = device.properties();
 		auto features   = device.features();
 
-		if (device.supports_swapchain() == true
-		&&  device.have_formats(surface) == true
-		&&  device.have_present_modes(surface) == true
+		if (device.supports_swapchain()          == true
+		&&  device.have_surface_formats(surface) == true
+		&&  device.have_present_modes(surface)   == true
 		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
 		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)) {
 			return device;
@@ -54,7 +54,7 @@ vulkan::instance::instance(void)
 #endif
 
 	// create application info
-	const ::VkApplicationInfo app_info{
+	const vk::application_info app_info{
 		.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 		.pNext              = nullptr,
 		.pApplicationName   = "application",
@@ -69,7 +69,7 @@ vulkan::instance::instance(void)
 
 
 	// create instance info
-	::VkInstanceCreateInfo create{};
+	vk::instance_info create{};
 
 	create.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
@@ -86,7 +86,7 @@ vulkan::instance::instance(void)
 
 
 	// get messenger info
-	const ::VkDebugUtilsMessengerCreateInfoEXT debug_info{
+	const vk::debug_utils_messenger_info debug_info{
 		.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
 		.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
 						 | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
@@ -120,13 +120,12 @@ vulkan::instance::instance(void)
 
 
 	// create instance
-	if (::vkCreateInstance(&create, nullptr, &_instance) != VK_SUCCESS)
-		engine::fatal("failed to create vulkan instance.");
+	_instance = vk::create_instance(create);
 
 
 	#ifdef ENGINE_VL_DEBUG
 	// create debug messenger
-	auto func = reinterpret_cast<::PFN_vkCreateDebugUtilsMessengerEXT>(
+	auto func = reinterpret_cast<vk::pfn_create_debug_utils_messenger>(
 			  ::vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
 	// check error
 	if (func == nullptr || func(_instance, &debug_info, nullptr, &_messenger) != VK_SUCCESS) {
@@ -148,14 +147,14 @@ vulkan::instance::~instance(void) noexcept {
 	// validation layers
 	#if defined(ENGINE_VL_DEBUG)
 	// destroy messenger
-	auto func = reinterpret_cast<::PFN_vkDestroyDebugUtilsMessengerEXT>(
+	auto func = reinterpret_cast<vk::pfn_destroy_debug_utils_messenger>(
 			  ::vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT"));
 	// check error
 	if (func != nullptr)
 		func(_instance, _messenger, nullptr);
 	#endif
 	// destroy instance
-	::vkDestroyInstance(_instance, nullptr);
+	vk::destroy_instance(_instance);
 }
 
 
@@ -170,24 +169,15 @@ vulkan::instance::operator const ::VkInstance&(void) const noexcept {
 // -- public accessors --------------------------------------------------------
 
 /* physical devices */
-auto vulkan::instance::physical_devices(void) -> xns::vector<vulkan::physical_device> {
+auto vulkan::instance::physical_devices(void) -> vk::vector<vulkan::physical_device> {
 
 	// get shared instance
 	const auto& instance = self::shared();
 
-	::uint32_t count = 0;
+	const auto devices = vk::enumerate_physical_devices(instance);
 
-	if (::vkEnumeratePhysicalDevices(instance._instance, &count, nullptr) != VK_SUCCESS)
-		engine::fatal("failed to get number of physical devices");
-
-	xns::vector<::VkPhysicalDevice> devices{};
-	devices.resize(count);
-
-	if (::vkEnumeratePhysicalDevices(instance._instance, &count, devices.data()) != VK_SUCCESS)
-		throw engine::exception{"failed to get physical devices"};
-
-	xns::vector<vulkan::physical_device> result{};
-	result.reserve(count);
+	vk::vector<vulkan::physical_device> result{};
+	result.reserve(devices.size());
 
 	for (const auto& device : devices)
 		result.emplace_back(device);
@@ -200,44 +190,14 @@ auto vulkan::instance::physical_devices(void) -> xns::vector<vulkan::physical_de
 // -- private static methods --------------------------------------------------
 
 /* extension properties */
-auto vulkan::instance::extension_properties(void) -> std::vector<::VkExtensionProperties> {
-
-	::uint32_t count = 0;
-
-	if (::vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr) != VK_SUCCESS)
-		engine::fatal("failed to enumerate vulkan instance extensions.");
-
-	std::vector<::VkExtensionProperties> properties;
-	properties.resize(count);
-
-	if (::vkEnumerateInstanceExtensionProperties(nullptr, &count, properties.data()) != VK_SUCCESS)
-		engine::fatal("failed to enumerate vulkan instance extensions.");
-
-	for (const auto& property : properties)
-		std::cout << "extension: " << property.extensionName << std::endl;
-
-	return properties;
+auto vulkan::instance::extension_properties(void) -> vk::vector<vk::extension_properties> {
+	return vk::enumerate_instance_extension_properties();
 }
-
 
 /* layer properties */
 #if defined(ENGINE_VL_DEBUG)
-auto vulkan::instance::layer_properties(void) -> xns::vector<::VkLayerProperties> {
-
-	::uint32_t count = 0;
-
-	// get number of layers
-	if (::vkEnumerateInstanceLayerProperties(&count, nullptr) != VK_SUCCESS)
-		throw engine::exception{"failed to get number of vulkan instance layers."};
-
-	xns::vector<::VkLayerProperties> properties;
-	properties.resize(count);
-
-	// get layers
-	if (::vkEnumerateInstanceLayerProperties(&count, properties.data()) != VK_SUCCESS)
-		throw engine::exception{"failed to enumerate vulkan instance layers."};
-
-	return properties;
+auto vulkan::instance::layer_properties(void) -> vk::vector<vk::layer_properties> {
+	return vk::enumerate_instance_layer_properties();
 }
 #endif
 

@@ -30,8 +30,11 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			renderpass(void);
+			/* deleted default constructor */
+			renderpass(void) noexcept = delete;
+
+			/* logical device constructor */
+			renderpass(const vulkan::logical_device&);
 
 
 			// -- public modifiers --------------------------------------------

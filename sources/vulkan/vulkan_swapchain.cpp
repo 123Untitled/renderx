@@ -21,45 +21,45 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 
 
 	// get surface capabilities
-	auto capabilities = pdevice.capabilities(surface);
+	auto capabilities = pdevice.surface_capabilities(surface);
 	// get surface formats
-	auto formats = pdevice.formats(surface);
+	auto formats = pdevice.surface_formats(surface);
 	// get surface modes
-	auto modes = pdevice.present_modes(surface);
+	auto modes = pdevice.surface_present_modes(surface);
 	// get surface extent
 
 
 
 
-	::VkSwapchainCreateInfoKHR info{};
-	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	info.pNext = nullptr;
-	info.flags = 0;
-	info.surface = surface;
-	info.minImageCount = capabilities.min_image_count() + 1; // for triple buffering
+	const vk::swapchain_info info{
+		.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+		.pNext = nullptr,
+		.flags = 0,
+		.surface = surface,
+	//info.minImageCount = capabilities.min_image_count() + 1; // for triple buffering
 	//info.imageFormat = format.format; // not implemented
 	//info.imageColorSpace = format.colorSpace; // not implemented
 	//info.imageExtent = extent; // not implemented
-	info.imageArrayLayers = 1; // for stereoscopic 3D applications
-	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // see later for post-processing
-	/* VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing */
+		// for stereoscopic 3D applications
+		.imageArrayLayers = 1,
+		// see later for post-processing
+		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, /* VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing */
+		// not implemented !!!
+		.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+		// not implemented !!!
+		.queueFamilyIndexCount = 0,
+		// not implemented !!!
+		.pQueueFamilyIndices = nullptr,
 
 
-	// not implemented !!!
-	info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	// not implemented !!!
-	info.queueFamilyIndexCount = 0;
-	// not implemented !!!
-	info.pQueueFamilyIndices = nullptr;
+		//info.preTransform = capabilities.current_transform(); // need to read tutorial
+		.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR, // for blending with other windows
+															 //info.presentMode = mode; // not implemented
+		.clipped = VK_TRUE, // not implemented
+		.oldSwapchain = nullptr  // for resizing window, see later...
+	};
 
-
-	info.preTransform = capabilities.current_transform(); // need to read tutorial
-	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR; // for blending with other windows
-	//info.presentMode = mode; // not implemented
-	info.clipped = VK_TRUE; // not implemented
-	info.oldSwapchain = nullptr; // for resizing window, see later...
-
-	_swapchain = self::create_swapchain(device, info);
+	_swapchain = vk::create_swapchain(device, info);
 
 	::uint32_t count = 0;
 	::vkGetSwapchainImagesKHR(device, _swapchain, &count, nullptr);
@@ -93,8 +93,8 @@ auto vulkan::swapchain::acquire_next_image(const vulkan::logical_device& device,
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkSwapchainKHR conversion operator */
-vulkan::swapchain::operator const ::VkSwapchainKHR&(void) const noexcept {
+/* vk::swapchain conversion operator */
+vulkan::swapchain::operator const vk::swapchain&(void) const noexcept {
 	return _swapchain;
 }
 
@@ -105,23 +105,13 @@ vulkan::swapchain::operator const ::VkSwapchainKHR&(void) const noexcept {
 auto vulkan::swapchain::destroy(const vulkan::logical_device& device) noexcept -> void {
 	if (_swapchain == VK_NULL_HANDLE)
 		return;
-	::vkDestroySwapchainKHR(_device, _swapchain, nullptr);
-	_swapchain = VK_NULL_HANDLE;
+	vk::destroy_swapchain(device, _swapchain);
+	//_swapchain = VK_NULL_HANDLE; // already done by vk::destroy_swapchain
 }
 
 
 // -- private static methods --------------------------------------------------
 
-/* create swapchain */
-auto vulkan::swapchain::create_swapchain(const vulkan::logical_device& device,
-										 const ::VkSwapchainCreateInfoKHR& info) -> ::VkSwapchainKHR {
-	// create swapchain
-	::VkSwapchainKHR swapchain{nullptr};
-	if (::vkCreateSwapchainKHR(device, &info, nullptr, &swapchain) != VK_SUCCESS)
-		throw engine::exception{"failed to create swapchain"};
-	// return swapchain
-	return swapchain;
-}
 
 /* create swapchain info */
 auto vulkan::swapchain::create_swapchain_info(const ::VkSurfaceCapabilitiesKHR& capabilities,

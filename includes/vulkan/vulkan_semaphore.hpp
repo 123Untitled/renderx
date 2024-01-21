@@ -43,8 +43,8 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkSemaphore conversion operator */
-			operator const ::VkSemaphore&(void) const noexcept;
+			/* vk::semaphore conversion operator */
+			operator const vk::semaphore&(void) const noexcept;
 
 
 		private:
@@ -52,7 +52,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* semaphore */
-			::VkSemaphore _semaphore;
+			vk::semaphore _semaphore;
 
 	}; // class semaphore
 

@@ -5,6 +5,8 @@
 #include "vulkan_physical_device.hpp"
 #include "vulkan_surface.hpp"
 
+#include "vk_functions.hpp"
+
 // V U L K A N  N A M E S P A C E ---------------------------------------------
 
 namespace vulkan {
@@ -49,15 +51,11 @@ namespace vulkan {
 
 			/* find */
 			static auto find(const vulkan::physical_device&,
-							 const vulkan::surface&) -> ::uint32_t;
+							 const vulkan::surface&) -> vk::u32;
 
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* enumeration */
-			static auto enumerate(const vulkan::physical_device&) -> std::vector<::VkQueueFamilyProperties>;
 
 	}; // class queue_families
 
@@ -69,44 +67,3 @@ namespace vulkan {
 
 
 
-/*
-			static auto print(const std::vector<::VkQueueFamilyProperties>& families) -> void {
-
-				for (const auto& family : families) {
-
-					if (family.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-						std::cout << "graphics queue family found" << std::endl;
-					}
-
-					if (family.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-						std::cout << "compute queue family found" << std::endl;
-					}
-
-					if (family.queueFlags & VK_QUEUE_TRANSFER_BIT) {
-						std::cout << "transfer queue family found" << std::endl;
-					}
-
-					if (family.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) {
-						std::cout << "sparse binding queue family found" << std::endl;
-					}
-
-					if (family.queueFlags & VK_QUEUE_PROTECTED_BIT) {
-						std::cout << "protected queue family found" << std::endl;
-					}
-
-					if (family.queueFlags & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
-						std::cout << "video decode queue family found" << std::endl;
-					}
-
-					#ifdef VK_ENABLE_BETA_EXTENSIONS
-					if (family.queueFlags & VK_QUEUE_VIDEO_ENCODE_BIT_KHR) {
-						std::cout << "video encode queue family found" << std::endl;
-					}
-					#endif
-
-					if (family.queueFlags & VK_QUEUE_OPTICAL_FLOW_BIT_NV) {
-						std::cout << "optical flow queue family found" << std::endl;
-					}
-				}
-			}
-			*/

@@ -9,17 +9,8 @@
 #include "vulkan_queue_families.hpp"
 #include "vulkan_surface.hpp"
 
-#include "shader_library.hpp"
-
 #include "os.hpp"
 
-// -- forward declarations ----------------------------------------------------
-
-//namespace engine {
-//	/* shader library */
-//	template <xns::basic_string_literal...>
-//	class shader_library;
-//}
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
@@ -70,7 +61,7 @@ namespace vulkan {
 			// -- public conversion operators ---------------------------------
 
 			/* VkDevice conversion operator */
-			operator const ::VkDevice&(void) const noexcept;
+			operator const vk::device&(void) const noexcept;
 
 
 			// -- public methods ----------------------------------------------
@@ -82,18 +73,6 @@ namespace vulkan {
 
 
 		private:
-
-			// -- private static methods --------------------------------------
-
-			/* create device */
-			static auto create_device(const vulkan::physical_device&,
-									  const ::VkDeviceCreateInfo&) -> ::VkDevice;
-
-			/* create device info */
-			static auto create_device_info(::VkDeviceQueueCreateInfo&,
-										   ::VkPhysicalDeviceFeatures&) noexcept -> ::VkDeviceCreateInfo;
-
-
 
 			// -- private methods ---------------------------------------------
 
@@ -107,7 +86,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* vulkan device */
-			::VkDevice _device;
+			vk::device _device;
 
 			/* queue priority */
 			float _priority;

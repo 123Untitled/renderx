@@ -6,11 +6,11 @@
 
 /* default constructor */
 vulkan::surface::surface(void) noexcept
-: _surface{nullptr} {}
+: _surface{VK_NULL_HANDLE} {}
 
 /* window constructor */
 vulkan::surface::surface(glfw::window& window)
-: _surface{nullptr} {
+: _surface{VK_NULL_HANDLE} {
 
 	// create surface
 	if (::glfwCreateWindowSurface(vulkan::instance::shared(),
@@ -45,27 +45,24 @@ auto vulkan::surface::operator=(self&& other) noexcept -> self& {
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkSurfaceKHR conversion operator */
-vulkan::surface::operator const ::VkSurfaceKHR&(void) const noexcept {
+/* vk::surface conversion operator */
+vulkan::surface::operator const vk::surface&(void) const noexcept {
 	return _surface;
 }
-
-
-
 
 
 // -- private methods ---------------------------------------------------------
 
 /* free */
 auto vulkan::surface::free(void) noexcept -> void {
-	if (_surface == nullptr)
+	if (_surface == VK_NULL_HANDLE)
 		return;
 	// destroy surface
-	::vkDestroySurfaceKHR(vulkan::instance::shared(), _surface, nullptr);
+	vk::destroy_surface(vulkan::instance::shared(), _surface);
 }
 
 /* init */
 auto vulkan::surface::init(void) noexcept -> void {
-	_surface = nullptr;
+	_surface = VK_NULL_HANDLE;
 }
 

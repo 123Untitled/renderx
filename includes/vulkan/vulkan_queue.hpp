@@ -32,13 +32,13 @@ namespace vulkan {
 			queue(void) noexcept = default;
 
 			/* device and queue family index constructor */
-			queue(const vulkan::logical_device&, const ::uint32_t) noexcept;
+			queue(const vulkan::logical_device&, const vk::u32) noexcept;
 
 
 			// -- public static methods ---------------------------------------
 
 			/* create queue info */
-			static auto create_queue_info(const ::uint32_t, const float&) noexcept -> ::VkDeviceQueueCreateInfo;
+			static auto create_queue_info(const vk::u32, const float&) noexcept -> vk::device_queue_info;
 
 
 			// -- public methods ----------------------------------------------
@@ -63,7 +63,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* underlying */
-			::VkQueue _queue;
+			vk::queue _queue;
 
 	}; // class queue
 

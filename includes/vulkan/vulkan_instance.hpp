@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 
+#include "vk_typedefs.hpp"
+#include "vk_functions.hpp"
 
 #include "glfw_system.hpp"
 #include "exceptions.hpp"
@@ -76,7 +78,7 @@ namespace vulkan {
 			static auto shared(void) -> self&;
 
 			/* physical devices */
-			static auto physical_devices(void) -> xns::vector<vulkan::physical_device>;
+			static auto physical_devices(void) -> vk::vector<vulkan::physical_device>;
 
 			/* pick physical device */
 			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
@@ -93,10 +95,10 @@ namespace vulkan {
 			// -- private static methods --------------------------------------
 
 			/* extension properties */
-			static auto extension_properties(void) -> std::vector<::VkExtensionProperties>;
+			static auto extension_properties(void) -> vk::vector<::vk::extension_properties>;
 
 			/* layer properties */
-			static auto layer_properties(void) -> xns::vector<::VkLayerProperties>;
+			static auto layer_properties(void) -> vk::vector<vk::layer_properties>;
 
 
 			/* callback */
@@ -116,7 +118,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* instance */
-			::VkInstance _instance;
+			vk::instance _instance;
 
 			/* debug messenger */
 			#if defined(ENGINE_VL_DEBUG)

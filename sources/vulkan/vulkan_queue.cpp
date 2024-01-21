@@ -5,20 +5,17 @@
 
 /* device and queue family constructor */
 vulkan::queue::queue(const vulkan::logical_device& device,
-					 const ::uint32_t index) noexcept
-: _queue{nullptr} {
-
-	//::vkGetDeviceQueue(device.underlying(), index, 0, &_queue);
-}
+					 const vk::u32 index) noexcept
+: _queue{vk::get_device_queue(device, index)} {}
 
 
 // -- public static methods ---------------------------------------------------
 
 /* create queue info */
-auto vulkan::queue::create_queue_info(const ::uint32_t index,
-									  const float& priority) noexcept -> ::VkDeviceQueueCreateInfo {
+auto vulkan::queue::create_queue_info(const vk::u32 index,
+									  const float& priority) noexcept -> vk::device_queue_info {
 	// return queue info
-	return ::VkDeviceQueueCreateInfo{
+	return vk::device_queue_info{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 		.pNext = nullptr,
 		.flags = 0,
@@ -44,7 +41,7 @@ auto vulkan::queue::submit(const vulkan::semaphore* wait,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
 	};
 
-	const ::VkSubmitInfo info{
+	const vk::submit_info info{
 		// structure type
 		.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 		.pNext                = nullptr,

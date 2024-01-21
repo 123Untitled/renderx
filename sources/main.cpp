@@ -11,7 +11,6 @@
 #include "vulkan_surface.hpp"
 #include "vulkan_shader_module.hpp"
 #include "vulkan_swapchain.hpp"
-#include "vulkan_extension_properties.hpp"
 #include "vulkan_command_pool.hpp"
 #include "vulkan_command_buffer.hpp"
 
@@ -231,8 +230,8 @@ int main(void) {
 		try { // vulkan try block
 			engine::renderer renderer;
 			//renderer.launch();
-		} catch (const engine::exception& except) {
-			except.print();
+		} catch (const vulkan::exception& except) {
+			except.what();
 			return 1;
 		}
 	} catch (const xns::exception& except) {

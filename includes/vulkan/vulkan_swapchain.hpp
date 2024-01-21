@@ -69,8 +69,8 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkSwapchainKHR conversion operator */
-			operator const ::VkSwapchainKHR&(void) const noexcept;
+			/* vk::swapchain conversion operator */
+			operator const vk::swapchain&(void) const noexcept;
 
 
 			// -- public modifiers --------------------------------------------
@@ -104,7 +104,7 @@ namespace vulkan {
 			vk::swapchain _swapchain;
 
 			/* images */
-			xns::vector<vk::image> _images;
+			vk::vector<vk::image> _images;
 
 			/* format */
 			vk::format _format;

@@ -5,6 +5,9 @@
 #include "vulkan_instance.hpp"
 //#include "vulkan_physical_device.hpp"
 
+#include "vk_typedefs.hpp"
+#include "vk_functions.hpp"
+
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
@@ -57,8 +60,8 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkSurfaceKHR conversion operator */
-			operator const ::VkSurfaceKHR&() const noexcept;
+			/* vk::surface conversion operator */
+			operator const vk::surface&() const noexcept;
 
 
 
@@ -76,13 +79,16 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* surface */
-			::VkSurfaceKHR _surface;
+			vk::surface _surface;
 
 	}; // class surface
 
 } // namespace vulkan
 
 #endif // ENGINE_VULKAN_SURFACE_HPP
+
+
+
 
 
 			//// -- private methods ---------------------------------------------
