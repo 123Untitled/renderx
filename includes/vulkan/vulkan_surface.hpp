@@ -37,7 +37,7 @@ namespace vulkan {
 			surface(void) noexcept;
 
 			/* window constructor */
-			surface(const vulkan::shared<vk::instance>&,
+			surface(const vk::shared<vk::instance>&,
 					glfw::window&);
 
 			/* copy constructor */
@@ -64,9 +64,9 @@ namespace vulkan {
 			/* vk::surface conversion operator */
 			operator const vk::surface&() const noexcept;
 
-			/* vulkan::managed<vk::surface> conversion operator */
-			operator const vulkan::managed<vk::surface,
-										 vulkan::shared<vk::instance>>&() const noexcept;
+			/* vk::managed<vk::surface> conversion operator */
+			operator const vk::managed<vk::surface,
+									   vk::shared<vk::instance>>&() const noexcept;
 
 
 		private:
@@ -74,8 +74,8 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* surface */
-			vulkan::managed<vk::surface,
-							vulkan::shared<vk::instance>> _surface;
+			vk::managed<vk::surface,
+						vk::shared<vk::instance>> _surface;
 
 	}; // class surface
 

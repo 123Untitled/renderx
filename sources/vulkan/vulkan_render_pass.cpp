@@ -1,12 +1,15 @@
 #include "vulkan_render_pass.hpp"
 
 
-
 // -- public lifecycle --------------------------------------------------------
 
+/* default constructor */
+vulkan::render_pass::render_pass(void) noexcept
+: _render_pass{} {}
+
 /* logical device constructor */
-vulkan::render_pass::render_pass(const vulkan::logical_device& device)
-: _render_pass{VK_NULL_HANDLE} {
+vulkan::render_pass::render_pass(const vk::shared<vk::device>& device)
+: _render_pass{} {
 
 	const vk::attachment_description attachment{
 		.flags          = 0,
@@ -41,15 +44,14 @@ vulkan::render_pass::render_pass(const vulkan::logical_device& device)
 		.pPreserveAttachments    = nullptr
 	};
 
-
 	const vk::subpass_dependency dependency{
 		.srcSubpass      = VK_SUBPASS_EXTERNAL,
 		.dstSubpass      = 0,
 
 		.srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask   = 0,
-
 		.dstStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+
+		.srcAccessMask   = 0,
 		.dstAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 
 		.dependencyFlags = 0
@@ -69,27 +71,43 @@ vulkan::render_pass::render_pass(const vulkan::logical_device& device)
 	};
 
 
-	// create renderpass
-	_render_pass = vk::create_render_pass(device, info);
+	// create renderpass and make managed
+	_render_pass = vk::make_managed(vk::create(device, info),
+									device);
+
 }
 
 
+/* copy constructor */
+vulkan::render_pass::render_pass(const self& other) noexcept
+: _render_pass{other._render_pass} {
+}
 
-// -- public modifiers --------------------------------------------------------
+/* move constructor */
+vulkan::render_pass::render_pass(self&& other) noexcept
+: _render_pass{xns::move(other._render_pass)} {
+}
 
-/* destroy */
-auto vulkan::render_pass::destroy(const vulkan::logical_device& device) noexcept -> void {
-	if (_render_pass == VK_NULL_HANDLE)
-		return;
-	::vkDestroyRenderPass(device, _render_pass, nullptr);
-	_render_pass = VK_NULL_HANDLE;
+
+// -- public assignment operators ---------------------------------------------
+
+/* copy assignment operator */
+auto vulkan::render_pass::operator=(const self& other) noexcept -> self& {
+	_render_pass = other._render_pass;
+	return *this;
+}
+
+/* move assignment operator */
+auto vulkan::render_pass::operator=(self&& other) noexcept -> self& {
+	_render_pass = xns::move(other._render_pass);
+	return *this;
 }
 
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkRenderPass conversion operator */
-vulkan::render_pass::operator ::VkRenderPass(void) const noexcept {
+/* vk::render_pass conversion operator */
+vulkan::render_pass::operator const vk::render_pass&(void) const noexcept {
 	return _render_pass;
 }
 

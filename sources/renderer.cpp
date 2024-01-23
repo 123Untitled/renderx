@@ -14,30 +14,15 @@ engine::renderer::renderer(void)
 	_surface{_instance, _window},
 	_pdevice{_instance.pick_physical_device(_surface)},
 	_ldevice{_pdevice, _surface},
-	_swapchain{},
-	_command_pool{},
-	_image_available{},
-	_render_finished{},
-	//_command_pool{*_ldevice, 0}, /* queue family index */
-	//_image_available{*_ldevice},
-	//_render_finished{*_ldevice},
-	_shaders{} {
-
-		/*
-	_pdevice{vulkan::instance::pick_physical_device(_surface)},
-	_ldevice{xns::make_shared<vulkan::logical_device>(_pdevice, _surface)},
 	_swapchain{_pdevice, _ldevice, _surface},
-	_command_pool{},
-	_image_available{},
-	_render_finished{},
-	//_command_pool{*_ldevice, 0},
-	//_image_available{*_ldevice},
-	//_render_finished{*_ldevice},
-	_shaders{} {
-		*/
+	_command_pool{_ldevice, 0}, /* queue family index */
+	_image_available{_ldevice},
+	_render_finished{_ldevice},
+	_shaders{},
+	_render_pass{_ldevice} {
 
-
-
+	// load shaders
+	//_shaders.load_vertex<"basic">(*_ldevice);
 
 	// create triangle
 	vertices.emplace_back(-1.0f, -1.0f, 0.0f,
@@ -46,36 +31,8 @@ engine::renderer::renderer(void)
 						   0.0f,  1.0f, 0.0f, 1.0f);
 	vertices.emplace_back( 1.0f, -1.0f, 0.0f,
 						   0.0f,  0.0f, 1.0f, 1.0f);
-
-
-
 }
 
-/* initialize */
-auto engine::renderer::initialize(void) -> void {
-
-	// create logical device
-	//_ldevice = xns::make_shared<vulkan::logical_device>(_pdevice, _surface);
-	// create swapchain
-	//_swapchain = vulkan::swapchain{_pdevice, _ldevice, _surface};
-	// create command pool
-	//_command_pool = vulkan::command_pool{*_ldevice, 0}; /* queue family index */
-
-	// create semaphores
-	//_image_available = vulkan::semaphore{*_ldevice};
-	//_render_finished = vulkan::semaphore{*_ldevice};
-
-
-	// load shaders
-	//_shaders.load_vertex<"basic">(*_ldevice);
-
-
-}
-
-/* destructor */
-engine::renderer::~renderer(void) noexcept {
-	//this->destroy(*_ldevice);
-}
 
 
 // -- public methods ----------------------------------------------------------
@@ -84,6 +41,7 @@ engine::renderer::~renderer(void) noexcept {
 auto engine::renderer::launch(void) -> void {
 
 	//this->initialize();
+	std::cout << _ldevice.count() << std::endl;
 
 	return;
 	while (_window.should_close() == false) {
@@ -92,6 +50,9 @@ auto engine::renderer::launch(void) -> void {
 		//_events.poll();
 		//draw_frame();
 	}
+
+	// wait for logical device to be idle
+	_ldevice.wait_idle();
 }
 
 /* draw frame */
@@ -99,40 +60,26 @@ auto engine::renderer::draw_frame(void) -> void {
 
 	xns::u32 image_index = 0;
 
-	auto cb = _command_pool.new_command_buffer(_ldevice);
+	//auto cb = _command_pool.new_command_buffer(_ldevice);
 
-	cb.bind_graphics_pipeline(pipeline);
+	//cb.bind_pipeline<"graphics">(pipeline);
 
 	vulkan::queue queue{};
 
 	// here error not means program must stop
-	if (_swapchain.acquire_next_image(_ldevice, _image_available, image_index) == false)
+	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
 		return;
 
+	vk::semaphore wait[] = {_image_available};
+	vk::semaphore signal[] = {_render_finished};
 
 	// maybe send img_index to queue.submit
 	/* command_buffers[image_index] */
-	queue.submit(&_image_available, 1,
-				 &_render_finished, 1,
-				 nullptr, /* command_buffers */ 0);
-
+	queue.submit(wait, signal, VK_NULL_HANDLE, /* command_buffers */ 0);
 
 	// here error not means program must stop
-	if (queue.present(_swapchain, image_index, &_render_finished, 1) == false)
+	if (queue.present(_swapchain, image_index, signal) == false)
 		return;
-}
-
-
-// -- public modifiers --------------------------------------------------------
-
-/* destroy */
-auto engine::renderer::destroy(const vulkan::logical_device& device) noexcept -> void {
-	// wait for logical device to be idle
-	//_ldevice->wait_idle();
-	//_shaders.destroy(*_ldevice);
-	//_render_finished.destroy(*_ldevice);
-	//_image_available.destroy(*_ldevice);
-	//_command_pool.destroy(*_ldevice);
 }
 
 

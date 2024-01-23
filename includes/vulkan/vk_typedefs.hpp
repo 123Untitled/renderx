@@ -115,6 +115,14 @@ namespace vk {
 	using submit_info                        = ::VkSubmitInfo;
 
 
+
+
+	/* present info */
+	using present_info                       = ::VkPresentInfoKHR;
+
+
+
+
 	// -- command pool --------------------------------------------------------
 
 	/* command pool */

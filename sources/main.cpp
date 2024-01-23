@@ -24,68 +24,15 @@
 
 #include <xns>
 
+#include "vulkan_library.hpp"
 
 #include "vulkan_resource.hpp"
 
+#include "renderer.hpp"
 
-				//vulkan::command_pool pool{_ldevice};
-				//auto buffers = pool.new_buffers(_ldevice, 2);
-				//for (auto& buffer : buffers) {
-				//	buffer.destroy(_ldevice, pool);
-				//}
-				//pool.destroy(_ldevice);
+#include "vulkan_pipeline.hpp"
 
 
-				//// get formats
-				//const auto& formats = xns::get<xns::vector<::VkSurfaceFormatKHR>>(choice);
-				//// get modes
-				//const auto& modes = xns::get<xns::vector<::VkPresentModeKHR>>(choice);
-				//// get capabilities
-				//const auto& capabilities = xns::get<vulkan::surface_capabilities>(choice);
-				//
-				//
-				//::VkSurfaceFormatKHR format = [](const auto& formats) {
-				//	for (const auto& f : formats) {
-				//		if (f.format == VK_FORMAT_B8G8R8A8_SRGB
-				//				&& f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-				//			return f;
-				//		}
-				//	}
-				//	return formats[0];
-				//}(formats);
-				//
-				//::VkPresentModeKHR mode = [](const auto& modes) {
-				//	for (const auto& m : modes) {
-				//		if (m == VK_PRESENT_MODE_MAILBOX_KHR) {
-				//			return m;
-				//		}
-				//	}
-				//	return VK_PRESENT_MODE_FIFO_KHR;
-				//}(modes);
-				//
-				//
-				//::VkExtent2D extent = [](const auto& capabilities, auto& window) -> ::VkExtent2D {
-				//	if (capabilities.current_extent().width != UINT32_MAX) {
-				//		return capabilities.current_extent();
-				//	}
-				//	int width, height;
-				//	::glfwGetFramebufferSize(window.underlying(), &width, &height);
-				//	::VkExtent2D extent = {
-				//		.width  = xns::clamp(static_cast<uint32_t>(width),  capabilities.min_image_extent().width,
-				//				capabilities.max_image_extent().width),
-				//		.height = xns::clamp(static_cast<uint32_t>(height), capabilities.min_image_extent().height,
-				//				capabilities.max_image_extent().height),
-				//	};
-				//	return extent;
-				//
-				//}(capabilities, _window);
-				//
-				//
-				//_swapchain = vulkan::swapchain{_ldevice, _surface, capabilities, format, mode, extent};
-				//
-
-
-#include "vulkan_library.hpp"
 
 
 void make_lib(void) {
@@ -392,7 +339,15 @@ auto create_pipeline(void) {
 		.pDynamicStates = dynamic_state,
 	};
 
-	const vk::pipeline_layout_info layout_info{
+
+	vk::shared<vk::device> device{};
+
+
+	vk::managed<vk::pipeline_layout,
+				vk::shared<vk::device>> layout =
+
+		vk::make_managed(vk::create(device,
+									vk::pipeline_layout_info{
 		// type of struct
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		// pointer to next struct
@@ -407,108 +362,59 @@ auto create_pipeline(void) {
 		.pushConstantRangeCount = 0,
 		// push constant ranges
 		.pPushConstantRanges = nullptr,
-	};
+	}), device);
 
 
-	vk::pipeline_layout layout{};
-
-	::vkCreatePipelineLayout(VK_NULL_HANDLE /* device */,
-							&layout_info, nullptr, &layout);
-
-
-	//vk::render_pass render_pass{};
-
-	const vk::graphics_pipeline_info info{
-		// type of struct
-		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		// pointer to next struct
-		.pNext = nullptr,
-		// flags
-		.flags = 0,
-		// shader stage count
-		.stageCount = 2,
-		// shader stages
-		.pStages = shader_stages,
-		// vertex input state
-		.pVertexInputState = &vertex_input,
-		// input assembly state
-		.pInputAssemblyState = &input_assembly_info,
-		// tesselation state
-		.pTessellationState = &tesselation,
-		// viewport state
-		.pViewportState = &viewport_info,
-		// rasterization state
-		.pRasterizationState = &rasterizer,
-		// multisample state
-		.pMultisampleState = &multisampling,
-		// depth stencil state
-		.pDepthStencilState = &depth_stencil,
-		// color blend state
-		.pColorBlendState = &color_blend,
-		// dynamic state
-		.pDynamicState = &dynamic,
-		// pipeline layout
-		.layout = layout,
-		// render pass
-		.renderPass = VK_NULL_HANDLE,
-		// subpass
-		.subpass = 0,
-		// base pipeline handle
-		.basePipelineHandle = VK_NULL_HANDLE,
-		// base pipeline index
-		.basePipelineIndex = -1,
-	};
-
-	vk::pipeline pipeline{};
-
-	::vkCreateGraphicsPipelines(VK_NULL_HANDLE /* device */,
-								VK_NULL_HANDLE /* pipeline cache */,
-								1, &info, nullptr, &pipeline);
-
-	vk::pipeline_bind_point bind_point{VK_PIPELINE_BIND_POINT_GRAPHICS};
+	vulkan::pipeline pipeline{device,
+							  shader_stages,
+							  vertex_input,
+							  input_assembly_info,
+							  tesselation,
+							  viewport_info,
+							  rasterizer,
+							  multisampling,
+							  depth_stencil,
+							  color_blend,
+							  dynamic,
+							  layout,
+							  vk::render_pass{}};
 
 
-	::vkDestroyPipeline(VK_NULL_HANDLE /* device */, pipeline, nullptr);
+
+
+
+
+
+	//vk::pipeline pipeline{};
+	//::vkCreateGraphicsPipelines(VK_NULL_HANDLE /* device */,
+	//							VK_NULL_HANDLE /* pipeline cache */,
+	//							1,             /* pipeline count */
+	//							&info, nullptr, &pipeline);
+	//vk::pipeline_bind_point bind_point{VK_PIPELINE_BIND_POINT_GRAPHICS};
+	//::vkDestroyPipeline(VK_NULL_HANDLE /* device */, pipeline, nullptr);
 
 
 
 }
 
 
-void unamed(void) {
 
-
-
-
-
-
-	// depth and stencil testing (not used yet)
-
-
-	// color blending
-
-
-}
-
-#include "renderer.hpp"
 
 int main(void) {
 
-	//try {
-	//	try {
-	//	vulkan::instance::shared();
+	vk::managed2<vk::pipeline_layout,
+				 vk::shared<vk::device>> layout{};
+
+			vk::managed<vk::command_buffer,
+						vk::shared<vk::device>,
+						vk::managed<vk::command_pool,
+									vk::shared<vk::device>>> _buffer;
+
+	//vk::managed2<vk::command_buffer,
+	//			 vk::managed2<vk::command_pool,
+	//						  vk::shared<vk::device>>> 
 	//
-	//} catch (const vulkan::exception& except) {
-	//	except.what();
-	//	return 1;
-	//}
-	//} catch (const xns::exception& except) {
-	//	xns::print(except.get_message());
-	//	return 1;
-	//}
-	//
-	//
-	//return 0;
+	//							  buffer{};
 
 
 	//auto module = vulkan::make_shared(device, info);

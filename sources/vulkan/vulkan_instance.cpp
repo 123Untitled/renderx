@@ -123,11 +123,11 @@ vulkan::instance::instance(void)
 
 
 	// create shared instance
-	_instance = vulkan::make_shared(create);
+	_instance = vk::make_shared(create);
 
 	// create debug messenger
 	#ifdef ENGINE_VL_DEBUG
-	_messenger = vulkan::make_managed(vk::create(_instance, debug_info),
+	_messenger = vk::make_managed(vk::create(_instance, debug_info),
 									  _instance);
 	#endif
 
@@ -142,8 +142,8 @@ vulkan::instance::operator const vk::instance&(void) const noexcept {
 	return _instance;
 }
 
-/* vulkan::shared<vk::instance> conversion operator */
-vulkan::instance::operator const vulkan::shared<vk::instance>&(void) const noexcept {
+/* vk::shared<vk::instance> conversion operator */
+vulkan::instance::operator const vk::shared<vk::instance>&(void) const noexcept {
 	return _instance;
 }
 

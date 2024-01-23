@@ -34,16 +34,6 @@ namespace vk {
 		::vkDestroyFramebuffer(device, framebuffer, nullptr);
 	}
 
-	/* destroy renderpass */
-	inline auto destroy(const vk::device& device,
-						const vk::render_pass& renderpass) noexcept -> void {
-		::vkDestroyRenderPass(device, renderpass, nullptr);
-	};
-
-	inline auto destroy(const vk::render_pass& renderpass,
-						const vk::device& device) noexcept -> void {
-		::vkDestroyRenderPass(device, renderpass, nullptr);
-	};
 
 
 	/* destroy surface */
@@ -70,17 +60,22 @@ namespace vk {
 	}
 
 
+	// -- semaphore -----------------------------------------------------------
+
 	/* destroy semaphore */
 	inline auto destroy(const vk::device& device,
 						const vk::semaphore& semaphore) noexcept -> void {
 		::vkDestroySemaphore(device, semaphore, nullptr);
 	}
 
+	/* destroy semaphore */
 	inline auto destroy(const vk::semaphore& semaphore,
 						const vk::device& device) noexcept -> void {
 		::vkDestroySemaphore(device, semaphore, nullptr);
 	}
 
+
+	// -- image view ----------------------------------------------------------
 
 	/* destroy image view */
 	inline auto destroy(const vk::device& device,
@@ -94,17 +89,52 @@ namespace vk {
 	}
 
 
+
+	// -- shader module -------------------------------------------------------
+
 	/* destroy shader module */
 	inline auto destroy(const vk::device& device,
 						const vk::shader_module& module) noexcept -> void {
 		::vkDestroyShaderModule(device, module, nullptr);
 	}
 
+	/* destroy shader module */
 	inline auto destroy(const vk::shader_module& module,
 						const vk::device& device) noexcept -> void {
 		::vkDestroyShaderModule(device, module, nullptr);
 	}
 
+
+	// -- pipeline ------------------------------------------------------------
+
+	/* destroy pipeline */
+	inline auto destroy(const vk::device& device,
+						const vk::pipeline& pipeline) noexcept -> void {
+		::vkDestroyPipeline(device, pipeline, nullptr);
+	}
+
+	/* destroy pipeline */
+	inline auto destroy(const vk::pipeline& pipeline,
+						const vk::device& device) noexcept -> void {
+		::vkDestroyPipeline(device, pipeline, nullptr);
+	}
+
+	// -- pipeline layout -----------------------------------------------------
+
+	/* destroy pipeline layout */
+	inline auto destroy(const vk::device& device,
+						const vk::pipeline_layout& layout) noexcept -> void {
+		::vkDestroyPipelineLayout(device, layout, nullptr);
+	}
+
+	/* destroy pipeline layout */
+	inline auto destroy(const vk::pipeline_layout& layout,
+						const vk::device& device) noexcept -> void {
+		::vkDestroyPipelineLayout(device, layout, nullptr);
+	}
+
+
+	// -- command buffer ------------------------------------------------------
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::device& device,
@@ -113,30 +143,35 @@ namespace vk {
 		::vkFreeCommandBuffers(device, pool, 1, &buffer);
 	}
 
+	/* destroy command buffer */
 	inline auto destroy(const vk::device& device,
 						const vk::command_buffer& buffer,
 						const vk::command_pool& pool) noexcept -> void {
 		::vkFreeCommandBuffers(device, pool, 1, &buffer);
 	}
 
+	/* destroy command buffer */
 	inline auto destroy(const vk::command_pool& pool,
 						const vk::device& device,
 						const vk::command_buffer& buffer) noexcept -> void {
 		::vkFreeCommandBuffers(device, pool, 1, &buffer);
 	}
 
+	/* destroy command buffer */
 	inline auto destroy(const vk::command_pool& pool,
 						const vk::command_buffer& buffer,
 						const vk::device& device) noexcept -> void {
 		::vkFreeCommandBuffers(device, pool, 1, &buffer);
 	}
 
+	/* destroy command buffer */
 	inline auto destroy(const vk::command_buffer& buffer,
 						const vk::device& device,
 						const vk::command_pool& pool) noexcept -> void {
 		::vkFreeCommandBuffers(device, pool, 1, &buffer);
 	}
 
+	/* destroy command buffer */
 	inline auto destroy(const vk::command_buffer& buffer,
 						const vk::command_pool& pool,
 						const vk::device& device) noexcept -> void {
@@ -144,18 +179,34 @@ namespace vk {
 	}
 
 
+	// -- command pool --------------------------------------------------------
+
 	/* destroy command pool */
 	inline auto destroy(const vk::device& device,
 						const vk::command_pool& pool) noexcept -> void {
 		::vkDestroyCommandPool(device, pool, nullptr);
 	}
 
+	/* destroy command pool */
 	inline auto destroy(const vk::command_pool& pool,
 						const vk::device& device) noexcept -> void {
 		::vkDestroyCommandPool(device, pool, nullptr);
 	}
 
 
+	// -- render pass ---------------------------------------------------------
+
+	/* destroy renderpass */
+	inline auto destroy(const vk::device& device,
+						const vk::render_pass& renderpass) noexcept -> void {
+		::vkDestroyRenderPass(device, renderpass, nullptr);
+	};
+
+	/* destroy renderpass */
+	inline auto destroy(const vk::render_pass& renderpass,
+						const vk::device& device) noexcept -> void {
+		::vkDestroyRenderPass(device, renderpass, nullptr);
+	};
 
 
 	// -- destroy debug utils messenger ---------------------------------------

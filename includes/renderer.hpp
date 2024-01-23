@@ -38,8 +38,23 @@ namespace engine {
 			/* default constructor */
 			renderer(void);
 
+			/* deleted copy constructor */
+			renderer(const self&) = delete;
+
+			/* deleted move constructor */
+			renderer(self&&) noexcept = delete;
+
 			/* destructor */
-			~renderer(void) noexcept;
+			~renderer(void) noexcept = default;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const self&) -> self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(self&&) noexcept -> self& = delete;
 
 
 			// -- public methods ----------------------------------------------
@@ -47,25 +62,11 @@ namespace engine {
 			/* draw frame */
 			auto draw_frame(void) -> void;
 
-
 			/* launch */
 			auto launch(void) -> void;
 
 
-			// -- public modifiers --------------------------------------------
-
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
-
-
-
 		private:
-
-			// -- private methods ---------------------------------------------
-
-			/* initialize */
-			auto initialize(void) -> void;
-
 
 			// -- private members ---------------------------------------------
 
@@ -102,6 +103,8 @@ namespace engine {
 			/* shader library */
 			shader_library _shaders;
 
+			/* render pass */
+			vulkan::render_pass _render_pass;
 
 
 	}; // class renderer

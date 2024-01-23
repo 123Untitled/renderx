@@ -1,13 +1,11 @@
 #ifndef ENGINE_VULKAN_RENDERPASS_HPP
 #define ENGINE_VULKAN_RENDERPASS_HPP
 
-
-
 // vulkan headers
 #include <vulkan/vulkan.h>
 
-#include "exceptions.hpp"
-#include "vulkan_logical_device.hpp"
+#include "vk_typedefs.hpp"
+#include "vulkan_resource.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -30,31 +28,41 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted default constructor */
-			render_pass(void) noexcept = delete;
+			/* default constructor */
+			render_pass(void) noexcept;
 
 			/* logical device constructor */
-			render_pass(const vulkan::logical_device&);
+			render_pass(const vk::shared<vk::device>&);
+
+			/* copy constructor */
+			render_pass(const self&) noexcept;
+
+			/* move constructor */
+			render_pass(self&&) noexcept;
 
 
-			// -- public modifiers --------------------------------------------
+			// -- public assignment operators ---------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
+
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkRenderPass conversion operator */
-			operator ::VkRenderPass(void) const noexcept;
+			/* vk::render_pass conversion operator */
+			operator const vk::render_pass&(void) const noexcept;
 
 
 		private:
 
 			// -- private members ---------------------------------------------
 
-			/* renderpass */
-			vk::render_pass _render_pass;
+			/* render pass */
+			vk::managed<vk::render_pass,
+						vk::shared<vk::device>> _render_pass;
 
 
 	}; // class renderpass

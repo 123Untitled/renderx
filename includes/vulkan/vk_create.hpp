@@ -82,6 +82,64 @@ namespace vk {
 	}
 
 
+	// -- create command pool -------------------------------------------------
+
+	/* create command pool */
+	inline auto create(const vk::device& device,
+					   const vk::command_pool_info& info) -> vk::command_pool {
+		vk::command_pool pool{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateCommandPool,
+					"failed to create command pool",
+					device, &info, nullptr, &pool);
+		return pool;
+	}
+
+	/* create command pool */
+	inline auto create(const vk::command_pool_info& info,
+					   const vk::device& device) -> vk::command_pool {
+		return vk::create(device, info);
+	}
+
+
+	// -- command buffer ------------------------------------------------------
+
+	/* create command buffer */
+	inline auto create(const vk::device& device,
+					   const vk::command_buffer_info& info) -> vk::command_buffer {
+		vk::command_buffer buffer{VK_NULL_HANDLE};
+		vk::try_execute(::vkAllocateCommandBuffers,
+					"failed to allocate command buffer",
+					device, &info, &buffer);
+		return buffer;
+	}
+
+	/* create command buffer */
+	inline auto create(const vk::command_buffer_info& info,
+					   const vk::device& device) -> vk::command_buffer {
+		return vk::create(device, info);
+	}
+
+
+
+	// -- render pass ---------------------------------------------------------
+
+	/* create render pass */
+	inline auto create(const vk::device& device,
+					   const vk::render_pass_info& info) -> vk::render_pass {
+		vk::render_pass render_pass{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateRenderPass,
+					"failed to create render pass",
+					device, &info, nullptr, &render_pass);
+		return render_pass;
+	}
+
+	/* create render pass */
+	inline auto create(const vk::render_pass_info& info,
+					   const vk::device& device) -> vk::render_pass {
+		return vk::create(device, info);
+	}
+
+
 	// -- create shader module ------------------------------------------------
 
 	/* create shader module */
@@ -99,6 +157,85 @@ namespace vk {
 					   const vk::device& device) -> vk::shader_module {
 		return vk::create(device, info);
 	}
+
+
+	// -- pipeline ------------------------------------------------------------
+
+	/* create pipeline */
+	inline auto create(const vk::device& device,
+					   const vk::pipeline_info& info) -> vk::pipeline {
+		vk::pipeline pipeline{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateGraphicsPipelines,
+					"failed to create pipeline",
+					device, VK_NULL_HANDLE,  // pipeline cache
+					static_cast<vk::u32>(1), // pipeline count
+					&info, nullptr, &pipeline);
+		return pipeline;
+	}
+
+	/* create pipeline */
+	inline auto create(const vk::pipeline_info& info,
+					   const vk::device& device) -> vk::pipeline {
+		return vk::create(device, info);
+	}
+
+
+	// -- pipeline layout -----------------------------------------------------
+
+	/* create pipeline layout */
+	inline auto create(const vk::device& device,
+					   const vk::pipeline_layout_info& info) -> vk::pipeline_layout {
+		vk::pipeline_layout layout{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreatePipelineLayout,
+					"failed to create pipeline layout",
+					device, &info, nullptr, &layout);
+		return layout;
+	}
+
+	/* create pipeline layout */
+	inline auto create(const vk::pipeline_layout_info& info,
+					   const vk::device& device) -> vk::pipeline_layout {
+		return vk::create(device, info);
+	}
+
+
+	// -- create semaphore ----------------------------------------------------
+
+	/* create semaphore */
+	inline auto create(const vk::device& device,
+					   const vk::semaphore_info& info) -> vk::semaphore {
+		vk::semaphore semaphore{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateSemaphore,
+					"failed to create semaphore",
+					device, &info, nullptr, &semaphore);
+		return semaphore;
+	}
+
+	/* create semaphore */
+	inline auto create(const vk::semaphore_info& info,
+					   const vk::device& device) -> vk::semaphore {
+		return vk::create(device, info);
+	}
+
+
+	// -- image view ----------------------------------------------------------
+
+	/* create image view */
+	inline auto create(const vk::device& device,
+					   const vk::image_view_info& info) -> vk::image_view {
+		vk::image_view view{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateImageView,
+					"failed to create image view",
+					device, &info, nullptr, &view);
+		return view;
+	}
+
+	/* create image view */
+	inline auto create(const vk::image_view_info& info,
+					   const vk::device& device) -> vk::image_view {
+		return vk::create(device, info);
+	}
+
 
 
 	// -- create debug utils messenger ----------------------------------------

@@ -4,7 +4,6 @@
 
 // vulkan headers
 #include <vulkan/vulkan.h>
-#include "exceptions.hpp"
 
 #include "vulkan_logical_device.hpp"
 
@@ -38,13 +37,17 @@ namespace vulkan {
 			command_pool(void) noexcept;
 
 			/* logical device and queue family index constructor */
-			command_pool(const vulkan::logical_device&, const vk::u32);
+			command_pool(const vk::shared<vk::device>&,
+						 const vk::u32);
 
 			/* copy constructor */
 			command_pool(const self&) noexcept;
 
 			/* move constructor */
 			command_pool(self&&) noexcept;
+
+			/* destructor */
+			~command_pool(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -58,17 +61,14 @@ namespace vulkan {
 
 			// -- public methods ----------------------------------------------
 
-			/* new command buffer */
-			auto new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
+			/* new primary command buffer */
+			auto new_primary_command_buffer(const vk::u32) -> void;
+
+			/* new secondary command buffer */
+			auto new_secondary_command_buffer(const vk::u32) -> void;
 
 			/* new buffers */
 			auto new_buffers(const vulkan::logical_device&, const vk::u32) const -> xns::vector<vulkan::command_buffer>;
-
-
-			// -- public modifiers --------------------------------------------
-
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
 
 
 			// -- public conversion operators ---------------------------------
@@ -82,7 +82,16 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pool */
-			vk::command_pool _pool;
+			vk::managed<vk::command_pool,
+						vk::shared<vk::device>> _pool;
+
+			/* command buffers */
+			vk::command_buffer _buffers;
+
+			/* size */
+			vk::u32 _size;
+
+
 
 	}; // class command_pool
 

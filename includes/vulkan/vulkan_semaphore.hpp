@@ -32,13 +32,25 @@ namespace vulkan {
 			semaphore(void) noexcept;
 
 			/* logical device constructor */
-			semaphore(const vulkan::logical_device&);
+			semaphore(const vk::shared<vk::device>&);
+
+			/* copy constructor */
+			semaphore(const self&) noexcept;
+
+			/* move constructor */
+			semaphore(self&&) noexcept;
+
+			/* destructor */
+			~semaphore(void) noexcept = default;
 
 
-			// -- public modifiers --------------------------------------------
+			// -- public assignment operators ---------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
+
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public conversion operators ---------------------------------
@@ -52,14 +64,15 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* semaphore */
-			vk::semaphore _semaphore;
+			vk::managed<vk::semaphore,
+						vk::shared<vk::device>> _semaphore;
 
 	}; // class semaphore
 
 
 	/* assert semaphore size matches */
-	static_assert(sizeof(vulkan::semaphore) == sizeof(::VkSemaphore),
-			"): SEMAPHORE SIZE MISMATCH! :(");
+	//static_assert(sizeof(vulkan::semaphore) == sizeof(::VkSemaphore),
+			//"): SEMAPHORE SIZE MISMATCH! :(");
 
 
 

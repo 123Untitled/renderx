@@ -71,8 +71,8 @@ namespace vulkan {
 			/* vk::instance conversion operator */
 			operator const vk::instance&(void) const noexcept;
 
-			/* vulkan::shared<vk::instance> conversion operator */
-			operator const vulkan::shared<vk::instance>&(void) const noexcept;
+			/* vk::shared<vk::instance> conversion operator */
+			operator const vk::shared<vk::instance>&(void) const noexcept;
 
 
 			// -- public accessors --------------------------------------------
@@ -123,12 +123,12 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* instance */
-			vulkan::shared<vk::instance> _instance;
+			vk::shared<vk::instance> _instance;
 
 			/* debug messenger */
 			#if defined(ENGINE_VL_DEBUG)
-			vulkan::managed<vk::debug_utils_messenger,
-							vulkan::shared<vk::instance>> _messenger;
+			vk::managed<vk::debug_utils_messenger,
+						vk::shared<vk::instance>> _messenger;
 			#endif
 
 	};

@@ -347,46 +347,9 @@ namespace vk {
 
 
 
-	// -- command pool --------------------------------------------------------
-
-	/* create command pool */
-	inline auto create_command_pool(const vk::device& device, const vk::command_pool_info& info) -> vk::command_pool {
-		vk::command_pool pool{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateCommandPool,
-						"failed to create command pool",
-						device, &info, nullptr, &pool);
-		return pool;
-	}
-
-	/* destroy command pool */
-	inline auto destroy_command_pool(const vk::device& device, vk::command_pool& pool) noexcept -> void {
-		if (pool == VK_NULL_HANDLE)
-			return;
-		::vkDestroyCommandPool(device, pool, nullptr);
-		pool = VK_NULL_HANDLE;
-	}
 
 
 	// -- command buffer ------------------------------------------------------
-
-	/* create command buffer */
-	inline auto create_command_buffer(const vk::device& device, const vk::command_buffer_info& info) -> vk::command_buffer {
-		vk::command_buffer buffer{VK_NULL_HANDLE};
-		vk::try_execute(::vkAllocateCommandBuffers,
-						"failed to create command buffer",
-						device, &info, &buffer);
-		return buffer;
-	}
-
-	/* destroy command buffer */
-	inline auto destroy_command_buffer(const vk::device& device,
-									   const vk::command_pool& pool,
-									   vk::command_buffer& buffer) noexcept -> void {
-		if (buffer == VK_NULL_HANDLE)
-			return;
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
-		buffer = VK_NULL_HANDLE;
-	}
 
 	/* begin command buffer */
 	inline auto begin_command_buffer(const vk::command_buffer& buffer,
@@ -413,25 +376,6 @@ namespace vk {
 	}
 
 
-	// -- render pass ---------------------------------------------------------
-
-	/* create render_pass */
-	inline auto create_render_pass(const vk::device& device, const vk::render_pass_info& info) -> vk::render_pass {
-		vk::render_pass render_pass{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateRenderPass,
-						"failed to create renderpass",
-						device, &info, nullptr, &render_pass);
-		return render_pass;
-	}
-
-	/* destroy renderpass */
-	//inline auto destroy_renderpass(const vk::device& device, vk::renderpass& renderpass) noexcept -> void {
-	//	if (renderpass == VK_NULL_HANDLE)
-	//		return;
-	//	::vkDestroyRenderPass(device, renderpass, nullptr);
-	//	renderpass = VK_NULL_HANDLE;
-	//}
-
 	/* cmd begin render pass */
 	inline auto cmd_begin_render_pass(const vk::command_buffer& buffer,
 									  const vk::render_pass_begin_info& info,
@@ -449,50 +393,14 @@ namespace vk {
 
 	/* cmd bind pipeline */
 	inline auto cmd_bind_pipeline(const vk::command_buffer& buffer,
-								  const vk::pipeline_bind_point& point,
-								  const vk::pipeline& pipeline) noexcept -> void {
+								  const vk::pipeline& pipeline,
+								  const vk::pipeline_bind_point& point) noexcept -> void {
 		::vkCmdBindPipeline(buffer, point, pipeline);
 	}
 
 
-	// -- semaphore -----------------------------------------------------------
-
-	/* create semaphore */
-	inline auto create_semaphore(const vk::device& device, const vk::semaphore_info& info) -> vk::semaphore {
-		vk::semaphore semaphore{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateSemaphore,
-						"failed to create semaphore",
-						device, &info, nullptr, &semaphore);
-		return semaphore;
-	}
-
-	/* destroy semaphore */
-	inline auto destroy_semaphore(const vk::device& device, vk::semaphore& semaphore) noexcept -> void {
-		if (semaphore == VK_NULL_HANDLE)
-			return;
-		::vkDestroySemaphore(device, semaphore, nullptr);
-		semaphore = VK_NULL_HANDLE;
-	}
 
 
-	// -- image view ----------------------------------------------------------
-
-	/* create image view */
-	inline auto create_image_view(const vk::device& device, const vk::image_view_info& info) -> vk::image_view {
-		vk::image_view view{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateImageView,
-						"failed to create image view",
-						device, &info, nullptr, &view);
-		return view;
-	}
-
-	/* destroy image view */
-	inline auto destroy_image_view(const vk::device& device, vk::image_view& view) noexcept -> void {
-		if (view == VK_NULL_HANDLE)
-			return;
-		::vkDestroyImageView(device, view, nullptr);
-		view = VK_NULL_HANDLE;
-	}
 
 
 	// -- shader module -------------------------------------------------------

@@ -5,24 +5,14 @@
 
 /* default constructor */
 vulkan::swapchain::swapchain(void) noexcept
-: _swapchain{VK_NULL_HANDLE},
-  _device{},
-  _images{},
-  _views{},
-  _format{},
-  _extent{} {
+: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
 }
 
 /* logical device and surface constructor */
 vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
-							 const vulkan::shared_device& device,
+							 const vk::shared<vk::device>& device,
 							 const vulkan::surface& surface)
-: _swapchain{VK_NULL_HANDLE},
-  _device{device},
-  _images{},
-  _views{},
-  _format{},
-  _extent{} {
+: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
 
 
 	// pick surface format
@@ -42,7 +32,7 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 		count = capabilities.maxImageCount;
 
 	// create swapchain with info
-	_swapchain = vk::create_swapchain(*_device, vk::swapchain_info{
+	auto swapchain = vk::create(device, vk::swapchain_info{
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		.pNext                 = nullptr,
 		.flags                 = 0,
@@ -73,44 +63,32 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 		.oldSwapchain = nullptr  // for resizing window, see later...
 	});
 
+	// make managed swapchain
+	_swapchain = vk::make_managed(swapchain, device);
+
 	// get swapchain images
-	_images = vk::get_swapchain_images(*_device, _swapchain);
+	_images = vk::get_swapchain_images(device, _swapchain);
 
-	for (const auto& image : _images)
-		_views.emplace_back(*_device, image, _format.format);
+	//for (const auto& image : _images)
+	//	_views.emplace_back(device, image, _format.format);
 
-}
-
-/* move constructor */
-vulkan::swapchain::swapchain(self&& other) noexcept
-: _swapchain{other._swapchain},
-  _device{xns::move(other._device)},
-  _images{xns::move(other._images)},
-  _views{xns::move(other._views)},
-  _format{other._format},
-  _extent{other._extent} {
 }
 
 /* destructor */
 vulkan::swapchain::~swapchain(void) noexcept {
-	this->free();
+	// wait for logical device to be idle
+	//_device->wait_idle();
+	// loop over image views
+	//for (auto& view : _views)
+		// destroy image view
+		//view.destroy(*_device);
 }
 
 
 // -- public assignment operators ---------------------------------------------
 
-/* move assignment operator */
-auto vulkan::swapchain::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	_swapchain   = other._swapchain;
-	_device      = xns::move(other._device);
-	_images      = xns::move(other._images);
-	_views       = xns::move(other._views);
-	_format      = other._format;
-	_extent      = other._extent;
-	return *this;
-}
+// THIS CLASS NEED TO BE HANDLE MOVE OR COPY (IMAGES, IMAGE VIEWS, ETC...)
+
 
 
 
@@ -132,11 +110,12 @@ auto vulkan::swapchain::image_views_data(void) const noexcept -> const vk::image
 }
 
 /* acquire next image */
-auto vulkan::swapchain::acquire_next_image(const vulkan::logical_device& device,
-										   const vulkan::semaphore& semaphore,
+auto vulkan::swapchain::acquire_next_image(const vulkan::semaphore& semaphore,
 										   xns::u32& img_index) const noexcept -> bool {
+
 	// get image index
-	if (::vkAcquireNextImageKHR(device, _swapchain,
+	if (::vkAcquireNextImageKHR(_swapchain.dependency<vk::shared<vk::device>>(),
+								_swapchain,
 								UINT64_MAX /* timeout */,
 								semaphore,
 								nullptr /* fence */,
@@ -163,8 +142,7 @@ vulkan::swapchain::operator const vk::swapchain&(void) const noexcept {
 auto vulkan::swapchain::recreate(const vulkan::physical_device& pdevice,
 								 const vulkan::surface& surface) -> void {
 
-	// destroy
-	this->free();
+	// destroy !!!
 
 	// pick surface format
 	_format         = self::pick_surface_format(pdevice.surface_formats(surface));
@@ -232,20 +210,3 @@ auto vulkan::swapchain::pick_extent(const vk::surface_capabilities& capabilities
 	return extent;
 }
 
-
-
-// -- private methods ---------------------------------------------------------
-
-/* free */
-auto vulkan::swapchain::free(void) noexcept -> void {
-	if (_swapchain == VK_NULL_HANDLE)
-		return;
-	// wait for logical device to be idle
-	_device->wait_idle();
-	// loop over image views
-	for (auto& view : _views)
-		// destroy image view
-		view.destroy(*_device);
-	// destroy swapchain
-	vk::destroy_swapchain(*_device, _swapchain);
-}

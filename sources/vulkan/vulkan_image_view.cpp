@@ -8,7 +8,7 @@ vulkan::image_view::image_view(const vulkan::logical_device& device,
 							   const vk::image& image,
 							   const vk::format& format)
 // create image view
-: _view{vk::create_image_view(device, vk::image_view_info{
+: _view{vk::create(device, vk::image_view_info{
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.pNext      = nullptr,
 		.flags      = 0,
@@ -66,6 +66,6 @@ vulkan::image_view::operator const vk::image_view&() const noexcept {
 
 /* destroy */
 auto vulkan::image_view::destroy(const vulkan::logical_device& device) noexcept -> void {
-	vk::destroy_image_view(device, _view);
+	vk::destroy(device, _view);
 }
 

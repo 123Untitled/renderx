@@ -121,10 +121,10 @@ override VULKAN_LIB := $(VULKAN_DIR)/lib
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-override CXX := clang++
+override CXX := /opt/homebrew/Cellar/llvm/17.0.6_1/bin/clang++
 
 # compiler standard
-override STD := -std=c++2a
+override STD := -std=c++23
 
 # compiler optimization
 override OPT := -O0

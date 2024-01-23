@@ -5,13 +5,13 @@
 
 /* default constructor */
 vulkan::command_buffer::command_buffer(void) noexcept
-: _buffer{VK_NULL_HANDLE} {}
+: _buffer{} {}
 
 /* logical device and command pool constructor */
 vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
 									   const vulkan::command_pool& pool)
 // create command buffer
-: _buffer{vk::create_command_buffer(device, vk::command_buffer_info{
+/*: _buffer{vk::create(device, vk::command_buffer_info{
 		// type of structure
 		.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 		// pointer to next structure
@@ -23,6 +23,8 @@ vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
 		// number of command buffers to allocate
 		.commandBufferCount = 1
 	})} {
+	*/
+{
 
     // VK_COMMAND_BUFFER_LEVEL_PRIMARY
 	// peut être envoyé à une queue pour y être exécuté
@@ -35,8 +37,8 @@ vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
 
 /* move constructor */
 vulkan::command_buffer::command_buffer(self&& other) noexcept
-: _buffer{other._buffer} {
-	other._buffer = VK_NULL_HANDLE;
+/*: _buffer{other._buffer}*/ {
+	//other._buffer = VK_NULL_HANDLE;
 }
 
 
@@ -47,7 +49,7 @@ auto vulkan::command_buffer::operator=(self&& other) noexcept -> self& {
 	if (this == &other)
 		return *this;
 	_buffer = other._buffer;
-	other._buffer = VK_NULL_HANDLE;
+	//other._buffer = VK_NULL_HANDLE;
 	return *this;
 }
 
@@ -57,7 +59,7 @@ auto vulkan::command_buffer::operator=(self&& other) noexcept -> self& {
 /* destroy */
 auto vulkan::command_buffer::destroy(const vulkan::logical_device& device,
 									 const vulkan::command_pool& pool) noexcept -> void {
-	vk::destroy_command_buffer(device, pool, _buffer);
+	//vk::destroy_command_buffer(device, pool, _buffer);
 }
 
 
@@ -121,32 +123,6 @@ auto vulkan::command_buffer::renderpass_begin(const vulkan::swapchain& swapchain
 	}, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-
-/* bind compute pipeline */
-auto vulkan::command_buffer::bind_compute_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-	vk::cmd_bind_pipeline(_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
-}
-
-/* bind graphics pipeline */
-auto vulkan::command_buffer::bind_graphics_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-	vk::cmd_bind_pipeline(_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-}
-
-/* bind execution graph amdx pipeline */
-#ifdef VK_ENABLE_BETA_EXTENSIONS
-auto vulkan::command_buffer::bind_execution_graph_amdx_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-	vk::cmd_bind_pipeline(_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline); }
-#endif
-
-/* bind ray tracing pipeline */
-auto vulkan::command_buffer::bind_ray_tracing_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-	vk::cmd_bind_pipeline(_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline);
-}
-
-/* bind subpass shading huawei pipeline */
-auto vulkan::command_buffer::bind_subpass_shading_huawei_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-	vk::cmd_bind_pipeline(_buffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline);
-}
 
 /* draw */
 auto vulkan::command_buffer::draw(const vk::u32 vertex_count,

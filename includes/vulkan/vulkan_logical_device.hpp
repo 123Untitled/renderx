@@ -60,14 +60,25 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkDevice conversion operator */
+			/* vk::device conversion operator */
 			operator const vk::device&(void) const noexcept;
+
+			/* vk::shared<vk::device> conversion operator */
+			operator const vk::shared<vk::device>&(void) const noexcept;
 
 
 			// -- public methods ----------------------------------------------
 
 			/* wait idle */
 			auto wait_idle(void) const -> void;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* count */
+			inline auto count(void) const noexcept -> vk::u32 {
+				return _device.count();
+			}
 
 
 
@@ -77,17 +88,12 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* vulkan device */
-			vulkan::shared<vk::device> _device;
+			vk::shared<vk::device> _device;
 
 			/* queue priority */
 			float _priority;
 
 	}; // class device
-
-
-	/* shared device type */
-	using shared_device = xns::shared_ptr<vulkan::logical_device>;
-
 
 } // namespace vulkan
 

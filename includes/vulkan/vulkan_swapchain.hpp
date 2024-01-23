@@ -38,14 +38,14 @@ namespace vulkan {
 
 			/* logical device and surface constructor */
 			swapchain(const vulkan::physical_device&,
-					  const vulkan::shared_device&,
+					  const vk::shared<vk::device>&,
 					  const vulkan::surface&);
 
 			/* deleted copy constructor */
 			swapchain(const self&) = delete;
 
-			/* move constructor */
-			swapchain(self&&) noexcept;
+			/* deleted move constructor */
+			swapchain(self&&) noexcept = delete;
 
 			/* destructor */
 			~swapchain(void) noexcept;
@@ -56,8 +56,8 @@ namespace vulkan {
 			/* deleted copy assignment operator */
 			auto operator=(const self&) -> self& = delete;
 
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			/* deleted move assignment operator */
+			auto operator=(self&&) noexcept -> self& = delete;
 
 
 			// -- public accessors --------------------------------------------
@@ -73,8 +73,7 @@ namespace vulkan {
 
 
 			/* acquire next image */
-			auto acquire_next_image(const vulkan::logical_device&,
-									const vulkan::semaphore&,
+			auto acquire_next_image(const vulkan::semaphore&,
 									xns::u32&) const noexcept -> bool;
 
 
@@ -105,21 +104,11 @@ namespace vulkan {
 			static auto pick_extent(const vk::surface_capabilities&) noexcept -> vk::extent2D;
 
 
-
-			// -- private methods ---------------------------------------------
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-
-
 			// -- private members ---------------------------------------------
 
 			/* swapchain */
-			vk::swapchain _swapchain;
-
-			/* logical device */
-			vulkan::shared_device _device;
+			vk::managed<vk::swapchain,
+						vk::shared<vk::device>> _swapchain;
 
 			/* images */
 			vk::vector<vk::image> _images;

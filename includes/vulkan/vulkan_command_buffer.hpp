@@ -71,22 +71,27 @@ namespace vulkan {
 
 			// -- bind pipeline -----------------------------------------------
 
-			/* bind compute pipeline */
-			auto bind_compute_pipeline(const vk::pipeline&) const noexcept -> void;
-
-			/* bind graphics pipeline */
-			auto bind_graphics_pipeline(const vk::pipeline&) const noexcept -> void;
-
-			/* bind execution graph amdx pipeline */
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-			auto bind_execution_graph_amdx_pipeline(const vk::pipeline&) const noexcept -> void;
-			#endif
-
-			/* bind ray tracing pipeline */
-			auto bind_ray_tracing_pipeline(const vk::pipeline&) const noexcept -> void;
-
-			/* bind subpass shading huawei pipeline */
-			auto bind_subpass_shading_huawei_pipeline(const vk::pipeline&) const noexcept -> void;
+			/* bind pipeline */
+			template <xns::basic_string_literal bp>
+			auto bind_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
+				// graphics pipeline
+				if      constexpr (bp == "graphics")
+					vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+				// compute pipeline
+				else if constexpr (bp == "compute")
+					vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
+				// amdx pipeline
+				#ifdef VK_ENABLE_BETA_EXTENSIONS
+				else if constexpr (bp == "amdx")
+					vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR);
+				#endif
+				// ray tracing pipeline
+				else if constexpr (bp == "ray")
+					vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR);
+				// subpass shading pipeline
+				else if constexpr (bp == "huawei")
+					vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_SUBPASS_SHADING_HUAWEI);
+			}
 
 
 
@@ -111,7 +116,7 @@ namespace vulkan {
 			// -- friends -----------------------------------------------------
 
 			/* command_pool::new_command_buffer as friend */
-			friend auto vulkan::command_pool::new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
+			//friend auto vulkan::command_pool::new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
 
 			/* command_pool::new_buffers as friend */
 			friend auto vulkan::command_pool::new_buffers(const vulkan::logical_device&, const ::uint32_t) const -> xns::vector<vulkan::command_buffer>;
@@ -150,13 +155,18 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::command_buffer _buffer;
+			vk::managed<vk::command_buffer,
+						vk::shared<vk::device>,
+						vk::managed<vk::command_pool,
+									vk::shared<vk::device>>> _buffer;
+
+			//vk::command_buffer _buffer;
 
 	};
 
 	/* assert command buffer size matches */
-	static_assert(sizeof(vk::command_buffer) == sizeof(vulkan::command_buffer),
-				"): COMMAND_BUFFER SIZE MISMATCH! :(");
+	//static_assert(sizeof(vk::command_buffer) == sizeof(vulkan::command_buffer),
+				//"): COMMAND_BUFFER SIZE MISMATCH! :(");
 
 } // namespace vulkan
 

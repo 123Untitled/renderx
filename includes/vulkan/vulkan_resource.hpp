@@ -2,19 +2,14 @@
 #define ENGINE_VULKAN_RESOURCE_HPP
 
 
-
-
-#include "vk_typedefs.hpp"
-#include "vk_functions.hpp"
 #include "vk_create.hpp"
 #include "vk_destroy.hpp"
+
 #include <xns>
-#include <utility>
-#include <tuple>
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V K  N A M E S P A C E --------------------------------------------------
 
-namespace vulkan {
+namespace vk {
 
 	// -- forward declarations ------------------------------------------------
 
@@ -29,7 +24,7 @@ namespace vulkan {
 
 	/* is shared */
 	template <typename T>
-	concept is_shared = xns::is_same<T, vulkan::shared<typename T::value_type>>;
+	concept is_shared = xns::is_same<T, vk::shared<typename T::value_type>>;
 
 
 	// -- details -------------------------------------------------------------
@@ -44,7 +39,7 @@ namespace vulkan {
 
 		/* is managed true */
 		template <typename... U>
-		struct is_managed<vulkan::managed<U...>> final {
+		struct is_managed<vk::managed<U...>> final {
 			static constexpr bool value = true;
 		};
 	}
@@ -54,7 +49,7 @@ namespace vulkan {
 
 
 	template <typename T>
-	concept is_resource = vulkan::is_shared<T> || vulkan::is_managed<T>;
+	concept is_resource = vk::is_shared<T> || vk::is_managed<T>;
 
 
 
@@ -74,7 +69,7 @@ namespace vulkan {
 
 		/* make shared as friend */
 		template <typename... A>
-		friend auto make_shared(A&&...) -> vulkan::shared<vk::create_return<A...>>;
+		friend auto make_shared(A&&...) -> vk::shared<vk::create_return<A...>>;
 
 
 		public:
@@ -82,7 +77,7 @@ namespace vulkan {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::shared<T>;
+			using self = vk::shared<T>;
 
 			/* value type */
 			using value_type = T;
@@ -152,6 +147,14 @@ namespace vulkan {
 			}
 
 
+			// -- public accessors --------------------------------------------
+
+			/* count */
+			inline auto count(void) const noexcept -> vk::u32 {
+				return _count != nullptr ? *_count : 0;
+			}
+
+
 		private:
 
 			// -- private lifecycle -------------------------------------------
@@ -203,12 +206,10 @@ namespace vulkan {
 
 	/* make shared */
 	template <typename... A>
-	inline auto make_shared(A&&... args) -> vulkan::shared<vk::create_return<A...>> {
+	inline auto make_shared(A&&... args) -> vk::shared<vk::create_return<A...>> {
 		// create shared pointer
 		return {vk::create(xns::forward<A>(args)...), new vk::u32{1}};
 	}
-
-
 
 
 
@@ -225,7 +226,7 @@ namespace vulkan {
 			"[vulkan::managed] Managed resources must have at least one dependency");
 
 		/* assert that parameter types are resources */
-		static_assert((vulkan::is_resource<A> && ...),
+		static_assert((vk::is_resource<A> && ...),
 			"[vulkan::managed] Dependencies must be vulkan resources (shared or managed)");
 
 		/* assert that type and dependencies are destroyable */
@@ -237,7 +238,7 @@ namespace vulkan {
 
 		/* make managed as friend */
 		template <typename U, typename... B>
-		friend auto make_managed(U&&, B&&...) -> vulkan::managed<xns::remove_cvr<U>,
+		friend auto make_managed(U&&, B&&...) -> vk::managed<xns::remove_cvr<U>,
 																 xns::remove_cvr<B>...>;
 
 
@@ -246,7 +247,7 @@ namespace vulkan {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::managed<T, A...>;
+			using self = vk::managed<T, A...>;
 
 			/* value type */
 			using value_type = T;
@@ -324,6 +325,21 @@ namespace vulkan {
 			}
 
 
+			// -- public accessors --------------------------------------------
+
+			/* dependencies by index */
+			template <decltype(tuple_size) I>
+			inline auto dependency(void) const noexcept -> const xns::indexed_element<I, tuple_type>& {
+				return xns::get<I>(_dependencies);
+			}
+
+			/* dependencies by type */
+			template <typename U>
+			inline auto dependency(void) const noexcept -> const U& {
+				return xns::get<U>(_dependencies);
+			}
+
+
 		private:
 
 			// -- private lifecycle -------------------------------------------
@@ -390,12 +406,13 @@ namespace vulkan {
 
 	/* make managed */
 	template <typename T, typename... A>
-	inline auto make_managed(T&& value, A&&... dependencies) -> vulkan::managed<xns::remove_cvr<T>,
-																				xns::remove_cvr<A>...> {
+	inline auto make_managed(T&& value, A&&... dependencies) -> vk::managed<xns::remove_cvr<T>,
+																			xns::remove_cvr<A>...> {
 
 		return {xns::forward<T>(value),
 				xns::forward<A>(dependencies)...};
 	}
+
 	//	using V =
 	//		//xns::remove_cvr<
 	//		xns::type_at<0, A...>
@@ -414,7 +431,190 @@ namespace vulkan {
 	//}
 
 
+	// -- M A N A G E D -------------------------------------------------------
 
+	template <typename T, typename D>
+	class managed2 final {
+
+
+		// -- assertions ------------------------------------------------------
+
+		/* assert that parameter types are resources */
+		static_assert((vk::is_resource<D>),
+			"[vulkan::managed] Dependency must be vulkan ressource (shared or managed)");
+
+		/* assert that type and dependencies are destroyable */
+		static_assert(vk::is_destroyable<typename D::value_type, T>,
+			"[vulkan::managed] Template parameters must be destructible with vulkan destroy functions");
+
+
+		// -- friends ---------------------------------------------------------
+
+		/* make managed as friend */
+		template <typename U, typename B>
+		friend auto make_managed2(U&&, B&&) -> vk::managed<xns::remove_cvr<U>,
+														   xns::remove_cvr<B>>;
+
+
+		public:
+
+			// -- public types ------------------------------------------------
+
+			/* self type */
+			using self = vk::managed2<T, D>;
+
+			/* value type */
+			using value_type = T;
+
+			/* dependency type */
+			using dependency_type = D;
+
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			inline managed2(void) noexcept
+			: _value{VK_NULL_HANDLE}, _count{nullptr}, _dependency{} {
+			}
+
+			/* copy constructor */
+			inline managed2(const self& other) noexcept
+			: _value{other._value}, _count{other._count}, _dependency{other._dependency} {
+				this->increment();
+			}
+
+			/* move constructor */
+			inline managed2(self&& other) noexcept
+			: _value{other._value}, _count{other._count}, _dependency{xns::move(other._dependency)} {
+				other.init();
+			}
+
+			/* destructor */
+			inline ~managed2(void) noexcept {
+				this->free();
+			}
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* copy assignment operator */
+			inline auto operator=(const self& other) noexcept -> self& {
+				// check if same instance
+				if (this == &other)
+					return *this;
+				// clean up
+				this->free();
+				// copy value and dependencies
+				_value      = other._value;
+				_count      = other._count;
+				_dependency = other._dependency;
+				this->increment();
+				return *this;
+			}
+
+			/* move assignment operator */
+			inline auto operator=(self&& other) noexcept -> self& {
+				// check if same instance
+				if (this == &other)
+					return *this;
+				// clean up
+				this->free();
+				// move value and dependencies
+				_value      = other._value;
+				_count      = other._count;
+				_dependency = xns::move(other._dependency);
+				other.init();
+				return *this;
+			}
+
+
+			// -- public conversion operators ---------------------------------
+
+			/* value conversion operator */
+			inline operator const value_type&(void) const noexcept {
+				return _value;
+			}
+
+
+			// -- public accessors --------------------------------------------
+
+			/* dependency */
+			inline auto dependency(void) const noexcept -> const dependency_type& {
+				return _dependency;
+			}
+
+
+		private:
+
+			// -- private lifecycle -------------------------------------------
+
+			/* value and dependencies constructor */
+			template <typename U, typename V>
+			inline managed2(U&& value, V&& dependency) noexcept
+			: _value{xns::forward<U>(value)}, _count{_value != VK_NULL_HANDLE ?
+											  new vk::u32{1} : nullptr},
+			  _dependency{xns::forward<V>(dependency)} {
+			}
+
+
+			// -- private methods ---------------------------------------------
+
+			/* free */
+			auto free(void) noexcept -> void {
+				if (_value == VK_NULL_HANDLE)
+					return;
+				if (--(*_count) > 0)
+					return;
+
+				if constexpr (vk::is_managed<dependency_type>)
+					vk::destroy(_value, _dependency._value, _dependency._dependency);
+				else
+					vk::destroy(_value, _dependency);
+
+				delete _count;
+			}
+
+			/* init */
+			inline auto init(void) noexcept -> void {
+				_value = VK_NULL_HANDLE;
+				_count = nullptr;
+				// dependency is initialized when he is moved
+			}
+
+			/* increment */
+			inline auto increment(void) noexcept -> void {
+				if (_value == VK_NULL_HANDLE)
+					return;
+				++(*_count);
+			}
+
+
+
+			// -- private members ---------------------------------------------
+
+			/* value */
+			value_type _value;
+
+			/* reference count */
+			vk::u32* _count;
+
+			/* dependency */
+			dependency_type _dependency;
+
+
+	};	// resource
+
+
+	// -- friends functions ---------------------------------------------------
+
+	/* make managed */
+	template <typename T, typename D>
+	inline auto make_managed2(T&& value, D&& dependency) -> vk::managed<xns::remove_cvr<T>,
+																		xns::remove_cvr<D>> {
+
+		return {xns::forward<T>(value),
+				xns::forward<D>(dependency)};
+	}
 
 
 

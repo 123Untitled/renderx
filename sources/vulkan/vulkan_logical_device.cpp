@@ -33,7 +33,7 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 	};
 
 	// create device
-	_device = vulkan::make_shared(pdevice, vk::device_info{
+	_device = vk::make_shared(pdevice, vk::device_info{
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = nullptr,
 		.flags                   = 0,
@@ -79,8 +79,13 @@ auto vulkan::logical_device::operator=(self&& other) noexcept -> self& {
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkDevice conversion operator */
+/* vk::device conversion operator */
 vulkan::logical_device::operator const vk::device&(void) const noexcept {
+	return _device;
+}
+
+/* vk::shared<vk::device> conversion operator */
+vulkan::logical_device::operator const vk::shared<vk::device>&(void) const noexcept {
 	return _device;
 }
 
