@@ -6,12 +6,12 @@
 
 /* default constructor */
 vulkan::logical_device::logical_device(void) noexcept
-: _device{nullptr}, _priority{1.0f} {}
+: _device{}, _priority{1.0f} {}
 
 /* physical device and surface constructor */
 vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 									   const vulkan::surface& surface)
-: _device{nullptr}, _priority{1.0f} {
+: _device{}, _priority{1.0f} {
 
 	// get queue family index
 	const auto index = vulkan::queue_families::find(pdevice, surface);
@@ -32,8 +32,8 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 		#endif
 	};
 
-	// create device info
-	const vk::device_info info{
+	// create device
+	_device = vulkan::make_shared(pdevice, vk::device_info{
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.pNext                   = nullptr,
 		.flags                   = 0,
@@ -41,37 +41,38 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 		.pQueueCreateInfos       = &queue_info,
 		.enabledLayerCount       = 0,
 		.ppEnabledLayerNames     = nullptr,
-		.enabledExtensionCount   = static_cast<::uint32_t>(extensions.size()),
+		.enabledExtensionCount   = static_cast<vk::u32>(extensions.size()),
 		.ppEnabledExtensionNames = extensions.data(),
 		.pEnabledFeatures        = &features
-	};
+	});
 
-	// create device
-	_device = vk::create_device(pdevice, info);
 }
+
+/* copy constructor */
+vulkan::logical_device::logical_device(const self& other) noexcept
+: _device{other._device}, _priority{other._priority} {}
 
 /* move constructor */
 vulkan::logical_device::logical_device(self&& other) noexcept
-: _device{other._device}, _priority{other._priority} {
-	other.init();
-}
-
-/* destructor */
-vulkan::logical_device::~logical_device(void) noexcept {
-	free();
+: _device{xns::move(other._device)}, _priority{other._priority} {
+	other._priority = 1.0f;
 }
 
 
 // -- public assignment operators ---------------------------------------------
 
+/* copy assignment operator */
+auto vulkan::logical_device::operator=(const self& other) noexcept -> self& {
+	_device = other._device;
+	_priority = other._priority;
+	return *this;
+}
+
 /* move assignment operator */
 auto vulkan::logical_device::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	free();
-	  _device = other._device;
+	_device = xns::move(other._device);
 	_priority = other._priority;
-	other.init();
+	other._priority = 1.0f;
 	return *this;
 }
 
@@ -91,20 +92,4 @@ auto vulkan::logical_device::wait_idle(void) const -> void {
 	vk::device_wait_idle(_device);
 }
 
-
-
-// -- private methods ---------------------------------------------------------
-
-/* free */
-auto vulkan::logical_device::free(void) noexcept -> void {
-	if (_device == nullptr)
-		return;
-	vk::destroy_device(_device);
-}
-
-/* init */
-auto vulkan::logical_device::init(void) noexcept -> void {
-	  _device = nullptr;
-	_priority = 1.0f;
-}
 

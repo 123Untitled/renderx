@@ -34,17 +34,35 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* logical device constructor */
-			command_pool(const vulkan::logical_device&);
+			/* default constructor */
+			command_pool(void) noexcept;
+
+			/* logical device and queue family index constructor */
+			command_pool(const vulkan::logical_device&, const vk::u32);
+
+			/* copy constructor */
+			command_pool(const self&) noexcept;
+
+			/* move constructor */
+			command_pool(self&&) noexcept;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
+
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public methods ----------------------------------------------
 
-			/* new buffer */
-			auto new_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
+			/* new command buffer */
+			auto new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
 
 			/* new buffers */
-			auto new_buffers(const vulkan::logical_device&, const ::uint32_t) const -> xns::vector<vulkan::command_buffer>;
+			auto new_buffers(const vulkan::logical_device&, const vk::u32) const -> xns::vector<vulkan::command_buffer>;
 
 
 			// -- public modifiers --------------------------------------------
@@ -55,8 +73,8 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkCommandPool conversion operator */
-			operator ::VkCommandPool(void) const noexcept;
+			/* vk::command_pool conversion operator */
+			operator const vk::command_pool&(void) const noexcept;
 
 
 		private:
@@ -64,7 +82,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pool */
-			::VkCommandPool _pool;
+			vk::command_pool _pool;
 
 	}; // class command_pool
 

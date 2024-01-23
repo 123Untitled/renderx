@@ -28,66 +28,48 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			image_view(const vulkan::logical_device&, ::VkImage&, ::VkFormat&);
+			image_view(const vulkan::logical_device&,
+					   const vk::image&,
+					   const vk::format&);
 
-			/* deleted copy constructor */
-			image_view(const self&) = delete;
+			/* copy constructor */
+			image_view(const self&) noexcept;
 
 			/* move constructor */
 			image_view(self&&) noexcept;
 
 			/* destructor */
-			~image_view(void) noexcept;
+			~image_view(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
 
 			/* move assignment operator */
 			auto operator=(self&&) noexcept -> self&;
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* underlying */
-			auto underlying(void) noexcept -> ::VkImageView&;
+			/* vk::image_view conversion operator */
+			operator const vk::image_view&() const noexcept;
 
-			/* const underlying */
-			auto underlying(void) const noexcept -> const ::VkImageView&;
+
+			// -- public modifiers --------------------------------------------
+
+			/* destroy */
+			auto destroy(const vulkan::logical_device&) noexcept -> void;
 
 
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* create image view */
-			static auto create_image_view(const vulkan::logical_device&,
-										  const ::VkImageViewCreateInfo&) -> ::VkImageView;
-
-			/* create image view info */
-			static auto create_image_view_info(::VkImage&,
-											  ::VkFormat&) noexcept -> ::VkImageViewCreateInfo;
-
-			
-			// -- private methods ---------------------------------------------
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-			/* init */
-			auto init(void) noexcept -> void;
-
-
 			// -- private members ---------------------------------------------
 
 			/* view */
-			::VkImageView _view;
-
-			/* device */
-			::VkDevice _device;
+			vk::image_view _view;
 
 	}; // class image_view
 

@@ -30,7 +30,7 @@ namespace vulkan {
 
 			/* msg and result constructor */
 			template <decltype(sizeof(0)) N>
-			constexpr exception(const char (&msg)[N], const vk::result result) noexcept
+			constexpr exception(const char (&msg)[N], const vk::result result = VkResult::VK_ERROR_UNKNOWN) noexcept
 			: _message{msg}, _size{N}, _result{result} {}
 
 			/* deleted copy constructor */

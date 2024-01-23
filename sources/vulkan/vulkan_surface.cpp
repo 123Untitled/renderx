@@ -6,39 +6,46 @@
 
 /* default constructor */
 vulkan::surface::surface(void) noexcept
-: _surface{VK_NULL_HANDLE} {}
+: _surface{} {}
 
-/* window constructor */
-vulkan::surface::surface(glfw::window& window)
-: _surface{VK_NULL_HANDLE} {
+/* instance and window constructor */
+vulkan::surface::surface(const vulkan::shared<vk::instance>& instance,
+						 glfw::window& window)
+: _surface{} {
+
+	vk::surface surface;
 
 	// create surface
-	if (::glfwCreateWindowSurface(vulkan::instance::shared(),
-								 window.underlying(), nullptr, &_surface) != VK_SUCCESS)
+	if (::glfwCreateWindowSurface(instance,
+								 window.underlying(), nullptr, &surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
+
+
+	_surface = vulkan::make_managed(surface, instance);
+}
+
+/* copy constructor */
+vulkan::surface::surface(const self& other) noexcept
+: _surface{other._surface} {
 }
 
 /* move constructor */
 vulkan::surface::surface(self&& other) noexcept
-: _surface{other._surface} {
-	other.init();
-}
-
-/* destructor */
-vulkan::surface::~surface(void) noexcept {
-	free();
+: _surface{xns::move(other._surface)} {
 }
 
 
 // -- public assignment operators ---------------------------------------------
 
+/* copy assignment operator */
+auto vulkan::surface::operator=(const self& other) noexcept -> self& {
+	_surface = other._surface;
+	return *this;
+}
+
 /* move assignment operator */
 auto vulkan::surface::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	free();
-	 _surface = other._surface;
-	other.init();
+	_surface = xns::move(other._surface);
 	return *this;
 }
 
@@ -50,19 +57,9 @@ vulkan::surface::operator const vk::surface&(void) const noexcept {
 	return _surface;
 }
 
-
-// -- private methods ---------------------------------------------------------
-
-/* free */
-auto vulkan::surface::free(void) noexcept -> void {
-	if (_surface == VK_NULL_HANDLE)
-		return;
-	// destroy surface
-	vk::destroy_surface(vulkan::instance::shared(), _surface);
-}
-
-/* init */
-auto vulkan::surface::init(void) noexcept -> void {
-	_surface = VK_NULL_HANDLE;
+/* vulkan::managed<vk::surface> conversion operator */
+vulkan::surface::operator const vulkan::managed<vk::surface,
+											   vulkan::shared<vk::instance>>&() const noexcept {
+	return _surface;
 }
 

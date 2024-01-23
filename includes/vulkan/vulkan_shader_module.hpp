@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 
+#include "vk_typedefs.hpp"
+#include "vk_functions.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -33,17 +35,17 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted default constructor */
-			shader_module(void) = delete;
+			/* default constructor */
+			shader_module(void) noexcept;
 
 			/* logical device and path constructor */
 			shader_module(const vulkan::logical_device&, const std::string&);
 
-			/* deleted copy constructor */
-			shader_module(const self&) = default;
+			/* copy constructor */
+			shader_module(const self&) noexcept;
 
-			/* deleted move constructor */
-			shader_module(self&&) noexcept = default;
+			/* move constructor */
+			shader_module(self&&) noexcept;
 
 			/* destructor */
 			~shader_module(void) noexcept = default;
@@ -51,17 +53,17 @@ namespace vulkan {
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = default;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
 
-			/* deleted move assignment operator */
-			auto operator=(self&&) noexcept -> self& = default;
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkShaderModule conversion operator */
-			operator ::VkShaderModule(void) noexcept;
+			/* Vk::shader_module conversion operator */
+			operator const vk::shader_module&(void) const noexcept;
 
 
 			// -- public modifiers --------------------------------------------
@@ -72,21 +74,10 @@ namespace vulkan {
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* create shader module */
-			static auto create_shader_module(const vulkan::logical_device&,
-											 const ::VkShaderModuleCreateInfo&,
-											 ::VkShaderModule&) noexcept -> ::VkResult;
-
-			/* create shader module info */
-			static auto create_shader_module_info(const std::vector<char>&) noexcept -> ::VkShaderModuleCreateInfo;
-
-
 			// -- private members ---------------------------------------------
 
 			/* shader module */
-			::VkShaderModule _module;
+			vk::shader_module _module;
 
 	}; // class shader_module
 

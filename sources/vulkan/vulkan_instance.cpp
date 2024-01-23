@@ -6,10 +6,10 @@
 // -- public static methods ---------------------------------------------------
 
 /* shared */
-auto vulkan::instance::shared(void) -> self& {
-	static self instance{};
-	return instance;
-}
+//auto vulkan::instance::shared(void) -> self& {
+//	static self instance{};
+//	return instance;
+//}
 
 /* pick physical device */
 auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> vulkan::physical_device {
@@ -41,16 +41,20 @@ auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> v
 }
 
 
-// -- private lifecycle -------------------------------------------------------
+// -- public lifecycle --------------------------------------------------------
 
 /* default constructor (debug) */
 #if defined(ENGINE_VL_DEBUG)
 vulkan::instance::instance(void)
-: _instance{VK_NULL_HANDLE}, _messenger{VK_NULL_HANDLE} {
+//: _instance{VK_NULL_HANDLE}, _messenger{VK_NULL_HANDLE} {
+: _instance{}, _messenger{} {
+//: _messenger{}, _instance{} {
+//: _instance{}, _messenger{VK_NULL_HANDLE} {
 #else
 /* default constructor */
 vulkan::instance::instance(void)
-: _instance{VK_NULL_HANDLE} {
+: _instance{} {
+//: _instance{VK_NULL_HANDLE} {
 #endif
 
 	// create application info
@@ -58,9 +62,9 @@ vulkan::instance::instance(void)
 		.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 		.pNext              = nullptr,
 		.pApplicationName   = "application",
-		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+		.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
 		.pEngineName        = "engine",
-		.engineVersion      = VK_MAKE_VERSION(1, 0, 0),
+		.engineVersion      = VK_MAKE_API_VERSION(0, 1, 0, 0),
 		.apiVersion         = VK_API_VERSION_1_0
 	};
 
@@ -75,11 +79,10 @@ vulkan::instance::instance(void)
 
 	#if defined(ENGINE_VL_DEBUG)
 
-	static constexpr xns::array<const char*, 3> layers = {
+	static constexpr xns::array<const char*, 1> layers = {
 		"VK_LAYER_KHRONOS_validation",
 		//"VK_LAYER_LUNARG_api_dump",
-		"VK_LAYER_KHRONOS_profiles",
-		"VK_LAYER_KHRONOS_validation",
+		//"VK_LAYER_KHRONOS_profiles",
 		//"VK_LAYER_KHRONOS_synchronization2",
 		//"VK_LAYER_KHRONOS_shader_object"
 	};
@@ -100,7 +103,7 @@ vulkan::instance::instance(void)
 
 
 	create.pNext                   = &debug_info;
-	create.enabledLayerCount       = static_cast<::uint32_t>(layers.size());
+	create.enabledLayerCount       = static_cast<vk::u32>(layers.size());
 	create.ppEnabledLayerNames     = layers.data();
 	#else
 	create.pNext                   = nullptr;
@@ -119,49 +122,28 @@ vulkan::instance::instance(void)
 	create.ppEnabledExtensionNames = extensions.data();
 
 
-	// create instance
-	_instance = vk::create_instance(create);
+	// create shared instance
+	_instance = vulkan::make_shared(create);
 
-
-	#ifdef ENGINE_VL_DEBUG
 	// create debug messenger
-	auto func = reinterpret_cast<vk::pfn_create_debug_utils_messenger>(
-			  ::vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
-	// check error
-	if (func == nullptr || func(_instance, &debug_info, nullptr, &_messenger) != VK_SUCCESS) {
-		engine::fatal("failed to set up debug messenger.");
-	}
+	#ifdef ENGINE_VL_DEBUG
+	_messenger = vulkan::make_managed(vk::create(_instance, debug_info),
+									  _instance);
 	#endif
 
 	//self::extension_properties();
 }
 
 
-// -- public lifecycle --------------------------------------------------------
-
-/* destructor */
-vulkan::instance::~instance(void) noexcept {
-	// check if instance is null
-	if (_instance == VK_NULL_HANDLE)
-		return;
-	// validation layers
-	#if defined(ENGINE_VL_DEBUG)
-	// destroy messenger
-	auto func = reinterpret_cast<vk::pfn_destroy_debug_utils_messenger>(
-			  ::vkGetInstanceProcAddr(_instance, "vkDestroyDebugUtilsMessengerEXT"));
-	// check error
-	if (func != nullptr)
-		func(_instance, _messenger, nullptr);
-	#endif
-	// destroy instance
-	vk::destroy_instance(_instance);
-}
-
-
 // -- public conversion operators ---------------------------------------------
 
-/* VkInstance conversion operator */
-vulkan::instance::operator const ::VkInstance&(void) const noexcept {
+/* vk::instance conversion operator */
+vulkan::instance::operator const vk::instance&(void) const noexcept {
+	return _instance;
+}
+
+/* vulkan::shared<vk::instance> conversion operator */
+vulkan::instance::operator const vulkan::shared<vk::instance>&(void) const noexcept {
 	return _instance;
 }
 
@@ -172,9 +154,9 @@ vulkan::instance::operator const ::VkInstance&(void) const noexcept {
 auto vulkan::instance::physical_devices(void) -> vk::vector<vulkan::physical_device> {
 
 	// get shared instance
-	const auto& instance = self::shared();
+	//const auto& instance = self::shared();
 
-	const auto devices = vk::enumerate_physical_devices(instance);
+	const auto devices = vk::enumerate_physical_devices(_instance);
 
 	vk::vector<vulkan::physical_device> result{};
 	result.reserve(devices.size());

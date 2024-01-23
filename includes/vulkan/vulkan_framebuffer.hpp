@@ -6,7 +6,9 @@
 #include <vulkan/vulkan.h>
 #include "exceptions.hpp"
 
-#include "vulkan_renderpass.hpp"
+#include "vulkan_logical_device.hpp"
+#include "vulkan_render_pass.hpp"
+#include "vulkan_swapchain.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -29,23 +31,25 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			framebuffer(const vulkan::renderpass&, ::uint32_t, ::uint32_t);
+			/* logical device and render pass constructor */
+			framebuffer(const vulkan::logical_device&,
+						const vulkan::render_pass&,
+						const vulkan::swapchain&);
 
-			/* deleted copy constructor */
-			framebuffer(const self&) = delete;
+			/* copy constructor */
+			framebuffer(const self&) noexcept;
 
 			/* move constructor */
 			framebuffer(self&&) noexcept;
 
 			/* destructor */
-			~framebuffer(void) noexcept;
+			~framebuffer(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
 
 			/* move assignment operator */
 			auto operator=(self&&) noexcept -> self&;
@@ -59,28 +63,10 @@ namespace vulkan {
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* create */
-			static auto create(::VkFramebufferCreateInfo&) -> ::VkFramebuffer;
-
-
-			// -- private methods ---------------------------------------------
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-			/* init */
-			auto init(void) noexcept -> void;
-
-
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			::VkFramebuffer _buffer;
-
-			/* logical device */
-			::VkDevice _device;
+			vk::framebuffer _buffer;
 
 	}; // class framebuffer
 

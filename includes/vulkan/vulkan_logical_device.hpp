@@ -39,20 +39,20 @@ namespace vulkan {
 						   const vulkan::surface&);
 
 
-			/* deleted copy constructor */
-			logical_device(const self&) = delete;
+			/* copy constructor */
+			logical_device(const self&) noexcept;
 
 			/* move constructor */
 			logical_device(self&&) noexcept;
 
 			/* destructor */
-			~logical_device(void) noexcept;
+			~logical_device(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self&;
 
 			/* move assignment operator */
 			auto operator=(self&&) noexcept -> self&;
@@ -74,24 +74,20 @@ namespace vulkan {
 
 		private:
 
-			// -- private methods ---------------------------------------------
-
-			/* free */
-			auto free(void) noexcept -> void;
-
-			/* init */
-			auto init(void) noexcept -> void;
-
-
 			// -- private members ---------------------------------------------
 
 			/* vulkan device */
-			vk::device _device;
+			vulkan::shared<vk::device> _device;
 
 			/* queue priority */
 			float _priority;
 
 	}; // class device
+
+
+	/* shared device type */
+	using shared_device = xns::shared_ptr<vulkan::logical_device>;
+
 
 } // namespace vulkan
 

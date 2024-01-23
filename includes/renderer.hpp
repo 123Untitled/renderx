@@ -4,10 +4,15 @@
 #include <xns>
 #include <vulkan/vulkan.h>
 
+#include "basic_vertex.hpp"
+
 #include "vulkan_swapchain.hpp"
 #include "vulkan_semaphore.hpp"
 #include "vulkan_queue.hpp"
 #include "glfw_events.hpp"
+
+#include "shader_library.hpp"
+
 
 
 // -- E N G I N E  N A M E S P A C E ------------------------------------------
@@ -56,7 +61,16 @@ namespace engine {
 
 		private:
 
+			// -- private methods ---------------------------------------------
+
+			/* initialize */
+			auto initialize(void) -> void;
+
+
 			// -- private members ---------------------------------------------
+
+			/* vulkan instance */
+			vulkan::instance _instance;
 
 			/* window */
 			glfw::window _window;
@@ -76,11 +90,18 @@ namespace engine {
 			/* swapchain */
 			vulkan::swapchain _swapchain;
 
+			/* command pool */
+			vulkan::command_pool _command_pool;
+
 			/* image available semaphore */
 			vulkan::semaphore _image_available;
 
 			/* render finished semaphore */
 			vulkan::semaphore _render_finished;
+
+			/* shader library */
+			shader_library _shaders;
+
 
 
 	}; // class renderer

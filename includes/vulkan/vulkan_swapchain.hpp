@@ -6,6 +6,7 @@
 
 // local headers
 #include "vulkan_logical_device.hpp"
+#include "vulkan_image_view.hpp"
 #include "vulkan_semaphore.hpp"
 
 #include <xns>
@@ -37,17 +38,17 @@ namespace vulkan {
 
 			/* logical device and surface constructor */
 			swapchain(const vulkan::physical_device&,
-					  const vulkan::logical_device&,
+					  const vulkan::shared_device&,
 					  const vulkan::surface&);
 
 			/* deleted copy constructor */
 			swapchain(const self&) = delete;
 
-			/* deleted move constructor */
-			swapchain(self&&) noexcept = delete;
+			/* move constructor */
+			swapchain(self&&) noexcept;
 
 			/* destructor */
-			~swapchain(void) noexcept = default;
+			~swapchain(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -55,11 +56,21 @@ namespace vulkan {
 			/* deleted copy assignment operator */
 			auto operator=(const self&) -> self& = delete;
 
-			/* deleted move assignment operator */
-			auto operator=(self&&) noexcept -> self& = delete;
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self&;
 
 
 			// -- public accessors --------------------------------------------
+
+			/* extent */
+			auto extent(void) const noexcept -> vk::extent2D;
+
+			/* image views size */
+			auto image_views_size(void) const noexcept -> vk::u32;
+
+			/* image views data */
+			auto image_views_data(void) const noexcept -> const vk::image_view*;
+
 
 			/* acquire next image */
 			auto acquire_next_image(const vulkan::logical_device&,
@@ -75,26 +86,30 @@ namespace vulkan {
 
 			// -- public modifiers --------------------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			/* re-create */
+			auto recreate(const vulkan::physical_device&,
+						  const vulkan::surface&) -> void;
 
 
 		private:
 
 			// -- private static methods --------------------------------------
 
-			/* create swapchain info */
-			static auto create_swapchain_info(const ::VkSurfaceCapabilitiesKHR&,
-											 const ::VkSurfaceFormatKHR&,
-											 const ::VkExtent2D&,
-											 const ::VkPresentModeKHR&) noexcept -> ::VkSwapchainCreateInfoKHR;
+			/* pick surface format */
+			static auto pick_surface_format(const vk::vector<vk::surface_format>&) noexcept -> vk::surface_format;
 
-			/* create swapchain */
-			static auto create_swapchain(const vulkan::logical_device&,
-										 const ::VkSwapchainCreateInfoKHR&) -> ::VkSwapchainKHR;
+			/* pick present mode */
+			static auto pick_present_mode(const vk::vector<vk::present_mode>&) noexcept -> vk::present_mode;
 
+			/* pick extent */
+			static auto pick_extent(const vk::surface_capabilities&) noexcept -> vk::extent2D;
 
 
+
+			// -- private methods ---------------------------------------------
+
+			/* free */
+			auto free(void) noexcept -> void;
 
 
 
@@ -103,17 +118,21 @@ namespace vulkan {
 			/* swapchain */
 			vk::swapchain _swapchain;
 
+			/* logical device */
+			vulkan::shared_device _device;
+
 			/* images */
 			vk::vector<vk::image> _images;
 
+			/* image views */
+			vk::vector<vulkan::image_view> _views;
+
 			/* format */
-			vk::format _format;
+			vk::surface_format _format;
 
 			/* extent */
 			vk::extent2D _extent;
 
-			/* logical device */
-			vk::device _device;
 
 	}; // class swapchain
 

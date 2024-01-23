@@ -3,55 +3,55 @@
 
 // -- public lifecycle --------------------------------------------------------
 
-/* default constructor */
-vulkan::framebuffer::framebuffer(const vulkan::renderpass& renderpass,
-								 ::uint32_t width, ::uint32_t height)
-: _buffer{VK_NULL_HANDLE}, _device{VK_NULL_HANDLE} {
+/* logical device and render pass constructor */
+vulkan::framebuffer::framebuffer(const vulkan::logical_device& device,
+								 const vulkan::render_pass& render_pass,
+								 const vulkan::swapchain& swapchain)
+// create framebuffer
+: _buffer{vk::create_framebuffer(device, vk::framebuffer_info{
+		// structure type
+		.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+		// next structure
+		.pNext           = nullptr,
+		// flags (none)
+		.flags           = 0,
+		// render pass
+		.renderPass      = render_pass,
+		// attachment count (swapchain image views)
+		.attachmentCount = swapchain.image_views_size(),
+		// attachments (swapchain image views)
+		.pAttachments    = swapchain.image_views_data(),
+		// width
+		.width           = swapchain.extent().width, 
+		// height
+		.height          = swapchain.extent().height,
+		// layers
+		.layers          = 1
+	})} {
+}
 
-	// swapchain image views (attachments)
-	xns::vector<::VkImageView> attachments{};
-
-	::VkFramebufferCreateInfo info{};
-	// structure type
-	info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	info.pNext           = nullptr;
-	info.flags           = 0;
-	info.renderPass      = renderpass;
-	// attachments (swapchain images)
-	info.attachmentCount = static_cast<::uint32_t>(attachments.size());
-	info.pAttachments    = attachments.data();
-	info.width           = width;
-	info.height          = height;
-	info.layers          = 1;
-
-	if (::vkCreateFramebuffer(nullptr /* logical device */,
-				&info, nullptr, &_buffer) != VK_SUCCESS)
-		throw engine::exception{"failed to create framebuffer"};
+/* copy constructor */
+vulkan::framebuffer::framebuffer(const self& other) noexcept
+: _buffer{other._buffer} {
 }
 
 /* move constructor */
 vulkan::framebuffer::framebuffer(self&& other) noexcept
-: _buffer{other._buffer}, _device{other._device} {
-	other.init();
-}
-
-/* destructor */
-vulkan::framebuffer::~framebuffer(void) noexcept {
-	free();
+: self{other} /* copy */ {
 }
 
 
 // -- public assignment operators ---------------------------------------------
 
+/* copy assignment operator */
+auto vulkan::framebuffer::operator=(const self& other) noexcept -> self& {
+	_buffer = other._buffer;
+	return *this;
+}
+
 /* move assignment operator */
 auto vulkan::framebuffer::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	free();
-	_buffer = other._buffer;
-	_device = other._device;
-	other.init();
-	return *this;
+	return self::operator=(other); /* copy */
 }
 
 
@@ -59,35 +59,6 @@ auto vulkan::framebuffer::operator=(self&& other) noexcept -> self& {
 
 /* destroy */
 auto vulkan::framebuffer::destroy(const vulkan::logical_device& device) noexcept -> void {
-	if (_buffer == VK_NULL_HANDLE)
-		return;
-	::vkDestroyFramebuffer(device, _buffer, nullptr);
-	_buffer = VK_NULL_HANDLE;
+	vk::destroy_framebuffer(device, _buffer);
 }
 
-
-// -- private static methods --------------------------------------------------
-
-/* create */
-auto vulkan::framebuffer::create(::VkFramebufferCreateInfo& info) -> ::VkFramebuffer {
-	::VkFramebuffer buffer{VK_NULL_HANDLE};
-	if (::vkCreateFramebuffer(nullptr /* logical device */,
-				&info, nullptr, &buffer) != VK_SUCCESS)
-		throw engine::exception{"failed to create framebuffer"};
-	return buffer;
-}
-
-// -- private methods ---------------------------------------------------------
-
-/* free */
-auto vulkan::framebuffer::free(void) noexcept -> void {
-	if (_buffer == VK_NULL_HANDLE)
-		return;
-	::vkDestroyFramebuffer(_device, _buffer, nullptr);
-}
-
-/* init */
-auto vulkan::framebuffer::init(void) noexcept -> void {
-	_buffer = VK_NULL_HANDLE;
-	_device = VK_NULL_HANDLE;
-}

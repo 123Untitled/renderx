@@ -7,6 +7,7 @@
 
 #include "vk_typedefs.hpp"
 #include "vk_functions.hpp"
+#include "vulkan_resource.hpp"
 
 #include "glfw_system.hpp"
 #include "exceptions.hpp"
@@ -43,6 +44,9 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
+			/* default constructor */
+			instance(void);
+
 			/* deleted copy constructor */
 			instance(const self&) = delete;
 
@@ -50,7 +54,7 @@ namespace vulkan {
 			instance(self&&) noexcept = delete;
 
 			/* destructor */
-			~instance(void) noexcept;
+			~instance(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -64,8 +68,11 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkInstance conversion operator */
-			operator const ::VkInstance&(void) const noexcept;
+			/* vk::instance conversion operator */
+			operator const vk::instance&(void) const noexcept;
+
+			/* vulkan::shared<vk::instance> conversion operator */
+			operator const vulkan::shared<vk::instance>&(void) const noexcept;
 
 
 			// -- public accessors --------------------------------------------
@@ -74,22 +81,20 @@ namespace vulkan {
 
 			// -- public static methods ---------------------------------------
 
-			/* shared */
-			static auto shared(void) -> self&;
+			///* shared */
+			//static auto shared(void) -> self&;
 
 			/* physical devices */
-			static auto physical_devices(void) -> vk::vector<vulkan::physical_device>;
+			auto physical_devices(void) -> vk::vector<vulkan::physical_device>;
 
 			/* pick physical device */
-			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
+			auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
 
 
 		private:
 
 			// -- private lifecycle -------------------------------------------
 
-			/* default constructor */
-			instance(void);
 
 
 			// -- private static methods --------------------------------------
@@ -118,11 +123,12 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* instance */
-			vk::instance _instance;
+			vulkan::shared<vk::instance> _instance;
 
 			/* debug messenger */
 			#if defined(ENGINE_VL_DEBUG)
-			::VkDebugUtilsMessengerEXT _messenger;
+			vulkan::managed<vk::debug_utils_messenger,
+							vulkan::shared<vk::instance>> _messenger;
 			#endif
 
 	};

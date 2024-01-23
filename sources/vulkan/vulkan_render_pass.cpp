@@ -1,12 +1,12 @@
-#include "vulkan_renderpass.hpp"
+#include "vulkan_render_pass.hpp"
 
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* logical device constructor */
-vulkan::renderpass::renderpass(const vulkan::logical_device& device)
-: _renderpass{VK_NULL_HANDLE} {
+vulkan::render_pass::render_pass(const vulkan::logical_device& device)
+: _render_pass{VK_NULL_HANDLE} {
 
 	const vk::attachment_description attachment{
 		.flags          = 0,
@@ -56,7 +56,7 @@ vulkan::renderpass::renderpass(const vulkan::logical_device& device)
 	};
 
 
-	const vk::renderpass_info info{
+	const vk::render_pass_info info{
 		.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
 		.pNext           = nullptr,
 		.flags           = 0,
@@ -70,7 +70,7 @@ vulkan::renderpass::renderpass(const vulkan::logical_device& device)
 
 
 	// create renderpass
-	_renderpass = vk::create_renderpass(device, info);
+	_render_pass = vk::create_render_pass(device, info);
 }
 
 
@@ -78,19 +78,19 @@ vulkan::renderpass::renderpass(const vulkan::logical_device& device)
 // -- public modifiers --------------------------------------------------------
 
 /* destroy */
-auto vulkan::renderpass::destroy(const vulkan::logical_device& device) noexcept -> void {
-	if (_renderpass == VK_NULL_HANDLE)
+auto vulkan::render_pass::destroy(const vulkan::logical_device& device) noexcept -> void {
+	if (_render_pass == VK_NULL_HANDLE)
 		return;
-	::vkDestroyRenderPass(device, _renderpass, nullptr);
-	_renderpass = VK_NULL_HANDLE;
+	::vkDestroyRenderPass(device, _render_pass, nullptr);
+	_render_pass = VK_NULL_HANDLE;
 }
 
 
 // -- public conversion operators ---------------------------------------------
 
 /* VkRenderPass conversion operator */
-vulkan::renderpass::operator ::VkRenderPass(void) const noexcept {
-	return _renderpass;
+vulkan::render_pass::operator ::VkRenderPass(void) const noexcept {
+	return _render_pass;
 }
 
 

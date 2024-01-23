@@ -22,7 +22,6 @@ namespace engine {
 
 	// -- S H A D E R  L I B R A R Y ------------------------------------------
 
-	template <xns::basic_string_literal... L>
 	class shader_library final {
 
 		public:
@@ -30,18 +29,20 @@ namespace engine {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = engine::shader_library<L...>;
+			using self = engine::shader_library;
 
 
 			// -- public lifecycle --------------------------------------------
 
-			/* logical device constructor */
-			shader_library(const vulkan::logical_device& device)
-			:	_vmap{(load_vertex<L>(device))...},
-				_fmap{(load_fragment<L>(device))...},
-				_device{device} {
-			}
+			/* default constructor */
+			shader_library(void) noexcept
+			: _vmap{}, _fmap{} {}
 
+			/* copy constructor */
+			shader_library(const self&) noexcept = default;
+
+			/* move constructor */
+			shader_library(self&&) noexcept = default;
 
 			/* destructor */
 			~shader_library(void) noexcept = default;
@@ -49,6 +50,31 @@ namespace engine {
 
 
 			// -- public modifiers --------------------------------------------
+
+			/* load vertex shader */
+			template <xns::basic_string_literal S>
+			auto load_vertex(const vulkan::logical_device& device) -> void {
+				std::string path;
+				path.reserve(_root.size() + S.size()-1 + _vext.size());
+				path.append(_root.data(), _root.size());
+				path.append(S.data(), S.size()-1);
+				path.append(_vext.data(), _vext.size());
+
+				xns::get<S>(_vmap) = vulkan::shader_module{device, path};
+			}
+
+			/* load fragment shader */
+			template <xns::basic_string_literal S>
+			auto load_fragment(const vulkan::logical_device& device) -> void {
+
+				std::string path;
+				path.reserve(_root.size() + S.size() + _fext.size());
+				path.append(_root.data(), _root.size());
+				path.append(S.data(), S.size());
+				path.append(_fext.data(), _fext.size());
+
+				xns::get<S>(_fmap) = vulkan::shader_module{device, path};
+			}
 
 			/* destroy */
 			auto destroy(const vulkan::logical_device& ldevice) noexcept -> void {
@@ -76,50 +102,23 @@ namespace engine {
 
 
 
-			template <xns::basic_string_literal S>
-			auto load_vertex(const vulkan::logical_device& device) -> vulkan::shader_module {
-				std::string path;
-				path.reserve(_root.size() + S.size() + _vext.size());
-				path.append(_root.data(), _root.size());
-				path.append(S.data(), S.size());
-				path.append(_vext.data(), _vext.size());
-
-				return vulkan::shader_module{device, path};
-			}
-
-			template <xns::basic_string_literal S>
-			auto load_fragment(const vulkan::logical_device& device) -> vulkan::shader_module {
-
-				std::string path;
-				path.reserve(_root.size() + S.size() + _fext.size());
-				path.append(_root.data(), _root.size());
-				path.append(S.data(), S.size());
-				path.append(_fext.data(), _fext.size());
-
-				return vulkan::shader_module{device, path};
-			}
 
 			// -- private types -----------------------------------------------
 
-			/* map type */
-			using map_type = xns::literal_map<vulkan::shader_module, L...>;
+			/* vertex shader map type */
+			using vertex_map_type = xns::literal_map<vulkan::shader_module, "basic">;
 
-
-
-			// -- private methods ---------------------------------------------
-
+			/* fragment shader map type */
+			using fragment_map_type = xns::literal_map<vulkan::shader_module, "basic">;
 
 
 			// -- private members ---------------------------------------------
 
 			/* vertex shaders */
-			map_type _vmap;
+			vertex_map_type _vmap;
 
 			/* fragment shaders */
-			map_type _fmap;
-
-			/* logical device */
-			const vulkan::logical_device& _device;
+			fragment_map_type _fmap;
 
 
 	}; // class shader_library

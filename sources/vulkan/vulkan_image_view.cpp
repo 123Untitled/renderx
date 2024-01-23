@@ -5,70 +5,10 @@
 
 /* default constructor */
 vulkan::image_view::image_view(const vulkan::logical_device& device,
-									::VkImage& image,
-									::VkFormat& format)
-: _view{nullptr}, _device{device} {
-	// create image view info
-	auto info = self::create_image_view_info(image, format);
-	// create image view
-	_view = self::create_image_view(device, info);
-}
-
-/* move constructor */
-vulkan::image_view::image_view(self&& other) noexcept
-: _view{other._view}, _device{other._device} {
-	other.init();
-}
-
-/* destructor */
-vulkan::image_view::~image_view(void) noexcept {
-	free();
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::image_view::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	free();
-	  _view = other._view;
-	_device = other._device;
-	other.init();
-	return *this;
-}
-
-
-// -- public accessors --------------------------------------------------------
-
-/* underlying */
-auto vulkan::image_view::underlying(void) noexcept -> ::VkImageView& {
-	return _view;
-}
-
-/* const underlying */
-auto vulkan::image_view::underlying(void) const noexcept -> const ::VkImageView& {
-	return _view;
-}
-
-
-// -- private static methods --------------------------------------------------
-
-/* create image view */
-auto vulkan::image_view::create_image_view(const vulkan::logical_device& device,
-										   const ::VkImageViewCreateInfo& info) -> ::VkImageView {
-	::VkImageView view;
-	// create image view
-	if (::vkCreateImageView(device, &info, nullptr, &view) != VK_SUCCESS)
-		throw engine::exception{"failed to create image view"};
-	return view;
-}
-
-/* create image view info */
-auto vulkan::image_view::create_image_view_info(::VkImage& image,
-												::VkFormat& format) noexcept -> ::VkImageViewCreateInfo {
-	return ::VkImageViewCreateInfo{
+							   const vk::image& image,
+							   const vk::format& format)
+// create image view
+: _view{vk::create_image_view(device, vk::image_view_info{
 		.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		.pNext      = nullptr,
 		.flags      = 0,
@@ -88,21 +28,44 @@ auto vulkan::image_view::create_image_view_info(::VkImage& image,
 			.baseArrayLayer = 0,
 			.layerCount     = 1,
 		}
-	};
+	})} {
+}
+
+/* copy constructor */
+vulkan::image_view::image_view(const self& other) noexcept
+: _view{other._view} {}
+
+/* move constructor */
+vulkan::image_view::image_view(self&& other) noexcept
+: self{other} /* copy */ {}
+
+
+// -- public assignment operators ---------------------------------------------
+
+/* copy assignment operator */
+auto vulkan::image_view::operator=(const self& other) noexcept -> self& {
+	_view = other._view;
+	return *this;
+}
+
+/* move assignment operator */
+auto vulkan::image_view::operator=(self&& other) noexcept -> self& {
+	return self::operator=(other); /* copy */
 }
 
 
-// -- private methods ---------------------------------------------------------
+// -- public conversion operators ---------------------------------------------
 
-/* free */
-auto vulkan::image_view::free(void) noexcept -> void {
-	if (_view == nullptr)
-		return;
-	::vkDestroyImageView(_device, _view, nullptr);
+/* vk::image_view conversion operator */
+vulkan::image_view::operator const vk::image_view&() const noexcept {
+	return _view;
 }
 
-/* init */
-auto vulkan::image_view::init(void) noexcept -> void {
-	  _view = VK_NULL_HANDLE;
-	_device = VK_NULL_HANDLE;
+
+// -- public modifiers --------------------------------------------------------
+
+/* destroy */
+auto vulkan::image_view::destroy(const vulkan::logical_device& device) noexcept -> void {
+	vk::destroy_image_view(device, _view);
 }
+

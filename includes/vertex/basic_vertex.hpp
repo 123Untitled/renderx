@@ -7,6 +7,7 @@
 #include <simd/simd.h>
 #endif
 
+#include "vk_typedefs.hpp"
 #include <vulkan/vulkan.h>
 #include <array>
 #include <xns>
@@ -47,9 +48,9 @@ namespace engine {
 			}
 
 			/* position and color constructor */
-			basic_vertex(const xns::array<float, 3>& position, const xns::array<float, 4>& color) noexcept
-			//basic_vertex(const simd::float3& position, const simd::float4& color) noexcept
-			: _position{position}, _color{color} {
+			basic_vertex(const float x, const float y, const float z,
+						 const float r, const float g, const float b, const float a) noexcept
+			: _position{x, y, z}, _color{r, g, b, a} {
 			}
 
 			/* copy constructor */
@@ -64,14 +65,9 @@ namespace engine {
 
 
 			/* pipeline vertex input state info */
-			static auto pipeline_vertex_input_state_info(void) noexcept -> ::VkPipelineVertexInputStateCreateInfo {
+			static auto pipeline_vertex_input_state_info(void) noexcept -> const vk::pipeline_vertex_input_state_info& {
 				// VK_VERTEX_INPUT_RATE_VERTEX:   Move to the next data entry after each vertex
 				// VK_VERTEX_INPUT_RATE_INSTANCE: Move to the next data entry after each instance
-				static constexpr ::VkVertexInputBindingDescription binding {
-					.binding   = 0, // index in binding array
-					.stride    = sizeof(self),
-					.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
-				};
 
 				//  float: VK_FORMAT_R32_SFLOAT
 				//   vec2: VK_FORMAT_R32G32_SFLOAT
@@ -81,23 +77,31 @@ namespace engine {
 				//  uvec4: VK_FORMAT_R32G32B32A32_UINT  (a 4-component vector of 32-bit unsigned integers)
 				// double: VK_FORMAT_R64_SFLOAT         (a double-precision (64-bit) float)
 
+				// create binding description
+				static constexpr vk::vertex_input_binding_description binding{
+					.binding   = 0, // index in binding array
+					.stride    = sizeof(self),
+					.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+				};
 
+				// create attribute descriptions
 				static constexpr xns::array attribute {
-					::VkVertexInputAttributeDescription{
+					vk::vertex_input_attribute_description{
 						.location = 0, // shader location
 						.binding  = 0, // binding index
-						.format   = VK_FORMAT_R32G32B32_SFLOAT,
+						.format   = VK_FORMAT_R32G32B32_SFLOAT, // float3
 						.offset   = offsetof(self, _position)
 					},
-					::VkVertexInputAttributeDescription{
+					vk::vertex_input_attribute_description{
 						.location = 1, // shader location
 						.binding  = 0, // binding index
-						.format   = VK_FORMAT_R32G32B32A32_SFLOAT,
+						.format   = VK_FORMAT_R32G32B32A32_SFLOAT, // float4
 						.offset   = offsetof(self, _color)
 					}
 				};
 
-				return ::VkPipelineVertexInputStateCreateInfo{
+				// create pipeline vertex input state info
+				static constexpr vk::pipeline_vertex_input_state_info info{
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 					.pNext = nullptr,
 					.flags = 0,
@@ -106,6 +110,9 @@ namespace engine {
 					.vertexAttributeDescriptionCount = attribute.size(),
 					.pVertexAttributeDescriptions    = attribute.data()
 				};
+
+				// return info
+				return info;
 			}
 
 	}; // class basic_vertex

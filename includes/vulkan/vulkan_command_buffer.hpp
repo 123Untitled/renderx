@@ -8,6 +8,8 @@
 // local headers
 #include "vulkan_logical_device.hpp"
 #include "vulkan_command_pool.hpp"
+#include "vulkan_swapchain.hpp"
+#include "vulkan_render_pass.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -52,8 +54,8 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkCommandBuffer conversion operator */
-			operator ::VkCommandBuffer(void) const noexcept;
+			/* vk::command_buffer conversion operator */
+			operator const vk::command_buffer&(void) const noexcept;
 
 
 			// -- public methods ----------------------------------------------
@@ -62,19 +64,40 @@ namespace vulkan {
 			auto begin(void) const -> void;
 
 			/* renderpass begin */
-			auto renderpass_begin(void) const noexcept -> void;
+			auto renderpass_begin(const vulkan::swapchain&,
+								  const vulkan::render_pass&) const noexcept -> void;
 
-			/* bind pipeline */
-			auto bind_pipeline(const ::VkPipelineBindPoint,
-							   const ::VkPipeline) const noexcept -> void;
 
+
+			// -- bind pipeline -----------------------------------------------
+
+			/* bind compute pipeline */
+			auto bind_compute_pipeline(const vk::pipeline&) const noexcept -> void;
+
+			/* bind graphics pipeline */
+			auto bind_graphics_pipeline(const vk::pipeline&) const noexcept -> void;
+
+			/* bind execution graph amdx pipeline */
+			#ifdef VK_ENABLE_BETA_EXTENSIONS
+			auto bind_execution_graph_amdx_pipeline(const vk::pipeline&) const noexcept -> void;
+			#endif
+
+			/* bind ray tracing pipeline */
+			auto bind_ray_tracing_pipeline(const vk::pipeline&) const noexcept -> void;
+
+			/* bind subpass shading huawei pipeline */
+			auto bind_subpass_shading_huawei_pipeline(const vk::pipeline&) const noexcept -> void;
+
+
+
+			/* bind vertex buffers */
 			// bind vertex buffers (not implemented)
 
 			/* draw */
-			auto draw(const ::uint32_t,
-					  const ::uint32_t,
-					  const ::uint32_t,
-					  const ::uint32_t) const noexcept -> void;
+			auto draw(const vk::u32,
+					  const vk::u32,
+					  const vk::u32,
+					  const vk::u32) const noexcept -> void;
 
 			/* renderpass end */
 			auto renderpass_end(void) const noexcept -> void;
@@ -87,14 +110,14 @@ namespace vulkan {
 
 			// -- friends -----------------------------------------------------
 
-			/* command_pool::new_buffer as friend */
-			friend auto vulkan::command_pool::new_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
+			/* command_pool::new_command_buffer as friend */
+			friend auto vulkan::command_pool::new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
 
 			/* command_pool::new_buffers as friend */
 			friend auto vulkan::command_pool::new_buffers(const vulkan::logical_device&, const ::uint32_t) const -> xns::vector<vulkan::command_buffer>;
 
 			/* vector<vulkan::command_buffer> as friend */
-			friend typename xns::vector<vulkan::command_buffer>::allocator;
+			friend typename vk::vector<self>::allocator;
 
 
 			// -- private lifecycle -------------------------------------------
@@ -118,11 +141,6 @@ namespace vulkan {
 
 			// -- private static methods --------------------------------------
 
-			/* create info */
-			static auto create_info(const vulkan::command_pool&,
-									const ::VkCommandBufferLevel,
-									const ::uint32_t) noexcept -> ::VkCommandBufferAllocateInfo;
-
 			/* create buffers */
 			static auto create_buffers(const vulkan::logical_device&,
 									   const vulkan::command_pool&,
@@ -132,12 +150,12 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			::VkCommandBuffer _buffer;
+			vk::command_buffer _buffer;
 
 	};
 
 	/* assert command buffer size matches */
-	static_assert(sizeof(::VkCommandBuffer) == sizeof(vulkan::command_buffer),
+	static_assert(sizeof(vk::command_buffer) == sizeof(vulkan::command_buffer),
 				"): COMMAND_BUFFER SIZE MISMATCH! :(");
 
 } // namespace vulkan

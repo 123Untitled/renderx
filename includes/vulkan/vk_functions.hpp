@@ -9,6 +9,7 @@
 #include "vulkan_exception.hpp"
 
 #include <xns>
+#include "vk_utils.hpp"
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -16,28 +17,6 @@
 namespace vk {
 
 
-	// -- types ---------------------------------------------------------------
-
-	/* unsigned integer 32 type */
-	using u32 = ::uint32_t;
-
-	/* vector type */
-	template <typename T>
-	using vector = xns::vector<T>;
-
-
-
-	/* try execute */
-	template <decltype(sizeof(0)) N, typename F, typename... A>
-	inline auto try_execute(F&& f, const char (&msg)[N], A&&... args) -> void {
-		// get return type
-		using ret_type = decltype(f(xns::forward<A>(args)...));
-		// assert return type is vk::result
-		static_assert(xns::is_same<ret_type, vk::result>, "invalid return type.");
-		// execute function
-		if (auto result = f(xns::forward<A>(args)...); result != VK_SUCCESS)
-			throw vulkan::exception{msg, result};
-	}
 
 
 	// -- instance ------------------------------------------------------------
@@ -101,6 +80,15 @@ namespace vk {
 		return properties;
 	}
 	#endif
+
+	/* get instance proc address */
+	template <typename F>
+	inline auto get_instance_proc_addr(const vk::instance& instance, const char* name) -> F {
+		auto func = ::vkGetInstanceProcAddr(instance, name);
+		if (func == nullptr)
+			throw vulkan::exception{"failed to get instance proc address", VK_ERROR_INITIALIZATION_FAILED};
+		return reinterpret_cast<F>(func);
+	}
 
 
 	// -- physical devices ----------------------------------------------------
@@ -207,6 +195,8 @@ namespace vk {
 
 	/* destroy device */
 	inline auto destroy_device(vk::device& device) noexcept -> void {
+		if (device == VK_NULL_HANDLE)
+			return;
 		::vkDestroyDevice(device, nullptr);
 		device = VK_NULL_HANDLE;
 	}
@@ -311,19 +301,157 @@ namespace vk {
 	/* destroy swapchain */
 	inline auto destroy_swapchain(const vk::device& device, vk::swapchain& swapchain) noexcept -> void {
 		::vkDestroySwapchainKHR(device, swapchain, nullptr);
-		swapchain = VK_NULL_HANDLE;
+	}
+
+	/* get swapchain images count */
+	inline auto get_swapchain_images_count(const vk::device& device, const vk::swapchain& swapchain) -> vk::u32 {
+		vk::u32 count = 0;
+		vk::try_execute(::vkGetSwapchainImagesKHR,
+						"failed to get number of swapchain images",
+						device, swapchain, &count, nullptr);
+		return count;
+	}
+
+	/* get swapchain images */
+	inline auto get_swapchain_images(const vk::device& device, const vk::swapchain& swapchain) -> vk::vector<vk::image> {
+		auto count = vk::get_swapchain_images_count(device, swapchain);
+		vk::vector<vk::image> images;
+		images.resize(count);
+		vk::try_execute(::vkGetSwapchainImagesKHR,
+						"failed to get swapchain images",
+						device, swapchain, &count, images.data());
+		return images;
 	}
 
 
-	// -- renderpass ----------------------------------------------------------
+	// -- framebuffer ---------------------------------------------------------
 
-	/* create renderpass */
-	inline auto create_renderpass(const vk::device& device, const vk::renderpass_info& info) -> vk::renderpass {
-		vk::renderpass renderpass{VK_NULL_HANDLE};
+	/* create framebuffer */
+	inline auto create_framebuffer(const vk::device& device,
+								   const vk::framebuffer_info& info) -> vk::framebuffer {
+		vk::framebuffer framebuffer{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateFramebuffer,
+						"failed to create framebuffer",
+						device, &info, nullptr, &framebuffer);
+		return framebuffer;
+	}
+
+	/* destroy framebuffer */
+	inline auto destroy_framebuffer(const vk::device& device,
+									vk::framebuffer& framebuffer) noexcept -> void {
+		if (framebuffer == VK_NULL_HANDLE)
+			return;
+		::vkDestroyFramebuffer(device, framebuffer, nullptr);
+		framebuffer = VK_NULL_HANDLE;
+	}
+
+
+
+	// -- command pool --------------------------------------------------------
+
+	/* create command pool */
+	inline auto create_command_pool(const vk::device& device, const vk::command_pool_info& info) -> vk::command_pool {
+		vk::command_pool pool{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateCommandPool,
+						"failed to create command pool",
+						device, &info, nullptr, &pool);
+		return pool;
+	}
+
+	/* destroy command pool */
+	inline auto destroy_command_pool(const vk::device& device, vk::command_pool& pool) noexcept -> void {
+		if (pool == VK_NULL_HANDLE)
+			return;
+		::vkDestroyCommandPool(device, pool, nullptr);
+		pool = VK_NULL_HANDLE;
+	}
+
+
+	// -- command buffer ------------------------------------------------------
+
+	/* create command buffer */
+	inline auto create_command_buffer(const vk::device& device, const vk::command_buffer_info& info) -> vk::command_buffer {
+		vk::command_buffer buffer{VK_NULL_HANDLE};
+		vk::try_execute(::vkAllocateCommandBuffers,
+						"failed to create command buffer",
+						device, &info, &buffer);
+		return buffer;
+	}
+
+	/* destroy command buffer */
+	inline auto destroy_command_buffer(const vk::device& device,
+									   const vk::command_pool& pool,
+									   vk::command_buffer& buffer) noexcept -> void {
+		if (buffer == VK_NULL_HANDLE)
+			return;
+		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+		buffer = VK_NULL_HANDLE;
+	}
+
+	/* begin command buffer */
+	inline auto begin_command_buffer(const vk::command_buffer& buffer,
+									 const vk::command_buffer_begin_info& info) -> void {
+		try_execute(::vkBeginCommandBuffer,
+					"failed to begin command buffer",
+					buffer, &info);
+	}
+
+	/* end command buffer */
+	inline auto end_command_buffer(const vk::command_buffer& buffer) -> void {
+		try_execute(::vkEndCommandBuffer,
+					"failed to end command buffer",
+					buffer);
+	}
+
+	/* cmd draw */
+	inline auto cmd_draw(const vk::command_buffer& buffer,
+						 const vk::u32 vertex_count,
+						 const vk::u32 instance_count,
+						 const vk::u32 first_vertex,
+						 const vk::u32 first_instance) noexcept -> void {
+		::vkCmdDraw(buffer, vertex_count, instance_count, first_vertex, first_instance);
+	}
+
+
+	// -- render pass ---------------------------------------------------------
+
+	/* create render_pass */
+	inline auto create_render_pass(const vk::device& device, const vk::render_pass_info& info) -> vk::render_pass {
+		vk::render_pass render_pass{VK_NULL_HANDLE};
 		vk::try_execute(::vkCreateRenderPass,
 						"failed to create renderpass",
-						device, &info, nullptr, &renderpass);
-		return renderpass;
+						device, &info, nullptr, &render_pass);
+		return render_pass;
+	}
+
+	/* destroy renderpass */
+	//inline auto destroy_renderpass(const vk::device& device, vk::renderpass& renderpass) noexcept -> void {
+	//	if (renderpass == VK_NULL_HANDLE)
+	//		return;
+	//	::vkDestroyRenderPass(device, renderpass, nullptr);
+	//	renderpass = VK_NULL_HANDLE;
+	//}
+
+	/* cmd begin render pass */
+	inline auto cmd_begin_render_pass(const vk::command_buffer& buffer,
+									  const vk::render_pass_begin_info& info,
+									  const vk::subpass_contents& contents = VK_SUBPASS_CONTENTS_INLINE) noexcept -> void {
+		::vkCmdBeginRenderPass(buffer, &info, contents);
+	}
+
+	/* cmd end render pass */
+	inline auto cmd_end_render_pass(const vk::command_buffer& buffer) noexcept -> void {
+		::vkCmdEndRenderPass(buffer);
+	}
+
+
+	// -- pipeline ------------------------------------------------------------
+
+	/* cmd bind pipeline */
+	inline auto cmd_bind_pipeline(const vk::command_buffer& buffer,
+								  const vk::pipeline_bind_point& point,
+								  const vk::pipeline& pipeline) noexcept -> void {
+		::vkCmdBindPipeline(buffer, point, pipeline);
 	}
 
 
@@ -345,6 +473,39 @@ namespace vk {
 		::vkDestroySemaphore(device, semaphore, nullptr);
 		semaphore = VK_NULL_HANDLE;
 	}
+
+
+	// -- image view ----------------------------------------------------------
+
+	/* create image view */
+	inline auto create_image_view(const vk::device& device, const vk::image_view_info& info) -> vk::image_view {
+		vk::image_view view{VK_NULL_HANDLE};
+		vk::try_execute(::vkCreateImageView,
+						"failed to create image view",
+						device, &info, nullptr, &view);
+		return view;
+	}
+
+	/* destroy image view */
+	inline auto destroy_image_view(const vk::device& device, vk::image_view& view) noexcept -> void {
+		if (view == VK_NULL_HANDLE)
+			return;
+		::vkDestroyImageView(device, view, nullptr);
+		view = VK_NULL_HANDLE;
+	}
+
+
+	// -- shader module -------------------------------------------------------
+
+	///* destroy shader module */
+	//inline auto destroy_shader_module(const vk::device& device, vk::shader_module& module) noexcept -> void {
+	//	if (module == VK_NULL_HANDLE)
+	//		return;
+	//	::vkDestroyShaderModule(device, module, nullptr);
+	//	module = VK_NULL_HANDLE;
+	//}
+
+
 
 
 

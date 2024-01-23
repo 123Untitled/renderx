@@ -45,6 +45,15 @@ namespace vk {
 	using swapchain_info                     = ::VkSwapchainCreateInfoKHR;
 
 
+	// -- framebuffer ---------------------------------------------------------
+
+	/* framebuffer */
+	using framebuffer                        = ::VkFramebuffer;
+
+	/* framebuffer info */
+	using framebuffer_info                   = ::VkFramebufferCreateInfo;
+
+
 	// -- physical device -----------------------------------------------------
 
 	/* physical device */
@@ -106,13 +115,37 @@ namespace vk {
 	using submit_info                        = ::VkSubmitInfo;
 
 
+	// -- command pool --------------------------------------------------------
+
+	/* command pool */
+	using command_pool                       = ::VkCommandPool;
+
+	/* command pool info */
+	using command_pool_info                  = ::VkCommandPoolCreateInfo;
+
+
+	// -- command buffer ------------------------------------------------------
+
+	/* command buffer */
+	using command_buffer                     = ::VkCommandBuffer;
+
+	/* command buffer info */
+	using command_buffer_info                = ::VkCommandBufferAllocateInfo;
+
+	/* command buffer begin info */
+	using command_buffer_begin_info          = ::VkCommandBufferBeginInfo;
+
+
 	// -- renderpass ----------------------------------------------------------
 
 	/* renderpass */
-	using renderpass                         = ::VkRenderPass;
+	using render_pass                        = ::VkRenderPass;
 
 	/* renderpass info */
-	using renderpass_info                    = ::VkRenderPassCreateInfo;
+	using render_pass_info                    = ::VkRenderPassCreateInfo;
+
+	/* renderpass begin info */
+	using render_pass_begin_info              = ::VkRenderPassBeginInfo;
 
 
 	// -- subpass -------------------------------------------------------------
@@ -122,6 +155,67 @@ namespace vk {
 
 	/* subpass dependency */
 	using subpass_dependency                 = ::VkSubpassDependency;
+
+	/* subpass contents */
+	using subpass_contents                   = ::VkSubpassContents;
+
+
+	// -- pipeline ------------------------------------------------------------
+
+	/* pipeline */
+	using pipeline                           = ::VkPipeline;
+
+	/* pipeline info */
+	using pipeline_info                      = ::VkGraphicsPipelineCreateInfo;
+
+	/* pipeline layout */
+	using pipeline_layout                    = ::VkPipelineLayout;
+
+	/* pipeline layout info */
+	using pipeline_layout_info               = ::VkPipelineLayoutCreateInfo;
+
+	/* graphics pipeline info */
+	using graphics_pipeline_info             = ::VkGraphicsPipelineCreateInfo;
+
+
+	/* pipeline bind point */
+	using pipeline_bind_point                = ::VkPipelineBindPoint;
+
+
+	/* pipeline shader stage info */
+	using pipeline_shader_stage_info         = ::VkPipelineShaderStageCreateInfo;
+
+	/* pipeline input assembly state info */
+	using pipeline_input_assembly_state_info = ::VkPipelineInputAssemblyStateCreateInfo;
+
+	/* pipeline tesselation state info */
+	using pipeline_tesselation_state_info    = ::VkPipelineTessellationStateCreateInfo;
+
+	/* pipeline viewport state info */
+	using pipeline_viewport_state_info       = ::VkPipelineViewportStateCreateInfo;
+
+	/* pipeline rasterization state info */
+	using pipeline_rasterization_state_info  = ::VkPipelineRasterizationStateCreateInfo;
+
+	/* pipeline multisample state info */
+	using pipeline_multisample_state_info    = ::VkPipelineMultisampleStateCreateInfo;
+
+	/* pipeline depth stencil state info */
+	using pipeline_depth_stencil_state_info  = ::VkPipelineDepthStencilStateCreateInfo;
+
+	/* pipeline color blend state info */
+	using pipeline_color_blend_state_info    = ::VkPipelineColorBlendStateCreateInfo;
+
+	/* pipeline color blend attachment state */
+	using pipeline_color_blend_attachment_state = ::VkPipelineColorBlendAttachmentState;
+
+	/* dynamic state */
+	using dynamic_state                      = ::VkDynamicState;
+
+	/* pipeline dynamic state info */
+	using pipeline_dynamic_state_info        = ::VkPipelineDynamicStateCreateInfo;
+
+
 
 
 	// -- attachment ----------------------------------------------------------
@@ -142,7 +236,38 @@ namespace vk {
 	using semaphore_info                     = ::VkSemaphoreCreateInfo;
 
 
+	// -- image view ----------------------------------------------------------
+
+	/* image view */
+	using image_view                         = ::VkImageView;
+
+	/* image view info */
+	using image_view_info                    = ::VkImageViewCreateInfo;
+
+
+	// -- image ---------------------------------------------------------------
+
+	/* image */
+	using image                              = ::VkImage;
+
+	/* image info */
+	using image_info                         = ::VkImageCreateInfo;
+
+
+	// -- shader module -------------------------------------------------------
+
+	/* shader module */
+	using shader_module                      = ::VkShaderModule;
+
+	/* shader module info */
+	using shader_module_info                 = ::VkShaderModuleCreateInfo;
+
+
+
 	// -- messenger -----------------------------------------------------------
+
+	/* debug utils messenger */
+	using debug_utils_messenger              = ::VkDebugUtilsMessengerEXT;
 
 	/* debug utils messenger info */
 	using debug_utils_messenger_info         = ::VkDebugUtilsMessengerCreateInfoEXT;
@@ -154,12 +279,27 @@ namespace vk {
 	using pfn_destroy_debug_utils_messenger  = ::PFN_vkDestroyDebugUtilsMessengerEXT;
 
 
+	// -- functions -----------------------------------------------------------
+
+	/* pfn void function */
+	using pfn_void_function                  = ::PFN_vkVoidFunction;
+
+
+	// -- vertex --------------------------------------------------------------
+
+	/* vertex input binding description */
+	using vertex_input_binding_description   = ::VkVertexInputBindingDescription;
+
+	/* vertex input attribute description */
+	using vertex_input_attribute_description = ::VkVertexInputAttributeDescription;
+
+	/* pipeline vertex input state info */
+	using pipeline_vertex_input_state_info   = ::VkPipelineVertexInputStateCreateInfo;
+
 
 	/* primitive topology */
 	using primitive_topology                 = ::VkPrimitiveTopology;
 
-	/* pipeline input assembly state info */
-	using pipeline_input_assembly_state_info = ::VkPipelineInputAssemblyStateCreateInfo;
 
 	/* viewport */
 	using viewport                           = ::VkViewport;
@@ -167,23 +307,21 @@ namespace vk {
 	/* rect2D */
 	using rect2D                             = ::VkRect2D;
 
-	/* pipeline viewport state info */
-	using pipeline_viewport_state_info       = ::VkPipelineViewportStateCreateInfo;
+	/* offset2D */
+	using offset2D                           = ::VkOffset2D;
 
-	/* pipeline rasterization state info */
-	using pipeline_rasterization_state_info  = ::VkPipelineRasterizationStateCreateInfo;
-
-	/* pipeline multisample state info */
-	using pipeline_multisample_state_info    = ::VkPipelineMultisampleStateCreateInfo;
-
-	/* image */
-	using image                              = ::VkImage;
 
 	/* format */
 	using format                             = ::VkFormat;
 
 	/* extent2D */
 	using extent2D                           = ::VkExtent2D;
+
+	/* clear value */
+	using clear_value                        = ::VkClearValue;
+
+	/* clear color value */
+	using clear_color_value                  = ::VkClearColorValue;
 
 
 

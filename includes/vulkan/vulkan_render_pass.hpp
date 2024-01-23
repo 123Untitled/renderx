@@ -15,9 +15,9 @@
 namespace vulkan {
 
 
-	// -- R E N D E R P A S S -------------------------------------------------
+	// -- R E N D E R  P A S S ------------------------------------------------
 
-	class renderpass final {
+	class render_pass final {
 
 
 		public:
@@ -25,16 +25,16 @@ namespace vulkan {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::renderpass;
+			using self = vulkan::render_pass;
 
 
 			// -- public lifecycle --------------------------------------------
 
 			/* deleted default constructor */
-			renderpass(void) noexcept = delete;
+			render_pass(void) noexcept = delete;
 
 			/* logical device constructor */
-			renderpass(const vulkan::logical_device&);
+			render_pass(const vulkan::logical_device&);
 
 
 			// -- public modifiers --------------------------------------------
@@ -54,7 +54,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* renderpass */
-			::VkRenderPass _renderpass;
+			vk::render_pass _render_pass;
 
 
 	}; // class renderpass

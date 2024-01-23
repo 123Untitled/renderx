@@ -4,26 +4,50 @@
 
 // -- public lifecycle --------------------------------------------------------
 
-/* logical device constructor */
-vulkan::command_pool::command_pool(const vulkan::logical_device& device)
-: _pool{VK_NULL_HANDLE} {
+/* default constructor */
+vulkan::command_pool::command_pool(void) noexcept
+: _pool{VK_NULL_HANDLE} {}
 
-	const ::VkCommandPoolCreateInfo info{
+/* logical device and queue family index constructor */
+vulkan::command_pool::command_pool(const vulkan::logical_device& device, const vk::u32 family)
+// create command pool
+: _pool{vk::create_command_pool(device, vk::command_pool_info{
 		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 		.pNext            = nullptr,
 		.flags            = 0,
-		.queueFamilyIndex = 0 // here need to get queue family index
-	};
+		.queueFamilyIndex = family
+	})} {
+}
 
-	if (::vkCreateCommandPool(device, &info, nullptr, &_pool) != VK_SUCCESS)
-		throw engine::exception{"failed to create command pool"};
+/* copy constructor */
+vulkan::command_pool::command_pool(const self& other) noexcept
+: _pool{other._pool} {
+}
+
+/* move constructor */
+vulkan::command_pool::command_pool(self&& other) noexcept
+: self{other} /* copy */ {
+}
+
+
+// -- public assignment operators ---------------------------------------------
+
+/* copy assignment operator */
+auto vulkan::command_pool::operator=(const self& other) noexcept -> self& {
+	_pool = other._pool;
+	return *this;
+}
+
+/* move assignment operator */
+auto vulkan::command_pool::operator=(self&& other) noexcept -> self& {
+	return self::operator=(other); /* copy */
 }
 
 
 // -- public methods ----------------------------------------------------------
 
-/* new buffer */
-auto vulkan::command_pool::new_buffer(const vulkan::logical_device& device) const -> vulkan::command_buffer {
+/* new command buffer */
+auto vulkan::command_pool::new_command_buffer(const vulkan::logical_device& device) const -> vulkan::command_buffer {
 	return vulkan::command_buffer{device, *this};
 }
 
@@ -37,17 +61,14 @@ auto vulkan::command_pool::new_buffers(const vulkan::logical_device& device, con
 
 /* destroy */
 auto vulkan::command_pool::destroy(const vulkan::logical_device& device) noexcept -> void {
-	if (_pool == VK_NULL_HANDLE)
-		return;
-	::vkDestroyCommandPool(device, _pool, nullptr);
-	_pool = VK_NULL_HANDLE;
+	vk::destroy_command_pool(device, _pool);
 }
 
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkCommandPool conversion operator */
-vulkan::command_pool::operator ::VkCommandPool(void) const noexcept {
+/* vk::command_pool conversion operator */
+vulkan::command_pool::operator const vk::command_pool&(void) const noexcept {
 	return _pool;
 }
 
