@@ -53,46 +53,32 @@ namespace engine {
 
 			/* load vertex shader */
 			template <xns::basic_string_literal S>
-			auto load_vertex(const vulkan::logical_device& device) -> void {
-				std::string path;
-				path.reserve(_root.size() + S.size()-1 + _vext.size());
-				path.append(_root.data(), _root.size());
-				path.append(S.data(), S.size()-1);
-				path.append(_vext.data(), _vext.size());
+			auto load_vertex(const vk::shared<vk::device>& device) -> void {
+				xns::string path;
+				//path.append(_root.data(), S.data(), _vext.data());
+				//std::cout << path << std::endl;
 
-				xns::get<S>(_vmap) = vulkan::shader_module{device, path};
+				//xns::get<S>(_vmap) = vulkan::shader_module{device, path, S};
 			}
 
 			/* load fragment shader */
 			template <xns::basic_string_literal S>
-			auto load_fragment(const vulkan::logical_device& device) -> void {
+			auto load_fragment(const vk::shared<vk::device>& device) -> void {
 
-				std::string path;
-				path.reserve(_root.size() + S.size() + _fext.size());
-				path.append(_root.data(), _root.size());
-				path.append(S.data(), S.size());
-				path.append(_fext.data(), _fext.size());
+				//std::string path;
+				//path.reserve(_root.size() + S.size() + _fext.size());
+				//path.append(_root.data(), _root.size());
+				//path.append(S.data(), S.size());
+				//path.append(_fext.data(), _fext.size());
 
-				xns::get<S>(_fmap) = vulkan::shader_module{device, path};
-			}
-
-			/* destroy */
-			auto destroy(const vulkan::logical_device& ldevice) noexcept -> void {
-				// destroy all vertex shaders
-				_vmap.for_each([](auto& shader, auto& device) {
-					shader.destroy(device);
-				}, ldevice);
-				// destroy all fragment shaders
-				_fmap.for_each([](auto& shader, auto& device) {
-					shader.destroy(device);
-				}, ldevice);
+				//xns::get<S>(_fmap) = vulkan::shader_module{device, path};
 			}
 
 
 		private:
 
 			/* root path */
-			static constexpr xns::string_view _root{"shaders/spirv/"};
+			static constexpr xns::basic_string_literal _root{"shaders/spirv/"};
 
 			/* vertex extension */
 			static constexpr xns::string_view _vext{".vert.spv"};

@@ -22,7 +22,10 @@ engine::renderer::renderer(void)
 	_render_pass{_ldevice} {
 
 	// load shaders
-	//_shaders.load_vertex<"basic">(*_ldevice);
+	_shaders.load_vertex<"basic">(_ldevice);
+
+	vulkan::shader_module vertex_shader{_ldevice,
+			xns::string{"shaders/spirv/basic.vert.spv"}, xns::string{"main"}};
 
 	// create triangle
 	vertices.emplace_back(-1.0f, -1.0f, 0.0f,

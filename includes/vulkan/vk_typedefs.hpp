@@ -270,6 +270,9 @@ namespace vk {
 	/* shader module info */
 	using shader_module_info                 = ::VkShaderModuleCreateInfo;
 
+	/* shader stage flag bits */
+	using shader_stage_flag_bits             = ::VkShaderStageFlagBits;
+
 
 
 	// -- messenger -----------------------------------------------------------

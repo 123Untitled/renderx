@@ -9,6 +9,7 @@
 
 #include "vk_typedefs.hpp"
 #include "vk_functions.hpp"
+#include "vulkan_resource.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -39,7 +40,9 @@ namespace vulkan {
 			shader_module(void) noexcept;
 
 			/* logical device and path constructor */
-			shader_module(const vulkan::logical_device&, const std::string&);
+			shader_module(const vk::shared<vk::device>&,
+						  const xns::string&,
+								xns::string&&);
 
 			/* copy constructor */
 			shader_module(const self&) noexcept;
@@ -62,14 +65,14 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* Vk::shader_module conversion operator */
+			/* vk::shader_module conversion operator */
 			operator const vk::shader_module&(void) const noexcept;
 
 
-			// -- public modifiers --------------------------------------------
+			// -- public accessors --------------------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			/* stage info */
+			auto stage_info(const vk::shader_stage_flag_bits) const noexcept -> vk::pipeline_shader_stage_info;
 
 
 		private:
@@ -77,7 +80,11 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* shader module */
-			vk::shader_module _module;
+			vk::managed<vk::shader_module,
+						vk::shared<vk::device>> _module;
+
+			/* entry point */
+			xns::string _entry;
 
 	}; // class shader_module
 
