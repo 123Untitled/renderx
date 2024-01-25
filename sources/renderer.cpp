@@ -46,7 +46,7 @@ auto engine::renderer::launch(void) -> void {
 	//this->initialize();
 	std::cout << _ldevice.count() << std::endl;
 
-	return;
+	//return;
 	while (_window.should_close() == false) {
 
 		_events.wait();
