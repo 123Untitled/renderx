@@ -40,6 +40,8 @@ auto vulkan::instance::physical_devices(void) -> const vk::vector<vulkan::physic
 	return __pdevices;
 }
 
+#include "overloads.hpp"
+
 /* pick physical device */
 auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> vulkan::physical_device {
 
@@ -48,6 +50,10 @@ auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> v
 
 	// loop over devices
 	for (const auto& pdevice : pdevices) {
+
+		const vulkan::physical_device& device = pdevice;
+
+		std::cout << device << std::endl;
 		//&& features.geometryShader;
 		//	device_type(properties);
 		//device_features(features);

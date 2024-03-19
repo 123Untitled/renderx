@@ -16,7 +16,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "basic_vertex.hpp"
 
 
@@ -40,7 +40,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			vertex_buffer(const vulkan::logical_device&);
+			vertex_buffer(const vulkan::device&);
 
 			/* deleted copy constructor */
 			vertex_buffer(const self&) = delete;

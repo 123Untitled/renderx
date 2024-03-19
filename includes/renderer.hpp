@@ -93,11 +93,8 @@ namespace engine {
 			/* surface */
 			vulkan::surface _surface;
 
-			/* physical device */
-			vulkan::physical_device _pdevice;
-
 			/* device */
-			vulkan::logical_device _ldevice;
+			vulkan::device _device;
 
 			/* swapchain */
 			vulkan::swapchain _swapchain;

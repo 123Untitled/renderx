@@ -15,7 +15,7 @@
 
 
 #include <vulkan/vulkan.h>
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_semaphore.hpp"
 #include "vulkan_command_buffer.hpp"
 #include "vulkan_swapchain.hpp"
@@ -44,7 +44,7 @@ namespace vulkan {
 			queue(void) noexcept = default;
 
 			/* device and queue family index constructor */
-			queue(const vulkan::logical_device&, const vk::u32) noexcept;
+			queue(const vulkan::device&, const vk::u32) noexcept;
 
 
 			// -- public static methods ---------------------------------------

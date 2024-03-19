@@ -15,8 +15,7 @@
 #include "glfw_events.hpp"
 
 #include "vulkan_physical_device.hpp"
-#include "vulkan_logical_device.hpp"
-#include "vulkan_queue_families.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_surface.hpp"
 #include "vulkan_shader_module.hpp"
 #include "vulkan_swapchain.hpp"

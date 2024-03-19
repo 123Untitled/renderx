@@ -18,7 +18,7 @@
 #include <vulkan/vulkan.h>
 
 // local headers
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_command_pool.hpp"
 #include "vulkan_swapchain.hpp"
 #include "vulkan_render_pass.hpp"

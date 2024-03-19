@@ -17,7 +17,7 @@
 // vulkan headers
 #include <vulkan/vulkan.h>
 
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 
 #include "vk_shared.hpp"
 

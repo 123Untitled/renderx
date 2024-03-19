@@ -21,10 +21,9 @@
 #include <unordered_map>
 #include <map>
 
-//#include "vulkan_logical_device.hpp"
 
 namespace vulkan {
-	class logical_device;
+	class device;
 }
 
 // -- E N G I N E  N A M E S P A C E ------------------------------------------

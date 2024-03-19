@@ -9,24 +9,25 @@ vulkan::swapchain::swapchain(void) noexcept
 }
 
 /* logical device and surface constructor */
-vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
-							 const vk::shared<vk::device>& device,
+vulkan::swapchain::swapchain(const vulkan::device& device,
 							 const vulkan::surface& surface)
 : _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
 
+	const auto& pdevice = device.physical_device();
 
 	// pick surface format
-	_format         = self::pick_surface_format(pdevice.surface_formats(surface));
+	_format                 = self::pick_surface_format(pdevice.surface_formats(surface));
 	// pick present mode
-	const auto mode = self::pick_present_mode(pdevice.surface_present_modes(surface));
+	const auto mode         = self::pick_present_mode(pdevice.surface_present_modes(surface));
 	// get capabilities
 	const auto capabilities = pdevice.surface_capabilities(surface);
 	// pick extent
-	_extent         = self::pick_extent(capabilities);
+	_extent                 = self::pick_extent(capabilities);
 
 
 	// +1 for triple buffering
 	vk::u32 count = pdevice.surface_capabilities(surface).minImageCount + 1;
+
 	// check for max image count
 	if (capabilities.maxImageCount > 0 && count > capabilities.maxImageCount)
 		count = capabilities.maxImageCount;
@@ -65,7 +66,7 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 
 
 	// get swapchain images
-	_images = vk::get_swapchain_images(device, _swapchain);
+	//_images = vk::get_swapchain_images(device, _swapchain);
 
 	//for (const auto& image : _images)
 	//	_views.emplace_back(device, image, _format.format);

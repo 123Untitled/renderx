@@ -22,7 +22,7 @@ static auto find_memory_type(::uint32_t filter, ::VkMemoryPropertyFlags flags) -
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::vertex_buffer::vertex_buffer(const vulkan::logical_device& device)
+vulkan::vertex_buffer::vertex_buffer(const vulkan::device& device)
 :	_buffer{VK_NULL_HANDLE},
 	_memory{VK_NULL_HANDLE} {
 

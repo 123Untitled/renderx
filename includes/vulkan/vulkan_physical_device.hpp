@@ -75,6 +75,9 @@ namespace vulkan {
 
 			// -- public accessors --------------------------------------------
 
+			/* find queue family */
+			auto find_queue_family(const vulkan::surface&, const vk::queue_flags_bits) const -> vk::u32;
+
 			/* supports swapchain */
 			auto supports_swapchain(void) const noexcept -> bool;
 

@@ -132,6 +132,9 @@ namespace vk {
 	/* queue flags */
 	using queue_flags                        = ::VkQueueFlags;
 
+	/* queue flags bits */
+	using queue_flags_bits                   = ::VkQueueFlagBits;
+
 
 
 	// -- queue ---------------------------------------------------------------

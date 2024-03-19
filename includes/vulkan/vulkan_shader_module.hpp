@@ -30,8 +30,8 @@ namespace vulkan {
 
 	// -- forward declarations ------------------------------------------------
 
-	/* logical device */
-	class logical_device;
+	/* device */
+	class device;
 
 
 	// -- S H A D E R  M O D U L E --------------------------------------------

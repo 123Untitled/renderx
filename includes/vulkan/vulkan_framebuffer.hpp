@@ -20,7 +20,7 @@
 
 #include "vulkan/vk_shared.hpp"
 
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_render_pass.hpp"
 #include "vulkan_swapchain.hpp"
 

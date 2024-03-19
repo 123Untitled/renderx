@@ -14,7 +14,7 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* device and queue family constructor */
-vulkan::queue::queue(const vulkan::logical_device& device,
+vulkan::queue::queue(const vulkan::device& device,
 					 const vk::u32 index) noexcept
 : _queue{vk::get_device_queue(device, index)} {}
 

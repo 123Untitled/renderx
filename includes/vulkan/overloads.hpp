@@ -18,31 +18,60 @@
 #include "vk_typedefs.hpp"
 #include <iostream>
 
+#include "vulkan_physical_device.hpp"
 
-/* physical device type */
-inline auto operator<<(std::ostream& os, const vk::physical_device_type& type) -> std::ostream& {
-	switch (type) {
+/* physical device */
+inline auto operator<<(std::ostream& os, const vulkan::physical_device& type) -> std::ostream& {
+
+	const bool supports_swapchain = type.supports_swapchain();
+	const auto extensions         = type.extension_properties();
+	const auto proterties         = type.properties();
+	const auto features           = type.features();
+
+	os << "supports swapchain: " << supports_swapchain << "\n";
+
+	// extension properties
+	//for (const auto& extension : extensions) {
+	//	os << "  " << extension.extensionName << "\n";
+	//}
+
+	// properties
+	os << "api version: " << proterties.apiVersion << "\n";
+	os << "driver version: " << proterties.driverVersion << "\n";
+	os << "vendor id: " << proterties.vendorID << "\n";
+	os << "device id: " << proterties.deviceID << "\n";
+	os << "device type: ";
+
+	switch (proterties.deviceType) {
 		case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-			os << "other";
+			os << "other\n";
 			break;
 		case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-			os << "integrated gpu";
+			os << "integrated gpu\n";
 			break;
 		case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-			os << "discrete gpu";
+			os << "discrete gpu\n";
 			break;
 		case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-			os << "virtual gpu";
+			os << "virtual gpu\n";
 			break;
 		case VK_PHYSICAL_DEVICE_TYPE_CPU:
-			os << "cpu";
+			os << "cpu\n";
 			break;
 		default:
-			os << "unknown";
+			os << "unknown\n";
 			break;
 	}
+
+
+	os << "device name: " << proterties.deviceName << "\n";
+	os << "pipeline cache uuid: " << proterties.pipelineCacheUUID << "\n";
+	//os << "  limits: " << proterties.limits << "\n";
+	//os << "  sparseProperties: " << proterties.sparseProperties << "\n";
+
 	return os;
 }
+
 
 /* physical device features */
 inline auto operator<<(std::ostream& os, const vk::physical_device_features& features) -> std::ostream& {

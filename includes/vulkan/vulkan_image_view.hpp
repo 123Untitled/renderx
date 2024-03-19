@@ -17,7 +17,7 @@
 #include <vulkan/vulkan.h>
 
 // local headers
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
@@ -40,7 +40,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			image_view(const vulkan::logical_device&,
+			image_view(const vulkan::device&,
 					   const vk::image&,
 					   const vk::format&);
 
@@ -72,7 +72,7 @@ namespace vulkan {
 			// -- public modifiers --------------------------------------------
 
 			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			auto destroy(const vulkan::device&) noexcept -> void;
 
 
 

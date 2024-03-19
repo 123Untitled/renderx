@@ -37,6 +37,22 @@ vulkan::physical_device::operator const vk::physical_device&(void) const noexcep
 
 // -- public accessors --------------------------------------------------------
 
+/* find queue family */
+auto vulkan::physical_device::find_queue_family(const vulkan::surface& surface,
+												const vk::queue_flags_bits flags) const -> vk::u32 {
+	// get queue families properties
+	static const auto properties = vk::get_physical_device_queue_family_properties(_pdevice);
+
+	for (vk::u32 i = 0; i < properties.size(); ++i) {
+		// check queue flags
+		if (properties[i].queueFlags & flags
+		&& is_support_surface_and_queue_family(surface, i)) {
+			return i;
+		}
+	}
+	throw engine::exception{"failed to find suitable queue family"};
+}
+
 /* supports swapchain */
 auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
 	auto extensions = vk::enumerate_device_extension_properties(_pdevice);

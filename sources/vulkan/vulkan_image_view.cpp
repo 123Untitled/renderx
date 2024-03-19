@@ -4,7 +4,7 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::image_view::image_view(const vulkan::logical_device& device,
+vulkan::image_view::image_view(const vulkan::device& device,
 							   const vk::image& image,
 							   const vk::format& format)
 // create image view
@@ -65,7 +65,7 @@ vulkan::image_view::operator const vk::image_view&() const noexcept {
 // -- public modifiers --------------------------------------------------------
 
 /* destroy */
-auto vulkan::image_view::destroy(const vulkan::logical_device& device) noexcept -> void {
+auto vulkan::image_view::destroy(const vulkan::device& device) noexcept -> void {
 	vk::destroy(device, _view);
 }
 

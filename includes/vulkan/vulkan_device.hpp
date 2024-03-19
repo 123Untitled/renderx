@@ -17,7 +17,8 @@
 #include <vulkan/vulkan.h>
 
 // local headers
-#include "vulkan_queue_families.hpp"
+#include "vulkan/vk_typedefs.hpp"
+#include "vulkan/vulkan_physical_device.hpp"
 #include "vulkan_surface.hpp"
 #include "vulkan/vk_shared.hpp"
 
@@ -30,32 +31,32 @@ namespace vulkan {
 
 	// -- D E V I C E ---------------------------------------------------------
 
-	class logical_device final {
+	class device final {
 		
 		public:
 
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::logical_device;
+			using self = vulkan::device;
 
 
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			logical_device(void) noexcept = default;
+			device(void) noexcept = default;
 
 			/* surface constructor */
-			logical_device(const vulkan::surface&);
+			device(const vulkan::surface&);
 
 			/* copy constructor */
-			logical_device(const self&) noexcept = default;
+			device(const self&) noexcept = default;
 
 			/* move constructor */
-			logical_device(self&&) noexcept = default;
+			device(self&&) noexcept = default;
 
 			/* destructor */
-			~logical_device(void) noexcept = default;
+			~device(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -76,6 +77,15 @@ namespace vulkan {
 			operator const vk::shared<vk::device>&(void) const noexcept;
 
 
+			// -- public accessors --------------------------------------------
+
+			/* physical device */
+			auto physical_device(void) const noexcept -> const vulkan::physical_device&;
+
+			/* queue family */
+
+
+
 			// -- public methods ----------------------------------------------
 
 			/* wait idle */
@@ -86,8 +96,14 @@ namespace vulkan {
 
 			// -- private members ---------------------------------------------
 
-			/* vulkan device */
-			vk::shared<vk::device> _device;
+			/* logical device */
+			vk::shared<vk::device> _ldevice;
+
+			/* physical device */
+			vulkan::physical_device _pdevice;
+
+			/* queue family */
+			vk::u32 _family;
 
 			/* queue priority */
 			float _priority;

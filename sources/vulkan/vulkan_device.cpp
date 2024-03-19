@@ -1,4 +1,4 @@
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_physical_device.hpp"
 #include "vulkan_queue.hpp"
 #include "vulkan/global/instance.hpp"
@@ -8,20 +8,20 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* physical device and surface constructor */
-vulkan::logical_device::logical_device(const vulkan::surface& surface)
-: _device{}, _priority{1.0f} {
+vulkan::device::device(const vulkan::surface& surface)
+: _ldevice{}, _pdevice{}, _family{0}, _priority{1.0f} {
 
-
-	auto pdevice = vulkan::instance::pick_physical_device(surface);
+	// pick physical device
+	_pdevice = vulkan::instance::pick_physical_device(surface);
 
 	// get queue family index
-	const auto index = vulkan::queue_families::find(pdevice, surface);
+	_family = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
 	// create device queue info
-	const auto queue_info = vulkan::queue::create_queue_info(index, _priority);
+	const auto queue_info = vulkan::queue::create_queue_info(_family, _priority);
 
 	// get physical device features
-	const auto features = pdevice.features();
+	const auto features = _pdevice.features();
 
 	// setup extensions
 	constexpr const char* extensions[] = {
@@ -35,7 +35,7 @@ vulkan::logical_device::logical_device(const vulkan::surface& surface)
 	// VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME (not defined)
 
 	// create device
-	_device = vk::make_shared(pdevice, vk::device_info{
+	_ldevice = vk::make_shared(_pdevice, vk::device_info{
 		// structure type
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		// next structure
@@ -63,19 +63,27 @@ vulkan::logical_device::logical_device(const vulkan::surface& surface)
 // -- public conversion operators ---------------------------------------------
 
 /* vk::device conversion operator */
-vulkan::logical_device::operator const vk::device&(void) const noexcept {
-	return _device;
+vulkan::device::operator const vk::device&(void) const noexcept {
+	return _ldevice;
 }
 
 /* vk::shared<vk::device> conversion operator */
-vulkan::logical_device::operator const vk::shared<vk::device>&(void) const noexcept {
-	return _device;
+vulkan::device::operator const vk::shared<vk::device>&(void) const noexcept {
+	return _ldevice;
+}
+
+
+// -- public accessors --------------------------------------------------------
+
+/* physical device */
+auto vulkan::device::physical_device(void) const noexcept -> const vulkan::physical_device& {
+	return _pdevice;
 }
 
 
 // -- public methods ----------------------------------------------------------
 
 /* wait idle */
-auto vulkan::logical_device::wait_idle(void) const -> void {
-	vk::device_wait_idle(_device);
+auto vulkan::device::wait_idle(void) const -> void {
+	vk::device_wait_idle(_ldevice);
 }

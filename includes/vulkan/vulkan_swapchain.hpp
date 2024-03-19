@@ -17,7 +17,7 @@
 #include <vulkan/vulkan.h>
 
 // local headers
-#include "vulkan_logical_device.hpp"
+#include "vulkan_device.hpp"
 #include "vulkan_image_view.hpp"
 #include "vulkan_semaphore.hpp"
 
@@ -51,8 +51,7 @@ namespace vulkan {
 			swapchain(void) noexcept;
 
 			/* logical device and surface constructor */
-			swapchain(const vulkan::physical_device&,
-					  const vk::shared<vk::device>&,
+			swapchain(const vulkan::device&,
 					  const vulkan::surface&);
 
 			/* deleted copy constructor */

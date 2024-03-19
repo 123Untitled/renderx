@@ -24,20 +24,19 @@ engine::renderer::renderer(void)
 	_window{800, 600},
 	_events{},
 	_surface{_window},
-	_pdevice{vulkan::instance::pick_physical_device(_surface)},
-	_ldevice{_surface},
-	_swapchain{_pdevice, _ldevice, _surface},
-	_command_pool{_ldevice, 0}, /* queue family index */
+	_device{_surface},
+	_swapchain{_device, _surface},
+	_command_pool{_device, 0}, /* queue family index */
 	_command_buffer{_command_pool}, /* swapChainFramebuffers.size() */
-	_image_available{_ldevice},
-	_render_finished{_ldevice},
+	_image_available{_device},
+	_render_finished{_device},
 	_shaders{},
-	_render_pass{_ldevice} {
+	_render_pass{_device} {
 
 	// load shaders
-	_shaders.load_vertex<"basic">(_ldevice);
+	_shaders.load_vertex<"basic">(_device);
 
-	vulkan::shader_module vertex_shader{_ldevice,
+	vulkan::shader_module vertex_shader{_device,
 			xns::string{"shaders/spirv/basic.vert.spv"}, xns::string{"main"}};
 
 	// create triangle
@@ -65,7 +64,7 @@ auto engine::renderer::launch(void) -> void {
 	}
 
 	// wait for logical device to be idle
-	_ldevice.wait_idle();
+	_device.wait_idle();
 }
 
 /* draw frame */
