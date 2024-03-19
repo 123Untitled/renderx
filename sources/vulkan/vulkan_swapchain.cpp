@@ -32,7 +32,7 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 		count = capabilities.maxImageCount;
 
 	// create swapchain with info
-	auto swapchain = vk::create(device, vk::swapchain_info{
+	_swapchain = {device, vk::swapchain_info{
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		.pNext                 = nullptr,
 		.flags                 = 0,
@@ -61,10 +61,8 @@ vulkan::swapchain::swapchain(const vulkan::physical_device& pdevice,
 															 //info.presentMode = mode; // not implemented
 		.clipped = VK_TRUE, // not implemented
 		.oldSwapchain = nullptr  // for resizing window, see later...
-	});
+	}};
 
-	// make managed swapchain
-	_swapchain = vk::make_managed(swapchain, device);
 
 	// get swapchain images
 	_images = vk::get_swapchain_images(device, _swapchain);
@@ -114,7 +112,7 @@ auto vulkan::swapchain::acquire_next_image(const vulkan::semaphore& semaphore,
 										   xns::u32& img_index) const noexcept -> bool {
 
 	// get image index
-	if (::vkAcquireNextImageKHR(_swapchain.dependency<vk::shared<vk::device>>(),
+	if (::vkAcquireNextImageKHR(_swapchain.dependency(),
 								_swapchain,
 								UINT64_MAX /* timeout */,
 								semaphore,

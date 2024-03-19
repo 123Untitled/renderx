@@ -1,9 +1,21 @@
-#ifndef ENGINE_GLFW_WINDOW_HPP
-#define ENGINE_GLFW_WINDOW_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_GLFW_WINDOW_HEADER
+#define ENGINE_GLFW_WINDOW_HEADER
 
 #include "glfw_system.hpp"
-
 #include "exceptions.hpp"
+
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
@@ -85,6 +97,6 @@ namespace glfw {
 
 	};
 
-}
+} // namespace glfw
 
-#endif // ENGINE_GLFW_WINDOW_HPP
+#endif // ENGINE_GLFW_WINDOW_HEADER

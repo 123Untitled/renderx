@@ -1,4 +1,5 @@
 #include "glfw_window.hpp"
+#include <GLFW/glfw3.h>
 
 
 /* default constructor */
@@ -9,13 +10,12 @@ glfw::window::window(void) noexcept
 glfw::window::window(const int width, const int height)
 : _window{nullptr} {
 
-	if (glfw::system::is_initialized() == false)
-		throw engine::exception{"glfw system is not initialized."};
+	auto& system = glfw::system::shared();
 
 	::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	::glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-	_window = ::glfwCreateWindow(width, height, "engine", nullptr, nullptr);
+	_window = system.new_window(width, height, "engine", nullptr, nullptr);
 
 	if (_window == nullptr)
 		throw engine::exception{"failed to create glfw window."};

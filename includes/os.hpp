@@ -1,5 +1,17 @@
-#ifndef ENGINE_OS_HPP
-#define ENGINE_OS_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_OS_HEADER
+#define ENGINE_OS_HEADER
 
 #if defined(_WIN32) || defined(_WIN64)
 	#define ENGINE_OS_WINDOWS
@@ -12,4 +24,4 @@
 	#define VK_USE_PLATFORM_MACOS_MVK
 #endif
 
-#endif // ENGINE_OS_HPP
+#endif // ENGINE_OS_HEADER

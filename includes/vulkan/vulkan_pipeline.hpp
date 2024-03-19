@@ -1,8 +1,20 @@
-#ifndef ENGINE_VULKAN_PIPELINE_HPP
-#define ENGINE_VULKAN_PIPELINE_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
 
-#include "vk_typedefs.hpp"
-#include "vulkan_resource.hpp"
+#pragma once
+
+#ifndef ENGINE_VULKAN_PIPELINE_HEADER
+#define ENGINE_VULKAN_PIPELINE_HEADER
+
+#include "vulkan/vk_typedefs.hpp"
+#include "vulkan/vk_shared.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -21,6 +33,7 @@ namespace vulkan {
 
 			/* self type */
 			using self = vulkan::pipeline;
+
 
 			// -- public lifecycle --------------------------------------------
 
@@ -43,6 +56,23 @@ namespace vulkan {
 					 const vk::pipeline_layout&,
 					 const vk::render_pass&);
 
+			/* copy constructor */
+			pipeline(const self&) noexcept = default;
+
+			/* move constructor */
+			pipeline(self&&) noexcept = default;
+
+			/* destructor */
+			~pipeline(void) noexcept = default;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self& = default;
+
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 		private:
@@ -50,13 +80,10 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pipeline */
-			vk::managed<vk::pipeline,
-						vk::shared<vk::device>> _pipeline;
-
-
+			vk::shared<vk::pipeline> _pipeline;
 
 	}; // class pipeline
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_PIPELINE_HPP
+#endif // ENGINE_VULKAN_PIPELINE_HEADER

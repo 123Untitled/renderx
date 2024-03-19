@@ -1,15 +1,26 @@
-#ifndef ENGINE_VULKAN_DEVICE_HPP
-#define ENGINE_VULKAN_DEVICE_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_VULKAN_DEVICE_HEADER
+#define ENGINE_VULKAN_DEVICE_HEADER
 
 // vulkan headers
 #include <vulkan/vulkan.h>
 
 // local headers
-#include "vulkan_physical_device.hpp"
 #include "vulkan_queue_families.hpp"
 #include "vulkan_surface.hpp"
+#include "vulkan/vk_shared.hpp"
 
-#include "os.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -32,18 +43,16 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			logical_device(void) noexcept;
+			logical_device(void) noexcept = default;
 
-			/* physical device and surface constructor */
-			logical_device(const vulkan::physical_device&,
-						   const vulkan::surface&);
-
+			/* surface constructor */
+			logical_device(const vulkan::surface&);
 
 			/* copy constructor */
-			logical_device(const self&) noexcept;
+			logical_device(const self&) noexcept = default;
 
 			/* move constructor */
-			logical_device(self&&) noexcept;
+			logical_device(self&&) noexcept = default;
 
 			/* destructor */
 			~logical_device(void) noexcept = default;
@@ -52,10 +61,10 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
@@ -73,16 +82,6 @@ namespace vulkan {
 			auto wait_idle(void) const -> void;
 
 
-			// -- public accessors --------------------------------------------
-
-			/* count */
-			inline auto count(void) const noexcept -> vk::u32 {
-				return _device.count();
-			}
-
-
-
-
 		private:
 
 			// -- private members ---------------------------------------------
@@ -97,4 +96,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_DEVICE_HPP
+#endif // ENGINE_VULKAN_DEVICE_HEADER

@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_COMMANDBUFFER_HPP
 #define ENGINE_VULKAN_COMMANDBUFFER_HPP
 
@@ -32,8 +44,18 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted copy constructor */
-			command_buffer(const self&) = delete;
+			/* default constructor */
+			command_buffer(void) noexcept = default;
+
+			/* logical device and command pool constructor */
+			command_buffer(const vk::shared<vk::command_pool>&,
+						   const vk::u32 size = 1);
+
+			/* copy constructor */
+			command_buffer(const self&) noexcept = default;
+
+			/* move constructor */
+			command_buffer(self&&) noexcept = default;
 
 			/* destructor */
 			~command_buffer(void) noexcept = default;
@@ -41,21 +63,17 @@ namespace vulkan {
 
 			// -- public assignment operators ---------------------------------
 
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			/* copy assignment operator */
+			auto operator=(const self&) noexcept -> self& = default;
+
+			/* move assignment operator */
+			auto operator=(self&&) noexcept -> self& = default;
 
 
-			// -- public modifiers --------------------------------------------
+			// -- public accessors --------------------------------------------
 
-			/* destroy */
-			auto destroy(const vulkan::logical_device&,
-						 const vulkan::command_pool&) noexcept -> void;
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* vk::command_buffer conversion operator */
-			operator const vk::command_buffer&(void) const noexcept;
+			/* size */
+			auto size(void) const noexcept -> vk::u32;
 
 
 			// -- public methods ----------------------------------------------
@@ -111,62 +129,32 @@ namespace vulkan {
 			auto end(void) const -> void;
 
 
+
 		private:
 
 			// -- friends -----------------------------------------------------
 
 			/* command_pool::new_command_buffer as friend */
 			//friend auto vulkan::command_pool::new_command_buffer(const vulkan::logical_device&) const -> vulkan::command_buffer;
+			friend auto vulkan::command_pool::new_secondary_command_buffer(const vk::u32 size) -> vulkan::command_buffer;
+			friend auto vulkan::command_pool::new_primary_command_buffer(const vk::u32 size) -> vulkan::command_buffer;
 
 			/* command_pool::new_buffers as friend */
-			friend auto vulkan::command_pool::new_buffers(const vulkan::logical_device&, const ::uint32_t) const -> xns::vector<vulkan::command_buffer>;
+			//friend auto vulkan::command_pool::new_buffers(const vulkan::logical_device&, const ::uint32_t) const -> xns::vector<vulkan::command_buffer>;
 
 			/* vector<vulkan::command_buffer> as friend */
-			friend typename vk::vector<self>::allocator;
-
-
-			// -- private lifecycle -------------------------------------------
-
-			/* default constructor */
-			command_buffer(void) noexcept;
-
-			/* logical device and command pool constructor */
-			command_buffer(const vulkan::logical_device&,
-						   const vulkan::command_pool&);
-
-			/* move constructor */
-			command_buffer(self&&) noexcept;
-
-
-			// -- private assignment operators --------------------------------
-
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
-
-
-			// -- private static methods --------------------------------------
-
-			/* create buffers */
-			static auto create_buffers(const vulkan::logical_device&,
-									   const vulkan::command_pool&,
-									   const ::uint32_t) -> xns::vector<self>;
+			//friend typename vk::vector<self>::allocator;
 
 
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::managed<vk::command_buffer,
-						vk::shared<vk::device>,
-						vk::managed<vk::command_pool,
-									vk::shared<vk::device>>> _buffer;
+			vk::shared<vk::command_buffer> _buffer;
 
-			//vk::command_buffer _buffer;
 
-	};
+			vk::u32 _size;
 
-	/* assert command buffer size matches */
-	//static_assert(sizeof(vk::command_buffer) == sizeof(vulkan::command_buffer),
-				//"): COMMAND_BUFFER SIZE MISMATCH! :(");
+	}; // class command_buffer
 
 } // namespace vulkan
 

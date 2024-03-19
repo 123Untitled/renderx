@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_SEMAPHORE_HPP
 #define ENGINE_VULKAN_SEMAPHORE_HPP
 
@@ -6,6 +18,9 @@
 #include <vulkan/vulkan.h>
 
 #include "vulkan_logical_device.hpp"
+
+#include "vk_shared.hpp"
+
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -35,10 +50,10 @@ namespace vulkan {
 			semaphore(const vk::shared<vk::device>&);
 
 			/* copy constructor */
-			semaphore(const self&) noexcept;
+			semaphore(const self&) noexcept = default;
 
 			/* move constructor */
-			semaphore(self&&) noexcept;
+			semaphore(self&&) noexcept = default;
 
 			/* destructor */
 			~semaphore(void) noexcept = default;
@@ -47,10 +62,10 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
@@ -64,17 +79,9 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* semaphore */
-			vk::managed<vk::semaphore,
-						vk::shared<vk::device>> _semaphore;
+			vk::shared<vk::semaphore> _semaphore;
 
 	}; // class semaphore
-
-
-	/* assert semaphore size matches */
-	//static_assert(sizeof(vulkan::semaphore) == sizeof(::VkSemaphore),
-			//"): SEMAPHORE SIZE MISMATCH! :(");
-
-
 
 } // namespace vulkan
 

@@ -1,17 +1,30 @@
-#ifndef ENGINE_VULKAN_PHYSICAL_DEVICE_HPP
-#define ENGINE_VULKAN_PHYSICAL_DEVICE_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
 
-#include <vulkan/vulkan.h>
-#include "vulkan_instance.hpp"
-#include "vulkan_surface.hpp"
+#pragma once
+
+#ifndef ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER
+#define ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER
 
 #include "vk_typedefs.hpp"
-#include "vk_functions.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
+
+	// -- forward declarations ------------------------------------------------
+
+	/* surface */
+	class surface;
 
 
 	// -- P H Y S I C A L  D E V I C E ----------------------------------------
@@ -32,11 +45,14 @@ namespace vulkan {
 			/* default constructor */
 			physical_device(void) noexcept;
 
+			/* vk::physical_device constructor */
+			physical_device(const vk::physical_device&) noexcept;
+
 			/* copy constructor */
-			physical_device(const self&) noexcept;
+			physical_device(const self&) noexcept = default;
 
 			/* move constructor */
-			physical_device(self&&) noexcept;
+			physical_device(self&&) noexcept = default;
 
 			/* destructor */
 			~physical_device(void) noexcept = default;
@@ -45,19 +61,16 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
-
-
-
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
 
-			/* VkPhysicalDevice conversion operator */
-			operator const vk::physical_device&() const noexcept;
+			/* vk::physical_device conversion operator */
+			operator const vk::physical_device&(void) const noexcept;
 
 
 			// -- public accessors --------------------------------------------
@@ -93,28 +106,21 @@ namespace vulkan {
 			auto features(void) const -> vk::physical_device_features;
 
 
-
 		private:
-
-			// -- friends -----------------------------------------------------
-
-			/* vk vector allocator as friend */
-			friend typename vk::vector<self>::allocator;
-
-
-			// -- private lifecycle -------------------------------------------
-
-			/* VkPhysicalDevice constructor */
-			physical_device(const vk::physical_device&) noexcept;
-
 
 			// -- private members ---------------------------------------------
 
 			/* device */
-			vk::physical_device _device;
+			vk::physical_device _pdevice;
 
-	};
+	}; // class physical_device
 
-}
 
-#endif // ENGINE_VULKAN_PHYSICAL_DEVICE_HPP
+	// -- assertions ----------------------------------------------------------
+
+	static_assert(sizeof(vulkan::physical_device) == sizeof(vk::physical_device),
+		"vk::physical_device size mismatch");
+
+} // namespace vulkan
+
+#endif // ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER

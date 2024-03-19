@@ -3,10 +3,6 @@
 
 // -- public lifecycle --------------------------------------------------------
 
-/* default constructor */
-vulkan::render_pass::render_pass(void) noexcept
-: _render_pass{} {}
-
 /* logical device constructor */
 vulkan::render_pass::render_pass(const vk::shared<vk::device>& device)
 : _render_pass{} {
@@ -72,35 +68,8 @@ vulkan::render_pass::render_pass(const vk::shared<vk::device>& device)
 
 
 	// create renderpass and make managed
-	_render_pass = vk::make_managed(vk::create(device, info),
-									device);
+	_render_pass = {device, info};
 
-}
-
-
-/* copy constructor */
-vulkan::render_pass::render_pass(const self& other) noexcept
-: _render_pass{other._render_pass} {
-}
-
-/* move constructor */
-vulkan::render_pass::render_pass(self&& other) noexcept
-: _render_pass{xns::move(other._render_pass)} {
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* copy assignment operator */
-auto vulkan::render_pass::operator=(const self& other) noexcept -> self& {
-	_render_pass = other._render_pass;
-	return *this;
-}
-
-/* move assignment operator */
-auto vulkan::render_pass::operator=(self&& other) noexcept -> self& {
-	_render_pass = xns::move(other._render_pass);
-	return *this;
 }
 
 

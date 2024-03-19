@@ -10,6 +10,9 @@
 # delete intermediate files on error
 .DELETE_ON_ERROR:
 
+# silent mode
+.SILENT:
+
 # set shell program
 override SHELL := $(shell which zsh)
 
@@ -24,6 +27,13 @@ override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
 
 override OS := $(shell uname -s)
+
+ifeq ($(OS), Darwin)
+override THREADS := $(shell sysctl -n hw.logicalcpu)
+endif
+ifeq ($(OS), Linux)
+override THREADS := $(shell nproc --all)
+endif
 
 
 
@@ -43,78 +53,97 @@ override COMPILE_COMMANDS = compile_commands.json
 # -- D I R E C T O R I E S ----------------------------------------------------
 
 # root directory
-override ROOTDIR := $(shell pwd)
-
-# build directory
-override BLDDIR := build
+override PWD_DIR := $(shell pwd)
 
 # source directory
-override SRCDIR := sources
+override SRC_DIR := sources
 
 # include directory
-override INCDIR := includes
-
-# object directory
-override OBJDIR := $(BLDDIR)/objects
-
-# dependency directory
-override DEPDIR := $(BLDDIR)/dependencies
-
-# json directory
-override JSNDIR := $(BLDDIR)/json
+override INC_DIR := includes
 
 # shader directory
-override SHADIR := shaders
+override SHA_DIR := shaders
+
+# tools directory
+override TLS_DIR := tools
 
 # external directory
-override EXTDIR := $(ROOTDIR)/external
+override EXT_DIR := $(PWD_DIR)/external
 
 
 
 
-# -- G L F W  S E T T I N G S -------------------------------------------------
+# -- G L F W ------------------------------------------------------------------
 
 # glfw directory
-override GLFW_DIR := $(EXTDIR)/glfw
+override GLFW_DIR := $(EXT_DIR)/glfw
 
 # glfw include directory
-override GLFW_INCLUDE := $(GLFW_DIR)/include
+override GLFW_INCLUDE := -I$(GLFW_DIR)/include
 
 # glfw library directory
-override GLFW_LIB := $(GLFW_DIR)/lib
+override GLFW_LIB := -L$(GLFW_DIR)/lib -lglfw3
 
 
-# -- X N S  S E T T I N G S ---------------------------------------------------
+# -- X N S --------------------------------------------------------------------
 
 # xns directory
-override XNS_DIR := $(EXTDIR)/xns
+override XNS_DIR := $(EXT_DIR)/xns
 
 # xns include directory
-override XNS_INCLUDE := $(XNS_DIR)
+override XNS_INCLUDE := -I$(XNS_DIR)
 
 # xns library directory
-override XNS_LIB := $(XNS_DIR)
+override XNS_LIB := -L$(XNS_DIR) -lxns
 
 
 
-# -- V U L K A N  S E T T I N G S ---------------------------------------------
+# -- V U L K A N --------------------------------------------------------------
 
 # vulkan directory
 ifeq ($(OS), Darwin)
-    override VULKAN_DIR := /Users/untitled/VulkanSDK/1.3.268.1/macOS
+override VULKAN_DIR := /Users/untitled/VulkanSDK/1.3.268.1/macOS
 endif
 ifeq ($(OS), Linux)
-    override VULKAN_DIR := $(EXTDIR)/vulkan/x86_64
+override VULKAN_DIR := $(EXT_DIR)/vulkan/x86_64
 endif
 
 # glslc compiler
 override GLSLC := $(VULKAN_DIR)/bin/glslc
 
 # vulkan include directory
-override VULKAN_INCLUDE := $(VULKAN_DIR)/include
+override VULKAN_INCLUDE := -I$(VULKAN_DIR)/include
+
+# os dependent vulkan dependencies
+ifeq ($(OS), Darwin)
+override VULKAN_DEPS := -framework Cocoa -framework IOKit
+endif
+ifeq ($(OS), Linux)
+override VULKAN_DEPS := -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
+endif
 
 # vulkan library directory
-override VULKAN_LIB := $(VULKAN_DIR)/lib
+override VULKAN_LIB := -L$(VULKAN_DIR)/lib -lvulkan $(VULKAN_DEPS)
+
+
+
+# -- S O U R C E S ------------------------------------------------------------
+
+# get all source files
+override SRCS := $(shell find $(SRC_DIR) -type f -name '*.cpp')
+
+# get all sub include directories
+override INCS := $(shell find $(INC_DIR) -type d)
+
+# pattern substitution for object files
+override OBJS := $(SRCS:%.cpp=%.o)
+
+# pattern substitution for dependency files
+override DEPS := $(OBJS:%.o=%.d)
+
+# pattern substitution for json files
+override JSNS := $(SRCS:%.cpp=%.json)
+
 
 
 
@@ -122,7 +151,6 @@ override VULKAN_LIB := $(VULKAN_DIR)/lib
 
 # compiler
 override CXX := clang++
-#override CXX := /opt/homebrew/Cellar/llvm/17.0.6_1/bin/clang++
 
 # compiler standard
 override STD := -std=c++2a
@@ -133,180 +161,144 @@ override OPT := -O0
 # debug flags
 override DEBUG := -g3
 
-# address sanitizer flags
-override ASANFLAGS := -fsanitize=address
-
 # warning scope
-override CXXFLAGS := -Wall -Wextra
+override EFLAGS := -Wall -Wextra
 
 # warning impact
-override CXXFLAGS += -Werror
+override EFLAGS += -Werror
 
 # standard respect
-override CXXFLAGS += -Weffc++ -Wpedantic
+override EFLAGS += -Weffc++ -Wpedantic
 
 # unused suppression
-override CXXFLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
+override EFLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
 					 -Wno-unused-private-field -Wno-unused-local-typedef \
 					 -Wno-unused-function 
 
 # optimization
-override CXXFLAGS += -Winline
+override EFLAGS += -Winline
 
 # type conversion
-override CXXFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
+override EFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
 
 # shadowing
-override CXXFLAGS += -Wshadow
-
-# linker flags
-override LDFLAGS := -L$(GLFW_LIB) -lglfw3 -L$(VULKAN_LIB) -lvulkan -L$(XNS_LIB) -lxns
-
-# os dependent linker flags
-ifeq ($(OS), Darwin)
-    override LDFLAGS += -framework Cocoa -framework IOKit
-endif
-ifeq ($(OS), Linux)
-    override LDFLAGS += -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
-endif
+override EFLAGS += -Wshadow
 
 # dependency flags
-override DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+override DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 # compile commands flags
-override CMPFLAGS = -MJ $(JSNDIR)/$*.json
-
+override CMPFLAGS = -MJ $*.json
 
 # defines
 override DEFINES := -DENGINE_VL_DEBUG
 
-
-# -- S O U R C E S ------------------------------------------------------------
-
-# get all source files
-override SRCS := $(shell find $(SRCDIR) -type f -name '*.cpp')
-
-# pattern substitution for object files
-override OBJS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o,    $(SRCS))
-
-# pattern substitution for dependency files
-override DEPS := $(patsubst $(OBJDIR)/%.o,   $(DEPDIR)/%.d,    $(OBJS))
-
-# pattern substitution for json files
-override JSNS := $(patsubst $(SRCDIR)/%.cpp, $(JSNDIR)/%.json, $(SRCS))
-
-
-# get all sub source directories
-override SUBSRCDIR := $(sort $(dir $(SRCS)))
-
-# pattern substitution for sub directories
-override SUBOBJDIR := $(SUBSRCDIR:$(SRCDIR)/%=$(OBJDIR)/%)
-override SUBDEPDIR := $(SUBSRCDIR:$(SRCDIR)/%=$(DEPDIR)/%)
-override SUBJSNDIR := $(SUBSRCDIR:$(SRCDIR)/%=$(JSNDIR)/%)
-
-# get all sub include directories
-override SUB_INCLUDE := $(shell find $(INCDIR) -type d)
-
-
-
 # include flags
-override INCLUDES := $(addprefix -I, $(SUB_INCLUDE) $(GLFW_INCLUDE) $(VULKAN_INCLUDE) $(XNS_INCLUDE))
+override INCLUDES := $(addprefix -I, $(INCS)) $(GLFW_INCLUDE) $(VULKAN_INCLUDE) $(XNS_INCLUDE)
+
+# linker flags
+override LDFLAGS := $(GLFW_LIB) $(VULKAN_LIB) $(XNS_LIB)
+
+
+# cxx flags
+override CXXFLAGS = $(STD) $(OPT) $(DEBUG) $(DEFINES) $(EFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS)
 
 
 
 
-# -- C O L O R S --------------------------------------------------------------
+# -- T O O L S ----------------------------------------------------------------
 
-define COLOR
-	@printf "\e[7;32m %s \e[0m\n" $(1)
-endef
+override RM := rm -rf
+override CP := cp -r
+override MKDIR := mkdir -p
 
-define LINES
-	@printf "\e[90m%s\e[0m\n" '-----------------------------------------------'
-endef
 
-define LOGO
-@echo -e '\x1b[32m'\
-'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n'\
-'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n'\
-' ╱         ╱         ╱         ╱         ╱\n'\
-'╱         ╱         ╱        ▁╱       ▁▁╱ \n'\
-'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱\n'
-endef
+# terminal cell width
+override TERM_WIDTH := $(shell tput cols)
 
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re intro shaders xns
+.PHONY: all clean fclean re intro shaders xns ascii
+
+
+# -- A S C I I  A R T ---------------------------------------------------------
+
+ascii:
+	echo '\x1b[32m\n' \
+		'░  ░░░░  ░░  ░░░░  ░░  ░░░░░░░░  ░░░░  ░░░      ░░░   ░░░  ░\n' \
+		'▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒▒  ▒▒    ▒▒  ▒\n' \
+		'▓▓  ▓▓  ▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓     ▓▓▓▓▓  ▓▓▓▓  ▓▓  ▓  ▓  ▓\n' \
+		'███    ████  ████  ██  ████████  ███  ███        ██  ██    █\n' \
+		'████  ██████      ███        ██  ████  ██  ████  ██  ███   █\n' \
+		'GNU Make:' $(MAKE_VERSION)'\x1b[0m'
 
 
 # -- R U L E S ----------------------------------------------------------------
 
-all: intro $(GLFW_DIR) xns shaders objs $(EXEC) $(COMPILE_COMMANDS)
-	@$(call LINES)
-	$(call COLOR,"done ◝(ᵔᵕᵔ)◜")
-	echo -n '\n'
-
-intro:
-	$(call LOGO)
+all: ascii $(GLFW_DIR) xns shaders objs $(EXEC) $(COMPILE_COMMANDS)
+	$(call FORMAT,"done")
+	echo
 
 # shaders
 shaders:
-	@$(MAKE) --silent --directory=$(SHADIR) GLSLC=$(GLSLC)
-	$(call LINES)
+	$(call FORMAT,"compiling shaders")
+	$(MAKE) --silent --directory=$(SHA_DIR) GLSLC=$(GLSLC)
 
 
 # executable
 $(EXEC): $(OBJS)
-	@echo "  linking: $@"
+	$(call FORMAT,"linking")
 	$(CXX) $^ -o $@ $(LDFLAGS)
-	file $(EXEC)
+	\ls -l $@
 
 # launch threads
 objs:
-	$(call COLOR,"compiling project")
-	@$(MAKE) --silent -j8 $(OBJS)
+	$(call FORMAT,"compilation")
+	$(MAKE) --silent --jobs=$(THREADS) $(OBJS)
 
 # compilation
 -include $(DEPS)
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp Makefile | $(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR)
-	@echo "compiling: $<"
-	$(CXX) $(STD) $(DEBUG) $(DEFINES) $(CXXFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS) -c $< -o $@
+%.o: %.cpp Makefile
+	print -f '- %s\n' $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# create directories
-$(SUBOBJDIR) $(SUBDEPDIR) $(SUBJSNDIR):
-	@mkdir -p $@
 
 # compile commands
 $(COMPILE_COMMANDS): $(JSNS)
-	@echo "creating $@"
-	@echo "[\n"$$(cat $(JSNS) | sed '$$s/,\s*$$//')"\n]" | jq > $@
+	$(call FORMAT,"compile database")
+	echo "[\n"$$(cat $(JSNS) | sed '$$s/,\s*$$//')"\n]" | jq > $@
+	\ls -l $@
 
 # clean
-clean: intro
-	$(call LINES)
-	@$(call COLOR,"cleaning project")
-	@rm -rfv $(BLDDIR) $(COMPILE_COMMANDS) .cache
-	$(MAKE) --silent --directory=$(SHADIR) clean
+clean:
+	$(call FORMAT,"cleaning project")
+	$(RM) $(COMPILE_COMMANDS) .cache $(OBJS) $(DEPS) $(JSNS)
+	$(MAKE) --silent --directory=$(SHA_DIR) clean
 
 # fclean
 fclean: clean
-	@rm -rfv $(EXEC) $(GLFW_DIR) $(XNS_DIR)
-	$(MAKE) --silent --directory=$(SHADIR) fclean
-
-
-# glfw
-$(GLFW_DIR):
-	@$(call LINES)
-	@$(call COLOR,"installing glfw")
-	tools/install_glfw.sh
-
-# xns
-xns:
-	@$(call LINES)
-	@$(call COLOR,"installing xns")
-	tools/install_xns.sh
+	$(RM) $(EXEC) $(EXT_DIR)
+	$(MAKE) --silent --directory=$(SHA_DIR) fclean
 
 # re
 re: fclean all
 
+# glfw
+$(GLFW_DIR):
+	$(call FORMAT,"installing glfw")
+	$(TLS_DIR)/install_glfw.sh
+
+# xns
+xns:
+	$(call FORMAT,"installing xns")
+	$(TLS_DIR)/install_xns.sh
+
+
+
+# -- F O R M A T T I N G ------------------------------------------------------
+
+define FORMAT
+printf '\x1b[90m%0.1s\x1b[0m' '-'{1..$(TERM_WIDTH)}
+echo '\x1b[7;32m' $(1) '\x1b[0m'
+endef

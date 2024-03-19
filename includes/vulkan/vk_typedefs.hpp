@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VK_TYPEDEFS_HPP
 #define ENGINE_VK_TYPEDEFS_HPP
 
@@ -5,14 +17,27 @@
 // vulkan headers
 #include <vulkan/vulkan.h>
 
+#include <xns>
+
 
 // -- V K  N A M E S P A C E --------------------------------------------------
 
 namespace vk {
 
 
+	/* unsigned integer 32 type */
+	using u32 = ::uint32_t;
+
+	/* vector type */
+	template <typename T>
+	using vector = xns::vector<T>;
+
+
 	/* result */
 	using result                             = ::VkResult;
+
+	/* bool32 */
+	using bool32                             = ::VkBool32;
 
 
 	/* extension properties */
@@ -26,6 +51,9 @@ namespace vk {
 
 	/* instance */
 	using instance                           = ::VkInstance;
+
+	/* instance create flags */
+	using instance_create_flags              = ::VkInstanceCreateFlags;
 
 	/* application info */
 	using application_info                   = ::VkApplicationInfo;

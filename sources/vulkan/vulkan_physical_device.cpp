@@ -1,41 +1,37 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
 #include "vulkan_physical_device.hpp"
+
+#include "vulkan/vulkan_surface.hpp"
+#include "vk_functions.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
 vulkan::physical_device::physical_device(void) noexcept
-: _device{VK_NULL_HANDLE} {}
-
-/* copy constructor */
-vulkan::physical_device::physical_device(const self& other) noexcept
-: _device{other._device} {}
-
-/* move constructor */
-vulkan::physical_device::physical_device(self&& other) noexcept
-: self{other._device} /* copy */ {}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* copy assignment operator */
-auto vulkan::physical_device::operator=(const self& other) noexcept -> self& {
-	_device = other._device;
-	return *this;
+: _pdevice{VK_NULL_HANDLE} {
 }
 
-/* move assignment operator */
-auto vulkan::physical_device::operator=(self&& other) noexcept -> self& {
-	return self::operator=(other); /* copy */
+/* vk::physical_device constructor */
+vulkan::physical_device::physical_device(const vk::physical_device& pdevice) noexcept
+: _pdevice{pdevice} {
 }
-
 
 
 // -- public conversion operators ---------------------------------------------
 
-/* VkPhysicalDevice conversion operator */
-vulkan::physical_device::operator const ::VkPhysicalDevice&() const noexcept {
-	return _device;
+/* vk::physical_device conversion operator */
+vulkan::physical_device::operator const vk::physical_device&(void) const noexcept {
+	return _pdevice;
 }
 
 
@@ -43,7 +39,7 @@ vulkan::physical_device::operator const ::VkPhysicalDevice&() const noexcept {
 
 /* supports swapchain */
 auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
-	auto extensions = vk::enumerate_device_extension_properties(_device);
+	auto extensions = vk::enumerate_device_extension_properties(_pdevice);
 
 	for (const auto& extension : extensions) {
 		if (vk::supports_swapchain(extension))
@@ -54,56 +50,46 @@ auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
 
 /* have surface formats */
 auto vulkan::physical_device::have_surface_formats(const vulkan::surface& surface) const -> bool {
-	return bool{vk::get_physical_device_surface_formats_count(_device, surface) > 0};
+	return bool{vk::get_physical_device_surface_formats_count(_pdevice, surface) > 0};
 }
 
 /* have present modes */
 auto vulkan::physical_device::have_present_modes(const vulkan::surface& surface) const -> bool {
-	return bool{vk::get_physical_device_surface_present_modes_count(_device, surface) > 0};
+	return bool{vk::get_physical_device_surface_present_modes_count(_pdevice, surface) > 0};
 }
 
 /* is support surface and queue family */
 auto vulkan::physical_device::is_support_surface_and_queue_family(const vulkan::surface& surface,
 																  const vk::u32 family) const -> bool {
-	return vk::get_physical_device_surface_support(*this, surface, family);
+	return vk::get_physical_device_surface_support(_pdevice, surface, family);
 }
 
 /* extension properties */
 auto vulkan::physical_device::extension_properties(void) const -> vk::vector<vk::extension_properties> {
-	return vk::enumerate_device_extension_properties(_device);
+	return vk::enumerate_device_extension_properties(_pdevice);
 }
 
 /* surface capabilities */
 auto vulkan::physical_device::surface_capabilities(const vulkan::surface& surface) const -> vk::surface_capabilities {
-	return vk::get_physical_device_surface_capabilities(_device, surface);
+	return vk::get_physical_device_surface_capabilities(_pdevice, surface);
 }
 
 /* surface formats */
 auto vulkan::physical_device::surface_formats(const vulkan::surface& surface) const -> vk::vector<vk::surface_format> {
-	return vk::get_physical_device_surface_formats(_device, surface);
+	return vk::get_physical_device_surface_formats(_pdevice, surface);
 }
 
 /* surface present modes */
 auto vulkan::physical_device::surface_present_modes(const vulkan::surface& surface) const -> vk::vector<vk::present_mode> {
-	return vk::get_physical_device_surface_present_modes(_device, surface);
+	return vk::get_physical_device_surface_present_modes(_pdevice, surface);
 }
 
 /* properties */
 auto vulkan::physical_device::properties(void) const -> vk::physical_device_properties {
-	return vk::get_physical_device_properties(_device);
+	return vk::get_physical_device_properties(_pdevice);
 }
 
 /* features */
 auto vulkan::physical_device::features(void) const -> vk::physical_device_features {
-	return vk::get_physical_device_features(_device);
+	return vk::get_physical_device_features(_pdevice);
 }
-
-
-
-// -- private lifecycle -------------------------------------------------------
-
-/* VkPhysicalDevice constructor */
-vulkan::physical_device::physical_device(const vk::physical_device& device) noexcept
-: _device{device} {}
-
-

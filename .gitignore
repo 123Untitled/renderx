@@ -3,6 +3,10 @@ build/
 .cache/
 .nvimlog
 
+sources/**/*.o
+sources/**/*.d
+sources/**/*.json
+
 **/*.spv
 
 exec

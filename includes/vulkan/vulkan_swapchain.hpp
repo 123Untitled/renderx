@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_SWAPCHAIN_HPP
 #define ENGINE_VULKAN_SWAPCHAIN_HPP
 
@@ -12,11 +24,13 @@
 #include <xns>
 
 #include "vk_typedefs.hpp"
+#include "vk_shared.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
+
 
 	// -- S W A P C H A I N ---------------------------------------------------
 
@@ -107,8 +121,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* swapchain */
-			vk::managed<vk::swapchain,
-						vk::shared<vk::device>> _swapchain;
+			vk::shared<vk::swapchain> _swapchain;
 
 			/* images */
 			vk::vector<vk::image> _images;

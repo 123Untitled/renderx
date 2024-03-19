@@ -1,5 +1,17 @@
-#ifndef ENGINE_VK_UTILS_HPP
-#define ENGINE_VK_UTILS_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_VK_UTILS_HEADER
+#define ENGINE_VK_UTILS_HEADER
 
 #include <xns>
 #include "vk_typedefs.hpp"
@@ -9,17 +21,6 @@
 // -- V K  N A M E S P A C E --------------------------------------------------
 
 namespace vk {
-
-
-	// -- types ---------------------------------------------------------------
-
-	/* unsigned integer 32 type */
-	using u32 = ::uint32_t;
-
-	/* vector type */
-	template <typename T>
-	using vector = xns::vector<T>;
-
 
 
 	/* try execute */
@@ -37,4 +38,4 @@ namespace vk {
 
 } // namespace vk
 
-#endif // ENGINE_VK_UTILS_HPP
+#endif // ENGINE_VK_UTILS_HEADER

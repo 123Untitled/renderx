@@ -1,4 +1,4 @@
-#include "vulkan_pipeline.hpp"
+#include "vulkan/vulkan_pipeline.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -19,7 +19,7 @@ vulkan::pipeline::pipeline(const vk::shared<vk::device>&                 device,
 						   const vk::pipeline_layout&                    layout,
 						   const vk::render_pass&                        render_pass)
 
-: _pipeline{vk::make_managed(vk::create(device, vk::graphics_pipeline_info{
+: _pipeline{device, vk::graphics_pipeline_info{
 		// type of struct
 		.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
 		// pointer to next struct
@@ -57,12 +57,7 @@ vulkan::pipeline::pipeline(const vk::shared<vk::device>&                 device,
 		// base pipeline handle
 		.basePipelineHandle  = VK_NULL_HANDLE,
 		// base pipeline index
-		.basePipelineIndex   = -1,
-
-	}), device)} {
-
+		.basePipelineIndex   = -1
+	}} {
 
 }
-
-
-

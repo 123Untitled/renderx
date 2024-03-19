@@ -1,5 +1,17 @@
-#ifndef ENGINE_VULKAN_QUEUE_FAMILIES_HPP
-#define ENGINE_VULKAN_QUEUE_FAMILIES_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_VULKAN_QUEUE_FAMILIES_HEADER
+#define ENGINE_VULKAN_QUEUE_FAMILIES_HEADER
 
 #include <vulkan/vulkan.h>
 #include "vulkan_physical_device.hpp"
@@ -61,9 +73,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_QUEUE_FAMILIES_HPP
-
-
-
-
-
+#endif // ENGINE_VULKAN_QUEUE_FAMILIES_HEADER

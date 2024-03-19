@@ -1,17 +1,14 @@
 #include "vulkan_command_buffer.hpp"
 
+#include <vulkan/vulkan.h>
 
 // -- private lifecycle -------------------------------------------------------
 
-/* default constructor */
-vulkan::command_buffer::command_buffer(void) noexcept
-: _buffer{} {}
-
 /* logical device and command pool constructor */
-vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
-									   const vulkan::command_pool& pool)
+vulkan::command_buffer::command_buffer(const vk::shared<vk::command_pool>& pool,
+									   const vk::u32 size)
 // create command buffer
-/*: _buffer{vk::create(device, vk::command_buffer_info{
+: _buffer{pool, size, vk::command_buffer_info{
 		// type of structure
 		.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 		// pointer to next structure
@@ -21,10 +18,8 @@ vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
 		// level of command buffer (primary or secondary)
 		.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 		// number of command buffers to allocate
-		.commandBufferCount = 1
-	})} {
-	*/
-{
+		.commandBufferCount = size
+	}} {
 
     // VK_COMMAND_BUFFER_LEVEL_PRIMARY
 	// peut être envoyé à une queue pour y être exécuté
@@ -35,39 +30,12 @@ vulkan::command_buffer::command_buffer(const vulkan::logical_device& device,
 
 }
 
-/* move constructor */
-vulkan::command_buffer::command_buffer(self&& other) noexcept
-/*: _buffer{other._buffer}*/ {
-	//other._buffer = VK_NULL_HANDLE;
-}
 
+// -- public accessors --------------------------------------------------------
 
-// -- private assignment operators --------------------------------------------
-
-/* move assignment operator */
-auto vulkan::command_buffer::operator=(self&& other) noexcept -> self& {
-	if (this == &other)
-		return *this;
-	_buffer = other._buffer;
-	//other._buffer = VK_NULL_HANDLE;
-	return *this;
-}
-
-
-// -- public modifiers --------------------------------------------------------
-
-/* destroy */
-auto vulkan::command_buffer::destroy(const vulkan::logical_device& device,
-									 const vulkan::command_pool& pool) noexcept -> void {
-	//vk::destroy_command_buffer(device, pool, _buffer);
-}
-
-
-// -- public conversion operators ---------------------------------------------
-
-/* VkCommandBuffer conversion operator */
-vulkan::command_buffer::operator const vk::command_buffer&(void) const noexcept {
-	return _buffer;
+/* size */
+auto vulkan::command_buffer::size(void) const noexcept -> vk::u32 {
+	return _buffer.size();
 }
 
 
@@ -75,17 +43,37 @@ vulkan::command_buffer::operator const vk::command_buffer&(void) const noexcept 
 
 /* begin */
 auto vulkan::command_buffer::begin(void) const -> void {
-	// begin command buffer
-	vk::begin_command_buffer(_buffer, vk::command_buffer_begin_info{
-		// type of structure
-		.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		// pointer to next structure
-		.pNext            = nullptr,
-		// flags
-		.flags            = 0,
-		// pointer to inheritance info for secondary command buffers
-		.pInheritanceInfo = nullptr
-	});
+
+	vk::command_buffer_begin_info info {
+			// type of structure
+			.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			// pointer to next structure
+			.pNext            = nullptr,
+			// flags
+			.flags            = 0,
+			// pointer to inheritance info for secondary command buffers
+			.pInheritanceInfo = nullptr
+	};
+
+	/* flags:
+	 * VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT 
+		le command buffer sera ré-enregistré après son utilisation, donc invalidé une fois son exécution terminée
+     * VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT
+		ce command buffer secondaire sera intégralement exécuté dans une unique render pass
+	 * VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+		le command buffer peut être ré-envoyé à la queue alors qu'il y est déjà et/ou est en cours d'exécution
+	 */
+
+
+	vk::command_buffer buffer = _buffer;
+
+	// loop over command buffers
+	for (vk::u32 i = 0; i < _buffer.size(); ++i) {
+		// begin command buffer
+		vk::begin_command_buffer((&buffer)[i], info);
+	}
+
+
 }
 
 /* end */
@@ -95,7 +83,7 @@ auto vulkan::command_buffer::end(void) const -> void {
 
 /* renderpass begin */
 auto vulkan::command_buffer::renderpass_begin(const vulkan::swapchain& swapchain,
-											  const vulkan::render_pass& renderpass) const noexcept -> void {
+											  const vulkan::render_pass& render_pass) const noexcept -> void {
 
 	// clear color
 	const vk::clear_value clear{
@@ -109,20 +97,16 @@ auto vulkan::command_buffer::renderpass_begin(const vulkan::swapchain& swapchain
 		.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.pNext           = nullptr,
 		// renderpass
-		.renderPass      = renderpass,
+		.renderPass      = render_pass,
 		// framebuffer from swapchain !!! (not implemented)
 		.framebuffer     = VK_NULL_HANDLE,
-		.renderArea      = vk::rect2D{
-			.offset = vk::offset2D{0, 0},
-			// swapchain extent
-			.extent = swapchain.extent()
-		},
+		.renderArea      = vk::rect2D{.offset = vk::offset2D{0, 0},
+									  .extent = swapchain.extent()},
 		.clearValueCount = 1,
 		.pClearValues    = &clear
 	// primary command buffer or secondary command buffer ?
 	}, VK_SUBPASS_CONTENTS_INLINE);
 }
-
 
 /* draw */
 auto vulkan::command_buffer::draw(const vk::u32 vertex_count,
@@ -136,29 +120,3 @@ auto vulkan::command_buffer::draw(const vk::u32 vertex_count,
 auto vulkan::command_buffer::renderpass_end(void) const noexcept -> void {
 	vk::cmd_end_render_pass(_buffer);
 }
-
-
-
-
-// -- private static methods --------------------------------------------------
-
-
-/* create buffers */
-auto vulkan::command_buffer::create_buffers(const vulkan::logical_device& device,
-											const vulkan::command_pool& pool,
-											const ::uint32_t count) -> xns::vector<self> {
-	// create info
-	//const auto info = self::create_info(pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, count);
-	//// allocate vector of command buffers
-	//xns::vector<self> buffers{};
-	//buffers.resize(count);
-	//// get data pointer
-	//auto data = reinterpret_cast<::VkCommandBuffer*>(buffers.data());
-	//// allocate command buffers
-	//if (::vkAllocateCommandBuffers(device, &info, data) != VK_SUCCESS)
-	//	throw engine::exception{"failed to allocate command buffers"};
-	//// return vector
-	//return buffers;
-	return {};
-}
-

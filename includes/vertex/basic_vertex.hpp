@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_BASIC_VERTEX_HPP
 #define ENGINE_BASIC_VERTEX_HPP
 
@@ -61,6 +73,22 @@ namespace engine {
 			/* move constructor */
 			basic_vertex(self&& other) noexcept
 			: self{other} /* copy */ {}
+
+
+
+			// -- public assignment operators --------------------------------
+
+			/* copy assignment operator */
+			auto operator=(const self& other) noexcept -> self& {
+				_position = other._position;
+				_color    = other._color;
+				return *this;
+			}
+
+			/* move assignment operator */
+			auto operator=(self&& other) noexcept -> self& {
+				return operator=(other);
+			}
 
 
 

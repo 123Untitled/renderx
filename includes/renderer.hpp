@@ -1,5 +1,17 @@
-#ifndef ENGINE_RENDERER_HPP
-#define ENGINE_RENDERER_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_RENDERER_HEADER
+#define ENGINE_RENDERER_HEADER
 
 #include <xns>
 #include <vulkan/vulkan.h>
@@ -12,6 +24,8 @@
 #include "glfw_events.hpp"
 
 #include "shader_library.hpp"
+
+#include "vulkan/global/instance.hpp"
 
 
 
@@ -70,9 +84,6 @@ namespace engine {
 
 			// -- private members ---------------------------------------------
 
-			/* vulkan instance */
-			vulkan::instance _instance;
-
 			/* window */
 			glfw::window _window;
 
@@ -94,6 +105,9 @@ namespace engine {
 			/* command pool */
 			vulkan::command_pool _command_pool;
 
+			/* command buffer */
+			vulkan::command_buffer _command_buffer;
+
 			/* image available semaphore */
 			vulkan::semaphore _image_available;
 
@@ -111,4 +125,4 @@ namespace engine {
 
 } // namespace engine
 
-#endif // ENGINE_RENDERER_HPP
+#endif // ENGINE_RENDERER_HEADER

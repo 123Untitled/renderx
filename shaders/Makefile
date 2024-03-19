@@ -10,6 +10,9 @@
 # delete intermediate files on error
 .DELETE_ON_ERROR:
 
+# silent mode
+.SILENT:
+
 # set shell program
 override SHELL := $(shell which zsh)
 
@@ -72,40 +75,25 @@ override VERT_SPIRV := $(patsubst $(SRCDIR)/%.vert.glsl, $(OUTDIR)/%.vert.spv, $
 override FRAG_SPIRV := $(patsubst $(SRCDIR)/%.frag.glsl, $(OUTDIR)/%.frag.spv, $(FRAG_SRCS))
 
 
-# -- C O L O R S --------------------------------------------------------------
-
-define COLOR
-	@printf "\e[7;32m %s \e[0m\n" $(1)
-endef
-
-define LINES
-	@printf "\e[90m%s\e[0m\n" '-----------------------------------------------'
-endef
-
-
 # -- R U L E S ----------------------------------------------------------------
 
-.PHONY: all intro clean fclean re
+.PHONY: all clean fclean re
 
-all: intro $(VERT_SPIRV) $(FRAG_SPIRV)
-
-intro:
-	$(call LINES)
-	$(call COLOR,"compiling shaders")
+all: $(VERT_SPIRV) $(FRAG_SPIRV)
 
 $(OUTDIR)/%.vert.spv: $(SRCDIR)/%.vert.glsl Makefile | $(OUTDIR)
-	@echo "compiling: $<"
+	print -f '- %s\n' $@
 	$(GLSLC) $(VERT_FLAGS) $< -o $@
 
 $(OUTDIR)/%.frag.spv: $(SRCDIR)/%.frag.glsl Makefile | $(OUTDIR)
-	@echo "compiling: $<"
+	print -f '- %s\n' $@
 	$(GLSLC) $(FRAG_FLAGS) $< -o $@
 
 $(OUTDIR):
-	@mkdir -p $@
+	mkdir -p $@
 
 clean:
-	@rm -rfv $(VERT_SPIRV) $(FRAG_SPIRV) $(OUTDIR)
+	rm -rf $(VERT_SPIRV) $(FRAG_SPIRV) $(OUTDIR)
 
 fclean: clean
 

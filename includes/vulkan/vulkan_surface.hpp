@@ -1,22 +1,27 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_SURFACE_HPP
 #define ENGINE_VULKAN_SURFACE_HPP
 
-#include "glfw_window.hpp"
-#include "vulkan_instance.hpp"
-//#include "vulkan_physical_device.hpp"
-
 #include "vk_typedefs.hpp"
-#include "vk_functions.hpp"
 
+namespace glfw {
+	class window;
+}
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
-
-	// -- forward declarations ------------------------------------------------
-
-	/* physical device */
-	class physical_device;
 
 
 	// -- S U R F A C E -------------------------------------------------------
@@ -37,23 +42,22 @@ namespace vulkan {
 			surface(void) noexcept;
 
 			/* window constructor */
-			surface(const vk::shared<vk::instance>&,
-					glfw::window&);
+			surface(glfw::window&);
 
-			/* copy constructor */
-			surface(const self&) noexcept;
+			/* deleted copy constructor */
+			surface(const self&) = delete;
 
 			/* move constructor */
 			surface(self&&) noexcept;
 
 			/* destructor */
-			~surface(void) noexcept = default;
+			~surface(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			/* deleted copy assignment operator */
+			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
 			auto operator=(self&&) noexcept -> self&;
@@ -62,11 +66,7 @@ namespace vulkan {
 			// -- public conversion operators ---------------------------------
 
 			/* vk::surface conversion operator */
-			operator const vk::surface&() const noexcept;
-
-			/* vk::managed<vk::surface> conversion operator */
-			operator const vk::managed<vk::surface,
-									   vk::shared<vk::instance>>&() const noexcept;
+			operator const vk::surface&(void) const noexcept;
 
 
 		private:
@@ -74,8 +74,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* surface */
-			vk::managed<vk::surface,
-						vk::shared<vk::instance>> _surface;
+			vk::surface _surface;
 
 	}; // class surface
 

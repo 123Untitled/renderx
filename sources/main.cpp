@@ -1,10 +1,19 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
 #define GLFW_INCLUDE_VULKAN
 
 
 #include "glfw_window.hpp"
 #include "glfw_events.hpp"
 
-#include "vulkan_instance.hpp"
 #include "vulkan_physical_device.hpp"
 #include "vulkan_logical_device.hpp"
 #include "vulkan_queue_families.hpp"
@@ -15,6 +24,7 @@
 #include "vulkan_command_buffer.hpp"
 
 #include "vk_typedefs.hpp"
+#include "vulkan/vk_shared.hpp"
 
 #include "os.hpp"
 #include "meta_vertex.hpp"
@@ -343,11 +353,9 @@ auto create_pipeline(void) {
 	vk::shared<vk::device> device{};
 
 
-	vk::managed<vk::pipeline_layout,
-				vk::shared<vk::device>> layout =
-
-		vk::make_managed(vk::create(device,
-									vk::pipeline_layout_info{
+	vk::shared<vk::pipeline_layout> layout {
+		
+		device, vk::pipeline_layout_info{
 		// type of struct
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		// pointer to next struct
@@ -362,7 +370,7 @@ auto create_pipeline(void) {
 		.pushConstantRangeCount = 0,
 		// push constant ranges
 		.pPushConstantRanges = nullptr,
-	}), device);
+	}};
 
 
 	vulkan::pipeline pipeline{device,
@@ -397,86 +405,7 @@ auto create_pipeline(void) {
 
 }
 
-
-
-
 int main(void) {
-
-	vk::managed2<vk::pipeline_layout,
-				 vk::shared<vk::device>> layout{};
-
-			vk::managed<vk::command_buffer,
-						vk::shared<vk::device>,
-						vk::managed<vk::command_pool,
-									vk::shared<vk::device>>> _buffer;
-
-	//vk::managed2<vk::command_buffer,
-	//			 vk::managed2<vk::command_pool,
-	//						  vk::shared<vk::device>>> 
-	//
-	//							  buffer{};
-
-
-	//auto module = vulkan::make_shared(device, info);
-
-	//vulkan::shared<vk::device> device{};
-
-	//auto device = vulkan::make_shared(vk::device_info{/* */}, vk::physical_device{/* */});
-
-	//auto module = vk::create(device, vk::shader_module_info{});
-	//auto managed = vulkan::make_managed(module, device);
-
-	//vulkan::managed<vk::shader_module,
-	//				vulkan::shared<vk::device>>
-	//module_managed{module, device};
-
-
-
-		//> debug_messenger{};
-	//vulkan::shared<vk::command_pool> command_pool{};
-
-	//using command_pool = vulkan::managed<vk::command_pool, int, vulkan::shared<vk::device>>;
-
-	/*
-	using command_pool = vulkan::managed<
-		vk::command_pool,
-		vulkan::shared<vk::device>
-		>;
-
-	using command_buffer = vulkan::managed<
-		vk::command_buffer,
-		command_pool,
-		vulkan::shared<vk::device>
-		>;
-		*/
-
-	//using test = vulkan::managed<
-	//	vk::shader_module,
-	//	shader_module
-	//	>;
-
-	//command_pool pool{};
-
-	//command_buffer buffer{};
-
-
-	//vulkan::resource<vk::swapchain,
-	//				vulkan::shared<vk::device>,
-	//				command_pool
-	//					> swapchain{};
-
-
-	/*
-	static_assert(vulkan::is_managed<
-			//int
-			vulkan::managed<int>
-			>, "is not managed");
-			*/
-
-
-	//vulkan::instance::shared();
-
-
 
 	// memory try block
 	try {
@@ -493,15 +422,3 @@ int main(void) {
 	}
 	return 0;
 }
-
-	//vulkan::shader_module module;
-	//vulkan::shader_library library;
-
-	//glfw::window win;
-	//glfw::events events;
-	//events.run(win);
-
-	//vulkan::surface surface{instance, win};
-
-	//vulkan::queue_families families{device};
-

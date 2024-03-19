@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VK_FUNCTIONS_HPP
 #define ENGINE_VK_FUNCTIONS_HPP
 
@@ -103,13 +115,19 @@ namespace vk {
 	}
 
 	/* enumerate physical devices */
-	inline auto enumerate_physical_devices(const vk::instance& instance) -> vk::vector<vk::physical_device> {
+	template <typename T>
+	inline auto enumerate_physical_devices(const vk::instance& instance) -> vk::vector<T> {
+
+		static_assert(sizeof(T) == sizeof(vk::physical_device),
+					  "T must be same size as vk::physical_device");
+
 		auto count = vk::get_physical_devices_count(instance);
-		vk::vector<vk::physical_device> devices;
+		vk::vector<T> devices;
 		devices.resize(count);
 		vk::try_execute(::vkEnumeratePhysicalDevices,
 						"failed to get physical devices",
-						instance, &count, devices.data());
+						instance, &count,
+						reinterpret_cast<vk::physical_device*>(devices.data()));
 		return devices;
 	}
 
@@ -322,29 +340,6 @@ namespace vk {
 						device, swapchain, &count, images.data());
 		return images;
 	}
-
-
-	// -- framebuffer ---------------------------------------------------------
-
-	/* create framebuffer */
-	inline auto create_framebuffer(const vk::device& device,
-								   const vk::framebuffer_info& info) -> vk::framebuffer {
-		vk::framebuffer framebuffer{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateFramebuffer,
-						"failed to create framebuffer",
-						device, &info, nullptr, &framebuffer);
-		return framebuffer;
-	}
-
-	/* destroy framebuffer */
-	inline auto destroy_framebuffer(const vk::device& device,
-									vk::framebuffer& framebuffer) noexcept -> void {
-		if (framebuffer == VK_NULL_HANDLE)
-			return;
-		::vkDestroyFramebuffer(device, framebuffer, nullptr);
-		framebuffer = VK_NULL_HANDLE;
-	}
-
 
 
 

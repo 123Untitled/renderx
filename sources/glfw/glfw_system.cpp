@@ -1,38 +1,37 @@
 #include "glfw_system.hpp"
+#include "exceptions.hpp"
+#include "os.hpp"
+
 #include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+
+#include <iostream>
 
 
 /* default constructor */
-glfw::system::system(void)
-: _initialized{false} {
+glfw::system::system(void) {
+
 	// initialize glfw
 	if (::glfwInit() != GLFW_TRUE)
 		throw engine::exception{"failed to initialize glfw."};
+
 	// check vulkan support
-	if (::glfwVulkanSupported() == GLFW_FALSE)
+	if (::glfwVulkanSupported() == GLFW_FALSE) {
+		::glfwTerminate();
 		throw engine::exception{"glfw: vulkan is not supported."};
-	_initialized = true;
+	}
+
 	// set error callback
 	static_cast<void>(::glfwSetErrorCallback(glfw::system::error_callback));
 }
 
 /* destructor */
 glfw::system::~system(void) noexcept {
-	if (_initialized == false)
-		return;
 	::glfwTerminate();
-}
-
-/* is initialized */
-auto glfw::system::is_initialized(void) noexcept -> bool {
-	return shared()._initialized;
 }
 
 /* vulkan required extensions */
 auto glfw::system::vulkan_required_extensions(void) -> xns::vector<const char*> {
-
-	if (glfw::system::is_initialized() == false)
-		return {};
 
 	::uint32_t        count = 0;
 	const char** extensions = ::glfwGetRequiredInstanceExtensions(&count);
@@ -61,6 +60,18 @@ auto glfw::system::vulkan_required_extensions(void) -> xns::vector<const char*> 
 	return result;
 }
 
+
+// -- private methods ---------------------------------------------------------
+
+/* new window */
+auto glfw::system::new_window(const int width,
+							  const int height,
+							  const char* title, GLFWmonitor* monitor, GLFWwindow* share) -> GLFWwindow* {
+	return ::glfwCreateWindow(width, height, title, monitor, share);
+}
+
+
+// -- private static methods --------------------------------------------------
 
 /* shared */
 auto glfw::system::shared(void) noexcept -> self& {

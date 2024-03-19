@@ -1,17 +1,18 @@
 #include "vulkan_logical_device.hpp"
+#include "vulkan_physical_device.hpp"
 #include "vulkan_queue.hpp"
+#include "vulkan/global/instance.hpp"
 
+#include "os.hpp"
 
 // -- public lifecycle --------------------------------------------------------
 
-/* default constructor */
-vulkan::logical_device::logical_device(void) noexcept
-: _device{}, _priority{1.0f} {}
-
 /* physical device and surface constructor */
-vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
-									   const vulkan::surface& surface)
+vulkan::logical_device::logical_device(const vulkan::surface& surface)
 : _device{}, _priority{1.0f} {
+
+
+	auto pdevice = vulkan::instance::pick_physical_device(surface);
 
 	// get queue family index
 	const auto index = vulkan::queue_families::find(pdevice, surface);
@@ -23,57 +24,39 @@ vulkan::logical_device::logical_device(const vulkan::physical_device& pdevice,
 	const auto features = pdevice.features();
 
 	// setup extensions
-	constexpr xns::array extensions = {
+	constexpr const char* extensions[] = {
 		// swapchain extension
-		(const char*)VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		#if defined(ENGINE_OS_MACOS)
 		// portability subset extension
-		,(const char*)"VK_KHR_portability_subset" // VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME not defined ???
+		,"VK_KHR_portability_subset"
 		#endif
 	};
+	// VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME (not defined)
 
 	// create device
 	_device = vk::make_shared(pdevice, vk::device_info{
+		// structure type
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+		// next structure
 		.pNext                   = nullptr,
+		// flags
 		.flags                   = 0,
+		// number of queue create infos
 		.queueCreateInfoCount    = 1,
+		// queue create infos
 		.pQueueCreateInfos       = &queue_info,
+		// number of enabled layers
 		.enabledLayerCount       = 0,
+		// enabled layers
 		.ppEnabledLayerNames     = nullptr,
-		.enabledExtensionCount   = static_cast<vk::u32>(extensions.size()),
-		.ppEnabledExtensionNames = extensions.data(),
+		// number of enabled extensions
+		.enabledExtensionCount   = static_cast<vk::u32>(sizeof(extensions) / sizeof(extensions[0])),
+		//
+		.ppEnabledExtensionNames = extensions,
 		.pEnabledFeatures        = &features
 	});
 
-}
-
-/* copy constructor */
-vulkan::logical_device::logical_device(const self& other) noexcept
-: _device{other._device}, _priority{other._priority} {}
-
-/* move constructor */
-vulkan::logical_device::logical_device(self&& other) noexcept
-: _device{xns::move(other._device)}, _priority{other._priority} {
-	other._priority = 1.0f;
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* copy assignment operator */
-auto vulkan::logical_device::operator=(const self& other) noexcept -> self& {
-	_device = other._device;
-	_priority = other._priority;
-	return *this;
-}
-
-/* move assignment operator */
-auto vulkan::logical_device::operator=(self&& other) noexcept -> self& {
-	_device = xns::move(other._device);
-	_priority = other._priority;
-	other._priority = 1.0f;
-	return *this;
 }
 
 
@@ -96,5 +79,3 @@ vulkan::logical_device::operator const vk::shared<vk::device>&(void) const noexc
 auto vulkan::logical_device::wait_idle(void) const -> void {
 	vk::device_wait_idle(_device);
 }
-
-

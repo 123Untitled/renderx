@@ -1,10 +1,24 @@
-#ifndef ENGINE_VULKAN_FRAMEBUFFER_HPP
-#define ENGINE_VULKAN_FRAMEBUFFER_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_VULKAN_FRAMEBUFFER_HEADER
+#define ENGINE_VULKAN_FRAMEBUFFER_HEADER
 
 
 // vulkan headers
 #include <vulkan/vulkan.h>
 #include "exceptions.hpp"
+
+#include "vulkan/vk_shared.hpp"
 
 #include "vulkan_logical_device.hpp"
 #include "vulkan_render_pass.hpp"
@@ -31,16 +45,19 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
+			/* default constructor */
+			framebuffer(void) noexcept = default;
+
 			/* logical device and render pass constructor */
-			framebuffer(const vulkan::logical_device&,
+			framebuffer(const vk::shared<vk::device>&,
 						const vulkan::render_pass&,
 						const vulkan::swapchain&);
 
 			/* copy constructor */
-			framebuffer(const self&) noexcept;
+			framebuffer(const self&) noexcept = default;
 
 			/* move constructor */
-			framebuffer(self&&) noexcept;
+			framebuffer(self&&) noexcept = default;
 
 			/* destructor */
 			~framebuffer(void) noexcept = default;
@@ -49,16 +66,10 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
-
-
-			// -- public modifiers --------------------------------------------
-
-			/* destroy */
-			auto destroy(const vulkan::logical_device&) noexcept -> void;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 		private:
@@ -66,7 +77,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::framebuffer _buffer;
+			vk::shared<vk::framebuffer> _buffer;
 
 	}; // class framebuffer
 

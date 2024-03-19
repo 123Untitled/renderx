@@ -1,21 +1,34 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
 #include "renderer.hpp"
+#include "vulkan/global/instance.hpp"
 
 static vk::vector<engine::basic_vertex> vertices{};
 
 static vk::pipeline pipeline{};
 
+
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
 engine::renderer::renderer(void)
-:	_instance{},
+:
 	_window{800, 600},
 	_events{},
-	_surface{_instance, _window},
-	_pdevice{_instance.pick_physical_device(_surface)},
-	_ldevice{_pdevice, _surface},
+	_surface{_window},
+	_pdevice{vulkan::instance::pick_physical_device(_surface)},
+	_ldevice{_surface},
 	_swapchain{_pdevice, _ldevice, _surface},
 	_command_pool{_ldevice, 0}, /* queue family index */
+	_command_buffer{_command_pool}, /* swapChainFramebuffers.size() */
 	_image_available{_ldevice},
 	_render_finished{_ldevice},
 	_shaders{},
@@ -43,10 +56,7 @@ engine::renderer::renderer(void)
 /* launch */
 auto engine::renderer::launch(void) -> void {
 
-	//this->initialize();
-	std::cout << _ldevice.count() << std::endl;
 
-	//return;
 	while (_window.should_close() == false) {
 
 		_events.wait();
@@ -73,8 +83,8 @@ auto engine::renderer::draw_frame(void) -> void {
 	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
 		return;
 
-	vk::semaphore wait[] = {_image_available};
-	vk::semaphore signal[] = {_render_finished};
+	vk::semaphore   wait[] = { _image_available };
+	vk::semaphore signal[] = { _render_finished };
 
 	// maybe send img_index to queue.submit
 	/* command_buffers[image_index] */

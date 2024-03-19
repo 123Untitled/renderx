@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_RENDERPASS_HPP
 #define ENGINE_VULKAN_RENDERPASS_HPP
 
@@ -5,7 +17,7 @@
 #include <vulkan/vulkan.h>
 
 #include "vk_typedefs.hpp"
-#include "vulkan_resource.hpp"
+#include "vk_shared.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -29,25 +41,25 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			render_pass(void) noexcept;
+			render_pass(void) noexcept = default;
 
 			/* logical device constructor */
 			render_pass(const vk::shared<vk::device>&);
 
 			/* copy constructor */
-			render_pass(const self&) noexcept;
+			render_pass(const self&) noexcept = default;
 
 			/* move constructor */
-			render_pass(self&&) noexcept;
+			render_pass(self&&) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
@@ -61,9 +73,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* render pass */
-			vk::managed<vk::render_pass,
-						vk::shared<vk::device>> _render_pass;
-
+			vk::shared<vk::render_pass> _render_pass;
 
 	}; // class renderpass
 

@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VULKAN_SHADER_MODULE_HPP
 #define ENGINE_VULKAN_SHADER_MODULE_HPP
 
@@ -8,8 +20,8 @@
 #include <vector>
 
 #include "vk_typedefs.hpp"
+#include "vk_shared.hpp"
 #include "vk_functions.hpp"
-#include "vulkan_resource.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -37,7 +49,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			shader_module(void) noexcept;
+			shader_module(void) noexcept = default;
 
 			/* logical device and path constructor */
 			shader_module(const vk::shared<vk::device>&,
@@ -45,10 +57,10 @@ namespace vulkan {
 								xns::string&&);
 
 			/* copy constructor */
-			shader_module(const self&) noexcept;
+			shader_module(const self&) noexcept = default;
 
 			/* move constructor */
-			shader_module(self&&) noexcept;
+			shader_module(self&&) noexcept = default;
 
 			/* destructor */
 			~shader_module(void) noexcept = default;
@@ -57,10 +69,10 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
@@ -80,15 +92,12 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* shader module */
-			vk::managed<vk::shader_module,
-						vk::shared<vk::device>> _module;
+			vk::shared<vk::shader_module> _module;
 
 			/* entry point */
 			xns::string _entry;
 
 	}; // class shader_module
-
-
 
 
 

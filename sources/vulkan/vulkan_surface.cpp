@@ -1,51 +1,62 @@
-#include "vulkan_surface.hpp"
-#include "vulkan_physical_device.hpp"
+#include "vulkan/vulkan_surface.hpp"
+#include "vulkan/global/instance.hpp"
+
+#include "vulkan/vk_destroy.hpp"
+#include "glfw_window.hpp"
+
+#include <GLFW/glfw3.h>
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
 vulkan::surface::surface(void) noexcept
-: _surface{} {}
+: _surface{VK_NULL_HANDLE} {
+}
 
-/* instance and window constructor */
-vulkan::surface::surface(const vk::shared<vk::instance>& instance,
-						 glfw::window& window)
-: _surface{} {
+/* window constructor */
+vulkan::surface::surface(glfw::window& window)
+: _surface{VK_NULL_HANDLE} {
 
-	vk::surface surface;
+	auto& instance = vulkan::instance::shared();
 
 	// create surface
 	if (::glfwCreateWindowSurface(instance,
-								 window.underlying(), nullptr, &surface) != VK_SUCCESS)
+								 window.underlying(), nullptr, &_surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
-
-
-	_surface = vk::make_managed(surface, instance);
-}
-
-/* copy constructor */
-vulkan::surface::surface(const self& other) noexcept
-: _surface{other._surface} {
 }
 
 /* move constructor */
 vulkan::surface::surface(self&& other) noexcept
-: _surface{xns::move(other._surface)} {
+: _surface{other._surface} {
+	other._surface = VK_NULL_HANDLE;
+}
+
+/* destructor */
+vulkan::surface::~surface(void) noexcept {
+	if (_surface == VK_NULL_HANDLE)
+		return;
+	vk::destroy(_surface, vulkan::instance::shared());
 }
 
 
 // -- public assignment operators ---------------------------------------------
 
-/* copy assignment operator */
-auto vulkan::surface::operator=(const self& other) noexcept -> self& {
-	_surface = other._surface;
-	return *this;
-}
-
 /* move assignment operator */
 auto vulkan::surface::operator=(self&& other) noexcept -> self& {
-	_surface = xns::move(other._surface);
+
+	// check for self-assignment
+	if (this == &other)
+		return *this;
+
+	// destroy surface
+	if (_surface != VK_NULL_HANDLE)
+		vk::destroy(_surface, vulkan::instance::shared());
+
+	// move from other
+		  _surface = other._surface;
+	other._surface = VK_NULL_HANDLE;
+
 	return *this;
 }
 
@@ -56,10 +67,3 @@ auto vulkan::surface::operator=(self&& other) noexcept -> self& {
 vulkan::surface::operator const vk::surface&(void) const noexcept {
 	return _surface;
 }
-
-/* vk::managed<vk::surface> conversion operator */
-vulkan::surface::operator const vk::managed<vk::surface,
-											vk::shared<vk::instance>>&() const noexcept {
-	return _surface;
-}
-

@@ -26,7 +26,7 @@ vulkan::vertex_buffer::vertex_buffer(const vulkan::logical_device& device)
 :	_buffer{VK_NULL_HANDLE},
 	_memory{VK_NULL_HANDLE} {
 
-	xns::vector<engine::basic_vertex> vertices; // temporary
+	vk::vector<engine::basic_vertex> vertices; // temporary
 
 	::VkBufferCreateInfo info{};
 

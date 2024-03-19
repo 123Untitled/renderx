@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
 #ifndef ENGINE_VK_DESTROY_HPP
 #define ENGINE_VK_DESTROY_HPP
 
@@ -139,43 +151,49 @@ namespace vk {
 	/* destroy command buffer */
 	inline auto destroy(const vk::device& device,
 						const vk::command_pool& pool,
-						const vk::command_buffer& buffer) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::command_buffer& buffer,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::device& device,
 						const vk::command_buffer& buffer,
-						const vk::command_pool& pool) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::command_pool& pool,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::command_pool& pool,
 						const vk::device& device,
-						const vk::command_buffer& buffer) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::command_buffer& buffer,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::command_pool& pool,
 						const vk::command_buffer& buffer,
-						const vk::device& device) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::device& device,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::command_buffer& buffer,
 						const vk::device& device,
-						const vk::command_pool& pool) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::command_pool& pool,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 	/* destroy command buffer */
 	inline auto destroy(const vk::command_buffer& buffer,
 						const vk::command_pool& pool,
-						const vk::device& device) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, 1, &buffer);
+						const vk::device& device,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 
@@ -221,6 +239,7 @@ namespace vk {
 			// don't throw, to keep the same behaviour as vk::destroy
 			//throw vulkan::exception{"failed to get instance proc address", VK_ERROR_EXTENSION_NOT_PRESENT};
 		func(instance, messenger, nullptr);
+		// maybe get function at startup to avoid error in destructors
 	}
 
 	/* destroy debug utils messenger */

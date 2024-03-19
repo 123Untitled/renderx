@@ -1,22 +1,53 @@
-#ifndef ENGINE_GLFW_SYSTEM_HPP
-#define ENGINE_GLFW_SYSTEM_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
+
+#pragma once
+
+#ifndef ENGINE_GLFW_SYSTEM_HEADER
+#define ENGINE_GLFW_SYSTEM_HEADER
 
 #define GLFW_INCLUDE_VULKAN
 
-#include <GLFW/glfw3.h>
-#include <iostream>
-
-#include "os.hpp"
-#include "exceptions.hpp"
 #include <xns>
+
+
+// -- forward declarations ----------------------------------------------------
+
+/* GLFWwindow */
+struct GLFWwindow;
+
+/* GLFWmonitor */
+struct GLFWmonitor;
+
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
 namespace glfw {
 
+
+	// -- forward declarations ------------------------------------------------
+
+	/* window */
+	class window;
+
+
 	// -- S Y S T E M ---------------------------------------------------------
 
 	class system final {
+
+
+		// -- friends ---------------------------------------------------------
+
+		/* window as friend */
+		friend class window;
+
 
 		public:
 
@@ -32,7 +63,7 @@ namespace glfw {
 			system(const self&) = delete;
 
 			/* deleted move constructor */
-			system(self&&) noexcept = delete;
+			system(self&&) = delete;
 
 			/* destructor */
 			~system(void) noexcept;
@@ -44,16 +75,19 @@ namespace glfw {
 			auto operator=(const self&) -> self& = delete;
 
 			/* deleted move assignment operator */
-			auto operator=(self&&) noexcept -> self& = delete;
+			auto operator=(self&&) -> self& = delete;
 
 
 			// -- public static methods ---------------------------------------
 
-			/* is initialized */
-			static auto is_initialized(void) noexcept -> bool;
+			/* shared */
+			static auto shared(void) noexcept -> self&;
+
+
+			// -- public methods ----------------------------------------------
 
 			/* vulkan required extensions */
-			static auto vulkan_required_extensions(void) -> xns::vector<const char*>;
+			auto vulkan_required_extensions(void) -> xns::vector<const char*>;
 
 
 		private:
@@ -64,22 +98,20 @@ namespace glfw {
 			system(void);
 
 
-			// -- private static methods --------------------------------------
+			// -- private methods ---------------------------------------------
 
-			/* shared */
-			static auto shared(void) noexcept -> self&;
+			/* new window */
+			auto new_window(const int, const int, const char*,
+							GLFWmonitor*, GLFWwindow*) -> GLFWwindow*;
+
+
+			// -- private static methods --------------------------------------
 
 			/* error callback */
 			static auto error_callback(int, const char*) noexcept -> void;
 
+	}; // class system
 
-			// -- private members ---------------------------------------------
+} // namespace glfw
 
-			/* initialized */
-			bool _initialized;
-
-	};
-
-}
-
-#endif // ENGINE_GLFW_SYSTEM_HPP
+#endif // ENGINE_GLFW_SYSTEM_HEADER

@@ -1,11 +1,20 @@
-#ifndef ENGINE_VULKAN_COMMAND_POOL_HPP
-#define ENGINE_VULKAN_COMMAND_POOL_HPP
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
 
+#pragma once
 
-// vulkan headers
-#include <vulkan/vulkan.h>
+#ifndef ENGINE_VULKAN_COMMAND_POOL_HEADER
+#define ENGINE_VULKAN_COMMAND_POOL_HEADER
 
-#include "vulkan_logical_device.hpp"
+// interal headers
+#include "vk_shared.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -34,17 +43,17 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			command_pool(void) noexcept;
+			command_pool(void) noexcept = default;
 
 			/* logical device and queue family index constructor */
 			command_pool(const vk::shared<vk::device>&,
 						 const vk::u32);
 
 			/* copy constructor */
-			command_pool(const self&) noexcept;
+			command_pool(const self&) noexcept = default;
 
 			/* move constructor */
-			command_pool(self&&) noexcept;
+			command_pool(self&&) noexcept = default;
 
 			/* destructor */
 			~command_pool(void) noexcept = default;
@@ -53,28 +62,25 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self&;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public methods ----------------------------------------------
 
 			/* new primary command buffer */
-			auto new_primary_command_buffer(const vk::u32) -> void;
+			auto new_primary_command_buffer(const vk::u32) -> vulkan::command_buffer;
 
 			/* new secondary command buffer */
-			auto new_secondary_command_buffer(const vk::u32) -> void;
-
-			/* new buffers */
-			auto new_buffers(const vulkan::logical_device&, const vk::u32) const -> xns::vector<vulkan::command_buffer>;
+			auto new_secondary_command_buffer(const vk::u32) -> vulkan::command_buffer;
 
 
 			// -- public conversion operators ---------------------------------
 
-			/* vk::command_pool conversion operator */
-			operator const vk::command_pool&(void) const noexcept;
+			/* vk::shared<vk::command_pool> conversion operator */
+			operator const vk::shared<vk::command_pool>&(void) const noexcept;
 
 
 		private:
@@ -82,8 +88,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pool */
-			vk::managed<vk::command_pool,
-						vk::shared<vk::device>> _pool;
+			vk::shared<vk::command_pool> _pool;
 
 			/* command buffers */
 			vk::command_buffer _buffers;
@@ -91,11 +96,8 @@ namespace vulkan {
 			/* size */
 			vk::u32 _size;
 
-
-
 	}; // class command_pool
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_COMMAND_POOL_HPP
-
+#endif // ENGINE_VULKAN_COMMAND_POOL_HEADER
