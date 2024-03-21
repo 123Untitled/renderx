@@ -20,7 +20,7 @@
 #include "vulkan_shader_module.hpp"
 #include "vulkan_swapchain.hpp"
 #include "vulkan_command_pool.hpp"
-#include "vulkan_command_buffer.hpp"
+#include "vulkan/command_buffer.hpp"
 
 #include "vk_typedefs.hpp"
 #include "vulkan/vk_shared.hpp"
@@ -387,11 +387,6 @@ auto create_pipeline(void) {
 							  vk::render_pass{}};
 
 
-
-
-
-
-
 	//vk::pipeline pipeline{};
 	//::vkCreateGraphicsPipelines(VK_NULL_HANDLE /* device */,
 	//							VK_NULL_HANDLE /* pipeline cache */,
@@ -400,18 +395,50 @@ auto create_pipeline(void) {
 	//vk::pipeline_bind_point bind_point{VK_PIPELINE_BIND_POINT_GRAPHICS};
 	//::vkDestroyPipeline(VK_NULL_HANDLE /* device */, pipeline, nullptr);
 
-
-
 }
 
+#include "vulkan/vk_vector.hpp"
+#include "vulkan/commands.hpp"
+
+
+
+
 int main(void) {
+
+
+	//try {
+	//
+	//	vulkan::command_pool<vk::void_bit> pool{};
+	//
+	//	vulkan::commands<vulkan::primary> cmds{pool};
+	//
+	//	vulkan::command_buffer<vulkan::primary>& buff = cmds[0];
+	//
+	//	buff.begin();
+	//
+	//	buff.end();
+	//
+	//	//auto com = pool.make_primary(100);
+	//	//auto v2 = pool.make_secondary(100);
+	//	//pool.reset_to_system();
+	//	//pool.trim();
+	//	//v.emplace_back(vk::command_buffer_info{});
+	//
+	//}
+	//catch (const vk::exception& except) {
+	//	except.what();
+	//}
+	//
+	//return 0;
+
+
 
 	// memory try block
 	try {
 		try { // vulkan try block
 			engine::renderer renderer;
 			renderer.launch();
-		} catch (const vulkan::exception& except) {
+		} catch (const vk::exception& except) {
 			except.what();
 			return 1;
 		}

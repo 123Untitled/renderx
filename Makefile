@@ -191,6 +191,7 @@ override DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 override CMPFLAGS = -MJ $*.json
 
 # defines
+#override DEFINES ?=
 override DEFINES := -DENGINE_VL_DEBUG
 
 # include flags

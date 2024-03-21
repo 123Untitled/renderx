@@ -10,29 +10,20 @@
 
 #pragma once
 
-#ifndef ENGINE_VULKAN_FRAMEBUFFER_HEADER
-#define ENGINE_VULKAN_FRAMEBUFFER_HEADER
+#ifndef ENGINE_VULKAN_EXCEPTION_HEADER
+#define ENGINE_VULKAN_EXCEPTION_HEADER
+
+#include "vk_typedefs.hpp"
 
 
-// vulkan headers
-#include <vulkan/vulkan.h>
-#include "exceptions.hpp"
+// -- V K  N A M E S P A C E --------------------------------------------------
 
-#include "vulkan/vk_shared.hpp"
-
-#include "vulkan_device.hpp"
-#include "vulkan_render_pass.hpp"
-#include "vulkan_swapchain.hpp"
+namespace vk {
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+	// -- E X C E P T I O N ---------------------------------------------------
 
-namespace vulkan {
-
-
-	// -- F R A M E B U F F E R -----------------------------------------------
-
-	class framebuffer final {
+	class exception final {
 
 
 		public:
@@ -40,27 +31,28 @@ namespace vulkan {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::framebuffer;
+			using self = vk::exception;
 
 
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			framebuffer(void) noexcept = default;
+			constexpr exception(void) noexcept;
 
-			/* logical device and render pass constructor */
-			framebuffer(const vk::shared<vk::device>&,
-						const vulkan::render_pass&,
-						const vulkan::swapchain&);
+			/* message and result constructor */
+			template <decltype(sizeof(0)) N>
+			constexpr exception(const char (&msg)[N], const vk::result result = VkResult::VK_ERROR_UNKNOWN) noexcept
+			: _message{msg}, _size{N}, _result{result} {
+			}
 
 			/* copy constructor */
-			framebuffer(const self&) noexcept = default;
+			exception(const self&) noexcept = default;
 
 			/* move constructor */
-			framebuffer(self&&) noexcept = default;
+			exception(self&&) noexcept = default;
 
 			/* destructor */
-			~framebuffer(void) noexcept = default;
+			~exception(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -72,15 +64,27 @@ namespace vulkan {
 			auto operator=(self&&) noexcept -> self& = default;
 
 
+			// -- public methods ----------------------------------------------
+
+			/* what */
+			auto what(void) const noexcept -> void;
+
+
 		private:
 
 			// -- private members ---------------------------------------------
 
-			/* buffer */
-			vk::shared<vk::framebuffer> _buffer;
+			/* message */
+			const char* _message;
 
-	}; // class framebuffer
+			/* size */
+			vk::u32 _size;
+
+			/* result */
+			vk::result _result;
+
+	}; // class exception
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_FRAMEBUFFER_HPP
+#endif // ENGINE_VULKAN_EXCEPTION_HEADER

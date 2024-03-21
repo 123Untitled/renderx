@@ -10,8 +10,8 @@
 
 #pragma once
 
-#ifndef ENGINE_VULKAN_RENDERPASS_HPP
-#define ENGINE_VULKAN_RENDERPASS_HPP
+#ifndef ENGINE_VULKAN_RENDERPASS_HEADER
+#define ENGINE_VULKAN_RENDERPASS_HEADER
 
 // vulkan headers
 #include <vulkan/vulkan.h>
@@ -52,6 +52,9 @@ namespace vulkan {
 			/* move constructor */
 			render_pass(self&&) noexcept = default;
 
+			/* destructor */
+			~render_pass(void) noexcept = default;
+
 
 			// -- public assignment operators ---------------------------------
 
@@ -79,4 +82,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_RENDERPASS_HPP
+#endif // ENGINE_VULKAN_RENDERPASS_HEADER

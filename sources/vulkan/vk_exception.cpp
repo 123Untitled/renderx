@@ -8,34 +8,21 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_VK_UTILS_HEADER
-#define ENGINE_VK_UTILS_HEADER
-
-#include <xns>
-#include "vk_typedefs.hpp"
-#include "vk_exception.hpp"
+#include "vulkan/vk_exception.hpp"
+#include <iostream>
 
 
-// -- V K  N A M E S P A C E --------------------------------------------------
+// -- public lifecycle --------------------------------------------------------
 
-namespace vk {
-
-
-	/* try execute */
-	template <decltype(sizeof(0)) N, typename F, typename... A>
-	inline auto try_execute(F&& f, const char (&msg)[N], A&&... args) -> void {
-		// get return type
-		using ret_type = decltype(f(xns::forward<A>(args)...));
-		// assert return type is vk::result
-		static_assert(xns::is_same<ret_type, vk::result>, "invalid return type.");
-		// execute function
-		if (auto result = f(xns::forward<A>(args)...); result != VK_SUCCESS)
-			throw vk::exception{msg, result};
-	}
+/* default constructor */
+constexpr vk::exception::exception(void) noexcept
+: _message{"unknown exception"}, _size{17}, _result{VkResult::VK_ERROR_UNKNOWN} {
+}
 
 
-} // namespace vk
+// -- public methods ----------------------------------------------------------
 
-#endif // ENGINE_VK_UTILS_HEADER
+/* what */
+auto vk::exception::what(void) const noexcept -> void {
+	std::cout << "vulkan exception: " << _message << " [" << _result << "]" << std::endl;
+}

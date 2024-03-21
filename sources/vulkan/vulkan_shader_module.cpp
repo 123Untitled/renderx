@@ -12,7 +12,7 @@ vulkan::shader_module::shader_module(const vk::shared<vk::device>& device,
 
 	std::ifstream file{path.data(), std::ios::ate | std::ios::binary};
 	if (!file.is_open()) {
-		throw vulkan::exception{"failed to open shader file"};
+		throw vk::exception{"failed to open shader file"};
 	}
 
 	std::vector<char> code;

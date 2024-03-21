@@ -10,21 +10,22 @@
 
 #pragma once
 
-#ifndef ENGINE_VULKAN_SWAPCHAIN_HPP
-#define ENGINE_VULKAN_SWAPCHAIN_HPP
+#ifndef ENGINE_VULKAN_SWAPCHAIN_HEADER
+#define ENGINE_VULKAN_SWAPCHAIN_HEADER
 
 // vulkan headers
 #include <vulkan/vulkan.h>
 
 // local headers
 #include "vulkan_device.hpp"
-#include "vulkan_image_view.hpp"
+#include "vulkan_render_pass.hpp"
 #include "vulkan_semaphore.hpp"
 
 #include <xns>
 
 #include "vk_typedefs.hpp"
 #include "vk_shared.hpp"
+#include "vk_vector.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -48,7 +49,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			swapchain(void) noexcept;
+			//swapchain(void) noexcept;
 
 			/* logical device and surface constructor */
 			swapchain(const vulkan::device&,
@@ -58,7 +59,7 @@ namespace vulkan {
 			swapchain(const self&) = delete;
 
 			/* deleted move constructor */
-			swapchain(self&&) noexcept = delete;
+			swapchain(self&&) = delete;
 
 			/* destructor */
 			~swapchain(void) noexcept;
@@ -70,10 +71,13 @@ namespace vulkan {
 			auto operator=(const self&) -> self& = delete;
 
 			/* deleted move assignment operator */
-			auto operator=(self&&) noexcept -> self& = delete;
+			auto operator=(self&&) -> self& = delete;
 
 
 			// -- public accessors --------------------------------------------
+
+			/* size */
+			auto size(void) const noexcept -> vk::u32;
 
 			/* extent */
 			auto extent(void) const noexcept -> vk::extent2D;
@@ -99,7 +103,7 @@ namespace vulkan {
 			// -- public modifiers --------------------------------------------
 
 			/* re-create */
-			auto recreate(const vulkan::physical_device&,
+			auto recreate(const vulkan::device&,
 						  const vulkan::surface&) -> void;
 
 
@@ -122,11 +126,17 @@ namespace vulkan {
 			/* swapchain */
 			vk::shared<vk::swapchain> _swapchain;
 
+			/* render pass */
+			vulkan::render_pass _render_pass;
+
 			/* images */
 			vk::vector<vk::image> _images;
 
 			/* image views */
-			vk::vector<vulkan::image_view> _views;
+			vk::vvector<vk::image_view> _views;
+
+			/* framebuffers */
+			vk::vvector<vk::framebuffer> _frames;
 
 			/* format */
 			vk::surface_format _format;
@@ -139,4 +149,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_SWAPCHAIN_HPP
+#endif // ENGINE_VULKAN_SWAPCHAIN_HEADER

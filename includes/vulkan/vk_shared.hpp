@@ -203,7 +203,8 @@ namespace vk {
 											 vk::framebuffer>;
 
 	/* shared specialization */
-	template <typename T> requires vk::dual_managed<T>
+	template <typename T> requires (vk::is_destroyable<vk::instance, T>
+								 || vk::is_destroyable<vk::device,   T>)
 	class shared<T> {
 
 
@@ -225,9 +226,9 @@ namespace vk {
 			using value_type = T;
 
 			/* dependency type */
-			using dependency_type = xns::conditional<vk::is_destroyable<T, vk::instance>,
-				  									 vk::shared<vk::instance>,
-													 vk::shared<vk::device>>;
+			using dep_type = xns::conditional<vk::is_destroyable<T, vk::instance>,
+												vk::instance,
+												vk::device>;
 
 
 			// -- public lifecycle --------------------------------------------
@@ -239,7 +240,7 @@ namespace vk {
 
 			/* members constructor */
 			template <typename... __params>
-			inline shared(const dependency_type& dependency, __params&&... args)
+			inline shared(const vk::shared<dep_type>& dependency, __params&&... args) requires (sizeof...(args) > 0)
 			: _value{VK_NULL_HANDLE}, _count{nullptr}, _dependency{dependency} {
 
 				if (dependency._value == VK_NULL_HANDLE)
@@ -258,7 +259,7 @@ namespace vk {
 			}
 
 			/* surface constructor NEED TO BE FIXED ! */
-			inline shared(const value_type& value, const dependency_type& dependency)
+			inline shared(const value_type& value, const vk::shared<dep_type>& dependency)
 			: _value{value}, _count{(vk::u32*)__builtin_malloc(sizeof(vk::u32))}, _dependency{dependency} {
 
 				if (_count == nullptr) {
@@ -346,7 +347,7 @@ namespace vk {
 			}
 
 			/* dependency conversion operator */
-			inline operator const dependency_type&(void) const noexcept {
+			inline operator const dep_type&(void) const noexcept {
 				return _dependency;
 			}
 
@@ -359,7 +360,7 @@ namespace vk {
 			}
 
 			/* dependency */
-			inline auto dependency(void) const noexcept -> const dependency_type& {
+			inline auto dependency(void) const noexcept -> const dep_type& {
 				return _dependency;
 			}
 
@@ -416,226 +417,7 @@ namespace vk {
 			vk::u32* _count;
 
 			/* dependency */
-			dependency_type _dependency;
-
-	}; // class shared
-
-
-
-	/* shared specialization */
-	template <>
-	class shared<vk::command_buffer> {
-
-
-		// -- friends ---------------------------------------------------------
-
-		/* shared as friend */
-		template <typename __type>
-		friend class vk::shared;
-
-
-		public:
-
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = vk::shared<vk::command_buffer>;
-
-			/* value type */
-			using value_type = vk::command_buffer;
-
-			/* dependency type */
-			using dependency_type = vk::shared<vk::command_pool>;
-
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			inline shared(void) noexcept
-			: _value{VK_NULL_HANDLE}, _count{nullptr}, _size{0}, _dependency{} {
-			}
-
-			/* members constructor */
-			template <typename... __params>
-			inline shared(const dependency_type& dependency, const vk::u32 size, __params&&... args)
-			: _value{VK_NULL_HANDLE}, _count{nullptr}, _size{size}, _dependency{dependency} {
-
-				if (dependency._value == VK_NULL_HANDLE)
-					throw engine::exception("dependency has been destroyed");
-
-				_value = vk::create(xns::forward<__params>(args)..., dependency._dependency);
-				_count = (vk::u32*)__builtin_malloc(sizeof(vk::u32));
-
-				if (_count == nullptr) {
-					vk::destroy(_value, _dependency._value, _dependency._dependency, _size);
-					throw engine::exception("failed to allocate memory");
-				}
-
-				// initialize count
-				*_count = 1;
-			}
-
-			/* copy constructor */
-			inline shared(const self& other) noexcept
-			: _value{other._value},
-			  _count{other._count},
-			   _size{other._size}, _dependency{other._dependency} {
-
-				if (_value == VK_NULL_HANDLE)
-					return;
-
-				// increment count
-				++(*_count);
-			}
-
-			/* move constructor */
-			inline shared(self&& other) noexcept
-			: _value{other._value},
-			  _count{other._count},
-			   _size{other._size}, _dependency{xns::move(other._dependency)} {
-
-				// invalidate other
-				other.__init();
-			}
-
-			/* destructor */
-			~shared(void) noexcept {
-				this->__free();
-			}
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* copy assignment operator */
-			inline auto operator=(const self& other) noexcept -> self& {
-
-				// check for self assignment
-				if (this == &other)
-					return *this;
-
-				// clean up
-				this->__free();
-
-				// copy members
-				this->__copy(other);
-
-				if (_value == VK_NULL_HANDLE)
-					return *this;
-
-				// increment count
-				++(*_count);
-
-				return *this;
-			}
-
-			/* move assignment operator */
-			inline auto operator=(self&& other) noexcept -> self& {
-
-				// check for self assignment
-				if (this == &other)
-					return *this;
-
-				// clean up
-				this->__free();
-				// move members
-				this->__move(xns::move(other));
-				// invalidate other
-				other.__init();
-
-				return *this;
-			}
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* value conversion operator */
-			inline operator const value_type&(void) const noexcept {
-				return _value;
-			}
-
-			/* dependency conversion operator */
-			inline operator const dependency_type&(void) const noexcept {
-				return _dependency;
-			}
-
-
-			// -- public accessors --------------------------------------------
-
-			/* count */
-			inline auto count(void) const noexcept -> vk::u32 {
-				return _count != nullptr ? *_count : 0;
-			}
-
-			/* size */
-			inline auto size(void) const noexcept -> vk::u32 {
-				return _size;
-			}
-
-			/* dependency */
-			inline auto dependency(void) const noexcept -> const dependency_type& {
-				return _dependency;
-			}
-
-
-		private:
-
-			// -- private methods ---------------------------------------------
-
-			/* init */
-			inline auto __init(void) noexcept -> void {
-
-				_value = VK_NULL_HANDLE;
-				_count = nullptr;
-				_size  = 0;
-			}
-
-			/* copy */
-			inline auto __copy(const self& other) noexcept -> void {
-
-				_value              = other._value;
-				_count              = other._count;
-				_size               = other._size;
-				_dependency.operator=(other._dependency);
-			}
-
-			/* move */
-			inline auto __move(self&& other) noexcept -> void {
-
-				_value              = other._value;
-				_count              = other._count;
-				_size               = other._size;
-				_dependency.operator=(xns::move(other._dependency));
-			}
-
-
-			/* free */
-			inline auto __free(void) noexcept -> void {
-
-				if (_value == VK_NULL_HANDLE)
-					return;
-
-				// check for last value reference
-				if (--(*_count) == 0) {
-					// destroy value
-					//vk::destroy(_value, _dependency._value, _dependency._dependency, _size);
-					__builtin_free(_count);
-				}
-			}
-
-
-			// -- private members ---------------------------------------------
-
-			/* value */
-			value_type _value;
-
-			/* count */
-			vk::u32* _count;
-
-			/* size */
-			vk::u32 _size;
-
-			/* dependency */
-			dependency_type _dependency;
+			vk::shared<dep_type> _dependency;
 
 	}; // class shared
 

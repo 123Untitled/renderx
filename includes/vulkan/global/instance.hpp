@@ -6,8 +6,12 @@
 #include "vulkan/vk_typedefs.hpp"
 
 #include "vulkan/vk_shared.hpp" // vk::vector
+#include "vulkan/unique.hpp"
+
 #include "vulkan/vulkan_physical_device.hpp"
 #include "vulkan/vulkan_surface.hpp"
+
+#include "templates/array.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -60,8 +64,8 @@ namespace vulkan {
 			/* physical devices */
 			static auto physical_devices(void) -> const vk::vector<vulkan::physical_device>&;
 
-			/* pick physical device */
-			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
+			/* validation layers */
+			static auto validation_layers(void) -> const vk::array<const char*, 1>&;
 
 
 		private:
@@ -102,7 +106,7 @@ namespace vulkan {
 			// -- private members -----------------------------------------
 
 			/* instance */
-			vk::instance _instance;
+			vk::unique<vk::instance> _instance;
 
 			/* messenger */
 			#if defined(ENGINE_VL_DEBUG)

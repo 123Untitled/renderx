@@ -16,6 +16,8 @@
 #include "vk_typedefs.hpp"
 #include "vk_functions.hpp"
 
+#include <tuple>
+
 #define pretty std::cout << __PRETTY_FUNCTION__ << std::endl
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -25,15 +27,24 @@ namespace vk {
 
 	// -- D E S T R O Y -------------------------------------------------------
 
+
+	// -- instance ------------------------------------------------------------
+
 	/* destroy instance */
 	inline auto destroy(const vk::instance& instance) noexcept -> void {
 		::vkDestroyInstance(instance, nullptr);
 	}
 
+
+	// -- device --------------------------------------------------------------
+
 	/* destroy device */
 	inline auto destroy(const vk::device& device) noexcept -> void {
 		::vkDestroyDevice(device, nullptr);
 	}
+
+
+	// -- framebuffer ---------------------------------------------------------
 
 	/* destroy framebuffer */
 	inline auto destroy(const vk::device& device,
@@ -47,6 +58,7 @@ namespace vk {
 	}
 
 
+	// -- surface -------------------------------------------------------------
 
 	/* destroy surface */
 	inline auto destroy(const vk::instance& instance,
@@ -59,6 +71,8 @@ namespace vk {
 		::vkDestroySurfaceKHR(instance, surface, nullptr);
 	}
 
+
+	// -- swapchain -----------------------------------------------------------
 
 	/* destroy swapchain */
 	inline auto destroy(const vk::device& device,
@@ -131,6 +145,7 @@ namespace vk {
 		::vkDestroyPipeline(device, pipeline, nullptr);
 	}
 
+
 	// -- pipeline layout -----------------------------------------------------
 
 	/* destroy pipeline layout */
@@ -143,57 +158,6 @@ namespace vk {
 	inline auto destroy(const vk::pipeline_layout& layout,
 						const vk::device& device) noexcept -> void {
 		::vkDestroyPipelineLayout(device, layout, nullptr);
-	}
-
-
-	// -- command buffer ------------------------------------------------------
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::device& device,
-						const vk::command_pool& pool,
-						const vk::command_buffer& buffer,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
-	}
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::device& device,
-						const vk::command_buffer& buffer,
-						const vk::command_pool& pool,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
-	}
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::command_pool& pool,
-						const vk::device& device,
-						const vk::command_buffer& buffer,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
-	}
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::command_pool& pool,
-						const vk::command_buffer& buffer,
-						const vk::device& device,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
-	}
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::command_buffer& buffer,
-						const vk::device& device,
-						const vk::command_pool& pool,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
-	}
-
-	/* destroy command buffer */
-	inline auto destroy(const vk::command_buffer& buffer,
-						const vk::command_pool& pool,
-						const vk::device& device,
-						const vk::u32 size) noexcept -> void {
-		::vkFreeCommandBuffers(device, pool, size, &buffer);
 	}
 
 
@@ -212,6 +176,17 @@ namespace vk {
 	}
 
 
+	// -- command buffer ------------------------------------------------------
+
+	/* destroy command buffer */
+	inline auto destroy(const vk::device& device,
+						const vk::command_pool& pool,
+						const vk::command_buffer* buffer,
+						const vk::u32 size) noexcept -> void {
+		::vkFreeCommandBuffers(device, pool, size, buffer);
+	}
+
+
 	// -- render pass ---------------------------------------------------------
 
 	/* destroy renderpass */
@@ -227,7 +202,7 @@ namespace vk {
 	};
 
 
-	// -- destroy debug utils messenger ---------------------------------------
+	// -- debug utils messenger -----------------------------------------------
 
 	/* destroy debug utils messenger */
 	inline auto destroy(const vk::instance& instance,
@@ -242,21 +217,21 @@ namespace vk {
 		// maybe get function at startup to avoid error in destructors
 	}
 
-	/* destroy debug utils messenger */
+	/* debug utils messenger */
 	inline auto destroy(const vk::debug_utils_messenger& messenger,
 						const vk::instance& instance) -> void {
 		vk::destroy(instance, messenger);
 	}
 
 
-	// -- is destroyable ------------------------------------------------------
+
+	// -- I S  D E S T R O Y A B L E ------------------------------------------
 
 	/* is destroyable */
 	template <typename... A>
 	concept is_destroyable = requires(A&&... args) {
 		{ vk::destroy(xns::forward<A>(args)...) } -> xns::is_same<void>;
 	};
-
 
 
 } // namespace vk

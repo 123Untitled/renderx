@@ -10,8 +10,8 @@
 
 #pragma once
 
-#ifndef ENGINE_VK_TYPEDEFS_HPP
-#define ENGINE_VK_TYPEDEFS_HPP
+#ifndef ENGINE_VK_TYPEDEFS_HEADER
+#define ENGINE_VK_TYPEDEFS_HEADER
 
 
 // vulkan headers
@@ -162,6 +162,15 @@ namespace vk {
 	/* command pool info */
 	using command_pool_info                  = ::VkCommandPoolCreateInfo;
 
+	/* command pool create flags */
+	using command_pool_create_flags          = ::VkCommandPoolCreateFlags;
+
+	/* command pool reset flags */
+	using command_pool_reset_flags           = ::VkCommandPoolResetFlags;
+
+	/* command pool trim flags (reserved for future use) */
+	using command_pool_trim_flags            = ::VkCommandPoolTrimFlags;
+
 
 	// -- command buffer ------------------------------------------------------
 
@@ -173,6 +182,15 @@ namespace vk {
 
 	/* command buffer begin info */
 	using command_buffer_begin_info          = ::VkCommandBufferBeginInfo;
+
+	/* command buffer inheritance info */
+	using command_buffer_inheritance_info    = ::VkCommandBufferInheritanceInfo;
+
+	/* command buffer level */
+	using command_buffer_level               = ::VkCommandBufferLevel;
+
+	/* command buffer reset flags */
+	using command_buffer_reset_flags         = ::VkCommandBufferResetFlags;
 
 
 	// -- renderpass ----------------------------------------------------------
@@ -366,8 +384,6 @@ namespace vk {
 	using clear_color_value                  = ::VkClearColorValue;
 
 
-
-
 } // namespace vk
 
-#endif // ENGINE_VK_TYPEDEFS_HPP
+#endif // ENGINE_VK_TYPEDEFS_HEADER

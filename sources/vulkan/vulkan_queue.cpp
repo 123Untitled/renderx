@@ -14,16 +14,16 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* device and queue family constructor */
-vulkan::queue::queue(const vulkan::device& device,
-					 const vk::u32 index) noexcept
-: _queue{vk::get_device_queue(device, index)} {}
+vulkan::queue::queue(const vulkan::device& device) noexcept
+: _queue{vk::get_device_queue(device, device.family())} {
+}
 
 
 // -- public static methods ---------------------------------------------------
 
-/* create queue info */
-auto vulkan::queue::create_queue_info(const vk::u32 index,
-									  const float& priority) noexcept -> vk::device_queue_info {
+/* info */
+auto vulkan::queue::info(const vk::u32 index,
+						 const float& priority) noexcept -> vk::device_queue_info {
 	// return queue info
 	return vk::device_queue_info{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
@@ -37,3 +37,4 @@ auto vulkan::queue::create_queue_info(const vk::u32 index,
 
 
 // -- public methods ----------------------------------------------------------
+

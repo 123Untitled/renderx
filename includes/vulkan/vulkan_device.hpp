@@ -83,6 +83,7 @@ namespace vulkan {
 			auto physical_device(void) const noexcept -> const vulkan::physical_device&;
 
 			/* queue family */
+			auto family(void) const noexcept -> const vk::u32&;
 
 
 
@@ -93,6 +94,12 @@ namespace vulkan {
 
 
 		private:
+
+			// -- private static methods --------------------------------------
+
+			/* pick physical device */
+			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
+
 
 			// -- private members ---------------------------------------------
 

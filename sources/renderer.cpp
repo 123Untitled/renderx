@@ -25,27 +25,27 @@ engine::renderer::renderer(void)
 	_events{},
 	_surface{_window},
 	_device{_surface},
+	_queue{_device},
 	_swapchain{_device, _surface},
-	_command_pool{_device, 0}, /* queue family index */
-	_command_buffer{_command_pool}, /* swapChainFramebuffers.size() */
+	_pool{_device, _device.family()},
+	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
 	_render_finished{_device},
-	_shaders{},
-	_render_pass{_device} {
+	_shaders{} {
 
 	// load shaders
-	_shaders.load_vertex<"basic">(_device);
-
-	vulkan::shader_module vertex_shader{_device,
-			xns::string{"shaders/spirv/basic.vert.spv"}, xns::string{"main"}};
-
-	// create triangle
-	vertices.emplace_back(-1.0f, -1.0f, 0.0f,
-						   1.0f,  0.0f, 0.0f, 1.0f);
-	vertices.emplace_back( 0.0f,  1.0f, 0.0f,
-						   0.0f,  1.0f, 0.0f, 1.0f);
-	vertices.emplace_back( 1.0f, -1.0f, 0.0f,
-						   0.0f,  0.0f, 1.0f, 1.0f);
+	//_shaders.load_vertex<"basic">(_device);
+	//
+	//vulkan::shader_module vertex_shader{_device,
+	//		xns::string{"shaders/spirv/basic.vert.spv"}, xns::string{"main"}};
+	//
+	//// create triangle
+	//vertices.emplace_back(-1.0f, -1.0f, 0.0f,
+	//					   1.0f,  0.0f, 0.0f, 1.0f);
+	//vertices.emplace_back( 0.0f,  1.0f, 0.0f,
+	//					   0.0f,  1.0f, 0.0f, 1.0f);
+	//vertices.emplace_back( 1.0f, -1.0f, 0.0f,
+	//					   0.0f,  0.0f, 1.0f, 1.0f);
 }
 
 
@@ -76,8 +76,6 @@ auto engine::renderer::draw_frame(void) -> void {
 
 	//cb.bind_pipeline<"graphics">(pipeline);
 
-	vulkan::queue queue{};
-
 	// here error not means program must stop
 	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
 		return;
@@ -87,10 +85,10 @@ auto engine::renderer::draw_frame(void) -> void {
 
 	// maybe send img_index to queue.submit
 	/* command_buffers[image_index] */
-	queue.submit(wait, signal, VK_NULL_HANDLE, /* command_buffers */ 0);
+	_queue.submit(wait, signal, VK_NULL_HANDLE, /* command_buffers */ 0);
 
 	// here error not means program must stop
-	if (queue.present(_swapchain, image_index, signal) == false)
+	if (_queue.present(_swapchain, image_index, signal) == false)
 		return;
 }
 

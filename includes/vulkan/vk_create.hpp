@@ -121,8 +121,8 @@ namespace vk {
 					   const vk::command_buffer_info& info) -> vk::command_buffer {
 		vk::command_buffer buffer{VK_NULL_HANDLE};
 		vk::try_execute(::vkAllocateCommandBuffers,
-					"failed to allocate command buffer",
-					device, &info, &buffer);
+						"failed to allocate command buffer",
+						device, &info, &buffer);
 		return buffer;
 	}
 
@@ -130,6 +130,51 @@ namespace vk {
 	inline auto create(const vk::command_buffer_info& info,
 					   const vk::device& device) -> vk::command_buffer {
 		return vk::create(device, info);
+	}
+
+	/* create command buffers */
+	inline auto create(const vk::device& device,
+					   const vk::command_buffer_info& info,
+					   vk::command_buffer* buffers) -> vk::command_buffer* {
+		vk::try_execute(::vkAllocateCommandBuffers,
+						"failed to allocate command buffers",
+						device, &info, buffers);
+		return buffers;
+	}
+
+	/* create command buffers */
+	inline auto create(const vk::command_buffer_info& info,
+					   const vk::device& device,
+					   vk::command_buffer* buffers) -> vk::command_buffer* {
+		return vk::create(device, info, buffers);
+	}
+
+	/* create command buffers */
+	inline auto create(const vk::device& device,
+					   vk::command_buffer* buffers,
+					   const vk::command_buffer_info& info) -> vk::command_buffer* {
+		return vk::create(device, info, buffers);
+	}
+
+	/* create command buffers */
+	inline auto create(const vk::command_buffer_info& info,
+					   vk::command_buffer* buffers,
+					   const vk::device& device) -> vk::command_buffer* {
+		return vk::create(device, info, buffers);
+	}
+
+	/* create command buffers */
+	inline auto create(vk::command_buffer* buffers,
+					   const vk::device& device,
+					   const vk::command_buffer_info& info) -> vk::command_buffer* {
+		return vk::create(device, info, buffers);
+	}
+
+	/* create command buffers */
+	inline auto create(vk::command_buffer* buffers,
+					   const vk::command_buffer_info& info,
+					   const vk::device& device) -> vk::command_buffer* {
+		return vk::create(device, info, buffers);
 	}
 
 
@@ -259,7 +304,7 @@ namespace vk {
 		const auto func = vk::get_instance_proc_addr<vk::pfn_create_debug_utils_messenger>(
 				instance, "vkCreateDebugUtilsMessengerEXT");
 		if (func == nullptr)
-			throw vulkan::exception{"failed to get instance proc address", VK_ERROR_EXTENSION_NOT_PRESENT};
+			throw vk::exception{"failed to get instance proc address", VK_ERROR_EXTENSION_NOT_PRESENT};
 		vk::try_execute(func,
 					"failed to create vulkan messenger",
 					instance, &info, nullptr, &messenger);

@@ -3,6 +3,9 @@
 #include "vulkan_queue.hpp"
 #include "vulkan/global/instance.hpp"
 
+
+#include "templates/array.hpp"
+
 #include "os.hpp"
 
 // -- public lifecycle --------------------------------------------------------
@@ -12,27 +15,24 @@ vulkan::device::device(const vulkan::surface& surface)
 : _ldevice{}, _pdevice{}, _family{0}, _priority{1.0f} {
 
 	// pick physical device
-	_pdevice = vulkan::instance::pick_physical_device(surface);
+	_pdevice = self::pick_physical_device(surface);
 
 	// get queue family index
-	_family = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
+	_family  = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
 	// create device queue info
-	const auto queue_info = vulkan::queue::create_queue_info(_family, _priority);
+	const auto queue_info = vulkan::queue::info(_family, _priority);
 
 	// get physical device features
 	const auto features = _pdevice.features();
 
 	// setup extensions
-	constexpr const char* extensions[] = {
-		// swapchain extension
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	constexpr vk::array extensions {
+		"VK_KHR_swapchain",
 		#if defined(ENGINE_OS_MACOS)
-		// portability subset extension
-		,"VK_KHR_portability_subset"
+		"VK_KHR_portability_subset"
 		#endif
 	};
-	// VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME (not defined)
 
 	// create device
 	_ldevice = vk::make_shared(_pdevice, vk::device_info{
@@ -47,13 +47,21 @@ vulkan::device::device(const vulkan::surface& surface)
 		// queue create infos
 		.pQueueCreateInfos       = &queue_info,
 		// number of enabled layers
+		#if defined(ENGINE_VL_DEBUG)
+		.enabledLayerCount       = vulkan::instance::validation_layers().size(),
+		// enabled layers
+		.ppEnabledLayerNames     = vulkan::instance::validation_layers().data(),
+		#else
+		// number of enabled layers
 		.enabledLayerCount       = 0,
 		// enabled layers
 		.ppEnabledLayerNames     = nullptr,
+		#endif
 		// number of enabled extensions
-		.enabledExtensionCount   = static_cast<vk::u32>(sizeof(extensions) / sizeof(extensions[0])),
-		//
-		.ppEnabledExtensionNames = extensions,
+		.enabledExtensionCount   = extensions.size(),
+		// enabled extensions
+		.ppEnabledExtensionNames = extensions.data(),
+		// enabled features
 		.pEnabledFeatures        = &features
 	});
 
@@ -80,10 +88,46 @@ auto vulkan::device::physical_device(void) const noexcept -> const vulkan::physi
 	return _pdevice;
 }
 
+/* queue family */
+auto vulkan::device::family(void) const noexcept -> const vk::u32& {
+	return _family;
+}
+
 
 // -- public methods ----------------------------------------------------------
 
 /* wait idle */
 auto vulkan::device::wait_idle(void) const -> void {
 	vk::device_wait_idle(_ldevice);
+}
+
+
+// -- private static methods --------------------------------------------------
+
+/* pick physical device */
+auto vulkan::device::pick_physical_device(const vulkan::surface& surface) -> vulkan::physical_device {
+
+	// get physical devices
+	const auto& pdevices = vulkan::instance::physical_devices();
+
+	// loop over devices
+	for (const auto& pdevice : pdevices) {
+
+		//std::cout << pdevice << std::endl;
+
+		auto capabilities = pdevice.surface_capabilities(surface);
+		auto properties   = pdevice.properties();
+		auto features     = pdevice.features();
+
+		if (pdevice.supports_swapchain()          == true
+		&&  pdevice.have_surface_formats(surface) == true
+		&&  pdevice.have_present_modes(surface)   == true
+		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)) {
+		// &&  features.geometryShader == true) {
+			return pdevice;
+		}
+	}
+	// no suitable physical device found
+	throw vk::exception{"failed to find suitable physical device"};
 }

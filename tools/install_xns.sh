@@ -1,5 +1,6 @@
 #!/usr/bin/env -S zsh --no-rcs --no-globalrcs
 
+exit 0
 
 # -- V A R I A B L E S --------------------------------------------------------
 

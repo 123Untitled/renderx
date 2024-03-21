@@ -18,8 +18,10 @@
 
 #include "basic_vertex.hpp"
 
-#include "vulkan_swapchain.hpp"
-#include "vulkan_semaphore.hpp"
+#include "vulkan/vulkan_swapchain.hpp"
+#include "vulkan/vulkan_semaphore.hpp"
+#include "vulkan/vulkan_command_pool.hpp"
+#include "vulkan/commands.hpp"
 #include "vulkan_queue.hpp"
 #include "glfw_events.hpp"
 
@@ -96,14 +98,17 @@ namespace engine {
 			/* device */
 			vulkan::device _device;
 
+			/* queue */
+			vulkan::queue _queue;
+
 			/* swapchain */
 			vulkan::swapchain _swapchain;
 
 			/* command pool */
-			vulkan::command_pool _command_pool;
+			vulkan::command_pool<vk::void_bit> _pool;
 
-			/* command buffer */
-			vulkan::command_buffer _command_buffer;
+			/* command buffers */
+			vulkan::commands<vulkan::primary> _cmds;
 
 			/* image available semaphore */
 			vulkan::semaphore _image_available;
@@ -113,9 +118,6 @@ namespace engine {
 
 			/* shader library */
 			shader_library _shaders;
-
-			/* render pass */
-			vulkan::render_pass _render_pass;
 
 
 	}; // class renderer

@@ -10,15 +10,15 @@
 
 #pragma once
 
-#ifndef ENGINE_VK_FUNCTIONS_HPP
-#define ENGINE_VK_FUNCTIONS_HPP
+#ifndef ENGINE_VK_FUNCTIONS_HEADER
+#define ENGINE_VK_FUNCTIONS_HEADER
 
 
 // vulkan headers
 #include <vulkan/vulkan.h>
 #include "vk_typedefs.hpp"
 #include "exceptions.hpp"
-#include "vulkan_exception.hpp"
+#include "vk_exception.hpp"
 
 #include <xns>
 #include "vk_utils.hpp"
@@ -98,7 +98,7 @@ namespace vk {
 	inline auto get_instance_proc_addr(const vk::instance& instance, const char* name) -> F {
 		auto func = ::vkGetInstanceProcAddr(instance, name);
 		if (func == nullptr)
-			throw vulkan::exception{"failed to get instance proc address", VK_ERROR_INITIALIZATION_FAILED};
+			throw vk::exception{"failed to get instance proc address", VK_ERROR_INITIALIZATION_FAILED};
 		return reinterpret_cast<F>(func);
 	}
 
@@ -342,9 +342,40 @@ namespace vk {
 	}
 
 
+	// -- command pool --------------------------------------------------------
+
+	/* reset command pool */
+	inline auto reset_command_pool(const vk::device& device,
+								   const vk::command_pool& pool,
+								   const vk::command_pool_reset_flags& flags) -> void {
+		vk::try_execute(::vkResetCommandPool,
+						"failed to reset command pool",
+						device, pool, flags);
+	}
+
+	/* trim command pool */
+	inline auto trim_command_pool(const vk::device& device,
+								  const vk::command_pool& pool) noexcept -> void {
+		::vkTrimCommandPool(device, pool, 0U /* reserved for future use */);
+	}
 
 
 	// -- command buffer ------------------------------------------------------
+
+	/* reset command buffer */
+	inline auto reset_command_buffer(const vk::command_buffer& buffer,
+									 const vk::command_buffer_reset_flags& flags) -> void {
+		vk::try_execute(::vkResetCommandBuffer,
+						"failed to reset command buffer",
+						buffer, flags);
+	}
+
+	/* cmd execute commands */
+	inline auto cmd_execute_commands(const vk::command_buffer& buffer,
+									 const vk::u32 count,
+									 const vk::command_buffer* buffers) noexcept -> void {
+		::vkCmdExecuteCommands(buffer, count, buffers);
+	}
 
 	/* begin command buffer */
 	inline auto begin_command_buffer(const vk::command_buffer& buffer,
@@ -414,4 +445,4 @@ namespace vk {
 
 } // namespace vk
 
-#endif // ENGINE_VK_FUNCTIONS_HPP
+#endif // ENGINE_VK_FUNCTIONS_HEADER

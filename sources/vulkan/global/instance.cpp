@@ -40,42 +40,19 @@ auto vulkan::instance::physical_devices(void) -> const vk::vector<vulkan::physic
 	return __pdevices;
 }
 
-#include "overloads.hpp"
-
-/* pick physical device */
-auto vulkan::instance::pick_physical_device(const vulkan::surface& surface) -> vulkan::physical_device {
-
-	// get physical devices
-	const auto& pdevices = self::physical_devices();
-
-	// loop over devices
-	for (const auto& pdevice : pdevices) {
-
-		const vulkan::physical_device& device = pdevice;
-
-		std::cout << device << std::endl;
-		//&& features.geometryShader;
-		//	device_type(properties);
-		//device_features(features);
-
-		//auto capabilities = device.surface_capabilities(surface);
-
-		auto properties = pdevice.properties();
-		auto features   = pdevice.features();
-
-		if (pdevice.supports_swapchain()          == true
-		&&  pdevice.have_surface_formats(surface) == true
-		&&  pdevice.have_present_modes(surface)   == true
-		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)) {
-			return {pdevice};
-		}
-	}
-	// no suitable physical device found
-	throw engine::exception{"failed to find suitable physical device"};
+/* validation layers */
+#if defined(ENGINE_VL_DEBUG)
+auto vulkan::instance::validation_layers(void) -> const vk::array<const char*, 1>& {
+	static const vk::array<const char*, 1> __layers {
+		"VK_LAYER_KHRONOS_validation"
+		//"VK_LAYER_LUNARG_api_dump",
+		//"VK_LAYER_KHRONOS_profiles",
+		//"VK_LAYER_KHRONOS_synchronization2",
+		//"VK_LAYER_KHRONOS_shader_object"
+	};
+	return __layers;
 }
-
-
+#endif
 
 
 // -- private lifecycle -------------------------------------------------------
@@ -105,15 +82,6 @@ vulkan::instance::instance(void)
 
 	#if defined(ENGINE_VL_DEBUG)
 
-
-	constexpr const char* layers[] {
-		"VK_LAYER_KHRONOS_validation",
-		//"VK_LAYER_LUNARG_api_dump",
-		//"VK_LAYER_KHRONOS_profiles",
-		//"VK_LAYER_KHRONOS_synchronization2",
-		//"VK_LAYER_KHRONOS_shader_object"
-	};
-
 	// get messenger info
 	constexpr vk::debug_utils_messenger_info debug_info{
 		.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -133,8 +101,8 @@ vulkan::instance::instance(void)
 		.pNext                   = &debug_info,
 		.flags                   = CREATE_FLAGS,
 		.pApplicationInfo        = &app_info,
-		.enabledLayerCount       = static_cast<vk::u32>(sizeof(layers) / sizeof(layers[0])),
-		.ppEnabledLayerNames     = layers,
+		.enabledLayerCount       = self::validation_layers().size(),
+		.ppEnabledLayerNames     = self::validation_layers().data(),
 		.enabledExtensionCount   = static_cast<::uint32_t>(extensions.size()),
 		.ppEnabledExtensionNames = extensions.data(),
 	};
@@ -145,7 +113,7 @@ vulkan::instance::instance(void)
 	const vk::instance_info create {
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 		.pNext                   = nullptr,
-		.flags                   = 0,
+		.flags                   = CREATE_FLAGS,
 		.pApplicationInfo        = &app_info,
 		.enabledLayerCount       = 0,
 		.ppEnabledLayerNames     = nullptr,
@@ -157,16 +125,12 @@ vulkan::instance::instance(void)
 
 
 	// create instance
-	_instance = vk::create(create);
+	_instance = vk::make_unique(create);
 
 
 	// create debug messenger
 	#ifdef ENGINE_VL_DEBUG
-	try { _messenger = vk::create(_instance, debug_info); }
-	catch (const engine::exception& except) {
-		vk::destroy(_instance);
-		throw except;
-	}
+	_messenger = vk::create(_instance, debug_info);
 	#endif
 
 	//self::extension_properties();
@@ -177,7 +141,6 @@ vulkan::instance::~instance(void) noexcept {
 #if defined(ENGINE_VL_DEBUG)
 	vk::destroy(_messenger, _instance);
 #endif
-	vk::destroy(_instance);
 }
 
 
@@ -223,13 +186,13 @@ vulkan::instance::callback(const message_severity severity,
 	}
 
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT)
-		std::cerr << "[general] \x1b[0m" << std::endl;
+		std::cerr << "[general] \x1b[0m\r\n";
 
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
-		std::cerr << "[validation] \x1b[0m" << std::endl;
+		std::cerr << "[validation] \x1b[0m\r\n";
 
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
-		std::cerr << "[performance] \x1b[0m" << std::endl;
+		std::cerr << "[performance] \x1b[0m\r\n";
 
 	std::cerr << cdata->pMessage << std::endl << std::endl;
 

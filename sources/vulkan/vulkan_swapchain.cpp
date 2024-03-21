@@ -4,14 +4,14 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::swapchain::swapchain(void) noexcept
-: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
-}
+//vulkan::swapchain::swapchain(void) noexcept
+//: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
+//}
 
 /* logical device and surface constructor */
 vulkan::swapchain::swapchain(const vulkan::device& device,
 							 const vulkan::surface& surface)
-: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
+: _swapchain{}, _render_pass{device}, _images{}, _views{device}, _frames{device}, _format{}, _extent{} {
 
 	const auto& pdevice = device.physical_device();
 
@@ -35,8 +35,8 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 	// create swapchain with info
 	_swapchain = {device, vk::swapchain_info{
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		.pNext                 = nullptr,
-		.flags                 = 0,
+		.pNext                 = VK_NULL_HANDLE,
+		.flags                 = 0U,
 
 		.surface               = surface,
 		.minImageCount         = count,
@@ -46,15 +46,14 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 
 		// for stereoscopic 3D applications
 		.imageArrayLayers      = 1,
-		// see later for post-processing
-		.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-
-		// not implemented !!!
-		.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
-		// not implemented !!!
-		.queueFamilyIndexCount = 0,
-		// not implemented !!!
-		.pQueueFamilyIndices   = nullptr,
+		// for post-processing
+		.imageUsage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, /* see 'vk::image_usage_flags_bits' */
+		// image sharing mode
+		.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE, /* VK_SHARING_MODE_CONCURRENT */
+		// number of queue families
+		.queueFamilyIndexCount = 1U,
+		// queue family indices
+		.pQueueFamilyIndices   = &device.family(),
 
 
 		.preTransform = capabilities.currentTransform, // need to read tutorial
@@ -66,21 +65,88 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 
 
 	// get swapchain images
-	//_images = vk::get_swapchain_images(device, _swapchain);
+	_images = vk::get_swapchain_images(device, _swapchain);
 
-	//for (const auto& image : _images)
-	//	_views.emplace_back(device, image, _format.format);
+
+	{
+		vk::image_view_info info {
+			.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			.pNext      = VK_NULL_HANDLE,
+			.flags      = 0U,
+			.image      = VK_NULL_HANDLE,
+			.viewType   = VK_IMAGE_VIEW_TYPE_2D,
+			.format     = _format.format,
+			.components = {
+				.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+			},
+			.subresourceRange   = {
+				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel   = 0U,
+				.levelCount     = 1U,
+				.baseArrayLayer = 0U,
+				.layerCount     = 1U,
+			}
+		};
+
+		_views.reserve((vk::u32)_images.size());
+
+		for (vk::u32 i = 0; i < _images.size(); ++i) {
+			// fill info with image
+			info.image = _images[i];
+			// create image view
+			_views.emplace_back(info);
+		}
+
+	}
+
+
+
+	{
+
+		// create framebuffers
+		_frames.reserve(_views.size());
+
+
+		vk::framebuffer_info info {
+			// structure type
+			.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+			// next structure
+			.pNext           = VK_NULL_HANDLE,
+			// flags (none)
+			.flags           = 0U,
+			// render pass
+			.renderPass      = _render_pass,
+			// attachment count (swapchain image views)
+			.attachmentCount = 1U,
+			// attachments (swapchain image views)
+			.pAttachments    = VK_NULL_HANDLE,
+			// width
+			.width           = _extent.width,
+			// height
+			.height          = _extent.height,
+			// layers
+			.layers          = 1
+		};
+
+		for (vk::u32 i = 0; i < _views.size(); ++i) {
+			// fill info with image view
+			info.pAttachments = &_views[i];
+			// create framebuffer
+			_frames.emplace_back(info);
+		}
+
+	}
+
 
 }
 
 /* destructor */
 vulkan::swapchain::~swapchain(void) noexcept {
 	// wait for logical device to be idle
-	//_device->wait_idle();
-	// loop over image views
-	//for (auto& view : _views)
-		// destroy image view
-		//view.destroy(*_device);
+	vk::device_wait_idle(_swapchain.dependency());
 }
 
 
@@ -93,6 +159,11 @@ vulkan::swapchain::~swapchain(void) noexcept {
 
 // -- public accessors --------------------------------------------------------
 
+/* size */
+auto vulkan::swapchain::size(void) const noexcept -> vk::u32 {
+	return (vk::u32)_images.size();
+}
+
 /* extent */
 auto vulkan::swapchain::extent(void) const noexcept -> vk::extent2D {
 	return _extent;
@@ -100,12 +171,12 @@ auto vulkan::swapchain::extent(void) const noexcept -> vk::extent2D {
 
 /* image views size */
 auto vulkan::swapchain::image_views_size(void) const noexcept -> vk::u32 {
-	return static_cast<vk::u32>(_views.size());
+	return _views.size();
 }
 
 /* image views data */
 auto vulkan::swapchain::image_views_data(void) const noexcept -> const vk::image_view* {
-	return reinterpret_cast<const vk::image_view*>(_views.data());
+	return _views.data();
 }
 
 /* acquire next image */
@@ -138,10 +209,17 @@ vulkan::swapchain::operator const vk::swapchain&(void) const noexcept {
 // -- public modifiers --------------------------------------------------------
 
 /* re-create */
-auto vulkan::swapchain::recreate(const vulkan::physical_device& pdevice,
+auto vulkan::swapchain::recreate(const vulkan::device& device,
 								 const vulkan::surface& surface) -> void {
 
 	// destroy !!!
+	// wait for logical device to be idle
+	vk::device_wait_idle(_swapchain.dependency());
+
+	_views.clear();
+
+
+	const auto& pdevice = device.physical_device();
 
 	// pick surface format
 	_format         = self::pick_surface_format(pdevice.surface_formats(surface));
@@ -208,4 +286,3 @@ auto vulkan::swapchain::pick_extent(const vk::surface_capabilities& capabilities
 
 	return extent;
 }
-

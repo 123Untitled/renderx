@@ -17,7 +17,7 @@
 #include <vulkan/vulkan.h>
 #include "vulkan_device.hpp"
 #include "vulkan_semaphore.hpp"
-#include "vulkan_command_buffer.hpp"
+#include "vulkan/command_buffer.hpp"
 #include "vulkan_swapchain.hpp"
 
 
@@ -43,23 +43,23 @@ namespace vulkan {
 			/* default constructor */
 			queue(void) noexcept = default;
 
-			/* device and queue family index constructor */
-			queue(const vulkan::device&, const vk::u32) noexcept;
+			/* device constructor */
+			queue(const vulkan::device&) noexcept;
 
 
 			// -- public static methods ---------------------------------------
 
-			/* create queue info */
-			static auto create_queue_info(const vk::u32, const float&) noexcept -> vk::device_queue_info;
+			/* info */
+			static auto info(const vk::u32, const float&) noexcept -> vk::device_queue_info;
 
 
 			// -- public methods ----------------------------------------------
 
-			/* submit */
+			/* submit */ // not thread safe
 			template <decltype(sizeof(0)) W, decltype(sizeof(0)) S>
 			auto submit(const vk::semaphore (&wait)[W],
 						const vk::semaphore (&signal)[S],
-						const vulkan::command_buffer* buffers,
+						const vulkan::command_buffer<vulkan::primary>* buffers,
 						vk::u32 buffer_count) const -> void {
 
 				const ::VkPipelineStageFlags wait_stages[] = {
@@ -91,6 +91,7 @@ namespace vulkan {
 				};
 
 
+				// see vkQueueSubmit2KHR
 				if (::vkQueueSubmit(
 						_queue,
 						1, // submit count
