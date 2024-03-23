@@ -13,7 +13,6 @@
 #ifndef ENGINE_VK_UTILS_HEADER
 #define ENGINE_VK_UTILS_HEADER
 
-#include <xns>
 #include "vk_typedefs.hpp"
 #include "vk_exception.hpp"
 

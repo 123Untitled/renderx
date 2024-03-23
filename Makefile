@@ -91,10 +91,10 @@ override GLFW_LIB := -L$(GLFW_DIR)/lib -lglfw3
 override XNS_DIR := $(EXT_DIR)/xns
 
 # xns include directory
-override XNS_INCLUDE := -I$(XNS_DIR)
+override XNS_INCLUDE := -I$(XNS_DIR)/include
 
 # xns library directory
-override XNS_LIB := -L$(XNS_DIR) -lxns
+override XNS_LIB := -L$(XNS_DIR)/lib -lxns
 
 
 
@@ -165,7 +165,7 @@ override DEBUG := -g3
 override EFLAGS := -Wall -Wextra
 
 # warning impact
-override EFLAGS += -Werror
+#override EFLAGS += -Werror
 
 # standard respect
 override EFLAGS += -Weffc++ -Wpedantic

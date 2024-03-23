@@ -8,6 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
+
+
 #include "renderer.hpp"
 #include "vulkan/global/instance.hpp"
 
@@ -30,8 +32,8 @@ engine::renderer::renderer(void)
 	_pool{_device, _device.family()},
 	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
-	_render_finished{_device},
-	_shaders{} {
+	_render_finished{_device} {
+	//_shaders{} {
 
 	// load shaders
 	//_shaders.load_vertex<"basic">(_device);
@@ -59,8 +61,11 @@ auto engine::renderer::launch(void) -> void {
 	while (_window.should_close() == false) {
 
 		_events.wait();
+
 		//_events.poll();
-		//draw_frame();
+		draw_frame();
+
+		sleep(1);
 	}
 
 	// wait for logical device to be idle
@@ -72,24 +77,38 @@ auto engine::renderer::draw_frame(void) -> void {
 
 	xns::u32 image_index = 0;
 
-	//auto cb = _command_pool.new_command_buffer(_ldevice);
 
-	//cb.bind_pipeline<"graphics">(pipeline);
 
 	// here error not means program must stop
 	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
 		return;
 
-	vk::semaphore   wait[] = { _image_available };
-	vk::semaphore signal[] = { _render_finished };
+	auto& cmd = _cmds[image_index];
+
+	cmd.begin();
+
+	cmd.renderpass_begin(_swapchain,
+						 _swapchain.render_pass(),
+						 _swapchain.frames()[image_index]);
+
+	cmd.bind_graphics_pipeline(pipeline);
+	cmd.cmd_set_viewport(_swapchain);
+	// set scissor...
+	cmd.cmd_draw(3, 1, 0, 0);
+	cmd.renderpass_end();
+	cmd.end();
+
+
 
 	// maybe send img_index to queue.submit
 	/* command_buffers[image_index] */
-	_queue.submit(wait, signal, VK_NULL_HANDLE, /* command_buffers */ 0);
+	_queue.submit({_image_available}, {_render_finished}, _cmds);
+	//_queue.submit(wait, signal, _cmds);
 
 	// here error not means program must stop
-	if (_queue.present(_swapchain, image_index, signal) == false)
+	if (_queue.present(_swapchain, image_index, {_render_finished}) == false)
 		return;
+
 }
 
 

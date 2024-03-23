@@ -17,10 +17,11 @@
 #include <vulkan/vulkan.h>
 
 #include "vulkan_shader_module.hpp"
-#include <xns>
 #include <unordered_map>
 #include <map>
 
+#include <xns/string.hpp>
+#include <xns/literal_map.hpp>
 
 namespace vulkan {
 	class device;
@@ -47,7 +48,8 @@ namespace engine {
 
 			/* default constructor */
 			shader_library(void) noexcept
-			: _vmap{}, _fmap{} {}
+			: _vmap{}, _fmap{} {
+			}
 
 			/* copy constructor */
 			shader_library(const self&) noexcept = default;
@@ -65,7 +67,7 @@ namespace engine {
 			/* load vertex shader */
 			template <xns::basic_string_literal S>
 			auto load_vertex(const vk::shared<vk::device>& device) -> void {
-				xns::string path;
+				//xns::string path;
 				//path.append(_root.data(), S.data(), _vext.data());
 				//std::cout << path << std::endl;
 
@@ -103,10 +105,14 @@ namespace engine {
 			// -- private types -----------------------------------------------
 
 			/* vertex shader map type */
-			using vertex_map_type = xns::literal_map<vulkan::shader_module, "basic">;
+			using vertex_map_type = xns::literal_map<vulkan::shader_module<"vertex">,
+														"basic",
+														"textured">;
 
 			/* fragment shader map type */
-			using fragment_map_type = xns::literal_map<vulkan::shader_module, "basic">;
+			using fragment_map_type = xns::literal_map<vulkan::shader_module<"fragment">,
+														"basic",
+														"textured">;
 
 
 			// -- private members ---------------------------------------------

@@ -17,7 +17,6 @@
 #include "vk_create.hpp"
 #include "vk_destroy.hpp"
 
-#include <xns>
 
 // -- V K  N A M E S P A C E --------------------------------------------------
 

@@ -1,5 +1,7 @@
 #include "vulkan_swapchain.hpp"
 
+#include <xns/math.hpp>
+
 
 // -- public lifecycle --------------------------------------------------------
 
@@ -177,6 +179,16 @@ auto vulkan::swapchain::image_views_size(void) const noexcept -> vk::u32 {
 /* image views data */
 auto vulkan::swapchain::image_views_data(void) const noexcept -> const vk::image_view* {
 	return _views.data();
+}
+
+/* frames */
+auto vulkan::swapchain::frames(void) const noexcept -> const vk::vvector<vk::framebuffer>& {
+	return _frames;
+}
+
+/* render pass */
+auto vulkan::swapchain::render_pass(void) const noexcept -> const vulkan::render_pass& {
+	return _render_pass;
 }
 
 /* acquire next image */

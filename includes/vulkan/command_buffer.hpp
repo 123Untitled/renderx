@@ -220,6 +220,25 @@ namespace vulkan {
 				vk::cmd_end_render_pass(_buffer);
 			}
 
+			/* cmd set viewport */
+			auto cmd_set_viewport(const vulkan::swapchain& swapchain) const noexcept -> void {
+
+				vk::viewport viewport {
+					.x        = 0.0f,
+					.y        = 0.0f,
+					.width    = static_cast<float>(swapchain.extent().width),
+					.height   = static_cast<float>(swapchain.extent().height),
+					.minDepth = 0.0f,
+					.maxDepth = 1.0f
+				};
+
+				::vkCmdSetViewport(_buffer,
+								   0, // first viewport
+								   1, // viewport count
+								   &viewport // viewports
+				);
+
+			}
 
 
 
@@ -227,17 +246,17 @@ namespace vulkan {
 			// bind vertex buffers (not implemented)
 
 			/* draw */
-			auto draw(const vk::u32 vertex_count,
+			auto cmd_draw(const vk::u32 vertex_count,
 					  const vk::u32 instance_count,
 					  const vk::u32 first_vertex,
 					  const vk::u32 first_instance) const noexcept -> void {
-				vk::cmd_draw(_buffer, vertex_count, instance_count, first_vertex, first_instance);
+				::vkCmdDraw(_buffer, vertex_count, instance_count, first_vertex, first_instance);
 			}
 
 
 
 			/* bind graphics pipeline */
-			auto bind_graphic_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
+			auto bind_graphics_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
 				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
 			}
 

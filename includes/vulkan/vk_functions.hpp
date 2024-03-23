@@ -20,8 +20,9 @@
 #include "exceptions.hpp"
 #include "vk_exception.hpp"
 
-#include <xns>
 #include "vk_utils.hpp"
+
+#include <xns/string.hpp>
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------

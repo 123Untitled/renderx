@@ -15,7 +15,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 
-#include <xns>
+#include <xns/vector.hpp>
 
 
 // -- forward declarations ----------------------------------------------------

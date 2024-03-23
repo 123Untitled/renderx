@@ -10,15 +10,15 @@
 
 #pragma once
 
-#ifndef ENGINE_VULKAN_QUEUE_HPP
-#define ENGINE_VULKAN_QUEUE_HPP
+#ifndef ENGINE_VULKAN_QUEUE_HEADER
+#define ENGINE_VULKAN_QUEUE_HEADER
 
 
 #include <vulkan/vulkan.h>
-#include "vulkan_device.hpp"
-#include "vulkan_semaphore.hpp"
-#include "vulkan/command_buffer.hpp"
-#include "vulkan_swapchain.hpp"
+#include "vulkan/vulkan_device.hpp"
+#include "vulkan/vulkan_semaphore.hpp"
+#include "vulkan/commands.hpp"
+#include "vulkan/vulkan_swapchain.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -38,6 +38,7 @@ namespace vulkan {
 			/* self type */
 			using self = vulkan::queue;
 
+
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
@@ -56,40 +57,34 @@ namespace vulkan {
 			// -- public methods ----------------------------------------------
 
 			/* submit */ // not thread safe
-			template <decltype(sizeof(0)) W, decltype(sizeof(0)) S>
+			template <vk::u32 W, vk::u32 S>
 			auto submit(const vk::semaphore (&wait)[W],
 						const vk::semaphore (&signal)[S],
-						const vulkan::command_buffer<vulkan::primary>* buffers,
-						vk::u32 buffer_count) const -> void {
+						const vulkan::commands<vulkan::primary>& cmds) const -> void {
 
-				const ::VkPipelineStageFlags wait_stages[] = {
+
+				const vk::pipeline_stage_flags wait_stages[] = {
 						VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
 				};
+
 
 				const vk::submit_info info{
 					// structure type
 					.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 					.pNext                = nullptr,
-
 					// wait semaphores
 					.waitSemaphoreCount   = W,
 					.pWaitSemaphores      = wait,
-						//reinterpret_cast<const ::VkSemaphore*>(wait),
-
 					// wait stages
 					.pWaitDstStageMask    = wait_stages,
-
 					// command buffers
-					.commandBufferCount   = buffer_count,
+					.commandBufferCount   = cmds.size(),
 					/* command_buffers[image_index] */
-					.pCommandBuffers      = reinterpret_cast<const ::VkCommandBuffer*>(buffers),
-
+					.pCommandBuffers      = cmds.data(),
 					// signal semaphores
 					.signalSemaphoreCount = S,
-					.pSignalSemaphores    = signal //
-						//reinterpret_cast<const ::VkSemaphore*>(signal)
+					.pSignalSemaphores    = signal
 				};
-
 
 				// see vkQueueSubmit2KHR
 				if (::vkQueueSubmit(
@@ -130,7 +125,6 @@ namespace vulkan {
 
 				return true;
 
-
 			}
 
 
@@ -145,4 +139,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_QUEUE_HPP
+#endif // ENGINE_VULKAN_QUEUE_HEADER

@@ -21,7 +21,6 @@
 #include "vulkan_render_pass.hpp"
 #include "vulkan_semaphore.hpp"
 
-#include <xns>
 
 #include "vk_typedefs.hpp"
 #include "vk_shared.hpp"
@@ -88,6 +87,11 @@ namespace vulkan {
 			/* image views data */
 			auto image_views_data(void) const noexcept -> const vk::image_view*;
 
+			/* frames */
+			auto frames(void) const noexcept -> const vk::vvector<vk::framebuffer>&;
+
+			/* render pass */
+			auto render_pass(void) const noexcept -> const vulkan::render_pass&;
 
 			/* acquire next image */
 			auto acquire_next_image(const vulkan::semaphore&,

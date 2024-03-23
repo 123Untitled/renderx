@@ -17,7 +17,8 @@
 // vulkan headers
 #include <vulkan/vulkan.h>
 
-#include <xns>
+#include <xns/vector.hpp>
+
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -273,6 +274,10 @@ namespace vk {
 	using pipeline_dynamic_state_info        = ::VkPipelineDynamicStateCreateInfo;
 
 
+	/* pipeline stage flags */
+	using pipeline_stage_flags               = ::VkPipelineStageFlags;
+
+
 
 
 	// -- attachment ----------------------------------------------------------
@@ -321,6 +326,13 @@ namespace vk {
 
 	/* shader stage flag bits */
 	using shader_stage_flag_bits             = ::VkShaderStageFlagBits;
+
+	/* specialization info */
+	using specialization_info                = ::VkSpecializationInfo;
+
+	/* specialization map entry */
+	using specialization_map_entry           = ::VkSpecializationMapEntry;
+
 
 
 

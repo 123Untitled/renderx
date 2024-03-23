@@ -22,7 +22,7 @@
 #include "vk_typedefs.hpp"
 #include <vulkan/vulkan.h>
 #include <array>
-#include <xns>
+
 
 // -- E N G I N E  N A M E S P A C E ------------------------------------------
 

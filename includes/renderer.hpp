@@ -13,7 +13,6 @@
 #ifndef ENGINE_RENDERER_HEADER
 #define ENGINE_RENDERER_HEADER
 
-#include <xns>
 #include <vulkan/vulkan.h>
 
 #include "basic_vertex.hpp"
@@ -21,9 +20,10 @@
 #include "vulkan/vulkan_swapchain.hpp"
 #include "vulkan/vulkan_semaphore.hpp"
 #include "vulkan/vulkan_command_pool.hpp"
+#include "vulkan/vulkan_pipeline.hpp"
 #include "vulkan/commands.hpp"
-#include "vulkan_queue.hpp"
-#include "glfw_events.hpp"
+#include "vulkan/vulkan_queue.hpp"
+#include "glfw/glfw_events.hpp"
 
 #include "shader_library.hpp"
 
@@ -117,7 +117,7 @@ namespace engine {
 			vulkan::semaphore _render_finished;
 
 			/* shader library */
-			shader_library _shaders;
+			//shader_library _shaders;
 
 
 	}; // class renderer
