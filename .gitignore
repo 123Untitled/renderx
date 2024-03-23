@@ -1,14 +1,12 @@
-external/
-build/
-.cache/
-.nvimlog
+/external
+/.cache
+/.nvimlog
 
-sources/**/*.o
-sources/**/*.d
-sources/**/*.json
+/sources/**/*.o
+/sources/**/*.d
+/sources/**/*.json
 
-**/*.spv
+/shaders/**/*.spv
 
-exec
-exec_engine
-compile_commands.json
+/exec*
+/compile_commands.json
