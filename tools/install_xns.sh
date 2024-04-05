@@ -15,6 +15,12 @@ LIBRARY='xns'
 # repository url
 REPO_URL='https://github.com/123Untitled/xns.git'
 
+# repo
+REPO='123Untitled/xns'
+
+# branch
+BRANCH='main'
+
 # commit hash url
 COMMIT_URL='https://api.github.com/repos/123Untitled/xns/commits/main'
 
@@ -92,7 +98,6 @@ if [[ ! -d $TARGET ]]; then
 	exit 0
 fi
 
-
 local REQUEST=''
 
 # get latest commit hash
@@ -100,6 +105,12 @@ if ! REQUEST=$(curl -s $COMMIT_URL); then
 	echo 'curl: failed to get latest xns library commit hash'
 	exit 1
 fi
+
+# alternative with gh cli
+#if ! REQUEST=$(gh api repos/$REPO/commits/$BRANCH); then
+#	echo 'gh: failed to get latest xns library commit hash'
+#	exit 1
+#fi
 
 
 # extract commit hash
