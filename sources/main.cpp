@@ -131,9 +131,13 @@ int main(void) {
 
 	std::cout << "sizeof _A: " << sizeof(_A) << std::endl;
 
+	//xns::literal_map<vulkan::specialization<int, float>, "sp1", "sp2"> sp_map{{123, 99.9}, {42, 42.0f}};
+
+	//vulkan::specialization<int, float> sp1{};
+
 	vulkan::specialization sp{123, _A{}, (short)4242, 99.9, 'x'};
-	//vulkan::specialization<int, _A, short, double, char> sp{123, _A{}, (short)4242, 99.9, 'x'};
-	//vulkan::specialization<int, short, double, char> sp{123, (short)4242, 99.9, 'x'};
+	auto& info = sp.info();
+
 	sp.print();
 
 	//auto& e = sp[0];
@@ -182,7 +186,7 @@ int main(void) {
 
 	// memory catch block
 	catch (const xns::exception& except) {
-		std::cerr << except.get_message() << std::endl;
+		std::cerr << except.message() << std::endl;
 		return EXIT_FAILURE;
 	}
 
