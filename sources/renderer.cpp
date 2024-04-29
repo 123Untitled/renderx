@@ -8,15 +8,30 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#include "engine/renderer.hpp"
+#include "engine/vertex/basic_vertex.hpp"
 
-
-#include "renderer.hpp"
-#include "vulkan/global/instance.hpp"
 
 static vk::vector<engine::basic_vertex> vertices{};
 
 static vk::pipeline pipeline{};
 
+class rotation final {
+
+	public:
+
+		static consteval auto format(void) noexcept -> vk::format {
+			return VK_FORMAT_R32G32B32_SFLOAT;
+		}
+
+	//private:
+
+		xns::f32 _x;
+		xns::f32 _y;
+		xns::f32 _z;
+};
+
+using _vertex = engine::vertex<rotation>;
 
 // -- public lifecycle --------------------------------------------------------
 
@@ -32,7 +47,11 @@ engine::renderer::renderer(void)
 	_pool{_device, _device.family()},
 	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
-	_render_finished{_device} {
+	_render_finished{_device},
+	_pipeline{
+		vulkan::create_pipeline<_vertex>(_device.shared(),
+								_swapchain.render_pass().shared())
+	} {
 	//_shaders{} {
 
 	// load shaders
@@ -63,9 +82,9 @@ auto engine::renderer::launch(void) -> void {
 		_events.wait();
 
 		//_events.poll();
-		draw_frame();
+		//draw_frame();
 
-		sleep(1);
+		//sleep(1);
 	}
 
 	// wait for logical device to be idle
@@ -76,8 +95,6 @@ auto engine::renderer::launch(void) -> void {
 auto engine::renderer::draw_frame(void) -> void {
 
 	xns::u32 image_index = 0;
-
-
 
 	// here error not means program must stop
 	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
@@ -99,7 +116,6 @@ auto engine::renderer::draw_frame(void) -> void {
 	cmd.end();
 
 
-
 	// maybe send img_index to queue.submit
 	/* command_buffers[image_index] */
 	_queue.submit({_image_available}, {_render_finished}, _cmds);
@@ -108,7 +124,6 @@ auto engine::renderer::draw_frame(void) -> void {
 	// here error not means program must stop
 	if (_queue.present(_swapchain, image_index, {_render_finished}) == false)
 		return;
-
 }
 
 

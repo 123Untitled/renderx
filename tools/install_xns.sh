@@ -74,7 +74,6 @@ if [[ ! -d $TARGET ]]; then
 		exit 1
 	fi
 
-
 	# build library
 	cd $REPOSITORY
 
@@ -106,15 +105,14 @@ if ! REQUEST=$(curl -s $COMMIT_URL); then
 	exit 1
 fi
 
-# alternative with gh cli
-#if ! REQUEST=$(gh api repos/$REPO/commits/$BRANCH); then
-#	echo 'gh: failed to get latest xns library commit hash'
-#	exit 1
-#fi
 
+local NEW_COMMIT=''
 
 # extract commit hash
-local NEW_COMMIT=$(jq -r '.sha' <<< $REQUEST)
+if ! NEW_COMMIT=$(jq -r '.sha' <<< $REQUEST); then
+	echo 'jq: failed to extract commit hash'
+	exit 1
+fi
 
 # check if xns library is up to date
 if [[ ! -f $COMMIT || $(<$COMMIT) != $NEW_COMMIT ]]; then

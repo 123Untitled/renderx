@@ -45,8 +45,8 @@ override PROJECT := engine
 # main executable
 override EXEC := exec_$(PROJECT)
 
-# compile commands for clangd
-override COMPILE_COMMANDS = compile_commands.json
+# compile commands database
+override COMPILE_DB := compile_commands.json
 
 
 
@@ -76,25 +76,25 @@ override EXT_DIR := $(PWD_DIR)/external
 # -- G L F W ------------------------------------------------------------------
 
 # glfw directory
-override GLFW_DIR := $(EXT_DIR)/glfw
+override GLFW_DIR     := $(EXT_DIR)/glfw
 
 # glfw include directory
 override GLFW_INCLUDE := -I$(GLFW_DIR)/include
 
 # glfw library directory
-override GLFW_LIB := -L$(GLFW_DIR)/lib -lglfw3
+override GLFW_LIB     := -L$(GLFW_DIR)/lib -lglfw3
 
 
 # -- X N S --------------------------------------------------------------------
 
 # xns directory
-override XNS_DIR := $(EXT_DIR)/xns
+override XNS_DIR      := $(EXT_DIR)/xns
 
 # xns include directory
-override XNS_INCLUDE := -I$(XNS_DIR)/include
+override XNS_INCLUDE  := -I$(XNS_DIR)/include
 
 # xns library directory
-override XNS_LIB := -L$(XNS_DIR)/lib -lxns
+override XNS_LIB      := -L$(XNS_DIR)/lib -lxns
 
 
 
@@ -116,7 +116,7 @@ override VULKAN_INCLUDE := -I$(VULKAN_DIR)/include
 
 # os dependent vulkan dependencies
 ifeq ($(OS), Darwin)
-override VULKAN_DEPS := -framework Cocoa -framework IOKit
+override VULKAN_DEPS := -framework Cocoa -framework IOKit -framework QuartzCore
 endif
 ifeq ($(OS), Linux)
 override VULKAN_DEPS := -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
@@ -133,7 +133,8 @@ override VULKAN_LIB := -L$(VULKAN_DIR)/lib -lvulkan $(VULKAN_DEPS)
 override SRCS := $(shell find $(SRC_DIR) -type f -name '*.cpp')
 
 # get all sub include directories
-override INCS := $(shell find $(INC_DIR) -type d)
+override INCS := $(INC_DIR)
+#$(shell find $(INC_DIR) -type d)
 
 # pattern substitution for object files
 override OBJS := $(SRCS:%.cpp=%.o)
@@ -141,19 +142,16 @@ override OBJS := $(SRCS:%.cpp=%.o)
 # pattern substitution for dependency files
 override DEPS := $(OBJS:%.o=%.d)
 
-# pattern substitution for json files
-override JSNS := $(SRCS:%.cpp=%.json)
-
-
 
 
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-override CXX := clang++
+#override CXX := /opt/homebrew/Cellar/llvm/18.1.4/bin/clang++
+override CXX := /opt/homebrew/Cellar/gcc/13.2.0/bin/g++-13
 
 # compiler standard
-override STD := -std=c++2a
+override STD := -std=c++23
 
 # compiler optimization
 override OPT := -O0
@@ -162,33 +160,26 @@ override OPT := -O0
 override DEBUG := -g3
 
 # warning scope
-override EFLAGS := -Wall -Wextra
-
-# warning impact
-#override EFLAGS += -Werror
-
-# standard respect
-override EFLAGS += -Weffc++ -Wpedantic
+override FLAGS := -Wall -Wextra -Werror \
+				  -fno-rtti -Wpedantic -Weffc++
 
 # unused suppression
-override EFLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
-					 -Wno-unused-private-field -Wno-unused-local-typedef \
-					 -Wno-unused-function 
+override FLAGS += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
+				  -Wno-unused-function
+
+				  #-Wno-unused-private-field -Wno-unused-local-typedef \
 
 # optimization
-override EFLAGS += -Winline
+#override FLAGS += -Winline
 
 # type conversion
-override EFLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
+#override FLAGS += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
 
 # shadowing
-override EFLAGS += -Wshadow
+override FLAGS += -Wshadow
 
 # dependency flags
 override DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
-
-# compile commands flags
-override CMPFLAGS = -MJ $*.json
 
 # defines
 #override DEFINES ?=
@@ -200,9 +191,8 @@ override INCLUDES := $(addprefix -I, $(INCS)) $(GLFW_INCLUDE) $(VULKAN_INCLUDE) 
 # linker flags
 override LDFLAGS := $(GLFW_LIB) $(VULKAN_LIB) $(XNS_LIB)
 
-
 # cxx flags
-override CXXFLAGS = $(STD) $(OPT) $(DEBUG) $(DEFINES) $(EFLAGS) $(INCLUDES) $(DEPFLAGS) $(CMPFLAGS)
+override CXXFLAGS = $(STD) $(OPT) $(DEBUG) $(DEFINES) $(FLAGS) $(INCLUDES) $(DEPFLAGS)
 
 
 
@@ -237,9 +227,15 @@ ascii:
 
 # -- R U L E S ----------------------------------------------------------------
 
-all: ascii $(GLFW_DIR) xns shaders objs $(EXEC) $(COMPILE_COMMANDS)
+all: ascii $(GLFW_DIR) xns shaders objs $(EXEC) $(COMPILE_DB)
 	$(call FORMAT,"done")
+	echo 'source' $(VULKAN_DIR)/../setup-env.sh
 	echo
+
+# xns
+xns:
+	$(call FORMAT,"installing xns")
+	$(TLS_DIR)/install_xns.sh
 
 # shaders
 shaders:
@@ -252,6 +248,9 @@ $(EXEC): $(OBJS)
 	$(call FORMAT,"linking")
 	$(CXX) $^ -o $@ $(LDFLAGS)
 	\ls -l $@
+
+# important !
+# requires 'source /Users/untitled/VulkanSDK/1.3.268.1/setup-env.sh'
 
 # launch threads
 objs:
@@ -266,15 +265,15 @@ objs:
 
 
 # compile commands
-$(COMPILE_COMMANDS): $(JSNS)
+$(COMPILE_DB): $(SRCS) Makefile
 	$(call FORMAT,"compile database")
-	echo "[\n"$$(cat $(JSNS) | sed '$$s/,\s*$$//')"\n]" | jq > $@
+	$(call GENERATE_CDB)
 	\ls -l $@
 
 # clean
 clean:
 	$(call FORMAT,"cleaning project")
-	$(RM) $(COMPILE_COMMANDS) .cache $(OBJS) $(DEPS) $(JSNS)
+	$(RM) $(OBJS) $(DEPS) $(COMPILE_DB) .cache
 	$(MAKE) --silent --directory=$(SHA_DIR) clean
 
 # fclean
@@ -290,10 +289,6 @@ $(GLFW_DIR):
 	$(call FORMAT,"installing glfw")
 	$(TLS_DIR)/install_glfw.sh
 
-# xns
-xns:
-	$(call FORMAT,"installing xns")
-	$(TLS_DIR)/install_xns.sh
 
 
 
@@ -302,4 +297,17 @@ xns:
 define FORMAT
 printf '\x1b[90m%0.1s\x1b[0m' '-'{1..$(TERM_WIDTH)}
 echo '\x1b[7;32m' $(1) '\x1b[0m'
+endef
+
+# generate compile_commands.json
+define GENERATE_CDB
+local CONTENT='[\n'
+for FILE in $(SRCS); do
+CONTENT+='\t{\n\t\t"directory": "'$$(pwd)'",\n\t\t"file": "'$$FILE'",\n\t\t"output": "'$${FILE%.cpp}.o'",\n\t\t"arguments": [\n\t\t\t"$(CXX)",\n'
+	for FLAG in $(CXXFLAGS); do
+		CONTENT+='\t\t\t"'$$FLAG'",\n'
+	done
+	CONTENT+='\t\t\t"-c",\n\t\t\t"'$$FILE'",\n\t\t\t"-o",\n\t\t\t"'$${FILE%.cpp}'.o"\n\t\t]\n\t},\n'
+done
+echo $${CONTENT%',\n'}'\n]' > $@
 endef

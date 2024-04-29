@@ -11,36 +11,39 @@
 #define GLFW_INCLUDE_VULKAN
 
 
-#include "glfw_window.hpp"
-#include "glfw_events.hpp"
+#include "engine/glfw/window.hpp"
+#include "engine/glfw/events.hpp"
 
-#include "vulkan_physical_device.hpp"
-#include "vulkan_device.hpp"
-#include "vulkan_surface.hpp"
-#include "vulkan_shader_module.hpp"
-#include "vulkan_swapchain.hpp"
-#include "vulkan_command_pool.hpp"
-#include "vulkan/command_buffer.hpp"
+#include "engine/vulkan/physical_device.hpp"
+#include "engine/vulkan/device.hpp"
+#include "engine/vulkan/surface.hpp"
+#include "engine/vulkan/shader_module.hpp"
+#include "engine/vulkan/swapchain.hpp"
+#include "engine/vulkan/command_pool.hpp"
+#include "engine/vulkan/command_buffer.hpp"
 
-#include "vk_typedefs.hpp"
-#include "vulkan/vk_shared.hpp"
+#include "engine/vk/typedefs.hpp"
+#include "engine/vk/shared.hpp"
 
-#include "os.hpp"
-#include "basic_vertex.hpp"
-#include "exceptions.hpp"
-#include "shader_library.hpp"
+#include "engine/os.hpp"
+#include "engine/vertex/basic_vertex.hpp"
+#include "engine/exceptions.hpp"
+#include "engine/shader_library.hpp"
 
 #include <xns/literal_map.hpp>
 
-#include "vulkan_library.hpp"
+#include "engine/vulkan/libraries/library.hpp"
 
-#include "vulkan_resource.hpp"
+#include "engine/vulkan/not_used/resource.hpp"
 
-#include "renderer.hpp"
+#include "engine/renderer.hpp"
 
-#include "vulkan_pipeline.hpp"
+#include "engine/vulkan/pipeline.hpp"
 
+#include "engine/vk/vector.hpp"
+#include "engine/vulkan/commands.hpp"
 
+#include "engine/vulkan/specialization.hpp"
 
 
 void make_lib(void) {
@@ -92,58 +95,32 @@ void make_lib(void) {
 	};
 }
 
-
-
-
-#include "vulkan/vk_vector.hpp"
-#include "vulkan/commands.hpp"
-
-
-class _A {
+class position final {
 
 	public:
 
-		_A(void) noexcept {
+		static consteval auto format(void) noexcept -> vk::format {
+			return VK_FORMAT_R32G32B32_SFLOAT;
 		}
 
-		_A(int&&) noexcept {
-		}
+	//private:
 
-		~_A(void) = default;
-
-	private:
-
-		int c;
+		xns::f32 _x;
+		xns::f32 _y;
+		xns::f32 _z;
 };
-
-// overload <<
-
-std::ostream& operator<<(std::ostream& os, const _A& a) {
-	os << "A";
-	return os;
-}
 
 
 int main(void) {
 
-	int i = 0;
-	float f = 0.0f;
+	position p = {1.0f, 2.0f, 3.0f};
 
-	std::cout << "sizeof _A: " << sizeof(_A) << std::endl;
-
-	//xns::literal_map<vulkan::specialization<int, float>, "sp1", "sp2"> sp_map{{123, 99.9}, {42, 42.0f}};
-
-	//vulkan::specialization<int, float> sp1{};
-
-	vulkan::specialization sp{123, _A{}, (short)4242, 99.9, 'x'};
-	auto& info = sp.info();
-
-	sp.print();
-
-	//auto& e = sp[0];
+	engine::vertex<position> v{position{1.0f, 2.0f, 3.0f}};
+	engine::vertex<position> v2;
 
 
-	return 0;
+	engine::vertex<position>::info();
+
 
 	//try {
 	//
@@ -184,6 +161,11 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
+	catch (const engine::exception& except) {
+		except.print();
+		return EXIT_FAILURE;
+	}
+
 	// memory catch block
 	catch (const xns::exception& except) {
 		std::cerr << except.message() << std::endl;
@@ -192,3 +174,6 @@ int main(void) {
 
 	return EXIT_SUCCESS;
 }
+
+
+
