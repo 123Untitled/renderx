@@ -16,6 +16,8 @@
 #include "engine/vk/typedefs.hpp"
 #include <xns/is_same.hpp>
 
+#include "engine/vertex/vertex.hpp"
+
 
 // -- E N G I N E  N A M E S P A C E ------------------------------------------
 
@@ -38,5 +40,43 @@ namespace engine {
 	} // namespace meta
 
 } // namespace engine
+
+
+// -- V X  N A M E S P A C E --------------------------------------------------
+
+namespace vx {
+
+
+	// -- I S  V E R T E X ----------------------------------------------------
+
+	namespace ___impl {
+
+
+		/* false specialization */
+		template <typename ___type>
+		struct ___is_vertex final {
+			___xns_not_instantiable(___is_vertex);
+			static constexpr bool value = false;
+		};
+
+		/* true specialization */
+		template <typename... ___types>
+		struct ___is_vertex<engine::vertex<___types...>> final {
+			___xns_not_instantiable(___is_vertex);
+			static constexpr bool value = true;
+		};
+
+	}; // namespace ___impl
+
+
+	/* is vertex */
+	template <typename ___type>
+	concept is_vertex = vx::___impl::___is_vertex<___type>::value;
+
+
+} // namespace vx
+
+
+
 
 #endif // ENGINE_META_VERTEX_HPP

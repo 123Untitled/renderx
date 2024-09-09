@@ -9,7 +9,7 @@
 /*****************************************************************************/
 
 #include "engine/renderer.hpp"
-#include "engine/vertex/basic_vertex.hpp"
+#include "engine/vertex/vertex.hpp"
 
 
 static vk::vector<engine::basic_vertex> vertices{};
@@ -47,11 +47,11 @@ engine::renderer::renderer(void)
 	_pool{_device, _device.family()},
 	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
-	_render_finished{_device},
-	_pipeline{
-		vulkan::create_pipeline<_vertex>(_device.shared(),
-								_swapchain.render_pass().shared())
-	} {
+	_render_finished{_device} {
+	//_pipeline{
+	//	vulkan::create_pipeline<_vertex>(_device.shared(),
+	//							_swapchain.render_pass().shared())
+	//} {
 	//_shaders{} {
 
 	// load shaders
@@ -125,5 +125,3 @@ auto engine::renderer::draw_frame(void) -> void {
 	if (_queue.present(_swapchain, image_index, {_render_finished}) == false)
 		return;
 }
-
-

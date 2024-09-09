@@ -10,8 +10,8 @@
 
 #pragma once
 
-#ifndef ENGINE_BASIC_VERTEX_HPP
-#define ENGINE_BASIC_VERTEX_HPP
+#ifndef ENGINE_VERTEX_HEADER
+#define ENGINE_VERTEX_HEADER
 
 #include "engine/os.hpp"
 
@@ -403,4 +403,4 @@ namespace engine {
 
 } // namespace engine
 
-#endif // ENGINE_BASIC_VERTEX_HPP
+#endif // ENGINE_VERTEX_HEADER

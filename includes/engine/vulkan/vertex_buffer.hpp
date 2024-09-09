@@ -17,7 +17,7 @@
 #include <vulkan/vulkan.h>
 
 #include "engine/vulkan/device.hpp"
-#include "engine/vertex/basic_vertex.hpp"
+#include "engine/vertex/vertex.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------

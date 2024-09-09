@@ -26,7 +26,7 @@
 #include "engine/vk/shared.hpp"
 
 #include "engine/os.hpp"
-#include "engine/vertex/basic_vertex.hpp"
+#include "engine/vertex/vertex.hpp"
 #include "engine/exceptions.hpp"
 #include "engine/shader_library.hpp"
 
@@ -95,31 +95,24 @@ void make_lib(void) {
 	};
 }
 
-class position final {
+#include "engine/vertex/position.hpp"
 
-	public:
 
-		static consteval auto format(void) noexcept -> vk::format {
-			return VK_FORMAT_R32G32B32_SFLOAT;
-		}
-
-	//private:
-
-		xns::f32 _x;
-		xns::f32 _y;
-		xns::f32 _z;
-};
+// note: analyze <vulkan/vulkan.hpp> to get ideas for my cpp wrapper
 
 
 int main(void) {
 
-	position p = {1.0f, 2.0f, 3.0f};
+	//using vertex = engine::vertex<vx::position<float>>;
+	//
+	//engine::vertex v{vx::position<float>{1.0f, 2.0f, 3.0f}};
+	//
+	//vertex::info();
+	//
+	//return 0;
 
-	engine::vertex<position> v{position{1.0f, 2.0f, 3.0f}};
-	engine::vertex<position> v2;
 
-
-	engine::vertex<position>::info();
+	//engine::vertex<position>::info();
 
 
 	//try {

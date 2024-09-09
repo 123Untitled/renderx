@@ -15,8 +15,8 @@
 
 #include "engine/vk/typedefs.hpp"
 #include "engine/vk/shared.hpp"
-#include "engine/vertex/meta_vertex.hpp"
-#include "engine/vertex/basic_vertex.hpp"
+#include "engine/vertex/is_vertex.hpp"
+#include "engine/vertex/vertex.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------

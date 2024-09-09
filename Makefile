@@ -147,11 +147,12 @@ override DEPS := $(OBJS:%.o=%.d)
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-#override CXX := /opt/homebrew/Cellar/llvm/18.1.4/bin/clang++
-override CXX := /opt/homebrew/Cellar/gcc/13.2.0/bin/g++-13
+override CXX := $(shell find '/opt/homebrew/Cellar/llvm' -name 'clang++')
+
+#override CXX := /opt/homebrew/Cellar/gcc/13.2.0/bin/g++-13
 
 # compiler standard
-override STD := -std=c++23
+override STD := -std=c++2a
 
 # compiler optimization
 override OPT := -O0
@@ -193,6 +194,9 @@ override LDFLAGS := $(GLFW_LIB) $(VULKAN_LIB) $(XNS_LIB)
 
 # cxx flags
 override CXXFLAGS = $(STD) $(OPT) $(DEBUG) $(DEFINES) $(FLAGS) $(INCLUDES) $(DEPFLAGS)
+
+# command database flags
+override CCDBFLAGS := $(STD) $(OPT) $(DEBUG) $(DEFINES) $(FLAGS) $(INCLUDES)
 
 
 
@@ -304,7 +308,7 @@ define GENERATE_CDB
 local CONTENT='[\n'
 for FILE in $(SRCS); do
 CONTENT+='\t{\n\t\t"directory": "'$$(pwd)'",\n\t\t"file": "'$$FILE'",\n\t\t"output": "'$${FILE%.cpp}.o'",\n\t\t"arguments": [\n\t\t\t"$(CXX)",\n'
-	for FLAG in $(CXXFLAGS); do
+	for FLAG in $(CCDBFLAGS); do
 		CONTENT+='\t\t\t"'$$FLAG'",\n'
 	done
 	CONTENT+='\t\t\t"-c",\n\t\t\t"'$$FILE'",\n\t\t\t"-o",\n\t\t\t"'$${FILE%.cpp}'.o"\n\t\t]\n\t},\n'
