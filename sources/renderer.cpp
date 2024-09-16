@@ -12,9 +12,8 @@
 #include "engine/vertex/vertex.hpp"
 
 
-static vk::vector<engine::basic_vertex> vertices{};
+//static vk::vector<engine::basic_vertex> vertices{};
 
-static vk::pipeline pipeline{};
 
 class rotation final {
 
@@ -24,12 +23,11 @@ class rotation final {
 			return VK_FORMAT_R32G32B32_SFLOAT;
 		}
 
-	//private:
-
 		xns::f32 _x;
 		xns::f32 _y;
 		xns::f32 _z;
 };
+
 
 using _vertex = engine::vertex<rotation>;
 
@@ -47,11 +45,14 @@ engine::renderer::renderer(void)
 	_pool{_device, _device.family()},
 	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
-	_render_finished{_device} {
-	//_pipeline{
-	//	vulkan::create_pipeline<_vertex>(_device.shared(),
-	//							_swapchain.render_pass().shared())
-	//} {
+	_render_finished{_device},
+	_shaders{_device},
+	_pipeline{
+		vulkan::pipeline_builder<_vertex>::build(
+				_device.shared(),
+				_shaders,
+				_swapchain.render_pass().shared())
+	} {
 	//_shaders{} {
 
 	// load shaders
@@ -94,7 +95,7 @@ auto engine::renderer::launch(void) -> void {
 /* draw frame */
 auto engine::renderer::draw_frame(void) -> void {
 
-	xns::u32 image_index = 0;
+	xns::u32 image_index = 0U;
 
 	// here error not means program must stop
 	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
@@ -108,7 +109,7 @@ auto engine::renderer::draw_frame(void) -> void {
 						 _swapchain.render_pass(),
 						 _swapchain.frames()[image_index]);
 
-	cmd.bind_graphics_pipeline(pipeline);
+	cmd.bind_graphics_pipeline(_pipeline);
 	cmd.cmd_set_viewport(_swapchain);
 	// set scissor...
 	cmd.cmd_draw(3, 1, 0, 0);

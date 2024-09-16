@@ -1,6 +1,7 @@
 #include "engine/glfw/system.hpp"
 #include "engine/exceptions.hpp"
 #include "engine/os.hpp"
+#include "engine/vk/typedefs.hpp"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
@@ -9,31 +10,21 @@
 
 
 /* default constructor */
-glfw::system::system(void) {
-
-	// initialize glfw
-	if (::glfwInit() != GLFW_TRUE)
-		throw engine::exception{"failed to initialize glfw."};
+glfw::system::system(void)
+: _init{} {
 
 	// check vulkan support
-	if (::glfwVulkanSupported() == GLFW_FALSE) {
-		::glfwTerminate();
+	if (::glfwVulkanSupported() == GLFW_FALSE)
 		throw engine::exception{"glfw: vulkan is not supported."};
-	}
 
 	// set error callback
 	static_cast<void>(::glfwSetErrorCallback(glfw::system::error_callback));
 }
 
-/* destructor */
-glfw::system::~system(void) noexcept {
-	::glfwTerminate();
-}
-
 /* vulkan required extensions */
 auto glfw::system::vulkan_required_extensions(void) -> xns::vector<const char*> {
 
-	::uint32_t        count = 0;
+	vk::u32           count = 0U;
 	const char** extensions = ::glfwGetRequiredInstanceExtensions(&count);
 
 	if (extensions == nullptr)
@@ -52,10 +43,8 @@ auto glfw::system::vulkan_required_extensions(void) -> xns::vector<const char*> 
 	result.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
-	for (::uint32_t i = 0; i < count; ++i)
+	for (vk::u32 i = 0U; i < count; ++i)
 		result.push_back(extensions[i]);
-
-
 
 	return result;
 }

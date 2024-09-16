@@ -6,7 +6,10 @@
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vk/typedefs.hpp"
 #include "engine/vulkan/unique.hpp"
+#include "engine/vk/shared.hpp"
 #include "engine/vk/array.hpp"
+
+#include "engine/vulkan/debug_utils_messenger.hpp"
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -19,31 +22,15 @@ namespace vulkan {
 	class instance final {
 
 
-		public:
+		private:
 
-			// -- public types ------------------------------------------------
+			// -- private types -----------------------------------------------
 
 			/* self type */
-			using self = vulkan::instance;
+			using ___self = vulkan::instance;
 
 
-			// -- public lifecycle --------------------------------------------
-
-			/* deleted copy constructor */
-			instance(const self&) = delete;
-
-			/* deleted move constructor */
-			instance(self&&) = delete;
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
-
-			/* deleted move assignment operator */
-			auto operator=(self&&) -> self& = delete;
-
+		public:
 
 			// -- public conversion operators ---------------------------------
 
@@ -54,13 +41,10 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* shared */
-			static auto shared(void) -> self&;
+			static auto shared(void) -> ___self&;
 
 			/* physical devices */
 			static auto physical_devices(void) -> const vk::vector<vulkan::physical_device>&;
-
-			/* validation layers */
-			static auto validation_layers(void) -> const vk::array<const char*, 1>&;
 
 
 		private:
@@ -70,8 +54,23 @@ namespace vulkan {
 			/* default constructor */
 			instance(void);
 
+			/* deleted copy constructor */
+			instance(const ___self&) = delete;
+
+			/* deleted move constructor */
+			instance(___self&&) = delete;
+
 			/* destructor */
-			~instance(void) noexcept;
+			~instance(void) noexcept = default;
+
+
+			// -- private assignment operators --------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(___self&&) -> ___self& = delete;
 
 
 			// -- private static methods ----------------------------------
@@ -82,30 +81,15 @@ namespace vulkan {
 			/* layer properties */
 			static auto layer_properties(void) -> vk::vector<vk::layer_properties>;
 
-			/* callback */
-			#if defined(ENGINE_VL_DEBUG)
-
-			using message_severity = ::VkDebugUtilsMessageSeverityFlagBitsEXT;
-			using message_type     = ::VkDebugUtilsMessageTypeFlagsEXT;
-			using callback_data    = ::VkDebugUtilsMessengerCallbackDataEXT;
-
-			/* callback */
-			static VKAPI_ATTR auto VKAPI_CALL
-			callback(const message_severity,
-						const message_type,
-						const callback_data*, void*) -> vk::bool32;
-
-			#endif
-
 
 			// -- private members -----------------------------------------
 
 			/* instance */
-			vk::unique<vk::instance> _instance;
+			vk::shared<vk::instance> _instance;
 
 			/* messenger */
 			#if defined(ENGINE_VL_DEBUG)
-			vk::debug_utils_messenger _messenger;
+			vulkan::debug_utils_messenger _messenger;
 			#endif
 
 	}; // class instance

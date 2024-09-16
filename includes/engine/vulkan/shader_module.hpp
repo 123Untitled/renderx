@@ -21,6 +21,7 @@
 //#include <vector>
 
 #include "engine/vk/typedefs.hpp"
+#include "engine/vulkan/specialization.hpp"
 #include "engine/vk/shared.hpp"
 //#include "engine/vk/functions.hpp"
 
@@ -65,6 +66,7 @@ inline auto get_file_content(const xns::string_view& path) -> xns::vector<char> 
 
 namespace vulkan {
 
+
 	// -- forward declarations ------------------------------------------------
 
 	/* device */
@@ -73,176 +75,67 @@ namespace vulkan {
 
 	// -- S H A D E R  M O D U L E --------------------------------------------
 
-	template <xns::basic_string_literal __type>
+	template <vk::shader_stage_flag_bits ___stage>
 	class shader_module final {
+
+
+		private:
+
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = vulkan::shader_module<___stage>;
+
+
+			// -- private members ---------------------------------------------
+
+			/* shader module */
+			vk::shared<vk::shader_module> _module;
+
+
+			// -- private methods ---------------------------------------------
+
+			/* create shader module */
+			static auto _create_shader_module(const vk::shared<vk::device>& ___device,
+											  const xns::string& ___path) -> vk::shared<vk::shader_module> {
+
+				// get shader data
+				const auto data = get_file_content(___path);
+
+				// create shader module
+				return vk::shared<vk::shader_module>{___device, vk::shader_module_info{
+					// structure type
+					.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+					// next structure
+					.pNext    = nullptr,
+					// flags
+					.flags    = 0U,
+					// data size
+					.codeSize = data.size(),
+					// data pointer
+					.pCode    = reinterpret_cast<const vk::u32*>(data.data())
+				}};
+			}
 
 
 		public:
 
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = vulkan::shader_module<__type>;
-
-
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			constexpr shader_module(void) noexcept
-			: _module{}, _stage{} {
-			}
+			shader_module(void) noexcept = default;
 
 			/* logical device and path constructor */
-			shader_module(const vk::shared<vk::device>& device,
-						  const xns::string& path)
-			: _module{},
-			  _stage{
-				.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-				.pNext  = VK_NULL_HANDLE,
-				/* flags:
-				 * VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT
-				 * VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT
-				 * VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT_EXT
-				 * VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT_EXT
-				 */
-				.flags  = 0U,
-				.stage  = self::__stage_flag(),
-				.module = nullptr,
-				.pName  = "main",
-				.pSpecializationInfo = nullptr
-			} {
-
-				auto data = get_file_content(path);
-
-				_module = {device, vk::shader_module_info{
-					.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-					.pNext    = nullptr,
-					.flags    = 0,
-					.codeSize = data.size(),
-					.pCode    = reinterpret_cast<const vk::u32*>(data.data())
-				}};
-
-				_stage.module = _module;
-
-			}
-
-
-			static consteval auto __stage_flag(void) -> vk::shader_stage_flag_bits {
-
-				// VK_SHADER_STAGE_VERTEX_BIT
-				if constexpr (__type == "vertex")
-					return VK_SHADER_STAGE_VERTEX_BIT;
-
-				// VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-				if constexpr (__type == "tess_control")
-					return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-
-				// VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
-				if constexpr (__type == "tess_eval")
-					return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-
-				// VK_SHADER_STAGE_GEOMETRY_BIT
-				if constexpr (__type == "geometry")
-					return VK_SHADER_STAGE_GEOMETRY_BIT;
-
-				// VK_SHADER_STAGE_FRAGMENT_BIT
-				if constexpr (__type == "fragment")
-					return VK_SHADER_STAGE_FRAGMENT_BIT;
-
-				// VK_SHADER_STAGE_COMPUTE_BIT
-				if constexpr (__type == "compute")
-					return VK_SHADER_STAGE_COMPUTE_BIT;
-
-				// VK_SHADER_STAGE_ALL_GRAPHICS
-				if constexpr (__type == "all_graphics")
-					return VK_SHADER_STAGE_ALL_GRAPHICS;
-
-				// VK_SHADER_STAGE_ALL
-				if constexpr (__type == "all")
-					return VK_SHADER_STAGE_ALL;
-
-				// VK_SHADER_STAGE_RAYGEN_BIT_KHR
-				if constexpr (__type == "raygen")
-					return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-
-				// VK_SHADER_STAGE_ANY_HIT_BIT_KHR
-				if constexpr (__type == "any_hit")
-					return VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
-
-				// VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
-				if constexpr (__type == "closest_hit")
-					return VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-
-				// VK_SHADER_STAGE_MISS_BIT_KHR
-				if constexpr (__type == "miss")
-					return VK_SHADER_STAGE_MISS_BIT_KHR;
-
-				// VK_SHADER_STAGE_INTERSECTION_BIT_KHR
-				if constexpr (__type == "intersection")
-					return VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
-
-				// VK_SHADER_STAGE_CALLABLE_BIT_KHR
-				if constexpr (__type == "callable")
-					return VK_SHADER_STAGE_CALLABLE_BIT_KHR;
-
-				// VK_SHADER_STAGE_TASK_BIT_EXT
-				if constexpr (__type == "task")
-					return VK_SHADER_STAGE_TASK_BIT_EXT;
-
-				// VK_SHADER_STAGE_MESH_BIT_EXT
-				if constexpr (__type == "mesh")
-					return VK_SHADER_STAGE_MESH_BIT_EXT;
-
-				// VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI
-				if constexpr (__type == "subpass_shading")
-					return VK_SHADER_STAGE_SUBPASS_SHADING_BIT_HUAWEI;
-
-				// VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI
-				if constexpr (__type == "cluster_culling")
-					return VK_SHADER_STAGE_CLUSTER_CULLING_BIT_HUAWEI;
-
-				// VK_SHADER_STAGE_RAYGEN_BIT_NV
-				if constexpr (__type == "raygen nv")
-					return VK_SHADER_STAGE_RAYGEN_BIT_NV;
-
-				// VK_SHADER_STAGE_ANY_HIT_BIT_NV
-				if constexpr (__type == "any_hit nv")
-					return VK_SHADER_STAGE_ANY_HIT_BIT_NV;
-
-				// VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV
-				if constexpr (__type == "closest_hit nv")
-					return VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV;
-
-				// VK_SHADER_STAGE_MISS_BIT_NV
-				if constexpr (__type == "miss nv")
-					return VK_SHADER_STAGE_MISS_BIT_NV;
-
-				// VK_SHADER_STAGE_INTERSECTION_BIT_NV
-				if constexpr (__type == "intersection nv")
-					return VK_SHADER_STAGE_INTERSECTION_BIT_NV;
-
-				// VK_SHADER_STAGE_CALLABLE_BIT_NV
-				if constexpr (__type == "callable nv")
-					return VK_SHADER_STAGE_CALLABLE_BIT_NV;
-
-				// VK_SHADER_STAGE_TASK_BIT_NV
-				if constexpr (__type == "task nv")
-					return VK_SHADER_STAGE_TASK_BIT_NV;
-
-				// VK_SHADER_STAGE_MESH_BIT_NV
-				if constexpr (__type == "mesh nv")
-					return VK_SHADER_STAGE_MESH_BIT_NV;
-
-				else
-					return static_cast<vk::shader_stage_flag_bits>(0U);
-
+			shader_module(const vk::shared<vk::device>&     ___device,
+						  const xns::string&                ___path)
+			: _module{___self::_create_shader_module(___device, ___path)} {
 			}
 
 			/* copy constructor */
-			shader_module(const self&) noexcept = default;
+			shader_module(const ___self&) noexcept = default;
 
 			/* move constructor */
-			shader_module(self&&) noexcept = default;
+			shader_module(___self&&) noexcept = default;
 
 			/* destructor */
 			~shader_module(void) noexcept = default;
@@ -251,10 +144,10 @@ namespace vulkan {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self& = default;
+			auto operator=(const ___self&) noexcept -> ___self& = default;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self& = default;
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public conversion operators ---------------------------------
@@ -265,32 +158,68 @@ namespace vulkan {
 			}
 
 
-			// -- public accessors --------------------------------------------
+			// -- public static methods ---------------------------------------
 
 			/* stage info */
-			auto stage_info(const vk::shader_stage_flag_bits& stage) const noexcept -> vk::pipeline_shader_stage_info {
-				return {};
+			auto stage_info(void) const noexcept -> vk::pipeline_shader_stage_info {
+
+				// create stage info
+				return vk::pipeline_shader_stage_info {
+					.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+					.pNext  = nullptr,
+					/* flags:
+						VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT
+						VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT
+						VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT_EXT
+						VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT_EXT
+					*/
+					.flags  = 0U,
+					.stage  = ___stage,
+					.module = _module,
+					.pName  = "main",
+					.pSpecializationInfo = nullptr
+				};
+			}
+
+			/* stage info */
+			template <typename... ___types>
+			auto stage_info(const vulkan::specialization<___types...>& ___spec) const noexcept -> vk::pipeline_shader_stage_info {
+
+				// create stage info
+				return vk::pipeline_shader_stage_info {
+					.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+					.pNext  = nullptr,
+					.flags  = 0U,
+					.stage  = ___stage,
+					.module = _module,
+					.pName  = "main",
+					.pSpecializationInfo = &___spec.info(),
+				};
 			}
 
 
-		private:
-
-			// -- private members ---------------------------------------------
-
-			/* shader module */
-			vk::shared<vk::shader_module> _module;
-
-			/* shader stage */
-			vk::pipeline_shader_stage_info _stage;
-
-
-		// -- assertions ------------------------------------------------------
-
-		/* check if type is valid */
-		static_assert(__stage_flag() != 0U,
-				"shader_module: invalid shader type");
-
 	}; // class shader_module
+
+
+	// -- aliases -------------------------------------------------------------
+
+	/* vertex module */
+	using vertex_module = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>;
+
+	/* fragment module */
+	using fragment_module = vulkan::shader_module<VK_SHADER_STAGE_FRAGMENT_BIT>;
+
+	/* compute module */
+	using compute_module = vulkan::shader_module<VK_SHADER_STAGE_COMPUTE_BIT>;
+
+	/* tessellation control module */
+	using tessellation_control_module = vulkan::shader_module<VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT>;
+
+	/* tessellation evaluation module */
+	using tessellation_evaluation_module = vulkan::shader_module<VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT>;
+
+	/* geometry module */
+	using geometry_module = vulkan::shader_module<VK_SHADER_STAGE_GEOMETRY_BIT>;
 
 } // namespace vulkan
 

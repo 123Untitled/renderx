@@ -2,6 +2,7 @@
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vulkan/queue.hpp"
 #include "engine/vulkan/instance.hpp"
+#include "engine/vulkan/validation_layers.hpp"
 
 
 #include "engine/vk/array.hpp"
@@ -20,8 +21,10 @@ vulkan::device::device(const vulkan::surface& surface)
 	// get queue family index
 	_family  = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
+	float prio = 1.0f;
+
 	// create device queue info
-	const auto queue_info = vulkan::queue::info(_family, _priority);
+	const auto queue_info = vulkan::queue::info(_family, prio);
 
 	// get physical device features
 	const auto features = _pdevice.features();
@@ -34,6 +37,11 @@ vulkan::device::device(const vulkan::surface& surface)
 		#endif
 	};
 
+	// get validation layers
+	#if defined(ENGINE_VL_DEBUG)
+	constexpr auto layers = vulkan::validation_layers::layers();
+	#endif
+
 	// create device
 	_ldevice = vk::make_shared(_pdevice, vk::device_info{
 		// structure type
@@ -41,19 +49,19 @@ vulkan::device::device(const vulkan::surface& surface)
 		// next structure
 		.pNext                   = nullptr,
 		// flags
-		.flags                   = 0,
+		.flags                   = 0U,
 		// number of queue create infos
-		.queueCreateInfoCount    = 1,
+		.queueCreateInfoCount    = 1U,
 		// queue create infos
 		.pQueueCreateInfos       = &queue_info,
 		// number of enabled layers
 		#if defined(ENGINE_VL_DEBUG)
-		.enabledLayerCount       = vulkan::instance::validation_layers().size(),
+		.enabledLayerCount       = layers.size(),
 		// enabled layers
-		.ppEnabledLayerNames     = vulkan::instance::validation_layers().data(),
+		.ppEnabledLayerNames     = layers.data(),
 		#else
 		// number of enabled layers
-		.enabledLayerCount       = 0,
+		.enabledLayerCount       = 0U,
 		// enabled layers
 		.ppEnabledLayerNames     = nullptr,
 		#endif

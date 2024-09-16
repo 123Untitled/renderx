@@ -117,10 +117,12 @@ namespace engine {
 			/* render finished semaphore */
 			vulkan::semaphore _render_finished;
 
+			/* shader library */
+			shader_library _shaders;
+
 			/* pipeline */
 			vulkan::pipeline _pipeline;
-			/* shader library */
-			//shader_library _shaders;
+
 
 
 	}; // class renderer

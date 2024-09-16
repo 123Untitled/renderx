@@ -44,7 +44,7 @@ auto vulkan::physical_device::find_queue_family(const vulkan::surface& surface,
 	// get queue families properties
 	static const auto properties = vk::get_physical_device_queue_family_properties(_pdevice);
 
-	for (vk::u32 i = 0; i < properties.size(); ++i) {
+	for (vk::u32 i = 0U; i < properties.size(); ++i) {
 		// check queue flags
 		if (properties[i].queueFlags & flags
 		&& is_support_surface_and_queue_family(surface, i)) {

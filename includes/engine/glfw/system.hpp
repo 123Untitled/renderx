@@ -15,6 +15,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 
+#include "engine/glfw/init.hpp"
+
 #include <xns/vector.hpp>
 
 
@@ -59,14 +61,6 @@ namespace glfw {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted copy constructor */
-			system(const self&) = delete;
-
-			/* deleted move constructor */
-			system(self&&) = delete;
-
-			/* destructor */
-			~system(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
@@ -92,10 +86,25 @@ namespace glfw {
 
 		private:
 
+			// -- private members ---------------------------------------------
+
+			/* init */
+			glfw::init _init;
+
+
 			// -- private lifecycle -------------------------------------------
 
 			/* default constructor */
 			system(void);
+
+			/* deleted copy constructor */
+			system(const self&) = delete;
+
+			/* deleted move constructor */
+			system(self&&) = delete;
+
+			/* destructor */
+			~system(void) noexcept = default;
 
 
 			// -- private methods ---------------------------------------------

@@ -41,6 +41,9 @@ endif
 
 endif
 
+
+
+
 # vertex shader flags
 override VERT_FLAGS := -fshader-stage=vert
 
@@ -48,55 +51,58 @@ override VERT_FLAGS := -fshader-stage=vert
 override FRAG_FLAGS := -fshader-stage=frag
 
 
+
 # -- D I R E C T O R I E S ----------------------------------------------------
 
 # source directory
-override SRCDIR := sources
+override SRC_DIR := sources
 
 # output directory
-override OUTDIR := spirv
+override OUT_DIR := spirv
+
+# shader directories
+override SHADER_DIRS := $(shell find $(SRC_DIR) -depth 1 -type d)
+
+# output directories
+override OUT_DIRS := $(patsubst $(SRC_DIR)%, $(OUT_DIR)%, $(SHADER_DIRS))
+
 
 
 # -- S O U R C E S ------------------------------------------------------------
 
-# vertex shader sources
-override VERT_SRCS  := $(shell find $(SRCDIR) -type f -name '*.vert.glsl')
+# shader sources
+override SRCS  := $(shell find $(SRC_DIR) -type f -name '*.glsl')
 
-# fragment shader sources
-override FRAG_SRCS  := $(shell find $(SRCDIR) -type f -name '*.frag.glsl')
 
 
 # -- T A R G E T S ------------------------------------------------------------
 
-# vertex shader targets
-override VERT_SPIRV := $(patsubst $(SRCDIR)/%.vert.glsl, $(OUTDIR)/%.vert.spv, $(VERT_SRCS))
+# spirv files
+override SPIRVS := $(patsubst $(SRC_DIR)%.glsl, $(OUT_DIR)%.spv, $(SRCS))
 
-# fragment shader targets
-override FRAG_SPIRV := $(patsubst $(SRCDIR)/%.frag.glsl, $(OUTDIR)/%.frag.spv, $(FRAG_SRCS))
+
+# -- F L A G S ----------------------------------------------------------------
+
+# glslc flags
+override FLAGS = -fshader-stage=$(patsubst $(SRC_DIR)/%,%,$(<D))
 
 
 # -- R U L E S ----------------------------------------------------------------
 
 .PHONY: all clean fclean re
 
-all: $(VERT_SPIRV) $(FRAG_SPIRV)
+all: $(SPIRVS)
 
-$(OUTDIR)/%.vert.spv: $(SRCDIR)/%.vert.glsl Makefile | $(OUTDIR)
+$(OUT_DIR)/%.spv: $(SRC_DIR)/%.glsl Makefile | $(OUT_DIRS)
 	print -f '- %s\n' $@
-	$(GLSLC) $(VERT_FLAGS) $< -o $@
+	$(GLSLC) $(FLAGS) $< -o $@
 
-$(OUTDIR)/%.frag.spv: $(SRCDIR)/%.frag.glsl Makefile | $(OUTDIR)
-	print -f '- %s\n' $@
-	$(GLSLC) $(FRAG_FLAGS) $< -o $@
-
-$(OUTDIR):
-	mkdir -p $@
+$(OUT_DIRS):
+	mkdir -pv $@
 
 clean:
-	rm -rf $(VERT_SPIRV) $(FRAG_SPIRV) $(OUTDIR)
+	rm -rfv $(SPIRVS) $(OUT_DIR)
 
 fclean: clean
 
 re: fclean all
-
-

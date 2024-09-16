@@ -278,6 +278,9 @@ namespace vk {
 	/* pipeline stage flags */
 	using pipeline_stage_flags               = ::VkPipelineStageFlags;
 
+	/* primitive topology */
+	using primitive_topology                  = ::VkPrimitiveTopology;
+
 
 
 
@@ -351,6 +354,15 @@ namespace vk {
 	/* pfn destroy debug utils messenger */
 	using pfn_destroy_debug_utils_messenger  = ::PFN_vkDestroyDebugUtilsMessengerEXT;
 
+	/* message severity */
+	using debug_utils_message_severity_flag_bit = ::VkDebugUtilsMessageSeverityFlagBitsEXT;
+
+	/* message type */
+	using debug_utils_message_type_flags        = ::VkDebugUtilsMessageTypeFlagsEXT;
+
+	/* callback data */
+	using debug_utils_messenger_callback_data   = ::VkDebugUtilsMessengerCallbackDataEXT;
+
 
 	// -- functions -----------------------------------------------------------
 
@@ -379,6 +391,9 @@ namespace vk {
 
 	/* rect2D */
 	using rect2D                             = ::VkRect2D;
+
+	/* scissor */
+	using scissor = vk::rect2D;
 
 	/* offset2D */
 	using offset2D                           = ::VkOffset2D;

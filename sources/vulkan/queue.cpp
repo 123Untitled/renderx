@@ -28,9 +28,9 @@ auto vulkan::queue::info(const vk::u32 index,
 	return vk::device_queue_info{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 		.pNext = nullptr,
-		.flags = 0,
+		.flags = 0U,
 		.queueFamilyIndex = index,
-		.queueCount = 1,
+		.queueCount = 1U,
 		.pQueuePriorities = &priority
 	};
 }

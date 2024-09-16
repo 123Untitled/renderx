@@ -100,8 +100,10 @@ void make_lib(void) {
 
 // note: analyze <vulkan/vulkan.hpp> to get ideas for my cpp wrapper
 
+#include "engine/shader_library.hpp"
 
 int main(void) {
+
 
 	//using vertex = engine::vertex<vx::position<float>>;
 	//

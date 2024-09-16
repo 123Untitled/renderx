@@ -187,7 +187,7 @@ namespace vk {
 	/* get physical device surface support */
 	inline auto get_physical_device_surface_support(const vk::physical_device& ___device,
 													const vk::surface& ___surface, vk::u32 ___family) -> bool {
-		vk::u32 ___present = false;
+		vk::u32 ___present = VK_FALSE;
 		vk::try_execute(::vkGetPhysicalDeviceSurfaceSupportKHR,
 						"failed to get physical device surface support",
 						___device, ___family, ___surface, &___present);

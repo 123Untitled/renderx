@@ -41,22 +41,22 @@ namespace vk {
 			// -- public types ------------------------------------------------
 
 			/* value type */
-			using value_type = ___type;
+			using value_type      = ___type;
 
 			/* reference type */
-			using reference = value_type&;
+			using reference       = value_type&;
 
 			/* const reference type */
 			using const_reference = const value_type&;
 
 			/* pointer type */
-			using pointer = value_type*;
+			using pointer         = value_type*;
 
 			/* const pointer type */
-			using const_pointer = const value_type*;
+			using const_pointer   = const value_type*;
 
 			/* size type */
-			using size_type = decltype(___size);
+			using size_type       = decltype(___size);
 
 
 			// -- public members ----------------------------------------------

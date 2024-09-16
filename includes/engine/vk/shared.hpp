@@ -437,7 +437,6 @@ namespace vk {
 
 	}; // class shared
 
-
 } // namespace vk
 
 #endif // ENGINE_VULKAN_SHARED_HEADER
