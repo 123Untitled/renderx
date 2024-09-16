@@ -105,7 +105,7 @@ ifeq ($(OS), Darwin)
 override VULKAN_DIR := /Users/untitled/VulkanSDK/1.3.268.1/macOS
 endif
 ifeq ($(OS), Linux)
-override VULKAN_DIR := $(EXT_DIR)/vulkan/x86_64
+override VULKAN_DIR := $(shell pwd)/vulkansdk/x86_64
 endif
 
 # glslc compiler
@@ -147,9 +147,7 @@ override DEPS := $(OBJS:%.o=%.d)
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-override CXX := $(shell find '/opt/homebrew/Cellar/llvm' -name 'clang++')
-
-#override CXX := /opt/homebrew/Cellar/gcc/13.2.0/bin/g++-13
+override CXX := clang++
 
 # compiler standard
 override STD := -std=c++2a

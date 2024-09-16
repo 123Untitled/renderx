@@ -1,4 +1,5 @@
 /external
+/vulkansdk
 /.cache
 /.nvimlog
 

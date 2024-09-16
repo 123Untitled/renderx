@@ -16,6 +16,7 @@
 #include "engine/vk/typedefs.hpp"
 #include "engine/vk/shared.hpp"
 #include "engine/vk/exception.hpp"
+#include <xns/malloc.hpp>
 
 
 
@@ -93,7 +94,7 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* level */
-			static consteval auto level(void) noexcept -> vk::command_buffer_level {
+			static constexpr auto level(void) noexcept -> vk::command_buffer_level {
 				if constexpr (xns::is_same<T, primary>)
 					return VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 				else
@@ -294,7 +295,7 @@ namespace vulkan {
 			/* allocate */
 			inline static auto __allocate(const size_type size) noexcept -> vk::command_buffer* {
 				// allocate memory
-				return static_cast<vk::command_buffer*>(__builtin_malloc(size * sizeof(vk::command_buffer)));
+				return xns::malloc<vk::command_buffer>(size);
 			}
 
 			/* deallocate */
@@ -303,7 +304,7 @@ namespace vulkan {
 				if (ptr == nullptr)
 					return;
 				// deallocate memory
-				__builtin_free(ptr);
+				xns::free(ptr);
 			}
 
 

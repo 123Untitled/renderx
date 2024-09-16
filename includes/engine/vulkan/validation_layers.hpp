@@ -34,14 +34,14 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* layers */
-			static constexpr auto layers(void) -> vk::array<const char*, 4U> {
+			static constexpr auto layers(void) -> vk::array<const char*, 1U> {
 
 				// return validation layers
-				return vk::array<const char*, 4U> {
+				return vk::array<const char*, 1U> {
 					"VK_LAYER_KHRONOS_validation",
-					"VK_LAYER_KHRONOS_profiles",
-					"VK_LAYER_KHRONOS_synchronization2",
-					"VK_LAYER_KHRONOS_shader_object"
+					//"VK_LAYER_KHRONOS_profiles",
+					//"VK_LAYER_KHRONOS_synchronization2",
+					//"VK_LAYER_KHRONOS_shader_object"
 					/*
 					"VK_LAYER_LUNARG_api_dump",
 					*/

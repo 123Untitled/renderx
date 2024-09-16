@@ -11,7 +11,7 @@
 .DELETE_ON_ERROR:
 
 # silent mode
-.SILENT:
+#.SILENT:
 
 # set shell program
 override SHELL := $(shell which zsh)
@@ -61,7 +61,7 @@ override SRC_DIR := sources
 override OUT_DIR := spirv
 
 # shader directories
-override SHADER_DIRS := $(shell find $(SRC_DIR) -depth 1 -type d)
+override SHADER_DIRS := $(shell find $(SRC_DIR) -maxdepth 1 -type d)
 
 # output directories
 override OUT_DIRS := $(patsubst $(SRC_DIR)%, $(OUT_DIR)%, $(SHADER_DIRS))

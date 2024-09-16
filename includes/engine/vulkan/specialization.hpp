@@ -162,7 +162,7 @@ namespace vulkan {
 
 			/* offset at */
 			template <size_type ___idx>
-			static constexpr auto ___offset_at = ___compute_offset<___idx, 0U, 0U>();
+			static constexpr size_type ___offset_at = ___compute_offset<___idx, 0U, 0U>();
 
 
 			/* forward declaration */

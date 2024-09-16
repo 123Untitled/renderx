@@ -167,6 +167,11 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
+	catch (...) {
+		std::cerr << "unknown exception" << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	return EXIT_SUCCESS;
 }
 

@@ -276,7 +276,7 @@ namespace vk {
 
 			/* surface constructor NEED TO BE FIXED ! */
 			shared(const value_type& value, const vk::shared<dep_type>& dependency)
-			: _value{value}, _count{(vk::u32*)__builtin_malloc(sizeof(vk::u32))}, _dependency{dependency} {
+			: _value{value}, _count{xns::malloc<vk::u32>(1U)}, _dependency{dependency} {
 
 				if (_count == nullptr) {
 					vk::destroy(_value, _dependency);

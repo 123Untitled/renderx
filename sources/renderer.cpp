@@ -46,13 +46,14 @@ engine::renderer::renderer(void)
 	_cmds{_pool, _swapchain.size()},
 	_image_available{_device},
 	_render_finished{_device},
-	_shaders{_device},
+	_shaders{_device} {
+		/*
 	_pipeline{
 		vulkan::pipeline_builder<_vertex>::build(
 				_device.shared(),
 				_shaders,
 				_swapchain.render_pass().shared())
-	} {
+	} */
 	//_shaders{} {
 
 	// load shaders

@@ -19,6 +19,8 @@
 #include "engine/vk/destroy.hpp"
 #include "engine/vk/shared.hpp"
 
+#include <xns/malloc.hpp>
+
 
 // -- V K  N A M E S P A C E --------------------------------------------------
 
@@ -211,7 +213,7 @@ namespace vk {
 			/* allocate */
 			inline static auto __allocate(const size_type size) -> mut_ptr {
 				// allocate memory
-				return static_cast<mut_ptr>(__builtin_malloc(size * sizeof(value_type)));
+				return xns::malloc<value_type>(size);
 			}
 
 			/* deallocate */
@@ -220,7 +222,7 @@ namespace vk {
 				if (ptr == nullptr)
 					return;
 				// deallocate memory
-				__builtin_free(ptr);
+				xns::free(ptr);
 			}
 
 
