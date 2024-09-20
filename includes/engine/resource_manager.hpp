@@ -53,8 +53,8 @@ namespace vk {
 			class instance_resource;
 
 
-			// -- private classes ---------------------------------------------
 
+			// -- private classes ---------------------------------------------
 
 			template <typename ___type, typename ___parent>
 			class node final {
@@ -95,18 +95,24 @@ namespace vk {
 					/* self type */
 					using ___self = instance_resource;
 
+					/* resource type */
+					template <typename ___type>
+					using ___resource = node<___type, ___self>;
+
 
 					// -- private members -------------------------------------
 
 					/* surfaces */
-					node<vk::surface, ___self>* _surfaces;
+					___resource<vk::surface>* _surfaces;
 
 					/* debug utils messengers */
-					node<vk::debug_utils_messenger, ___self>* _messengers;
+					___resource<vk::debug_utils_messenger>* _messengers;
+
+					/* size */
+					vk::u32 _size;
 
 
-
-			}; // class list
+			}; // class instance_resource
 
 
 			//resource<vk::surface, instance_resource> _surface;
