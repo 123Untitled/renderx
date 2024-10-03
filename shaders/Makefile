@@ -11,13 +11,13 @@
 .DELETE_ON_ERROR:
 
 # silent mode
-#.SILENT:
+.SILENT:
 
 # set shell program
-override SHELL := $(shell which zsh)
+override SHELL := $(shell which sh)
 
 # set shell flags
-.SHELLFLAGS := --no-rcs --no-globalrcs --errexit --no-unset -c -o pipefail
+.SHELLFLAGS := -c -e -o pipefail -u
 
 
 
@@ -25,23 +25,7 @@ override SHELL := $(shell which zsh)
 
 
 # get compiler
-GLSLC ?=
-
-ifndef MAKECMDGOALS
-
-# check if compiler exists
-ifndef GLSLC
-    $(error "glslc path not set")
-else
-    override RESULT := $(shell command -v $(GLSLC) 2> /dev/null)
-    ifndef RESULT
-        $(error "invalid glslc path")
-    endif
-endif
-
-endif
-
-
+GLSLC := glslc
 
 
 # vertex shader flags
@@ -84,7 +68,7 @@ override SPIRVS := $(patsubst $(SRC_DIR)%.glsl, $(OUT_DIR)%.spv, $(SRCS))
 # -- F L A G S ----------------------------------------------------------------
 
 # glslc flags
-override FLAGS = -fshader-stage=$(patsubst $(SRC_DIR)/%,%,$(<D))
+override glslc_flags = -fshader-stage=$(patsubst $(SRC_DIR)/%,%,$(<D))
 
 
 # -- R U L E S ----------------------------------------------------------------
@@ -94,8 +78,8 @@ override FLAGS = -fshader-stage=$(patsubst $(SRC_DIR)/%,%,$(<D))
 all: $(SPIRVS)
 
 $(OUT_DIR)/%.spv: $(SRC_DIR)/%.glsl Makefile | $(OUT_DIRS)
-	print -f '- %s\n' $@
-	$(GLSLC) $(FLAGS) $< -o $@
+	$(GLSLC) $(glslc_flags) $< -o $@
+	echo '-' $@
 
 $(OUT_DIRS):
 	mkdir -pv $@
