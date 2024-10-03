@@ -121,8 +121,6 @@ if [[ ! -f $COMMIT || $(<$COMMIT) != $NEW_COMMIT ]]; then
 	# call this script again
 	$0
 	exit $?
-else
-	echo 'xns library is up to date'
 fi
 
 exit 0
