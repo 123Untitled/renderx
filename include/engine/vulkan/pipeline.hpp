@@ -210,7 +210,7 @@ namespace vulkan {
 					// flags
 					.flags               = 0U,
 					// shader stage count
-					.stageCount          = (uint32_t)stages.size(),
+					.stageCount          = stages.size(),
 					// shader stages
 					.pStages             = stages.data(),
 					// vertex input state

@@ -370,6 +370,15 @@ namespace vk {
 	using pfn_void_function                  = ::PFN_vkVoidFunction;
 
 
+	// -- buffer --------------------------------------------------------------
+
+	/* buffer */
+	using buffer                             = ::VkBuffer;
+
+	/* buffer info */
+	using buffer_info                        = ::VkBufferCreateInfo;
+
+
 	// -- vertex --------------------------------------------------------------
 
 	/* vertex input binding description */

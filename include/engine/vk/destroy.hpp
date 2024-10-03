@@ -221,6 +221,21 @@ namespace vk {
 	}
 
 
+	// -- buffer --------------------------------------------------------------
+
+	/* destroy buffer */
+	inline auto destroy(const vk::device& ___device,
+						const vk::buffer& ___buffer) noexcept -> void {
+		::vkDestroyBuffer(___device, ___buffer, nullptr);
+	}
+
+	/* destroy buffer */
+	inline auto destroy(const vk::buffer& ___buffer,
+						const vk::device& ___device) noexcept -> void {
+		::vkDestroyBuffer(___device, ___buffer, nullptr);
+	}
+
+
 
 	// -- I S  D E S T R O Y A B L E ------------------------------------------
 

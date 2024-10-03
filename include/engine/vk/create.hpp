@@ -308,6 +308,28 @@ namespace vk {
 	}
 
 
+	// -- buffer --------------------------------------------------------------
+
+	/* create buffer */
+	inline auto create(const vk::device& ___de,
+					   const vk::buffer_info& ___in) -> vk::buffer {
+
+		vk::buffer ___bf;
+
+		vk::try_execute(::vkCreateBuffer,
+					"failed to create vk::buffer",
+					___de, &___in, nullptr, &___bf);
+
+		return ___bf;
+	}
+
+	/* create buffer */
+	inline auto create(const vk::buffer_info& ___in,
+					   const vk::device& ___de) -> vk::buffer {
+		return vk::create(___de, ___in);
+	}
+
+
 
 	// -- create debug utils messenger ----------------------------------------
 

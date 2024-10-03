@@ -240,6 +240,22 @@ namespace vulkan {
 
 			}
 
+			/* cmd set scissor */
+			auto cmd_set_scissor(const vulkan::swapchain& swapchain) const noexcept -> void {
+
+				vk::rect2D scissor {
+					.offset = vk::offset2D{0, 0},
+					.extent = swapchain.extent()
+				};
+
+				::vkCmdSetScissor(_buffer,
+								  0, // first scissor
+								  1, // scissor count
+								  &scissor // scissors
+				);
+
+			}
+
 
 
 			/* bind vertex buffers */
