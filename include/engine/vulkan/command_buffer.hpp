@@ -21,6 +21,8 @@
 //#include "engine/vulkan/device.hpp"
 #include "engine/vulkan/swapchain.hpp"
 #include "engine/vulkan/render_pass.hpp"
+#include "engine/vulkan/buffer.hpp"
+#include "engine/vulkan/pipeline.hpp"
 
 
 //namespace vulkan {
@@ -101,7 +103,7 @@ namespace vulkan {
 				 *   commandBuffer is moved to the initial state.
 				 */
 
-				vk::reset_command_buffer(_buffer, 0U);
+				vk::reset_command_buffer(_cbuffer, 0U);
 			}
 
 			/* cmd execute commands */
@@ -113,12 +115,12 @@ namespace vulkan {
 				   */
 
 				// execute secondary command buffers
-				::vkCmdExecuteCommands(_buffer, cmds.size(), cmds.data());
+				::vkCmdExecuteCommands(_cbuffer, cmds.size(), cmds.data());
 			}
 
 
 			/* begin */
-			auto begin(void) const -> void {
+			auto begin_command_buffer(void) const -> void {
 
 				// start recording state
 
@@ -134,6 +136,7 @@ namespace vulkan {
 					.pInheritanceInfo = nullptr
 				};
 
+				// actually not used !
 				vk::command_buffer_inheritance_info inheritance {
 					// type of structure
 					.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO,
@@ -163,20 +166,19 @@ namespace vulkan {
 				 */
 
 				// begin command buffer
-				vk::begin_command_buffer(_buffer, info);
+				vk::begin_command_buffer(_cbuffer, info);
 
 			}
 
 			/* end */
-			auto end(void) const -> void {
+			auto end_command_buffer(void) const -> void {
 
 				// stop recording state, start executable state
-
-				vk::end_command_buffer(_buffer);
+				vk::end_command_buffer(_cbuffer);
 			}
 
-			/* renderpass begin */
-			auto renderpass_begin(const vulkan::swapchain& swapchain,
+			/* render pass begin */
+			auto render_pass_begin(const vulkan::swapchain& swapchain,
 								  const vulkan::render_pass& render_pass,
 								  const vk::framebuffer& framebuffer) const noexcept -> void {
 
@@ -205,19 +207,18 @@ namespace vulkan {
 					// render area
 					.renderArea      = area,
 					// clear value count
-					.clearValueCount = 1,
+					.clearValueCount = 1U,
 					// clear values
 					.pClearValues    = &clear
 				};
 
 				// begin render pass
-				vk::cmd_begin_render_pass(_buffer, info, VK_SUBPASS_CONTENTS_INLINE);
-
+				vk::cmd_begin_render_pass(_cbuffer, info, VK_SUBPASS_CONTENTS_INLINE);
 			}
 
 			/* renderpass end */
-			auto renderpass_end(void) const noexcept -> void {
-				vk::cmd_end_render_pass(_buffer);
+			auto cmd_end_render_pass(void) const noexcept -> void {
+				vk::cmd_end_render_pass(_cbuffer);
 			}
 
 			/* cmd set viewport */
@@ -232,77 +233,145 @@ namespace vulkan {
 					.maxDepth = 1.0f
 				};
 
-				::vkCmdSetViewport(_buffer,
-								   0, // first viewport
-								   1, // viewport count
+				::vkCmdSetViewport(_cbuffer,
+								   0U, // first viewport
+								   1U, // viewport count
 								   &viewport // viewports
 				);
-
 			}
 
 			/* cmd set scissor */
 			auto cmd_set_scissor(const vulkan::swapchain& swapchain) const noexcept -> void {
 
-				vk::rect2D scissor {
-					.offset = vk::offset2D{0, 0},
-					.extent = swapchain.extent()
+				const vk::rect2D scissor {
+					// offset
+					vk::offset2D{0, 0},
+					// extent
+					swapchain.extent()
 				};
 
-				::vkCmdSetScissor(_buffer,
-								  0, // first scissor
-								  1, // scissor count
-								  &scissor // scissors
+				::vkCmdSetScissor(
+						// command buffer
+						_cbuffer,
+						// first scissor
+						0U,
+						// scissor count
+						1U,
+						// scissors
+						&scissor
 				);
-
 			}
 
 
 
 			/* bind vertex buffers */
+			template <vk::u32 ___size>
+			auto cmd_bind_vertex_buffers(const vk::buffer (&___buffs)[___size]) const noexcept -> void {
+
+				// offsets
+				const vk::device_size ___ofs[___size]{}; // zero offsets
+
+				// bind vertex buffers
+				vk::cmd_bind_vertex_buffers(
+						// command buffer
+						_cbuffer,
+						// first binding
+						0U,
+						// binding count
+						___size,
+						// buffers
+						___buffs,
+						// offsets
+						___ofs);
+			}
+
+
 			// bind vertex buffers (not implemented)
 
 			/* draw */
-			auto cmd_draw(const vk::u32 vertex_count,
-					  const vk::u32 instance_count,
-					  const vk::u32 first_vertex,
-					  const vk::u32 first_instance) const noexcept -> void {
-				::vkCmdDraw(_buffer, vertex_count, instance_count, first_vertex, first_instance);
+			auto cmd_draw(const vk::u32 vertex_count) const noexcept -> void {
+
+				// draw
+				vk::cmd_draw(
+						// command buffer
+						_cbuffer,
+						// vertex count
+						vertex_count,
+						// instance count
+						1U,
+						// first vertex
+						0U,
+						// first instance
+						0U
+				);
 			}
 
 
 
 			/* bind graphics pipeline */
 			auto bind_graphics_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
 			}
 
 			/* bind compute pipeline */
 			auto bind_compute_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_COMPUTE);
 			}
 
 			/* bind amdx pipeline */
 			#ifdef VK_ENABLE_BETA_EXTENSIONS
 			auto bind_amdx_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX);
 			}
 			#endif
 
 			/* bind ray tracing pipeline */
 			auto bind_ray_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR);
 			}
 
 			/* bind subpass shading pipeline */
 			auto bind_subpass_shading_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_SUBPASS_SHADING_HUAWEI);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_SUBPASS_SHADING_HUAWEI);
 			}
 
 			/* bind ray tracing nv pipeline */
 			auto bind_ray_nv_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
-				vk::cmd_bind_pipeline(_buffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_NV);
+				vk::cmd_bind_pipeline(_cbuffer, pipeline, VK_PIPELINE_BIND_POINT_RAY_TRACING_NV);
 			}
 
+
+
+			/* record */
+			auto record(const vulkan::swapchain& swapchain,
+						const vulkan::render_pass& render_pass,
+						const vk::framebuffer& framebuffer,
+						const vulkan::pipeline& pipeline) const -> void {
+
+				// begin recording
+				self::begin_command_buffer();
+
+				// begin render pass
+				self::render_pass_begin(swapchain, render_pass, framebuffer);
+
+				// bind graphics pipeline
+				self::bind_graphics_pipeline(pipeline);
+
+				// set viewport
+				self::cmd_set_viewport(swapchain);
+
+				// set scissor
+				self::cmd_set_scissor(swapchain);
+
+				// draw
+				self::cmd_draw(3U); // 3 vertices
+
+				// end render pass
+				self::cmd_end_render_pass();
+
+				// end recording
+				self::end_command_buffer();
+			}
 
 
 		private:
@@ -310,7 +379,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::command_buffer _buffer;
+			vk::command_buffer _cbuffer;
 
 	}; // class command_buffer
 

@@ -29,6 +29,13 @@
 #include "shader_library.hpp"
 
 //#include "vulkan/global/instance.hpp"
+#include "engine/vertex/vertex.hpp"
+#include "engine/vertex/position.hpp"
+
+
+// to be removed !
+using vertex_type = engine::vertex<vx::float2,
+								   vx::float3>;
 
 
 
@@ -122,6 +129,20 @@ namespace engine {
 
 			/* pipeline */
 			vulkan::pipeline _pipeline;
+
+
+			/* buffer */
+			vulkan::buffer _buffer;
+
+			/* device memory */
+			vulkan::device_memory _memory;
+
+			/* vertices */
+			vk::vector<vertex_type> _vertices;
+
+
+
+
 
 
 

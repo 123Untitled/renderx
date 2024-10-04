@@ -330,6 +330,28 @@ namespace vk {
 	}
 
 
+	// -- memory --------------------------------------------------------------
+
+	/* create device memory */
+	inline auto create(const vk::device& ___device,
+					   const vk::memory_allocate_info& ___info) -> vk::device_memory {
+
+		vk::device_memory ___mem;
+
+		vk::try_execute<"vkAllocateMemory failed">(
+				::vkAllocateMemory,
+				___device, &___info, nullptr, &___mem
+		);
+
+		return ___mem;
+	}
+
+	/* create device memory */
+	inline auto create(const vk::memory_allocate_info& ___info,
+					   const vk::device& ___device) -> vk::device_memory {
+		return vk::create(___device, ___info);
+	}
+
 
 	// -- create debug utils messenger ----------------------------------------
 

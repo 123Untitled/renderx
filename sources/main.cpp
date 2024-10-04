@@ -46,6 +46,60 @@
 #include "engine/vulkan/specialization.hpp"
 
 
+
+#include "engine/vertex/position.hpp"
+#include "engine/vertex/rotation.hpp"
+
+
+// note: analyze <vulkan/vulkan.hpp> to get ideas for my cpp wrapper
+
+#include "engine/shader_library.hpp"
+
+int main(void) {
+
+
+
+	/*
+	engine::vertex v{vx::float3{1.0f, 2.0f, 3.0f},
+					 vx::rotation{4.0f, 5.0f, 6.0f}};
+
+	v.print_info();
+	*/
+
+
+	// launch renderer
+	try {
+		engine::renderer renderer;
+		renderer.launch();
+	}
+
+	// vulkan catch block
+	catch (const vk::exception& except) {
+		except.what();
+		return EXIT_FAILURE;
+	}
+
+	catch (const engine::exception& except) {
+		except.print();
+		return EXIT_FAILURE;
+	}
+
+	// memory catch block
+	catch (const xns::exception& except) {
+		std::cerr << except.message() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	catch (...) {
+		std::cerr << "unknown exception" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+
+
 void make_lib(void) {
 
 
@@ -94,86 +148,3 @@ void make_lib(void) {
 		}
 	};
 }
-
-#include "engine/vertex/position.hpp"
-
-
-// note: analyze <vulkan/vulkan.hpp> to get ideas for my cpp wrapper
-
-#include "engine/shader_library.hpp"
-
-int main(void) {
-
-
-	//using vertex = engine::vertex<vx::position<float>>;
-	//
-	//engine::vertex v{vx::position<float>{1.0f, 2.0f, 3.0f}};
-	//
-	//vertex::info();
-	//
-	//return 0;
-
-
-	//engine::vertex<position>::info();
-
-
-	//try {
-	//
-	//	vulkan::command_pool<vk::void_bit> pool{};
-	//
-	//	vulkan::commands<vulkan::primary> cmds{pool};
-	//
-	//	vulkan::command_buffer<vulkan::primary>& buff = cmds[0];
-	//
-	//	buff.begin();
-	//
-	//	buff.end();
-	//
-	//	//auto com = pool.make_primary(100);
-	//	//auto v2 = pool.make_secondary(100);
-	//	//pool.reset_to_system();
-	//	//pool.trim();
-	//	//v.emplace_back(vk::command_buffer_info{});
-	//
-	//}
-	//catch (const vk::exception& except) {
-	//	except.what();
-	//}
-	//
-	//return 0;
-
-
-
-	// launch renderer
-	try {
-		engine::renderer renderer;
-		renderer.launch();
-	}
-
-	// vulkan catch block
-	catch (const vk::exception& except) {
-		except.what();
-		return EXIT_FAILURE;
-	}
-
-	catch (const engine::exception& except) {
-		except.print();
-		return EXIT_FAILURE;
-	}
-
-	// memory catch block
-	catch (const xns::exception& except) {
-		std::cerr << except.message() << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	catch (...) {
-		std::cerr << "unknown exception" << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
-
-
-

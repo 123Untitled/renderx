@@ -8,11 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_VULKAN_ARRAY_HEADER
-#define ENGINE_VULKAN_ARRAY_HEADER
-
+#ifndef ___ENGINE_VULKAN_ARRAY_HEADER___
+#define ___ENGINE_VULKAN_ARRAY_HEADER___
 
 #include "engine/vk/typedefs.hpp"
 
@@ -105,4 +102,4 @@ namespace vk {
 
 } // namespace vk
 
-#endif // ENGINE_VULKAN_ARRAY_HEADER
+#endif // ___ENGINE_VULKAN_ARRAY_HEADER___

@@ -300,7 +300,7 @@ namespace engine {
 				// -- static members ------------------------------------------
 
 				/* descriptions */
-				static constexpr vk::vertex_input_attribute_description descriptions[sizeof...(___types)] {
+				static constexpr vk::vertex_input_attribute_description _descriptions[sizeof...(___types)] {
 					{
 						// shader location
 						.location = ___idxs,
@@ -325,29 +325,29 @@ namespace engine {
 			/* vertex input binding description */
 			static constexpr vk::vertex_input_binding_description _binding{
 				// binding index
-				.binding   = 0U,
+				0U,
 				// stride
-				.stride    = sizeof(___impl_type),
+				sizeof(___impl_type),
 				// input rate
-				.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+				VK_VERTEX_INPUT_RATE_VERTEX // pass data to shader for each vertex
 			};
 
 			/* vertex input state info */
 			static constexpr vk::pipeline_vertex_input_state_info _info{
 				// structure type
-				.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+				VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
 				// next structure
-				.pNext = VK_NULL_HANDLE,
+				nullptr,
 				// flags
-				.flags = 0U,
+				0U,
 				// binding description count
-				.vertexBindingDescriptionCount   = 1U,
-				// binding description
-				.pVertexBindingDescriptions      = &_binding,
-				// attribute description count
-				.vertexAttributeDescriptionCount = sizeof...(___types),
-				// attribute description
-				.pVertexAttributeDescriptions    = ___descriptions_type::descriptions
+				1U,
+				// vertex binding description
+				&_binding,
+				// vertex attribute description count
+				sizeof...(___types),
+				// vertex attribute description
+				___descriptions_type::_descriptions
 			};
 
 
@@ -383,13 +383,53 @@ namespace engine {
 			constexpr auto operator=(___self&&) noexcept -> ___self& = default;
 
 
+			// -- public accessors --------------------------------------------
+
+			/* data */
+			constexpr auto data(void) noexcept -> void* {
+				return static_cast<void*>(&_impl);
+			}
+
+			/* const data */
+			constexpr auto data(void) const noexcept -> const void* {
+				return static_cast<const void*>(&_impl);
+			}
+
+
 			// -- public static methods ---------------------------------------
 
 			/* pipeline vertex input state info */
 			static constexpr auto info(void) noexcept -> const vk::pipeline_vertex_input_state_info& {
-				return _info;
+				return ___self::_info;
 			}
 
+			/* print info */
+			auto print_info(void) -> void {
+
+				std::cout << "vertex input state info:" << std::endl;
+
+				std::cout << "sType: " << _info.sType << std::endl;
+				std::cout << "pNext: " << _info.pNext << std::endl;
+				std::cout << "flags: " << _info.flags << std::endl;
+				std::cout << "  vertex binding description count: " << _info.vertexBindingDescriptionCount << std::endl;
+				std::cout << "  vertex attribute description count: " << _info.vertexAttributeDescriptionCount << std::endl;
+
+				std::cout << "  binding description:" << std::endl;
+				std::cout << "    binding index: " << _binding.binding << std::endl;
+				std::cout << "    stride: " << _binding.stride << std::endl;
+				std::cout << "    input rate: " << _binding.inputRate << std::endl;
+				std::cout << "  vertex attribute descriptions:" << std::endl;
+
+				for (size_type i = 0; i < sizeof...(___types); ++i) {
+					std::cout << "    attribute " << i << ":" << std::endl;
+					std::cout << "      location: " << ___descriptions_type::_descriptions[i].location << std::endl;
+					std::cout << "      binding: " << ___descriptions_type::_descriptions[i].binding << std::endl;
+					std::cout << "      format: " << ___descriptions_type::_descriptions[i].format << std::endl;
+					std::cout << "      offset: " << ___descriptions_type::_descriptions[i].offset << std::endl;
+				}
+
+				std::cout << std::endl;
+			}
 
 	}; // class vertex
 

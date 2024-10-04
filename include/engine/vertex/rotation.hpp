@@ -8,8 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef ___ENGINE_POSITION_HEADER___
-#define ___ENGINE_POSITION_HEADER___
+#ifndef ___ENGINE_ROTATION_HEADER___
+#define ___ENGINE_ROTATION_HEADER___
 
 #include "engine/vk/format.hpp"
 
@@ -21,15 +21,8 @@ namespace vx {
 
 	// -- P O S I T I O N -----------------------------------------------------
 
-	template <vk::u32 ___size, typename ___type>
-	class position final {
-
-
-		// -- assertions ------------------------------------------------------
-
-		/* check size */
-		static_assert(___size == 2U || ___size == 3U,
-			"vertex position size must be 2 or 3");
+	template <typename ___type = vk::f32>
+	class rotation final {
 
 
 		private:
@@ -37,13 +30,13 @@ namespace vx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = vx::position<___size, ___type>;
+			using ___self = vx::rotation<___type>;
 
 
 			// -- private members ---------------------------------------------
 
-			/* data */
-			___type _data[___size];
+			/* x, y, z */
+			___type _x, _y, _z;
 
 
 		public:
@@ -57,24 +50,29 @@ namespace vx {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			constexpr position(void) noexcept
-			: _data{} {
+			constexpr rotation(void) noexcept
+			: _x{static_cast<value_type>(0)},
+			  _y{static_cast<value_type>(0)},
+			  _z{static_cast<value_type>(0)} {
 			}
 
 			/* member constructor */
-			template <typename... ___params>
-			constexpr position(const ___params&... ___args) noexcept
-			: _data{static_cast<value_type>(___args)...} {
+			constexpr rotation(const value_type& ___x,
+							   const value_type& ___y,
+							   const value_type& ___z) noexcept
+			: _x{___x},
+			  _y{___y},
+			  _z{___z} {
 			}
 
 			/* copy constructor */
-			constexpr position(const ___self&) noexcept = default;
+			constexpr rotation(const ___self&) noexcept = default;
 
 			/* move constructor */
-			constexpr position(___self&&) noexcept = default;
+			constexpr rotation(___self&&) noexcept = default;
 
 			/* destructor */
-			constexpr ~position(void) noexcept = default;
+			constexpr ~rotation(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -86,21 +84,30 @@ namespace vx {
 			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
+			// -- public methods ----------------------------------------------
+
+			/* rotate */
+			template <typename ___matrix>
+			constexpr auto rotate(const ___matrix& ___m) noexcept -> void {
+				___m.translate(_x, _y, _z);
+			}
+
+
 			// -- public accessors --------------------------------------------
 
 			/* x */
 			constexpr auto x(void) const noexcept -> value_type {
-				return _data[0U];
+				return _x;
 			}
 
 			/* y */
 			constexpr auto y(void) const noexcept -> value_type {
-				return _data[1U];
+				return _y;
 			}
 
 			/* z */
-			constexpr auto z(void) const noexcept -> value_type requires(___size == 3U) {
-				return _data[2U];
+			constexpr auto z(void) const noexcept -> value_type {
+				return _z;
 			}
 
 
@@ -108,17 +115,17 @@ namespace vx {
 
 			/* x */
 			constexpr auto x(const value_type& ___x) noexcept -> void {
-				_data[0U] = ___x;
+				_x = ___x;
 			}
 
 			/* y */
 			constexpr auto y(const value_type& ___y) noexcept -> void {
-				_data[1U] = ___y;
+				_y = ___y;
 			}
 
 			/* z */
-			constexpr auto z(const value_type& ___z) noexcept -> void  requires(___size == 3U) {
-				_data[2U] = ___z;
+			constexpr auto z(const value_type& ___z) noexcept -> void {
+				_z = ___z;
 			}
 
 
@@ -126,34 +133,11 @@ namespace vx {
 
 			/* format */
 			static consteval auto format(void) noexcept -> vk::format {
-				return vk::pixel_format<value_type, ___size>();
+				return vk::pixel_format<value_type, 3U>();
 			}
 
 	}; // class position
 
-
-	// -- aliases -------------------------------------------------------------
-
-	/* position 2D */
-	template <typename ___type>
-	using position2D = vx::position<2U, ___type>;
-
-	/* float2 */
-	using float2 = vx::position<2U, float>;
-
-	/* double2 */
-	using double2 = vx::position<2U, double>;
-
-	/* position 3D */
-	template <typename ___type>
-	using position3D = vx::position<3U, ___type>;
-
-	/* float3 */
-	using float3 = vx::position<3U, float>;
-
-	/* double3 */
-	using double3 = vx::position<3U, double>;
-
 } // namespace vx
 
-#endif // ___ENGINE_POSITION_HEADER___
+#endif // ___ENGINE_ROTATION_HEADER___

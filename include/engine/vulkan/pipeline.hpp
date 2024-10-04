@@ -112,54 +112,17 @@ namespace vulkan {
 
 		public:
 
-			// -- public lifecycle --------------------------------------------
-
-
-			// -- public methods ----------------------------------------------
-
-			/* shader stage info */
-			//template <vk::shader_stage_flag_bits ___stage>
-			//static constexpr auto shader_stage_info(const vulkan::shader_module& ___mod) noexcept -> vk::pipeline_shader_stage_info {
-			//
-			//	return vk::pipeline_shader_stage_info {
-			//		.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			//		.pNext  = nullptr,
-			//		.flags  = 0U,
-			//		.stage  = ___stage,
-			//		.module = ___mod,
-			//		.pName  = "main",
-			//		.pSpecializationInfo = nullptr,
-			//	};
-			//}
-			//
-			//template <vk::shader_stage_flag_bits ___stage, typename... ___types>
-			//static constexpr auto shader_stage_info(const vulkan::shader_module& ___mod,
-			//										const vulkan::specialization<___types...>& ___spec
-			//		) noexcept -> vk::pipeline_shader_stage_info {
-			//
-			//	return vk::pipeline_shader_stage_info {
-			//		.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			//		.pNext  = nullptr,
-			//		.flags  = 0U,
-			//		.stage  = ___stage,
-			//		.module = ___mod,
-			//		.pName  = "main",
-			//		.pSpecializationInfo = &___spec.info(),
-			//	};
-			//}
-
-
+			// -- public static methods ---------------------------------------
 
 			/* build */
-			static auto build(
-					const vk::shared<vk::device>& ___device,
-					const engine::shader_library& ___shaders,
+			static auto build(const vk::shared<vk::device>& ___device,
+							  const engine::shader_library& ___shaders,
 							  const vk::shared<vk::render_pass>& ___render_pass) -> vulkan::pipeline {
 
 				// shader stages
 				const vk::array stages {
 					___shaders.vertex_module("basic").stage_info(),
-					___shaders.fragment_module("basic").stage_info()
+					___shaders.fragment_module("basic").stage_info(/* specialization */)
 				};
 
 				// vertex input info

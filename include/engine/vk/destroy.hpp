@@ -236,6 +236,21 @@ namespace vk {
 	}
 
 
+	// -- device memory -------------------------------------------------------
+
+	/* destroy device memory */
+	inline auto destroy(const vk::device& ___device,
+						const vk::device_memory& ___memory) noexcept -> void {
+		::vkFreeMemory(___device, ___memory, nullptr);
+	}
+
+	/* destroy device memory */
+	inline auto destroy(const vk::device_memory& ___memory,
+						const vk::device& ___device) noexcept -> void {
+		::vkFreeMemory(___device, ___memory, nullptr);
+	}
+
+
 
 	// -- I S  D E S T R O Y A B L E ------------------------------------------
 

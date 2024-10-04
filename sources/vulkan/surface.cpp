@@ -23,7 +23,7 @@ vulkan::surface::surface(glfw::window& window)
 
 	// create surface
 	if (::glfwCreateWindowSurface(instance,
-								 window.underlying(), nullptr, &_surface) != VK_SUCCESS)
+								  window.underlying(), nullptr, &_surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
 }
 

@@ -76,7 +76,4 @@ namespace vx {
 
 } // namespace vx
 
-
-
-
 #endif // ENGINE_META_VERTEX_HPP

@@ -33,23 +33,6 @@ namespace vk {
 
 
 
-	// -- instance ------------------------------------------------------------
-
-	/* create instance */
-	inline auto create_instance(const vk::instance_info& ___info) -> vk::instance {
-		vk::instance ___instance{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateInstance,
-						"failed to create vulkan instance",
-						&___info, nullptr, &___instance);
-		return ___instance;
-	}
-
-	/* destroy instance */
-	inline auto destroy_instance(vk::instance& ___instance) noexcept -> void {
-		::vkDestroyInstance(___instance, nullptr);
-		___instance = VK_NULL_HANDLE;
-	}
-
 	/* get instance extensions properties count */
 	inline auto get_instance_extension_properties_count(const char* ___layer = nullptr) -> vk::u32 {
 		vk::u32 ___count = 0U;
@@ -197,28 +180,13 @@ namespace vk {
 
 	// -- logical devices -----------------------------------------------------
 
-	/* create device */
-	inline auto create_device(const vk::physical_device& ___pdevice, const vk::device_info& ___info) -> vk::device {
-		vk::device ___device{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateDevice,
-						"failed to create logical device",
-						___pdevice, &___info, nullptr, &___device);
-		return ___device;
-	}
-
 	/* device wait idle */
 	inline auto device_wait_idle(const vk::device& ___device) -> void {
-		vk::try_execute(::vkDeviceWaitIdle,
-						"failed to wait device idle",
-						___device);
-	}
 
-	/* destroy device */
-	inline auto destroy_device(vk::device& ___device) noexcept -> void {
-		if (___device == VK_NULL_HANDLE)
-			return;
-		::vkDestroyDevice(___device, nullptr);
-		___device = VK_NULL_HANDLE;
+		vk::try_execute<"[vk::device_wait_idle] failed">(
+				::vkDeviceWaitIdle,
+				___device
+		);
 	}
 
 
@@ -389,9 +357,9 @@ namespace vk {
 
 	/* end command buffer */
 	inline auto end_command_buffer(const vk::command_buffer& ___buffer) -> void {
-		try_execute(::vkEndCommandBuffer,
-					"failed to end command buffer",
-					___buffer);
+		vk::try_execute<"[end_command_buffer] failed">(
+				::vkEndCommandBuffer,
+				___buffer);
 	}
 
 	/* cmd draw */
@@ -427,20 +395,78 @@ namespace vk {
 	}
 
 
+	// -- vertex buffers ------------------------------------------------------
+
+	/* cmd bind vertex buffers */
+	inline auto cmd_bind_vertex_buffers(const vk::command_buffer& ___buffer,
+										const vk::u32 ___first_binding,
+										const vk::u32 ___binding_count,
+										const vk::buffer* ___buffers,
+										const vk::device_size* ___offsets) noexcept -> void {
+		::vkCmdBindVertexBuffers(___buffer, ___first_binding, ___binding_count, ___buffers, ___offsets);
+	}
 
 
 
+	// -- memory --------------------------------------------------------------
 
-	// -- shader module -------------------------------------------------------
+	/* get buffer memory requirements */
+	inline auto get_buffer_memory_requirements(const vk::device& ___device,
+											   const vk::buffer& ___buffer) -> vk::memory_requirements {
+		vk::memory_requirements ___requirements;
+		::vkGetBufferMemoryRequirements(___device, ___buffer, &___requirements);
+		return ___requirements;
+	}
 
-	///* destroy shader module */
-	//inline auto destroy_shader_module(const vk::device& ___de, vk::shader_module& module) noexcept -> void {
-	//	if (module == VK_NULL_HANDLE)
-	//		return;
-	//	::vkDestroyShaderModule(___de, module, nullptr);
-	//	module = VK_NULL_HANDLE;
-	//}
+	/* get physical device memory properties */
+	inline auto get_physical_device_memory_properties(const vk::physical_device& ___device) -> vk::physical_device_memory_properties {
+		vk::physical_device_memory_properties ___properties;
+		::vkGetPhysicalDeviceMemoryProperties(___device, &___properties);
+		return ___properties;
+	}
 
+	/* bind buffer memory */
+	inline auto bind_buffer_memory(const vk::device& ___dev,
+								   const vk::buffer& ___buf,
+								   const vk::device_memory& ___mem,
+								   const vk::device_size& ___sz = 0U) -> void {
+
+		vk::try_execute<"[vk::bind_buffer_memory] failed">(
+				::vkBindBufferMemory,
+				___dev, ___buf, ___mem, ___sz);
+	}
+
+	/* map memory */
+	inline auto map_memory(const vk::device& ___dev,
+						   const vk::device_memory& ___mem,
+						   const vk::device_size& ___offset,
+						   const vk::device_size& ___size) -> void* {
+
+		void* ___data;
+
+		vk::try_execute<"[vk::map_memory] failed">(
+				// function to execute
+				::vkMapMemory,
+				// logical device
+				___dev,
+				// device memory
+				___mem,
+				// offset
+				___offset,
+				// size
+				___size,
+				// flags (reserved for future use, not implemented yet by the Vulkan API)
+				0U,
+				// data pointer to store the mapped memory
+				&___data);
+
+		return ___data;
+	}
+
+	/* unmap memory */
+	inline auto unmap_memory(const vk::device& ___dev, const vk::device_memory& ___mem) noexcept -> void {
+		::vkUnmapMemory(___dev, ___mem);
+	}
 
 
 

@@ -366,7 +366,7 @@ namespace vk {
 			}
 
 			/* dependency */
-			auto dependency(void) const noexcept -> const dep_type& {
+			auto dependency(void) const noexcept -> const vk::shared<dep_type>& {
 				return _dependency;
 			}
 

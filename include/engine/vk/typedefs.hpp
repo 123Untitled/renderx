@@ -30,6 +30,16 @@ namespace vk {
 	/* unsigned integer 32 type */
 	using u32 = ::uint32_t;
 
+	/* 32bit float type */
+	using f32 = float;
+
+	/* 64bit float type */
+	using f64 = double;
+
+
+	/* device size */
+	using device_size = ::VkDeviceSize;
+
 	/* vector type */
 	template <typename T>
 	using vector = xns::vector<T>;
@@ -379,6 +389,28 @@ namespace vk {
 	using buffer_info                        = ::VkBufferCreateInfo;
 
 
+	// -- memory --------------------------------------------------------------
+
+	/* device memory */
+	using device_memory                      = ::VkDeviceMemory;
+
+	/* memory requirements */
+	using memory_requirements                = ::VkMemoryRequirements;
+
+	/* physical device memory properties */
+	using physical_device_memory_properties  = ::VkPhysicalDeviceMemoryProperties;
+
+	/* memory property flags */
+	using memory_property_flags              = ::VkMemoryPropertyFlags;
+
+	/* memory allocate info */
+	using memory_allocate_info               = ::VkMemoryAllocateInfo;
+
+	/* memory map flags */
+	using memory_map_flags                   = ::VkMemoryMapFlags;
+
+
+
 	// -- vertex --------------------------------------------------------------
 
 	/* vertex input binding description */
@@ -419,6 +451,17 @@ namespace vk {
 
 	/* clear color value */
 	using clear_color_value                  = ::VkClearColorValue;
+
+
+
+	/* sample count flag bits */
+	using sample_count_flag_bits             = ::VkSampleCountFlagBits;
+
+	/* image tiling */
+	using image_tiling                       = ::VkImageTiling;
+
+	/* format feature flags */
+	using format_feature_flags               = ::VkFormatFeatureFlags;
 
 
 } // namespace vk

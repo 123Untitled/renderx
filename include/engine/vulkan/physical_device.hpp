@@ -69,7 +69,7 @@ namespace vulkan {
 
 			// -- public conversion operators ---------------------------------
 
-			/* vk::physical_device conversion operator */
+			/* const vk::physical_device conversion operator */
 			operator const vk::physical_device&(void) const noexcept;
 
 

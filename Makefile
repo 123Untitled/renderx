@@ -35,7 +35,8 @@ endif
 
 
 # set make flags
-override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules --no-print-directory \
+override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules \
+					  --no-print-directory \
 					  --jobs=$(threads) --output-sync=none
 
 
@@ -56,62 +57,53 @@ override compile_db := compile_commands.json
 # -- D I R E C T O R I E S ----------------------------------------------------
 
 # root directory
-override PWD_DIR := $(shell pwd)
+override cwd_dir := $(shell pwd)
 
 # source directory
-override SRC_DIR := sources
+override src_dir := $(cwd_dir)/sources
 
 # include directory
-override INC_DIR := include
+override inc_dir := $(cwd_dir)/include
 
 # shader directory
-override SHA_DIR := shaders
+override sha_dir := $(cwd_dir)/shaders
 
 # tools directory
-override TLS_DIR := tools
+override tls_dir := $(cwd_dir)/tools
 
 # external directory
-override EXT_DIR := $(PWD_DIR)/external
+override ext_dir := $(cwd_dir)/external
 
 
 
 
 # -- G L F W ------------------------------------------------------------------
 
-# glfw directory
-override GLFW_DIR     := $(EXT_DIR)/glfw
-
 # glfw include directory
-override GLFW_INCLUDE := -I$(GLFW_DIR)/include
+override glfw_include := -I$(ext_dir)/glfw/include
 
 # glfw library directory
-override GLFW_LIB     := -L$(GLFW_DIR)/lib -lglfw3
+override glfw_library := -L$(ext_dir)/glfw/lib -lglfw3
 
 
 # -- X N S --------------------------------------------------------------------
 
-# xns directory
-override XNS_DIR      := $(EXT_DIR)/xns
-
 # xns include directory
-override XNS_INCLUDE  := -I$(XNS_DIR)/include
+override xns_include  := -I$(ext_dir)/xns/include
 
 # xns library directory
-override XNS_LIB      := -L$(XNS_DIR)/lib -lxns
+override xns_library  := -L$(ext_dir)/xns/lib -lxns
+
+
+# -- M A T H F U ---------------------------------------------------------------
 
 
 
 # -- V U L K A N --------------------------------------------------------------
 
 ifeq ($(shell echo $$VULKAN_SDK),)
-$(error VULKAN_SDK is not set, source $(shell find ~/VulkanSDK -type f -name 'setup-env.sh'))
+$(error VULKAN_SDK env is not set, source $(shell find ~/VulkanSDK -type f -name 'setup-env.sh'))
 endif
-
-# vulkan directory
-override vulkan_dir := $(shell echo $$VULKAN_SDK)
-
-# vulkan include directory
-override VULKAN_INCLUDE := -I$(vulkan_dir)/include
 
 # os dependent vulkan dependencies
 ifeq ($(os), Darwin)
@@ -121,15 +113,21 @@ ifeq ($(os), Linux)
 override vulkan_dependencies := -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
 endif
 
+# vulkan directory
+override vulkan_dir := $(shell echo $$VULKAN_SDK)
+
+# vulkan include directory
+override vulkan_include := -I$(vulkan_dir)/include
+
 # vulkan library directory
-override VULKAN_LIB := -L$(vulkan_dir)/lib -lvulkan $(vulkan_dependencies)
+override vulkan_library := -L$(vulkan_dir)/lib -lvulkan $(vulkan_dependencies)
 
 
 
 # -- F I L E S ----------------------------------------------------------------
 
 # source files
-override srcs := $(shell find $(SRC_DIR) -type f -name '*.cpp')
+override srcs := $(shell find $(src_dir) -type f -name '*.cpp')
 
 # object files
 override objs := $(srcs:%.cpp=%.o)
@@ -177,10 +175,10 @@ override wflags += -Wshadow
 override depflags = -MT $@ -MMD -MP -MF $*.d
 
 # include flags
-override includes := $(addprefix -I, $(INC_DIR)) $(GLFW_INCLUDE) $(VULKAN_INCLUDE) $(XNS_INCLUDE)
+override includes := $(addprefix -I, $(inc_dir)) $(glfw_include) $(vulkan_include) $(xns_include)
 
 # linker flags
-override ldflags := $(GLFW_LIB) $(VULKAN_LIB) $(XNS_LIB)
+override ldflags := $(glfw_library) $(vulkan_library) $(xns_library)
 
 # cxx flags
 override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
@@ -189,9 +187,10 @@ override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re shaders xns ascii
+.PHONY: all clean fclean re shaders xns ascii glfw
 
-.NOTPARALLEL: xns $(GLFW_DIR) shaders $(compile_db)
+.NOTPARALLEL: ascii xns glfw shaders $(compile_db)
+
 
 
 # -- A S C I I  A R T ---------------------------------------------------------
@@ -218,12 +217,10 @@ all: ascii $(executable)
 shaders: | $(compile_db)
 	$(call make_shader,all)
 
-
 # executable
 $(executable): $(objs)
 	$(cxx) $^ -o $@ $(ldflags)
 	$(call print,36,exe,$@)
-
 
 # compilation
 -include $(deps)
@@ -231,10 +228,9 @@ $(executable): $(objs)
 	$(cxx) $(cxxflags) $(depflags) -c $< -o $@
 	$(call print,32,cxx,$@)
 
-
 # compile commands
 $(compile_db): $(srcs) Makefile | xns
-	node $(TLS_DIR)'/generate_cdb.js' $(PWD_DIR) '$(srcs)' '$(objs)' '$(cxx)' '$(cxxflags)'
+	node $(tls_dir)/generate_cdb.js '$(cwd_dir)' '$(srcs)' '$(objs)' '$(cxx)' '$(cxxflags)'
 	$(call print,34,cdb,$@)
 
 # clean
@@ -244,21 +240,18 @@ clean:
 
 # fclean
 fclean: clean
-	rm -rfv $(executable) $(EXT_DIR)
+	rm -rfv $(executable) $(ext_dir)
 	$(call make_shader,fclean)
 
 # re
 re: fclean all
 
 # glfw
-$(GLFW_DIR):
-	$(TLS_DIR)/install_glfw.sh
+glfw:
+	test -d $(ext_dir)/glfw || $(tls_dir)/install_glfw.sh
 # xns
-xns: | $(GLFW_DIR)
-	$(TLS_DIR)/install_xns.sh
-
-
-
+xns: | glfw
+	$(tls_dir)/install_xns.sh
 
 
 # -- F O R M A T T I N G ------------------------------------------------------
@@ -268,6 +261,6 @@ echo '[\x1b[$(1)m'$(2)'\x1b[0m]' '$(3)'
 endef
 
 define make_shader
-make --silent --directory=$(SHA_DIR) $(1)
+make --silent --directory=$(sha_dir) $(1)
 endef
 
