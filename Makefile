@@ -17,9 +17,7 @@
 override SHELL := $(shell which sh)
 
 # set shell flags
-.SHELLFLAGS := -c -e -o pipefail -u
-
-
+.SHELLFLAGS := -c -e
 
 
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
@@ -257,7 +255,7 @@ xns: | glfw
 # -- F O R M A T T I N G ------------------------------------------------------
 
 define print
-echo '[\x1b[$(1)m'$(2)'\x1b[0m]' '$(3)'
+echo '[\033[$(1)m'$(2)'\033[0m]' '$(3)'
 endef
 
 define make_shader

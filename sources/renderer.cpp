@@ -76,7 +76,7 @@ auto engine::renderer::launch(void) -> void {
 		_events.wait();
 
 		//_events.poll();
-		draw_frame();
+		self::draw_frame();
 
 		//sleep(1);
 	}

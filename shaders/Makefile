@@ -17,7 +17,7 @@
 override SHELL := $(shell which sh)
 
 # set shell flags
-.SHELLFLAGS := -c -e -o pipefail -u
+.SHELLFLAGS := -c -e
 
 
 

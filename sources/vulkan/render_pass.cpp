@@ -2,6 +2,8 @@
 #include "engine/vk/array.hpp"
 #include "engine/vulkan/device.hpp"
 
+#include <vector>
+
 
 // -- public lifecycle --------------------------------------------------------
 
