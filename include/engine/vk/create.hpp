@@ -270,7 +270,7 @@ namespace vk {
 	}
 
 
-	// -- create semaphore ----------------------------------------------------
+	// -- semaphore -----------------------------------------------------------
 
 	/* create semaphore */
 	inline auto create(const vk::device& ___device,
@@ -287,6 +287,29 @@ namespace vk {
 					   const vk::device& ___device) -> vk::semaphore {
 		return vk::create(___device, info);
 	}
+
+
+	// -- fence ---------------------------------------------------------------
+
+	/* create fence */
+	inline auto create(const vk::device& ___dev,
+					   const vk::fence_info& ___in) -> vk::fence {
+
+		vk::fence ___fc;
+
+		vk::try_execute<"create fence failed">(
+				::vkCreateFence,
+				___dev, &___in, nullptr, &___fc);
+
+		return ___fc;
+	}
+
+	/* create fence */
+	inline auto create(const vk::fence_info& ___in,
+					   const vk::device& ___dev) -> vk::fence {
+		return vk::create(___dev, ___in);
+	}
+
 
 
 	// -- image view ----------------------------------------------------------

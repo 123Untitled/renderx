@@ -98,6 +98,21 @@ namespace vk {
 	}
 
 
+	// -- fence ---------------------------------------------------------------
+
+	/* destroy fence */
+	inline auto destroy(const vk::device& ___dev,
+						const vk::fence& ___fc) noexcept -> void {
+		::vkDestroyFence(___dev, ___fc, nullptr);
+	}
+
+	/* destroy fence */
+	inline auto destroy(const vk::fence& ___fc,
+						const vk::device& ___dev) noexcept -> void {
+		::vkDestroyFence(___dev, ___fc, nullptr);
+	}
+
+
 	// -- image view ----------------------------------------------------------
 
 	/* destroy image view */

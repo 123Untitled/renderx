@@ -58,8 +58,6 @@
 
 int main(void) {
 
-	vulkan::fence f;
-
 
 	/*
 	engine::vertex v{vx::float3{1.0f, 2.0f, 3.0f},

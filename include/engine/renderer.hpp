@@ -19,6 +19,7 @@
 
 #include "engine/vulkan/swapchain.hpp"
 #include "engine/vulkan/semaphore.hpp"
+#include "engine/vulkan/fence.hpp"
 #include "engine/vulkan/command_pool.hpp"
 #include "engine/vulkan/pipeline.hpp"
 #include "engine/vulkan/commands.hpp"
@@ -139,6 +140,9 @@ namespace engine {
 
 			/* vertices */
 			vk::vector<vertex_type> _vertices;
+
+			/* fence */
+			vulkan::fence _fence;
 
 
 

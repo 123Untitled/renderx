@@ -38,7 +38,8 @@ engine::renderer::renderer(void)
 	_buffer{},
 	_memory{},
 
-	_vertices{} {
+	_vertices{},
+	_fence{_device} {
 
 		_vertices.emplace_back(
 				vx::float2{+0.0f, -0.5f}, vx::float3{+1.0f, +0.0f, +0.0f}
@@ -70,6 +71,7 @@ engine::renderer::renderer(void)
 /* launch */
 auto engine::renderer::launch(void) -> void {
 
+	return ;
 
 	while (_window.should_close() == false) {
 
