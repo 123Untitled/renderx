@@ -56,6 +56,8 @@
 #include "engine/shader_library.hpp"
 #include "engine/vulkan/fence.hpp"
 
+#include "viewmap.hpp"
+
 int main(void) {
 
 

@@ -1,15 +1,14 @@
 /external
-/vulkansdk
+
 /.cache
 /.nvimlog
 
 /sources/**/*.o
 /sources/**/*.d
-/sources/**/*.json
 
 /shaders/**/*.spv
 
-/exec*
+/exec_vulkan_engine
 /compile_commands.json
 
 /VulkanTutorial
