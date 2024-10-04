@@ -54,9 +54,11 @@
 // note: analyze <vulkan/vulkan.hpp> to get ideas for my cpp wrapper
 
 #include "engine/shader_library.hpp"
+#include "engine/vulkan/fence.hpp"
 
 int main(void) {
 
+	vulkan::fence f;
 
 
 	/*

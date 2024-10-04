@@ -312,6 +312,15 @@ namespace vk {
 	using semaphore_info                     = ::VkSemaphoreCreateInfo;
 
 
+	// -- fence ---------------------------------------------------------------
+
+	/* fence */
+	using fence                              = ::VkFence;
+
+	/* fence info */
+	using fence_info                         = ::VkFenceCreateInfo;
+
+
 	// -- image view ----------------------------------------------------------
 
 	/* image view */
