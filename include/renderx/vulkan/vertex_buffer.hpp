@@ -54,7 +54,7 @@ namespace vulkan {
 			template <typename... ___params>
 			vertex_buffer(const vk::vector<engine::vertex<___params...>>& vertices)
 			: _buffer(sizeof(engine::vertex<___params...>) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT),
-			  _count(vertices.size()) {
+			  _count((vk::u32)vertices.size()) {
 			}
 
 			/* deleted copy constructor */

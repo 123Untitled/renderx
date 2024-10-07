@@ -39,6 +39,7 @@
 #include "renderx/shapes/cuboid.hpp"
 #include "renderx/mesh.hpp"
 #include "renderx/object.hpp"
+#include "renderx/camera.hpp"
 
 
 // to be removed !
@@ -100,6 +101,9 @@ namespace engine {
 			vk::vector<rx::object> _objects;
 
 			vulkan::allocator<vulkan::cpu_coherent> _allocator;
+
+			/* camera */
+			rx::camera _camera;
 
 
 		public:

@@ -6,6 +6,7 @@
 #include "renderx/sdl/typedefs.hpp"
 #include "renderx/hint.hpp"
 #include "renderx/sdl/window.hpp"
+#include "renderx/time/delta.hpp"
 
 #include "renderx/running.hpp"
 
@@ -14,6 +15,53 @@
 // -- S D L -------------------------------------------------------------------
 
 namespace rx::sdl {
+
+
+	class observer {
+
+
+		public:
+
+			// -- public types ------------------------------------------------
+
+			/* self type */
+			using ___self = rx::sdl::observer;
+
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			observer(void) = default;
+
+			/* copy constructor */
+			observer(const ___self&) = default;
+
+			/* move constructor */
+			observer(___self&&) = default;
+
+			/* destructor */
+			virtual ~observer(void) noexcept = default;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = default;
+
+			/* move assignment operator */
+			auto operator=(___self&&) -> ___self& = default;
+
+
+			// -- public methods ----------------------------------------------
+
+			/* mouse motion */
+			virtual auto mouse_motion(const ::sdl_mouse_motion_event&) noexcept -> void = 0;
+
+			/* key down */
+			virtual auto key_down(const ::sdl_keyboard_event&) noexcept -> void = 0;
+
+	};
+
 
 
 	// -- E V E N T S ---------------------------------------------------------
@@ -33,6 +81,9 @@ namespace rx::sdl {
 
 			/* events */
 			::sdl_event _events;
+
+			/* observers */
+			std::vector<rx::sdl::observer*> _observers;
 
 
 			// -- private static methods --------------------------------------
@@ -93,29 +144,108 @@ namespace rx::sdl {
 
 				const ::sdl_keycode keycode = key_ev.key;
 
+				//for (auto& observer : _observers)
+				//	observer->key_down(key_ev);
+
 				switch (keycode) {
 
 					rx::hint::info("key down");
 
 					case SDLK_ESCAPE:
 						rx::hint::info("escape");
-						ws::running::stop();
+						rx::running::stop();
 						break;
 
 					case SDLK_LEFT:
 						rx::hint::info("left");
+						_arrows[0] = true;
 						break;
 
 					case SDLK_RIGHT:
 						rx::hint::info("right");
+						_arrows[1] = true;
 						break;
 
 					case SDLK_UP:
 						rx::hint::info("up");
+						_arrows[2] = true;
 						break;
 
 					case SDLK_DOWN:
 						rx::hint::info("down");
+						_arrows[3] = true;
+						break;
+
+					// key S
+					case SDLK_S:
+						_arrows[0] = true;
+						break;
+
+					// key F
+					case SDLK_F:
+						_arrows[1] = true;
+						break;
+
+					// key E
+					case SDLK_E:
+						_arrows[2] = true;
+						break;
+
+					// key D
+					case SDLK_D:
+						_arrows[3] = true;
+						break;
+
+					default:
+						return;
+				}
+
+			}
+
+			/* handle key up */
+			auto _handle_key_up(const ::sdl_keyboard_event& key_ev) -> void {
+
+				//for (auto& observer : _observers)
+				//	observer->key_down(key_ev);
+
+				const ::sdl_keycode keycode = key_ev.key;
+
+				switch (keycode) {
+
+					case SDLK_LEFT:
+						_arrows[0] = false;
+						break;
+
+					case SDLK_RIGHT:
+						_arrows[1] = false;
+						break;
+
+					case SDLK_UP:
+						_arrows[2] = false;
+						break;
+
+					case SDLK_DOWN:
+						_arrows[3] = false;
+						break;
+
+					// key S
+					case SDLK_S:
+						_arrows[0] = false;
+						break;
+
+					// key F
+					case SDLK_F:
+						_arrows[1] = false;
+						break;
+
+					// key E
+					case SDLK_E:
+						_arrows[2] = false;
+						break;
+
+					// key D
+					case SDLK_D:
+						_arrows[3] = false;
 						break;
 
 					default:
@@ -128,25 +258,33 @@ namespace rx::sdl {
 			float _x = 0.0f;
 			float _y = 0.0f;
 
+			bool _arrows[4U] = {false, false, false, false};
+
 
 			/* handle mouse motion */
 			auto _handle_mouse_motion(const ::sdl_mouse_motion_event& motion_ev) -> void {
 
-				float sens = 0.005f;
+				//for (auto& observer : _observers)
+				//	observer->mouse_motion(motion_ev);
+				//
+				//return;
 
-				_x += (motion_ev.xrel * sens);
-				_y += (motion_ev.yrel * sens);
+				float sens = 1.24f;
+				//std::cout << motion_ev.xrel * sens * rx::delta::time<float>() << " " << motion_ev.yrel * sens * rx::delta::time<float>() << std::endl;
+
+				_x -= (motion_ev.xrel * sens) * rx::delta::time<float>();
+				_y += (motion_ev.yrel * sens) * rx::delta::time<float>();
 
 
-				constexpr double pi2 = 2.0 * 3.14159265358979323846264338327950288;
+				constexpr float pi2 = (float)(2.0 * 3.14159265358979323846264338327950288);
 
 				// stay in radian range
 				_x = ((_x > pi2) ? (_x - pi2) : (_x < 0.0f) ? (_x + pi2) : _x);
 				_y = ((_y > pi2) ? (_y - pi2) : (_y < 0.0f) ? (_y + pi2) : _y);
 
-				std::cout << _x << " " << _y << std::endl;
-				//std::cout << motion_ev.x << " " << motion_ev.y << std::endl;
+				//std::cout << _x << " " << _y << std::endl;
 			}
+
 
 			/* handle window resized */
 			auto _handle_window_resized(const ::sdl_window_event& window_ev) -> void {
@@ -161,29 +299,29 @@ namespace rx::sdl {
 
 				switch (ev.type) {
 
-					case SDL_EVENT_WINDOW_RESIZED:
-						___self::_handle_window_resized(ev.window);
-						break;
+					//case SDL_EVENT_WINDOW_RESIZED:
+					//	___self::_handle_window_resized(ev.window);
+					//	break;
 
 					case SDL_EVENT_QUIT:
+						rx::running::stop();
 						break;
 
-					case SDL_EVENT_MOUSE_BUTTON_DOWN:
-						break;
+					//case SDL_EVENT_MOUSE_BUTTON_DOWN:
+					//	break;
 
 					case SDL_EVENT_KEY_UP:
-						//rx::hint::info("key up");
+						___self::_handle_key_up(_events.key);
 						break;
 
 					case SDL_EVENT_KEY_DOWN:
-						//rx::hint::info("key down");
 						___self::_handle_key_down(_events.key);
 						break;
 
-					case SDL_EVENT_MOUSE_MOTION:
-						//rx::hint::info("mouse motion");
-						___self::_handle_mouse_motion(_events.motion);
-						break;
+					//case SDL_EVENT_MOUSE_MOTION:
+					//	//rx::hint::info("mouse motion");
+					//	___self::_handle_mouse_motion(_events.motion);
+					//	break;
 
 					default:
 						return;
@@ -198,12 +336,12 @@ namespace rx::sdl {
 
 			/* x */
 			static auto x(void) noexcept -> float {
-				return ___self::_shared()._x;
+				return static_cast<float>(___self::_shared()._x);
 			}
 
 			/* y */
 			static auto y(void) noexcept -> float {
-				return ___self::_shared()._y;
+				return static_cast<float>(___self::_shared()._y);
 			}
 
 			// -- public static methods ---------------------------------------
@@ -257,6 +395,44 @@ namespace rx::sdl {
 				// check if quit
 				return ___self::_shared()._events.type == SDL_EVENT_QUIT;
 			}
+
+			/* is up */
+			static auto is_up(void) noexcept -> bool {
+
+				// check if key up
+				return ___self::_shared()._arrows[2];
+			}
+
+			/* is down */
+			static auto is_down(void) noexcept -> bool {
+
+				// check if key down
+				return ___self::_shared()._arrows[3];
+			}
+
+			/* is left */
+			static auto is_left(void) noexcept -> bool {
+
+				// check if key left
+				return ___self::_shared()._arrows[0];
+			}
+
+			/* is right */
+			static auto is_right(void) noexcept -> bool {
+
+				// check if key right
+				return ___self::_shared()._arrows[1];
+			}
+
+
+			/* subscribe */
+			static auto subscribe(rx::sdl::observer& observer) -> void {
+
+				// add observer
+				___self::_shared()._observers.push_back(&observer);
+			}
+
+
 
 	}; // class events
 

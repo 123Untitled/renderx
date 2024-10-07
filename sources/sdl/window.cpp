@@ -40,18 +40,19 @@ rx::sdl::window::window(void)
 	if (display == nullptr)
 		throw rx::sdl::exception{"Failed to get current display mode"};
 
-	std::cout << "display: " << display->w << "x" << display->h << std::endl;
-
-	_width  = (display->w / 4) * 3;
-	_height = (display->h / 4) * 3;
+	_width  = static_cast<rx::u16>((display->w / 4) * 3);
+	_height = static_cast<rx::u16>((display->h / 4) * 3);
 
 
 	// flags
 	constexpr auto flags = SDL_WINDOW_VULKAN
 						 | SDL_WINDOW_RESIZABLE
 						 | SDL_WINDOW_HIGH_PIXEL_DENSITY
-						 //| SDL_WINDOW_BORDERLESS
-						 | SDL_WINDOW_MOUSE_RELATIVE_MODE;
+						 //| SDL_WINDOW_FULLSCREEN
+						 | SDL_WINDOW_BORDERLESS
+						 | SDL_WINDOW_MOUSE_RELATIVE_MODE
+						 ;
+
 
 	// create window
 	_window = ::sdl_create_window("renderx", _width, _height, flags);
@@ -83,4 +84,15 @@ auto rx::sdl::window::width(void) -> rx::u16 {
 /* height */
 auto rx::sdl::window::height(void) -> rx::u16 {
 	return ___self::_shared()._height;
+}
+
+/* ratio */
+auto rx::sdl::window::ratio(void) -> float {
+
+	// get instance
+	const auto& self = ___self::_shared();
+
+	// calculate ratio
+	return static_cast<float>(self._width)
+		 / static_cast<float>(self._height);
 }

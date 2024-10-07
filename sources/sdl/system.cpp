@@ -33,12 +33,26 @@ auto rx::sdl::system::_shared(void) -> ___self& {
 rx::sdl::system::system(void) {
 
 	// flags
-	constexpr auto flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;
+	constexpr auto flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS;// | SDL_INIT_AUDIO;
 
 	// initialize SDL
 	if (::sdl_init_subsystem(flags) == false)
-		throw rx::sdl::exception{"Failed to initialize SDL subsystems."};
+		rx::sdl::exception{"Failed to initialize SDL subsystems."};
+
+
+	// raw 0, wrapped 1
+	if (::sdl_set_hint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "0") == false
+	// mouse scale
+	 || ::sdl_set_hint(SDL_HINT_MOUSE_RELATIVE_SPEED_SCALE, "0.1") == false
+	// unscaled 0, scaled 1 (system mouse acceleration curve)
+	 || ::sdl_set_hint(SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE, "0") == false
+	// motion event should be generated for mouse warping in relative mode.
+	 || ::sdl_set_hint(SDL_HINT_MOUSE_RELATIVE_WARP_MOTION, "0") == false
+	// relative mouse mode constrains the mouse to the center of the window (1 center, 0 top-left)
+	 || ::sdl_set_hint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "1") == false)
+		rx::sdl::exception{"Failed to set SDL hint."};
 }
+
 
 /* destructor */
 rx::sdl::system::~system(void) noexcept {

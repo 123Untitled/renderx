@@ -13,60 +13,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "renderx/time/delta.hpp"
 #include "renderx/running.hpp"
 
 #include "renderx/shapes/cuboid.hpp"
 
 #include "renderx/sdl/events.hpp"
-
-
-auto make_projection(void) noexcept -> glm::mat4 {
-
-	float fov = 105.0f;
-	float ratio = rx::sdl::window::width() / rx::sdl::window::height();
-
-	const float near = 0.1f;
-	const float far = 1000.0f;
-
-
-	const float ys = 1 / std::tan(((fov / 180.0f) * M_PI) * 0.5f);
-	const float xs = ys / ratio;
-	const float zs = far / (near - far);
-	const float zt = zs * near;
-
-	glm::mat4 projection {
-		{+xs,   0,   0,   0},
-		{  0, +ys,   0,   0},
-		{  0,   0, -zs,   1},
-		{  0,   0,  zt,   0}
-	};
-
-	return projection;
-}
-
-struct type_matrix {
-	glm::mat4 matrix;
-};
-
-static type_matrix model {
-	.matrix = glm::mat4(1.0f)
-};
-
-static type_matrix proj {
-	//.matrix = glm::perspective(glm::radians(45.0f),
-	//		(float)rx::sdl::window::width() / (float)rx::sdl::window::height(),
-	//		0.1f, 1000.0f)
-	.matrix = make_projection()
-};
-
-static type_matrix const_matrix {
-	.matrix = glm::mat4(1.0f)
-};
-
-// view matrix (backwards 10 units)
-static type_matrix view {
-	.matrix = glm::mat4(1.0f)
-};
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -91,26 +43,42 @@ engine::renderer::renderer(void)
 	_sync{},
 	_meshes{},
 	_objects{},
-	_allocator{}
+	_allocator{},
+	_camera{}
 {
 
-		auto cuboid = rx::cube();
+	auto cuboid = rx::cube();
 
-		_meshes.emplace_back(cuboid.first, cuboid.second);
+	_meshes.emplace_back(cuboid.first, cuboid.second);
 
-		//_mesh = rx::mesh{cuboid.first, cuboid.second};
-
-
-		auto alloc = _allocator.allocate_buffer(_meshes.back().vertices().underlying());
-		alloc.memcpy(cuboid.first.data());
+	//_mesh = rx::mesh{cuboid.first, cuboid.second};
 
 
-		auto alloc_index = _allocator.allocate_buffer(_meshes.back().indices().underlying());
-		alloc_index.memcpy(cuboid.second.data());
+	auto alloc = _allocator.allocate_buffer(_meshes.back().vertices().underlying());
+	alloc.memcpy(cuboid.first.data());
+
+
+	auto alloc_index = _allocator.allocate_buffer(_meshes.back().indices().underlying());
+	alloc_index.memcpy(cuboid.second.data());
 
 
 	_objects.emplace_back(_meshes.back());
+
+	_camera.ratio(rx::sdl::window::ratio());
+	_camera.fov(70.0f);
+	_camera.update_projection();
+
+	//rx::sdl::events::subscribe(_camera);
+	
+
 }
+
+
+auto SDLCALL callback(void *userdata, SDL_Event *event) -> bool {
+	std::cout << "callback" << std::endl;
+	return 1;
+}
+
 
 
 
@@ -119,49 +87,34 @@ engine::renderer::renderer(void)
 /* run */
 auto engine::renderer::run(void) -> void {
 
+	rx::umax last = rx::now();
+
+	//SDL_AddEventWatch(callback, nullptr);
+
+
 	static vk::u32 i = 0U;
 
+	while (rx::running::state() == true) {
 
-	ws::running::start();
+		// get current time (nanoseconds)
+		rx::umax now = rx::now();
 
-	while (ws::running::state() == true) {
+		// poll events every 100ms
+		rx::sdl::events::poll();
+		_camera.update();
 
-		if (rx::sdl::events::poll()) {
-			;
-		}
+		// compute fps
+		//float fps = 1.0f / rx::delta::time<float>();
 
+		//usleep(1'000'000 / 60);
 
-
-		for (auto& object : _objects) {
-
-
-			//auto n = 4;
-			//object.rotation().x += n * 0.001f;
-			//object.rotation().y += n * 0.005f;
-			//object.rotation().z += n * -0.003f;
-
-			object.rotation().y = -rx::sdl::events::x();
-			object.rotation().x = +rx::sdl::events::y();
-
-
-		}
-
-		// update model matrix
-		//model.matrix = glm::scale(model.matrix, glm::vec3(z, z, z));
-		//model.matrix = glm::mat4(1.0f);
-		//model.matrix = glm::rotate(model.matrix, (float)glfwGetTime()*0.5f, glm::vec3(-0.0f, 1.0f, 0.3f));
-		//model.matrix = glm::rotate(model.matrix, (float)glfwGetTime()*1.0f, glm::vec3(-0.3f, 0.1f, 0.9f));
-
-		view.matrix = glm::mat4(1.0f);
-		view.matrix = glm::translate(view.matrix, glm::vec3(0, 0, +3));
-
-
-		// update constant matrix
-		//const_matrix.matrix = model.matrix * view.matrix * proj.matrix;
-		const_matrix.matrix = proj.matrix * view.matrix * model.matrix;
-
+		_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
 
 		___self::draw_frame();
+		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
+		rx::delta::update();
+
+		last = now;
 
 		//std::cout << "--------------- draw frame [" << i++ << "] ---------------" << std::endl;
 	}
@@ -172,7 +125,6 @@ auto engine::renderer::run(void) -> void {
 
 /* draw frame */
 auto engine::renderer::draw_frame(void) -> void {
-
 
 	// wait for current fence
 	_sync.wait_current_fence();
@@ -222,7 +174,10 @@ auto engine::renderer::draw_frame(void) -> void {
 			cmd.bind_index_buffer(object.mesh().indices());
 
 			// push constants
-			cmd.push_constants(_pipeline, proj.matrix * view.matrix * object.model());
+			cmd.push_constants(_pipeline, 
+					_camera.projection() *
+					_camera.view() *
+					object.model());
 
 			// draw indexed
 			cmd.draw_indexed(object.mesh().indices().count());

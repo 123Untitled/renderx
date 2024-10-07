@@ -77,15 +77,6 @@ namespace rx {
 		idxs.push_back(6);
 
 		// top
-		idxs.push_back(7);
-		idxs.push_back(4);
-		idxs.push_back(3);
-
-		idxs.push_back(3);
-		idxs.push_back(4);
-		idxs.push_back(0);
-
-		// bottom
 		idxs.push_back(1);
 		idxs.push_back(5);
 		idxs.push_back(2);
@@ -94,9 +85,14 @@ namespace rx {
 		idxs.push_back(5);
 		idxs.push_back(6);
 
+		// bottom
+		idxs.push_back(0);
+		idxs.push_back(7);
+		idxs.push_back(4);
 
-		std::cout << "cube vertices: " << vtxs.size() << std::endl;
-		std::cout << "cube indexes: " << idxs.size() << std::endl;
+		idxs.push_back(0);
+		idxs.push_back(3);
+		idxs.push_back(7);
 
 
 		return data;

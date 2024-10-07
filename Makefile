@@ -42,7 +42,7 @@ override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules \
 # -- T A R G E T S ------------------------------------------------------------
 
 # project name
-override project := vulkan_engine
+override project := renderx
 
 # main executable
 override executable := exec_$(project)
@@ -177,16 +177,11 @@ override wflags := -Wall -Wextra -Werror \
 override wflags += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
 				  -Wno-unused-function -Wno-unused-private-field -Wno-unused-local-typedef \
 
-
-# extension
-#override wflags += -Wno-nullability-extension -Wno-nullability-completeness \
-#	-Wno-missing-field-initializers
-
 # optimization
 #override wflags += -Winline
 
 # type conversion
-#override wflags += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
+override wflags += -Wconversion -Wsign-conversion -Wfloat-conversion -Wnarrowing
 
 # shadowing
 override wflags += -Wshadow

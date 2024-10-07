@@ -93,7 +93,7 @@ vulkan::swapchain::swapchain(void)
 
 		auto info = vk::info::image_view(_format.format);
 
-		_views.reserve(_images.size());
+		_views.reserve((vk::u32)_images.size());
 
 		for (vk::u32 i = 0U; i < _images.size(); ++i) {
 			// fill info with image
@@ -153,7 +153,7 @@ vulkan::swapchain::~swapchain(void) noexcept {
 
 /* size */
 auto vulkan::swapchain::size(void) const noexcept -> vk::u32 {
-	return _images.size();
+	return (vk::u32)_images.size();
 }
 
 /* extent */
@@ -254,12 +254,43 @@ auto vulkan::swapchain::pick_present_mode(const vk::vector<vk::present_mode>& mo
 	// VK_PRESENT_MODE_FIFO_KHR (always available)
 	// VK_PRESENT_MODE_FIFO_RELAXED_KHR
 	// VK_PRESENT_MODE_MAILBOX_KHR
+    // VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR
+    // VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR
+
+	//return VK_PRESENT_MODE_IMMEDIATE_KHR;
 
 	// loop over modes
-	for (const auto& mode : modes)
+	for (const auto& mode : modes) {
+
 		// check for best mode
-		if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
+
+		// immediate mode (no vsync, tearing)
+		if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+			std::cout << "immediate mode" << std::endl;
+
+		// fifo mode (vsync, wait for display)
+		if (mode == VK_PRESENT_MODE_FIFO_KHR)
+			std::cout << "fifo mode" << std::endl;
+		return mode;
+
+		// fifo relaxed mode (vsync, but if late, display last image)
+		if (mode == VK_PRESENT_MODE_FIFO_RELAXED_KHR)
+			std::cout << "fifo relaxed mode" << std::endl;
+
+		// mailbox mode (vsync, but if late, display last image)
+		if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			std::cout << "mailbox mode" << std::endl;
 			return mode;
+		}
+
+		if (mode == VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR)
+			std::cout << "shared demand refresh mode" << std::endl;
+
+		if (mode == VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR)
+			std::cout << "shared continuous refresh mode" << std::endl;
+
+	}
+
 	// else return FIFO mode
 	return VK_PRESENT_MODE_FIFO_KHR;
 }

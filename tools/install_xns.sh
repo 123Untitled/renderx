@@ -54,8 +54,8 @@ for PROGRAM in $REQUIRED_PROGRAMS; do
 done
 
 # check if we are in right directory
-if [[ $BASENAME != 'vulkan_engine' ]]; then
-	echo 'error: this script must be run from' "'vulkan_engine'" 'repository'
+if [[ $BASENAME != 'renderx' ]]; then
+	echo 'error: this script must be run from' "'renderx'" 'repository'
 	exit 1
 fi
 

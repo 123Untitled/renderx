@@ -97,6 +97,9 @@ namespace rx::sdl {
 			/* height */
 			static auto height(void) -> rx::u16;
 
+			/* ratio */
+			static auto ratio(void) -> float;
+
 	}; // class window
 
 } // namespace rx::sdl

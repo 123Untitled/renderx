@@ -85,7 +85,7 @@ namespace vulkan {
 
 
 
-			//// -- private methods ---------------------------------------------
+			// -- private methods ---------------------------------------------
 			//
 			//#if defined(ENGINE_OS_WINDOWS)
 			//static auto create_platform_surface(vulkan::instance& instance,

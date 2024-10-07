@@ -28,6 +28,10 @@ namespace rx {
 
 	using i64 = std::int64_t;
 
+	using umax = std::uintmax_t;
+
+	using imax = std::intmax_t;
+
 } // namespace rx
 
 #endif // ___RENDERX_TYPES___

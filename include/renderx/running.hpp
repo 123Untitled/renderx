@@ -5,9 +5,9 @@
 #include <atomic>
 
 
-// -- W E B  S E R V E R  N A M E S P A C E -----------------------------------
+// -- R X ---------------------------------------------------------------------
 
-namespace ws {
+namespace rx {
 
 
 	// -- R U N N I N G -------------------------------------------------------
@@ -21,7 +21,7 @@ namespace ws {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = ws::running;
+			using ___self = rx::running;
 
 
 			// -- private members ---------------------------------------------
@@ -44,7 +44,7 @@ namespace ws {
 
 			/* default constructor */
 			running(void) noexcept
-			: _flag{false} {
+			: _flag{true} {
 			}
 
 			/* deleted copy constructor */

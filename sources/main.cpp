@@ -8,8 +8,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-///#define GLFW_INCLUDE_VULKAN
-
 
 #include "renderx/sdl/exception.hpp"
 
@@ -67,10 +65,15 @@
 
 
 #include <SDL3/SDL.h>
+#include "renderx/running.hpp"
 
 
 int main(void) {
 
+	::signal(SIGINT, [](int) {
+		rx::running::stop();
+		rx::write("\n");
+	});
 
 	/*
 	rx::object obj;
@@ -125,55 +128,4 @@ int main(void) {
 	}
 
 	return EXIT_SUCCESS;
-}
-
-
-
-void make_lib(void) {
-
-
-	// exemple of usage
-	xns::literal_map<vk::pipeline_shader_stage_info, "basic_vertex", "basic_fragment"> shader_stages;
-
-	xns::get<"basic_vertex">(shader_stages) = {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-		.pNext = nullptr,
-		.flags = 0,
-		.stage = VK_SHADER_STAGE_VERTEX_BIT,
-		.module = VK_NULL_HANDLE,
-		.pName = "main",
-		.pSpecializationInfo = nullptr,
-	};
-
-	xns::get<"basic_fragment">(shader_stages) = {
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-		.pNext = nullptr,
-		.flags = 0,
-		.stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-		.module = VK_NULL_HANDLE,
-		.pName = "main",
-		.pSpecializationInfo = nullptr,
-	};
-
-	//xns::get<"basic_vertex">(shader_stages).module = VK_NULL_HANDLE;
-
-	// exemple of usage
-	constexpr xns::literal_map<vk::pipeline_shader_stage_info, "basic_vertex", "basic_fragment"> shader_stages2 {
-		vk::pipeline_shader_stage_info{
-			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			nullptr, (VkPipelineShaderStageCreateFlags)0,
-			VK_SHADER_STAGE_VERTEX_BIT,
-			VK_NULL_HANDLE,
-			"main",
-			nullptr
-		},
-		vk::pipeline_shader_stage_info{
-			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			nullptr, (VkPipelineShaderStageCreateFlags)0,
-			VK_SHADER_STAGE_FRAGMENT_BIT,
-			VK_NULL_HANDLE,
-			"main",
-			nullptr
-		}
-	};
 }

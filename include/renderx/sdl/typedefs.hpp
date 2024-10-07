@@ -45,6 +45,12 @@
 #define sdl_window_event SDL_WindowEvent
 
 
+// -- mouse -------------------------------------------------------------------
+
+/* get relative mouse state */
+#define sdl_get_relative_mouse_state SDL_GetRelativeMouseState
+
+
 // -- display -----------------------------------------------------------------
 
 /* display mode */
@@ -74,6 +80,18 @@
 
 /* vulkan destroy surface */
 #define sdl_vulkan_destroy_surface SDL_Vulkan_DestroySurface
+
+
+// -- time --------------------------------------------------------------------
+
+/* get ticks */
+#define sdl_get_ticks SDL_GetTicks
+
+
+// -- hint --------------------------------------------------------------------
+
+/* set hint */
+#define sdl_set_hint SDL_SetHint
 
 
 #endif // ___RENDERX_SDL_TYPEDEFS_HPP___
