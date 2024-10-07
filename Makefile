@@ -20,6 +20,7 @@ override SHELL := $(shell which sh)
 .SHELLFLAGS := -c -e
 
 
+
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
 
 override os := $(shell uname -s)
@@ -36,7 +37,6 @@ endif
 override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules \
 					  --no-print-directory \
 					  --jobs=$(threads) --output-sync=none
-
 
 
 # -- T A R G E T S ------------------------------------------------------------
@@ -75,25 +75,41 @@ override ext_dir := $(cwd_dir)/external
 
 
 
-# -- G L F W ------------------------------------------------------------------
+# -- S D L --------------------------------------------------------------------
 
-# glfw include directory
-override glfw_include := -I$(ext_dir)/glfw/include
+# sdl directory
+override sdl_dir := $(ext_dir)/sdl
 
-# glfw library directory
-override glfw_library := -L$(ext_dir)/glfw/lib -lglfw3
+# sdl include directory
+override sdl_include := -I$(sdl_dir)/include
+
+# sdl library directory
+override sdl_library := -L$(sdl_dir)/lib -lSDL3
+
+
+# -- G L M --------------------------------------------------------------------
+
+# glm directory
+override glm_dir := $(ext_dir)/glm
+
+# glm include directory
+override glm_include := -I$(glm_dir)/include
+
+# glm library directory
+override glm_library := -L$(ext_dir)/glm/lib -lglm
 
 
 # -- X N S --------------------------------------------------------------------
 
+# xns directory
+override xns_dir := $(ext_dir)/xns
+
 # xns include directory
-override xns_include  := -I$(ext_dir)/xns/include
+override xns_include  := -I$(xns_dir)/include
 
 # xns library directory
 override xns_library  := -L$(ext_dir)/xns/lib -lxns
 
-
-# -- M A T H F U ---------------------------------------------------------------
 
 
 
@@ -105,7 +121,7 @@ endif
 
 # os dependent vulkan dependencies
 ifeq ($(os), Darwin)
-override vulkan_dependencies := -framework Cocoa -framework IOKit -framework QuartzCore
+override vulkan_dependencies := -framework Cocoa -framework IOKit -framework QuartzCore -framework Carbon
 endif
 ifeq ($(os), Linux)
 override vulkan_dependencies := -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl
@@ -138,7 +154,8 @@ override deps := $(objs:%.o=%.d)
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-override cxx := clang++
+#override cxx := clang++
+override cxx := $(shell echo $$(brew --prefix llvm)/bin/clang++)
 
 # compiler standard
 override std := -std=c++2a
@@ -158,7 +175,12 @@ override wflags := -Wall -Wextra -Werror \
 
 # unused suppression
 override wflags += -Wno-unused -Wno-unused-variable -Wno-unused-parameter \
-				  -Wno-unused-function -Wno-unused-private-field -Wno-unused-local-typedef
+				  -Wno-unused-function -Wno-unused-private-field -Wno-unused-local-typedef \
+
+
+# extension
+#override wflags += -Wno-nullability-extension -Wno-nullability-completeness \
+#	-Wno-missing-field-initializers
 
 # optimization
 #override wflags += -Winline
@@ -173,10 +195,13 @@ override wflags += -Wshadow
 override depflags = -MT $@ -MMD -MP -MF $*.d
 
 # include flags
-override includes := $(addprefix -I, $(inc_dir)) $(glfw_include) $(vulkan_include) $(xns_include)
+override includes := $(addprefix -I, $(inc_dir)) $(vulkan_include) $(xns_include) $(glm_include) $(sdl_include)
 
 # linker flags
-override ldflags := $(glfw_library) $(vulkan_library) $(xns_library)
+override ldflags := $(vulkan_library) \
+					$(xns_library) \
+					$(glm_library) \
+					$(sdl_library)
 
 # cxx flags
 override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
@@ -185,9 +210,9 @@ override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re shaders xns ascii glfw
+.PHONY: all clean fclean re shaders xns ascii
 
-.NOTPARALLEL: ascii xns glfw shaders $(compile_db)
+.NOTPARALLEL: ascii xns shaders $(compile_db)
 
 
 
@@ -207,13 +232,15 @@ ascii:
 		'     ░ GNU Make:' $(MAKE_VERSION)'\033[0m'
 
 
+
 # -- R U L E S ----------------------------------------------------------------
 
 all: ascii $(executable)
 
 # shaders
 shaders: | $(compile_db)
-	$(call make_shader,all)
+	$(sha_dir)/make.sh
+
 
 # executable
 $(executable): $(objs)
@@ -224,7 +251,7 @@ $(executable): $(objs)
 -include $(deps)
 %.o: %.cpp Makefile | shaders
 	$(cxx) $(cxxflags) $(depflags) -c $< -o $@
-	$(call print,32,cxx,$@)
+	$(call print,32,cxx,$(@F))
 
 # compile commands
 $(compile_db): $(srcs) Makefile | xns
@@ -234,31 +261,31 @@ $(compile_db): $(srcs) Makefile | xns
 # clean
 clean:
 	rm -rfv $(objs) $(deps) $(compile_db) .cache
-	$(call make_shader,clean)
+	$(sha_dir)/make.sh clean
 
 # fclean
 fclean: clean
 	rm -rfv $(executable) $(ext_dir)
-	$(call make_shader,fclean)
 
 # re
 re: fclean all
 
-# glfw
-glfw:
-	test -d $(ext_dir)/glfw || $(tls_dir)/install_glfw.sh
+
+# sdl
+$(sdl_dir):
+	$(tls_dir)/install_sdl.sh
+
+# glm
+$(glm_dir):
+	$(tls_dir)/install_glm.sh
+
 # xns
-xns: | glfw
+xns: | $(glm_dir) $(sdl_dir)
 	$(tls_dir)/install_xns.sh
 
 
 # -- F O R M A T T I N G ------------------------------------------------------
 
 define print
-echo '[\033[$(1)m'$(2)'\033[0m]' '$(3)'
+echo '\033[90m[\033[$(1)m'$(2)'\033[0m\033[90m]\033[0m' '$(3)'
 endef
-
-define make_shader
-make --silent --directory=$(sha_dir) $(1)
-endef
-
