@@ -8,11 +8,10 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#define GLFW_INCLUDE_VULKAN
+///#define GLFW_INCLUDE_VULKAN
 
 
-#include "engine/glfw/window.hpp"
-#include "engine/glfw/events.hpp"
+#include "renderx/sdl/exception.hpp"
 
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vulkan/device.hpp"
@@ -23,7 +22,6 @@
 #include "engine/vulkan/command_buffer.hpp"
 
 #include "engine/vk/typedefs.hpp"
-#include "engine/vk/shared.hpp"
 
 #include "engine/os.hpp"
 #include "engine/vertex/vertex.hpp"
@@ -56,23 +54,52 @@
 #include "engine/shader_library.hpp"
 #include "engine/vulkan/fence.hpp"
 
-#include "viewmap.hpp"
+
+
+#include "renderx/vertex/normal.hpp"
+
+
+#include "renderx/vulkan/allocator.hpp"
+#include "renderx/object.hpp"
+#include "renderx/transform.hpp"
+
+#include "renderx/sdl/window.hpp"
+
+
+#include <SDL3/SDL.h>
+
 
 int main(void) {
 
 
 	/*
-	engine::vertex v{vx::float3{1.0f, 2.0f, 3.0f},
-					 vx::rotation{4.0f, 5.0f, 6.0f}};
+	rx::object obj;
 
-	v.print_info();
+	obj.position() += 1.0f;
+
+
+	rx::transform<float, 3U> t;
+
+	t.rotation() += 2.0f;
+
+	const auto& r = t.rotation();
+	const auto& p = t.position();
+	const auto& s = t.scale();
+
+	std::cout << "rotation: " << r.x << ", " << r.y << ", " << r.z << std::endl;
+	std::cout << "position: " << p.x << ", " << p.y << ", " << p.z << std::endl;
+	std::cout << "scale: " << s.x << ", " << s.y << ", " << s.z << std::endl;
 	*/
-
 
 	// launch renderer
 	try {
 		engine::renderer renderer;
-		renderer.launch();
+		renderer.run();
+	}
+
+	catch (const rx::sdl::exception& except) {
+		std::cerr << except.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 
 	// vulkan catch block

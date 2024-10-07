@@ -40,10 +40,13 @@ namespace vk {
 	/* try execute */
 	template <xns::basic_string_literal ___msg, typename ___function, typename... ___params>
 	inline auto try_execute(___function&& ___func, ___params&&... ___args) -> void {
+
 		// get return type
 		using ret_type = decltype(___func(xns::forward<___params>(___args)...));
+
 		// assert return type is vk::result
 		static_assert(xns::is_same<ret_type, vk::result>, "invalid return type.");
+
 		// execute function
 		if (auto ___result = ___func(xns::forward<___params>(___args)...); ___result != VK_SUCCESS)
 			throw vk::exception{___msg.data(), ___result};

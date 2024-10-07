@@ -39,7 +39,7 @@ vulkan::physical_device::operator const vk::physical_device&(void) const noexcep
 // -- public accessors --------------------------------------------------------
 
 /* find queue family */
-auto vulkan::physical_device::find_queue_family(const vulkan::surface& surface,
+auto vulkan::physical_device::find_queue_family(const vk::surface& surface,
 												const vk::queue_flags_bits flags) const -> vk::u32 {
 	// get queue families properties
 	static const auto properties = vk::get_physical_device_queue_family_properties(_pdevice);
@@ -66,17 +66,17 @@ auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
 }
 
 /* have surface formats */
-auto vulkan::physical_device::have_surface_formats(const vulkan::surface& surface) const -> bool {
+auto vulkan::physical_device::have_surface_formats(const vk::surface& surface) const -> bool {
 	return bool{vk::get_physical_device_surface_formats_count(_pdevice, surface) > 0};
 }
 
 /* have present modes */
-auto vulkan::physical_device::have_present_modes(const vulkan::surface& surface) const -> bool {
+auto vulkan::physical_device::have_present_modes(const vk::surface& surface) const -> bool {
 	return bool{vk::get_physical_device_surface_present_modes_count(_pdevice, surface) > 0};
 }
 
 /* is support surface and queue family */
-auto vulkan::physical_device::is_support_surface_and_queue_family(const vulkan::surface& surface,
+auto vulkan::physical_device::is_support_surface_and_queue_family(const vk::surface& surface,
 																  const vk::u32 family) const -> bool {
 	return vk::get_physical_device_surface_support(_pdevice, surface, family);
 }
@@ -87,17 +87,17 @@ auto vulkan::physical_device::extension_properties(void) const -> vk::vector<vk:
 }
 
 /* surface capabilities */
-auto vulkan::physical_device::surface_capabilities(const vulkan::surface& surface) const -> vk::surface_capabilities {
+auto vulkan::physical_device::surface_capabilities(const vk::surface& surface) const -> vk::surface_capabilities {
 	return vk::get_physical_device_surface_capabilities(_pdevice, surface);
 }
 
 /* surface formats */
-auto vulkan::physical_device::surface_formats(const vulkan::surface& surface) const -> vk::vector<vk::surface_format> {
+auto vulkan::physical_device::surface_formats(const vk::surface& surface) const -> vk::vector<vk::surface_format> {
 	return vk::get_physical_device_surface_formats(_pdevice, surface);
 }
 
 /* surface present modes */
-auto vulkan::physical_device::surface_present_modes(const vulkan::surface& surface) const -> vk::vector<vk::present_mode> {
+auto vulkan::physical_device::surface_present_modes(const vk::surface& surface) const -> vk::vector<vk::present_mode> {
 	return vk::get_physical_device_surface_present_modes(_pdevice, surface);
 }
 

@@ -8,29 +8,22 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_VULKAN_SHADER_MODULE_HEADER
-#define ENGINE_VULKAN_SHADER_MODULE_HEADER
+#ifndef ___RENDERX_VULKAN_SHADER_MODULE___
+#define ___RENDERX_VULKAN_SHADER_MODULE___
 
 #include <vulkan/vulkan.h>
 
-//#include <string>
-//#include <fstream>
-//#include <iostream>
-//#include <vector>
+#include "engine/vulkan/device.hpp"
 
 #include "engine/vk/typedefs.hpp"
 #include "engine/vulkan/specialization.hpp"
-#include "engine/vk/shared.hpp"
-//#include "engine/vk/functions.hpp"
+#include "engine/vk/exception.hpp"
+#include "engine/vk/utils.hpp"
+
 
 #include <cstddef>
-
 #include <xns/string_literal.hpp>
-
 #include <xns/unique_descriptor.hpp>
-
 #include <sys/stat.h>
 
 
@@ -62,15 +55,9 @@ inline auto get_file_content(const xns::string_view& path) -> xns::vector<char> 
 
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
-
-
-	// -- forward declarations ------------------------------------------------
-
-	/* device */
-	class device;
 
 
 	// -- S H A D E R  M O D U L E --------------------------------------------
@@ -90,20 +77,27 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* shader module */
-			vk::shared<vk::shader_module> _module;
+			vk::shader_module _module;
 
 
-			// -- private methods ---------------------------------------------
+		public:
 
-			/* create shader module */
-			static auto _create_shader_module(const vk::shared<vk::device>& ___device,
-											  const xns::string& ___path) -> vk::shared<vk::shader_module> {
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			shader_module(void) noexcept
+			: _module{nullptr} {
+			}
+
+			/* path constructor */
+			shader_module(const xns::string& ___path)
+			/* uninitialized module */ {
 
 				// get shader data
 				const auto data = get_file_content(___path);
 
-				// create shader module
-				return vk::shared<vk::shader_module>{___device, vk::shader_module_info{
+				// create info
+				vk::shader_module_info info {
 					// structure type
 					.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 					// next structure
@@ -114,48 +108,61 @@ namespace vulkan {
 					.codeSize = data.size(),
 					// data pointer
 					.pCode    = reinterpret_cast<const vk::u32*>(data.data())
-				}};
+				};
+
+				// create shader module
+				vk::try_execute<"failed to create shader module">(
+						::vk_create_shader_module,
+						vulkan::device::logical(), &info, nullptr, &_module);
 			}
 
-
-		public:
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			shader_module(void) noexcept = default;
-
-			/* logical device and path constructor */
-			shader_module(const vk::shared<vk::device>&     ___device,
-						  const xns::string&                ___path)
-			: _module{___self::_create_shader_module(___device, ___path)} {
-			}
-
-			/* copy constructor */
-			shader_module(const ___self&) noexcept = default;
+			/* deleted copy constructor */
+			shader_module(const ___self&) = delete;
 
 			/* move constructor */
-			shader_module(___self&&) noexcept = default;
+			shader_module(___self&& ___ot) noexcept
+			: _module{___ot._module} {
+
+				// invalidate other
+				___ot._module = nullptr;
+			}
 
 			/* destructor */
-			~shader_module(void) noexcept = default;
+			~shader_module(void) noexcept {
+
+				if (_module == nullptr)
+					return;
+
+				// release shader module
+				::vk_destroy_shader_module(vulkan::device::logical(), _module, nullptr);
+			}
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* copy assignment operator */
-			auto operator=(const ___self&) noexcept -> ___self& = default;
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
+			auto operator=(___self&& ___ot) noexcept -> ___self& {
 
+				// check for self-assignment
+				if (this == &___ot)
+					return *this;
 
-			// -- public conversion operators ---------------------------------
+				// release shader module
+				if (_module != nullptr)
+					::vk_destroy_shader_module(vulkan::device::logical(),
+							_module, nullptr);
 
-			/* vk::shader_module conversion operator */
-			operator const vk::shader_module&(void) const noexcept {
-				return _module;
+				// move assignment
+				_module = ___ot._module;
+				___ot._module = nullptr;
+
+				// done
+				return *this;
 			}
+
 
 
 			// -- public static methods ---------------------------------------
@@ -193,7 +200,7 @@ namespace vulkan {
 					.stage  = ___stage,
 					.module = _module,
 					.pName  = "main",
-					.pSpecializationInfo = &___spec.info(),
+					.pSpecializationInfo = &(___spec.info())
 				};
 			}
 
@@ -223,4 +230,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_SHADER_MODULE_HPP
+#endif // ___RENDERX_VULKAN_SHADER_MODULE___

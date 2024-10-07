@@ -8,22 +8,13 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
+#ifndef ___RENDERX_VULKAN_SEMAPHORE___
+#define ___RENDERX_VULKAN_SEMAPHORE___
 
-#ifndef ENGINE_VULKAN_SEMAPHORE_HPP
-#define ENGINE_VULKAN_SEMAPHORE_HPP
-
-
-// vulkan headers
-#include <vulkan/vulkan.h>
-
-//#include "engine/vulkan/device.hpp"
-
-#include "engine/vk/shared.hpp"
+#include "engine/vk/typedefs.hpp"
 
 
-
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
 
@@ -33,56 +24,53 @@ namespace vulkan {
 	class semaphore final {
 
 
-		public:
+		private:
 
-			// -- public types ------------------------------------------------
+			// -- private types -----------------------------------------------
 
 			/* self type */
-			using self = vulkan::semaphore;
+			using ___self = vulkan::semaphore;
 
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			semaphore(void) noexcept;
-
-			/* logical device constructor */
-			semaphore(const vk::shared<vk::device>&);
-
-			/* copy constructor */
-			semaphore(const self&) noexcept = default;
-
-			/* move constructor */
-			semaphore(self&&) noexcept = default;
-
-			/* destructor */
-			~semaphore(void) noexcept = default;
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self& = default;
-
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self& = default;
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* vk::semaphore conversion operator */
-			operator const vk::semaphore&(void) const noexcept;
-
-
-		private:
 
 			// -- private members ---------------------------------------------
 
 			/* semaphore */
-			vk::shared<vk::semaphore> _semaphore;
+			vk::semaphore _semaphore;
+
+
+		public:
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			semaphore(void);
+
+			/* deleted copy constructor */
+			semaphore(const ___self&) = delete;
+
+			/* move constructor */
+			semaphore(___self&&) noexcept;
+
+			/* destructor */
+			~semaphore(void) noexcept;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* move assignment operator */
+			auto operator=(___self&&) noexcept -> ___self&;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* underlying */
+			auto underlying(void) const noexcept -> const vk::semaphore&;
 
 	}; // class semaphore
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_SEMAPHORE_HPP
+#endif // ___RENDERX_VULKAN_SEMAPHORE___

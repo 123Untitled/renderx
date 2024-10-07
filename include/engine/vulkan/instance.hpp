@@ -1,18 +1,23 @@
-#pragma once
+/*****************************************************************************/
+/*                                                                           */
+/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
+/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
+/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
+/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
+/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
+/*                                                                           */
+/*****************************************************************************/
 
-#ifndef ENGINE_VULKAN_INSTANCE_HEADER
-#define ENGINE_VULKAN_INSTANCE_HEADER
+#ifndef ___RENDERX_VULKAN_INSTANCE___
+#define ___RENDERX_VULKAN_INSTANCE___
 
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vk/typedefs.hpp"
 #include "engine/vulkan/unique.hpp"
-#include "engine/vk/shared.hpp"
 #include "engine/vk/array.hpp"
 
-#include "engine/vulkan/debug_utils_messenger.hpp"
 
-
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
 
@@ -30,26 +35,73 @@ namespace vulkan {
 			using ___self = vulkan::instance;
 
 
-		public:
+			// -- private members ---------------------------------------------
 
-			// -- public conversion operators ---------------------------------
+			/* instance */
+			vk::instance _instance;
 
-			/* vk::instance conversion operator */
-			operator const vk::instance&(void) const noexcept;
+			/* messenger */
+			#if defined(ENGINE_VL_DEBUG)
+			vk::debug_utils_messenger _messenger;
+			#endif
 
 
-			// -- public static methods ---------------------------------------
+			// -- private static methods --------------------------------------
 
 			/* shared */
-			static auto shared(void) -> ___self&;
+			static auto _shared(void) -> ___self&;
 
-			/* physical devices */
-			static auto physical_devices(void) -> const vk::vector<vulkan::physical_device>&;
+			/* extension properties */
+			static auto extension_properties(void) -> vk::vector<vk::extension_properties>;
+
+			/* layer properties */
+			static auto layer_properties(void) -> vk::vector<vk::layer_properties>;
+
+			/* messenger info */
+			#if defined(ENGINE_VL_DEBUG)
+			static constexpr auto _messenger_info(void) noexcept -> vk::debug_utils_messenger_info {
+
+				// create info
+				return vk::debug_utils_messenger_info {
+
+					// structure type
+					.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+
+					// next structure
+					.pNext           = nullptr,
+
+					// flags
+					.flags           = 0U,
+
+					// message severity
+					.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+									 | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+									 | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+
+					// message type
+					.messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+									 | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+									 | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+
+					// callback
+					.pfnUserCallback = ___self::_callback,
+
+					// user data (optional)
+					.pUserData       = nullptr
+				};
+			}
+
+			/* callback */
+			static VKAPI_ATTR auto VKAPI_CALL
+			_callback(const vk::debug_utils_message_severity_flag_bit,
+					  const vk::debug_utils_message_type_flags,
+					  const vk::debug_utils_messenger_callback_data*,
+					  void*) -> vk::bool32;
+
+			#endif // ENGINE_VL_DEBUG
 
 
-		private:
-
-			// -- private lifecycle ---------------------------------------
+			// -- private lifecycle -------------------------------------------
 
 			/* default constructor */
 			instance(void);
@@ -61,7 +113,7 @@ namespace vulkan {
 			instance(___self&&) = delete;
 
 			/* destructor */
-			~instance(void) noexcept = default;
+			~instance(void) noexcept;
 
 
 			// -- private assignment operators --------------------------------
@@ -73,27 +125,18 @@ namespace vulkan {
 			auto operator=(___self&&) -> ___self& = delete;
 
 
-			// -- private static methods ----------------------------------
+		public:
 
-			/* extension properties */
-			static auto extension_properties(void) -> vk::vector<vk::extension_properties>;
+			// -- public static methods ---------------------------------------
 
-			/* layer properties */
-			static auto layer_properties(void) -> vk::vector<vk::layer_properties>;
+			/* shared */
+			static auto shared(void) -> const vk::instance&;
 
-
-			// -- private members -----------------------------------------
-
-			/* instance */
-			vk::shared<vk::instance> _instance;
-
-			/* messenger */
-			#if defined(ENGINE_VL_DEBUG)
-			vulkan::debug_utils_messenger _messenger;
-			#endif
+			/* physical devices */
+			static auto physical_devices(void) -> const vk::vector<vulkan::physical_device>&;
 
 	}; // class instance
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_INSTANCE_HEADER
+#endif // ___RENDERX_VULKAN_INSTANCE___

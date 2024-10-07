@@ -76,31 +76,31 @@ namespace vulkan {
 			// -- public accessors --------------------------------------------
 
 			/* find queue family */
-			auto find_queue_family(const vulkan::surface&, const vk::queue_flags_bits) const -> vk::u32;
+			auto find_queue_family(const vk::surface&, const vk::queue_flags_bits) const -> vk::u32;
 
 			/* supports swapchain */
 			auto supports_swapchain(void) const noexcept -> bool;
 
 			/* have surface formats */
-			auto have_surface_formats(const vulkan::surface&) const -> bool;
+			auto have_surface_formats(const vk::surface&) const -> bool;
 
 			/* have present modes */
-			auto have_present_modes(const vulkan::surface&) const -> bool;
+			auto have_present_modes(const vk::surface&) const -> bool;
 
 			/* is support surface and queue family */
-			auto is_support_surface_and_queue_family(const vulkan::surface&, const vk::u32) const -> bool;
+			auto is_support_surface_and_queue_family(const vk::surface&, const vk::u32) const -> bool;
 
 			/* extension properties */
 			auto extension_properties(void) const -> vk::vector<vk::extension_properties>;
 
 			/* surface capabilities */
-			auto surface_capabilities(const vulkan::surface&) const -> vk::surface_capabilities;
+			auto surface_capabilities(const vk::surface&) const -> vk::surface_capabilities;
 
 			/* surface formats */
-			auto surface_formats(const vulkan::surface&) const -> vk::vector<vk::surface_format>;
+			auto surface_formats(const vk::surface&) const -> vk::vector<vk::surface_format>;
 
 			/* surface present modes */
-			auto surface_present_modes(const vulkan::surface&) const -> vk::vector<vk::present_mode>;
+			auto surface_present_modes(const vk::surface&) const -> vk::vector<vk::present_mode>;
 
 			/* properties */
 			auto properties(void) const -> vk::physical_device_properties;

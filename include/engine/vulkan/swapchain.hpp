@@ -23,7 +23,6 @@
 
 
 #include "engine/vk/typedefs.hpp"
-#include "engine/vk/shared.hpp"
 #include "engine/vk/vector.hpp"
 
 
@@ -48,11 +47,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			//swapchain(void) noexcept;
-
-			/* logical device and surface constructor */
-			swapchain(const vulkan::device&,
-					  const vulkan::surface&);
+			swapchain(void);
 
 			/* deleted copy constructor */
 			swapchain(const self&) = delete;
@@ -75,6 +70,11 @@ namespace vulkan {
 
 			// -- public accessors --------------------------------------------
 
+			/* underlying */
+			auto underlying(void) const noexcept -> const vk::swapchain& {
+				return _swapchain;
+			}
+
 			/* size */
 			auto size(void) const noexcept -> vk::u32;
 
@@ -94,21 +94,16 @@ namespace vulkan {
 			auto render_pass(void) const noexcept -> const vulkan::render_pass&;
 
 			/* acquire next image */
-			auto acquire_next_image(const vulkan::semaphore&,
-									xns::u32&) const noexcept -> bool;
+			auto acquire_next_image(const vk::semaphore&,
+									vk::u32&) const noexcept -> bool;
 
-
-			// -- public conversion operators ---------------------------------
-
-			/* vk::swapchain conversion operator */
-			operator const vk::swapchain&(void) const noexcept;
 
 
 			// -- public modifiers --------------------------------------------
 
 			/* re-create */
 			auto recreate(const vulkan::device&,
-						  const vulkan::surface&) -> void;
+						  const vk::surface&) -> void;
 
 
 		private:
@@ -128,7 +123,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* swapchain */
-			vk::shared<vk::swapchain> _swapchain;
+			vk::swapchain _swapchain;
 
 			/* render pass */
 			vulkan::render_pass _render_pass;

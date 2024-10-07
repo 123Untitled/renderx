@@ -17,7 +17,6 @@
 #include <vulkan/vulkan.h>
 
 #include "engine/vulkan/shader_module.hpp"
-#include "engine/vk/shared.hpp"
 #include "engine/vk/typedefs.hpp"
 
 #include <unordered_map>
@@ -94,11 +93,11 @@ namespace engine {
 
 			// -- private static members --------------------------------------
 
-			using ___fn = auto (___self::*)(const std::string&, const vk::shared<vk::device>&) -> void;
+			using ___fn = auto (___self::*)(const std::string&) -> void;
 
 
 			/* load vertex */
-			auto load_vertex(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_vertex(const std::string& path) -> void {
 
 				xns::string p{path.data(), path.size()};
 
@@ -109,11 +108,11 @@ namespace engine {
 				if (_vmodules.find(name) != _vmodules.end())
 					throw;
 
-				_vmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>{device, p};
+				_vmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>{p};
 			}
 
 			/* load fragment */
-			auto load_fragment(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_fragment(const std::string& path) -> void {
 
 				xns::string p{path.data(), path.size()};
 				const auto name = std::filesystem::path{path}.stem().string();
@@ -121,23 +120,23 @@ namespace engine {
 				if (_fmodules.find(name) != _fmodules.end())
 					throw;
 
-				_fmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_FRAGMENT_BIT>{device, p};
+				_fmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_FRAGMENT_BIT>{p};
 			}
 
 			/* load compute */
-			auto load_compute(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_compute(const std::string& path) -> void {
 			}
 
 			/* load tessellation control */
-			auto load_tess_control(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_tess_control(const std::string& path) -> void {
 			}
 
 			/* load tessellation evaluation */
-			auto load_tess_eval(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_tess_eval(const std::string& path) -> void {
 			}
 
 			/* load geometry */
-			auto load_geometry(const std::string& path, const vk::shared<vk::device>& device) -> void {
+			auto load_geometry(const std::string& path) -> void {
 			}
 
 
@@ -295,7 +294,7 @@ namespace engine {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			shader_library(const vk::shared<vk::device>& device)
+			shader_library(void)
 			: _vmodules{}, _fmodules{} {
 
 				// root
@@ -331,7 +330,7 @@ namespace engine {
 					const auto path = it->path().string();
 
 					// execute function
-					(this->*(res->second))(path, device);
+					(this->*(res->second))(path);
 				}
 			}
 

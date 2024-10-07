@@ -8,14 +8,13 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef ENGINE_VULKAN_FENCE_HPP
-#define ENGINE_VULKAN_FENCE_HPP
+#ifndef ___RENDERX_VULKAN_FENCE___
+#define ___RENDERX_VULKAN_FENCE___
 
 #include "engine/vk/typedefs.hpp"
-#include "engine/vk/shared.hpp"
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
 
@@ -23,6 +22,7 @@ namespace vulkan {
 	// -- F E N C E -----------------------------------------------------------
 
 	class fence final {
+
 
 		private:
 
@@ -35,51 +35,54 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* fence */
-			vk::shared<vk::fence> _fence;
+			vk::fence _fence;
 
 
 		public:
 
 			// -- public lifecycle --------------------------------------------
 
-			/* default constructor */
-			fence(void) noexcept = default;
+			/* deleted default constructor */
+			fence(void) = delete;
 
-			/* device constructor */
-			fence(const vk::shared<vk::device>& ___dev)
-			: _fence{___dev, vk::fence_info{
-					// structure type
-					VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-					// next structure
-					nullptr,
-					// flag
-					0U
-				}} {
+			/* flags constructor */
+			fence(const vk::fence_create_flags& = VK_FENCE_CREATE_SIGNALED_BIT);
 
-				//
-			}
+			/* deleted copy constructor */
+			fence(const ___self&) = delete;
+
+			/* move constructor */
+			fence(___self&&) noexcept;
+
+			/* destructor */
+			~fence(void) noexcept;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* move assignment operator */
+			auto operator=(___self&&) noexcept -> ___self&;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* underlying */
+			auto underlying(void) const noexcept -> const vk::fence&;
+
 
 			// -- public methods ----------------------------------------------
 
 			/* reset */
-			auto reset(const vk::shared<vk::device>& ___dev) -> void {
-				//::vkResetFences(___dev, 1U, _fence);
-			}
+			auto reset(void) -> void;
 
 			/* wait */
-			auto wait(const vk::shared<vk::device>& ___dev) -> void {
+			auto wait(void) -> void;
 
-				const vk::fence& ___fc = _fence;
-
-				const vk::device& ___dv = ___dev;
-
-				::vkWaitForFences(___dv,
-						1U, &___fc, VK_TRUE, UINT64_MAX);
-			}
-
-
-	};
+	}; // class fence
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_FENCE_HPP
+#endif // ___RENDERX_VULKAN_FENCE___

@@ -22,57 +22,6 @@
 
 namespace vk {
 
-	// -- C R E A T E ---------------------------------------------------------
-
-
-	// -- create instance -----------------------------------------------------
-
-	/* create instance */
-	inline auto create(const vk::instance_info& ___info) -> vk::instance {
-		vk::instance __instance{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateInstance,
-					"failed to create vulkan instance",
-					&___info, nullptr, &__instance);
-		return __instance;
-	}
-
-
-	// -- create device -------------------------------------------------------
-
-	/* create device */
-	inline auto create(const vk::physical_device& pdevice,
-					   const vk::device_info& ___info) -> vk::device {
-		vk::device ___device{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateDevice,
-					"failed to create logical device",
-					pdevice, &___info, nullptr, &___device);
-		return ___device;
-	}
-
-	/* create device */
-	inline auto create(const vk::device_info& ___info,
-					   const vk::physical_device& pdevice) -> vk::device {
-		return vk::create(pdevice, ___info);
-	}
-
-
-	// -- create swapchain ----------------------------------------------------
-
-	/* create swapchain */
-	inline auto create(const vk::device& ___device,
-					   const vk::swapchain_info& ___info) -> vk::swapchain {
-		vk::swapchain ___swapchain{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateSwapchainKHR,
-					"failed to create swapchain",
-					___device, &___info, nullptr, &___swapchain);
-		return ___swapchain;
-	}
-
-	/* create swapchain */
-	inline auto create(const vk::swapchain_info& ___info,
-					   const vk::device& ___device) -> vk::swapchain {
-		return vk::create(___device, ___info);
-	}
 
 
 
@@ -95,223 +44,6 @@ namespace vk {
 	}
 
 
-	// -- create command pool -------------------------------------------------
-
-	/* create command pool */
-	inline auto create(const vk::device& ___device,
-					   const vk::command_pool_info& info) -> vk::command_pool {
-		vk::command_pool pool{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateCommandPool,
-					"failed to create command pool",
-					___device, &info, nullptr, &pool);
-		return pool;
-	}
-
-	/* create command pool */
-	inline auto create(const vk::command_pool_info& info,
-					   const vk::device& ___device) -> vk::command_pool {
-		return vk::create(___device, info);
-	}
-
-
-	// -- command buffer ------------------------------------------------------
-
-	/* create command buffer */
-	inline auto create(const vk::device& ___device,
-					   const vk::command_buffer_info& info) -> vk::command_buffer {
-		vk::command_buffer buffer{VK_NULL_HANDLE};
-		vk::try_execute(::vkAllocateCommandBuffers,
-						"failed to allocate command buffer",
-						___device, &info, &buffer);
-		return buffer;
-	}
-
-	/* create command buffer */
-	inline auto create(const vk::command_buffer_info& info,
-					   const vk::device& ___device) -> vk::command_buffer {
-		return vk::create(___device, info);
-	}
-
-	/* create command buffers */
-	inline auto create(const vk::device& ___device,
-					   const vk::command_buffer_info& info,
-					   vk::command_buffer* buffers) -> vk::command_buffer* {
-		vk::try_execute(::vkAllocateCommandBuffers,
-						"failed to allocate command buffers",
-						___device, &info, buffers);
-		return buffers;
-	}
-
-	/* create command buffers */
-	inline auto create(const vk::command_buffer_info& info,
-					   const vk::device& ___device,
-					   vk::command_buffer* buffers) -> vk::command_buffer* {
-		return vk::create(___device, info, buffers);
-	}
-
-	/* create command buffers */
-	inline auto create(const vk::device& ___device,
-					   vk::command_buffer* buffers,
-					   const vk::command_buffer_info& info) -> vk::command_buffer* {
-		return vk::create(___device, info, buffers);
-	}
-
-	/* create command buffers */
-	inline auto create(const vk::command_buffer_info& info,
-					   vk::command_buffer* buffers,
-					   const vk::device& ___device) -> vk::command_buffer* {
-		return vk::create(___device, info, buffers);
-	}
-
-	/* create command buffers */
-	inline auto create(vk::command_buffer* buffers,
-					   const vk::device& ___device,
-					   const vk::command_buffer_info& info) -> vk::command_buffer* {
-		return vk::create(___device, info, buffers);
-	}
-
-	/* create command buffers */
-	inline auto create(vk::command_buffer* buffers,
-					   const vk::command_buffer_info& info,
-					   const vk::device& ___device) -> vk::command_buffer* {
-		return vk::create(___device, info, buffers);
-	}
-
-
-
-	// -- render pass ---------------------------------------------------------
-
-	/* create render pass */
-	inline auto create(const vk::device& ___device,
-					   const vk::render_pass_info& ___info) -> vk::render_pass {
-		vk::render_pass ___render_pass{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateRenderPass,
-					"failed to create render pass",
-					___device, &___info, nullptr, &___render_pass);
-		return ___render_pass;
-	}
-
-	/* create render pass */
-	inline auto create(const vk::render_pass_info& info,
-					   const vk::device& ___device) -> vk::render_pass {
-		return vk::create(___device, info);
-	}
-
-
-	// -- create shader module ------------------------------------------------
-
-	/* create shader module */
-	inline auto create(const vk::device& ___device,
-					   const vk::shader_module_info& info) -> vk::shader_module {
-		vk::shader_module module{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateShaderModule,
-					"failed to create shader module",
-					___device, &info, nullptr, &module);
-		return module;
-	}
-
-	/* create shader module */
-	inline auto create(const vk::shader_module_info& info,
-					   const vk::device& ___device) -> vk::shader_module {
-		return vk::create(___device, info);
-	}
-
-
-	// -- pipeline ------------------------------------------------------------
-
-	/* create pipeline */
-	inline auto create(const vk::device& ___device,
-					   const vk::pipeline_info& ___info) -> vk::pipeline {
-		vk::pipeline ___pipeline{VK_NULL_HANDLE};
-
-		vk::try_execute<"failed to create pipeline">(
-			// function
-			::vkCreateGraphicsPipelines,
-			// device
-			___device,
-			// pipeline cache
-			VK_NULL_HANDLE,
-			// pipeline count
-			static_cast<vk::u32>(1U),
-			// infos
-			&___info,
-			// allocator
-			nullptr,
-			// pipeline
-			&___pipeline
-		);
-
-		return ___pipeline;
-	}
-
-	/* create pipeline */
-	inline auto create(const vk::pipeline_info& info,
-					   const vk::device& ___device) -> vk::pipeline {
-		return vk::create(___device, info);
-	}
-
-
-	// -- pipeline layout -----------------------------------------------------
-
-	/* create pipeline layout */
-	inline auto create(const vk::device& ___device,
-					   const vk::pipeline_layout_info& info) -> vk::pipeline_layout {
-		vk::pipeline_layout layout{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreatePipelineLayout,
-					"failed to create pipeline layout",
-					___device, &info, nullptr, &layout);
-		return layout;
-	}
-
-	/* create pipeline layout */
-	inline auto create(const vk::pipeline_layout_info& info,
-					   const vk::device& ___device) -> vk::pipeline_layout {
-		return vk::create(___device, info);
-	}
-
-
-	// -- semaphore -----------------------------------------------------------
-
-	/* create semaphore */
-	inline auto create(const vk::device& ___device,
-					   const vk::semaphore_info& ___info) -> vk::semaphore {
-		vk::semaphore ___semaphore{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateSemaphore,
-					"failed to create semaphore",
-					___device, &___info, nullptr, &___semaphore);
-		return ___semaphore;
-	}
-
-	/* create semaphore */
-	inline auto create(const vk::semaphore_info& info,
-					   const vk::device& ___device) -> vk::semaphore {
-		return vk::create(___device, info);
-	}
-
-
-	// -- fence ---------------------------------------------------------------
-
-	/* create fence */
-	inline auto create(const vk::device& ___dev,
-					   const vk::fence_info& ___in) -> vk::fence {
-
-		vk::fence ___fc;
-
-		vk::try_execute<"create fence failed">(
-				::vkCreateFence,
-				___dev, &___in, nullptr, &___fc);
-
-		return ___fc;
-	}
-
-	/* create fence */
-	inline auto create(const vk::fence_info& ___in,
-					   const vk::device& ___dev) -> vk::fence {
-		return vk::create(___dev, ___in);
-	}
-
-
-
 	// -- image view ----------------------------------------------------------
 
 	/* create image view */
@@ -331,69 +63,35 @@ namespace vk {
 	}
 
 
-	// -- buffer --------------------------------------------------------------
+	// -- descriptor pool -----------------------------------------------------
 
-	/* create buffer */
-	inline auto create(const vk::device& ___de,
-					   const vk::buffer_info& ___in) -> vk::buffer {
-
-		vk::buffer ___bf;
-
-		vk::try_execute(::vkCreateBuffer,
-					"failed to create vk::buffer",
-					___de, &___in, nullptr, &___bf);
-
-		return ___bf;
-	}
-
-	/* create buffer */
-	inline auto create(const vk::buffer_info& ___in,
-					   const vk::device& ___de) -> vk::buffer {
-		return vk::create(___de, ___in);
-	}
-
-
-	// -- memory --------------------------------------------------------------
-
-	/* create device memory */
+	/* create descriptor pool */
 	inline auto create(const vk::device& ___device,
-					   const vk::memory_allocate_info& ___info) -> vk::device_memory {
+					   const vk::descriptor_pool_info& ___info) -> vk::descriptor_pool {
 
-		vk::device_memory ___mem;
+		vk::descriptor_pool ___pool;
 
-		vk::try_execute<"vkAllocateMemory failed">(
-				::vkAllocateMemory,
-				___device, &___info, nullptr, &___mem
-		);
+		vk::try_execute<"failed to create descriptor pool">(
+				::vkCreateDescriptorPool,
+				___device, &___info, nullptr, &___pool);
 
-		return ___mem;
-	}
-
-	/* create device memory */
-	inline auto create(const vk::memory_allocate_info& ___info,
-					   const vk::device& ___device) -> vk::device_memory {
-		return vk::create(___device, ___info);
+		return ___pool;
 	}
 
 
-	// -- create debug utils messenger ----------------------------------------
+	// -- descriptor set layout -----------------------------------------------
 
-	/* create debug utils messenger */
-	inline auto create(const vk::instance& __instance, const vk::debug_utils_messenger_info& info) -> vk::debug_utils_messenger {
-		vk::debug_utils_messenger messenger{VK_NULL_HANDLE};
-		const auto func = vk::get_instance_proc_addr<vk::pfn_create_debug_utils_messenger>(
-				__instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func == nullptr)
-			throw vk::exception{"failed to get instance proc address", VK_ERROR_EXTENSION_NOT_PRESENT};
-		vk::try_execute(func,
-					"failed to create vulkan messenger",
-					__instance, &info, nullptr, &messenger);
-		return messenger;
-	}
+	/* create descriptor set layout */
+	inline auto create(const vk::device& ___device,
+					   const vk::descriptor_set_layout_info& ___info) -> vk::descriptor_set_layout {
 
-	/* create debug utils messenger */
-	inline auto create(const vk::debug_utils_messenger_info& info, const vk::instance& __instance) -> vk::debug_utils_messenger {
-		return vk::create(__instance, info);
+		vk::descriptor_set_layout ___layout;
+
+		vk::try_execute<"failed to create descriptor set layout">(
+				::vkCreateDescriptorSetLayout,
+				___device, &___info, nullptr, &___layout);
+
+		return ___layout;
 	}
 
 

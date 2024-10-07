@@ -2,21 +2,21 @@
 
 //#include <xns/math.hpp>
 #include <xns/math/clamp.hpp>
+#include "engine/vk/info.hpp"
+
+#include "renderx/sdl/window.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-//vulkan::swapchain::swapchain(void) noexcept
-//: _swapchain{}, _images{}, _views{}, _format{}, _extent{} {
-//}
+vulkan::swapchain::swapchain(void)
+: _swapchain{}, _render_pass{}, _images{}, _views{}, _frames{}, _format{}, _extent{} {
 
-/* logical device and surface constructor */
-vulkan::swapchain::swapchain(const vulkan::device& device,
-							 const vulkan::surface& surface)
-: _swapchain{}, _render_pass{device}, _images{}, _views{device}, _frames{device}, _format{}, _extent{} {
+	const auto& pdevice = vulkan::device::physical();
 
-	const auto& pdevice = device.physical_device();
+	// get surface
+	auto& surface = vulkan::surface::shared();
 
 	// pick surface format
 	_format                 = self::pick_surface_format(pdevice.surface_formats(surface));
@@ -35,12 +35,12 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 	if (capabilities.maxImageCount > 0 && count > capabilities.maxImageCount)
 		count = capabilities.maxImageCount;
 
-	// create swapchain with info
-	_swapchain = {device, vk::swapchain_info{
+	// create info
+	const vk::swapchain_info sinfo {
 		// structure type
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		// next structure
-		.pNext                 = VK_NULL_HANDLE,
+		.pNext                 = nullptr,
 		// flags (none)
 		.flags                 = 0U,
 		// surface
@@ -63,7 +63,7 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 		// number of queue families
 		.queueFamilyIndexCount = 1U,
 		// queue family indices
-		.pQueueFamilyIndices   = &device.family(),
+		.pQueueFamilyIndices   = &(vulkan::device::family()),
 
 
 		// ...
@@ -75,93 +75,70 @@ vulkan::swapchain::swapchain(const vulkan::device& device,
 															 //info.presentMode = mode; // not implemented
 		.clipped = VK_TRUE, // not implemented
 		.oldSwapchain = nullptr  // for resizing window, see later...
-	}};
+	};
 
+	// create swapchain
+	vk::try_execute<"failed to create swapchain">(
+			::vk_create_swapchain_khr,
+			vulkan::device::logical(), &sinfo, nullptr, &_swapchain);
 
 
 	// get swapchain images
-	_images = vk::get_swapchain_images(device, _swapchain);
+	_images = vk::get_swapchain_images(vulkan::device::logical(), _swapchain);
+
 
 
 	{
-		vk::image_view_info info {
-			.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-			.pNext      = VK_NULL_HANDLE,
-			.flags      = 0U,
-			.image      = VK_NULL_HANDLE,
-			.viewType   = VK_IMAGE_VIEW_TYPE_2D,
-			.format     = _format.format,
-			.components = {
-				.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-				.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-				.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-				.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-			},
-			.subresourceRange   = {
-				.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-				.baseMipLevel   = 0U,
-				.levelCount     = 1U,
-				.baseArrayLayer = 0U,
-				.layerCount     = 1U,
-			}
-		};
+		// -- create image views ----------------------------------------------
 
-		_views.reserve((vk::u32)_images.size());
+		auto info = vk::info::image_view(_format.format);
 
-		for (vk::u32 i = 0; i < _images.size(); ++i) {
+		_views.reserve(_images.size());
+
+		for (vk::u32 i = 0U; i < _images.size(); ++i) {
 			// fill info with image
 			info.image = _images[i];
 			// create image view
 			_views.emplace_back(info);
 		}
-
 	}
 
 
 
 	{
+		// -- create framebuffers ---------------------------------------------
 
-		// create framebuffers
+		// allocate memory for framebuffers
 		_frames.reserve(_views.size());
 
-
-		vk::framebuffer_info info {
-			// structure type
-			.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-			// next structure
-			.pNext           = VK_NULL_HANDLE,
-			// flags (none)
-			.flags           = 0U,
-			// render pass
-			.renderPass      = _render_pass,
-			// attachment count (swapchain image views)
-			.attachmentCount = 1U,
-			// attachments (swapchain image views)
-			.pAttachments    = VK_NULL_HANDLE,
-			// width
-			.width           = _extent.width,
-			// height
-			.height          = _extent.height,
-			// layers
-			.layers          = 1
-		};
+		// generate info
+		auto info = vk::info::framebuffer(_render_pass.underlying(), _extent);
 
 		for (vk::u32 i = 0; i < _views.size(); ++i) {
-			// fill info with image view
-			info.pAttachments = &_views[i];
+
+			// set number of attachments
+			info.attachmentCount = 1U;
+
+			// set attachment
+			info.pAttachments = &(_views[i]);
+
 			// create framebuffer
 			_frames.emplace_back(info);
 		}
 
 	}
 
-
 }
 
 /* destructor */
 vulkan::swapchain::~swapchain(void) noexcept {
+
 	// wait for logical device to be idle
-	vk::device_wait_idle(_swapchain.dependency());
+	vulkan::device::wait_idle();
+
+	// release swapchain
+	::vk_destroy_swapchain_khr(vulkan::device::logical(),
+			_swapchain, nullptr);
 }
 
 
@@ -176,7 +153,7 @@ vulkan::swapchain::~swapchain(void) noexcept {
 
 /* size */
 auto vulkan::swapchain::size(void) const noexcept -> vk::u32 {
-	return (vk::u32)_images.size();
+	return _images.size();
 }
 
 /* extent */
@@ -205,11 +182,11 @@ auto vulkan::swapchain::render_pass(void) const noexcept -> const vulkan::render
 }
 
 /* acquire next image */
-auto vulkan::swapchain::acquire_next_image(const vulkan::semaphore& semaphore,
-										   xns::u32& img_index) const noexcept -> bool {
+auto vulkan::swapchain::acquire_next_image(const vk::semaphore& semaphore,
+										   vk::u32& img_index) const noexcept -> bool {
 
 	// get image index
-	if (::vkAcquireNextImageKHR(_swapchain.dependency(),
+	if (::vkAcquireNextImageKHR(vulkan::device::logical(),
 								_swapchain,
 								UINT64_MAX /* timeout */,
 								semaphore,
@@ -223,28 +200,22 @@ auto vulkan::swapchain::acquire_next_image(const vulkan::semaphore& semaphore,
 }
 
 
-// -- public conversion operators ---------------------------------------------
-
-/* vk::swapchain conversion operator */
-vulkan::swapchain::operator const vk::swapchain&(void) const noexcept {
-	return _swapchain;
-}
 
 
 // -- public modifiers --------------------------------------------------------
 
 /* re-create */
 auto vulkan::swapchain::recreate(const vulkan::device& device,
-								 const vulkan::surface& surface) -> void {
+								 const vk::surface& surface) -> void {
 
 	// destroy !!!
 	// wait for logical device to be idle
-	vk::device_wait_idle(_swapchain.dependency());
+	vulkan::device::wait_idle();
 
 	_views.clear();
 
 
-	const auto& pdevice = device.physical_device();
+	const auto& pdevice = vulkan::device::physical();
 
 	// pick surface format
 	_format         = self::pick_surface_format(pdevice.surface_formats(surface));
@@ -274,7 +245,6 @@ auto vulkan::swapchain::pick_surface_format(const vk::vector<vk::surface_format>
 			return format;
 	// else return first format
 	return formats[0];
-
 }
 
 /* pick present mode */
@@ -297,10 +267,13 @@ auto vulkan::swapchain::pick_present_mode(const vk::vector<vk::present_mode>& mo
 /* pick extent */
 auto vulkan::swapchain::pick_extent(const vk::surface_capabilities& capabilities) noexcept -> vk::extent2D {
 
-	if (capabilities.currentExtent.width != UINT32_MAX)
+	if (capabilities.currentExtent.width != UINT32_MAX) {
+		std::cout << "current extent: " << capabilities.currentExtent.width << "x" << capabilities.currentExtent.height << std::endl;
 		return capabilities.currentExtent;
+	}
 
-	vk::extent2D extent{800, 600}; // will be replaced by window size
+	vk::extent2D extent{rx::sdl::window::width(),
+						rx::sdl::window::height()};
 
 	extent.width  = xns::clamp(extent.width,
 			capabilities.minImageExtent.width,

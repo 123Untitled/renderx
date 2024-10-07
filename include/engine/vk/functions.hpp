@@ -178,17 +178,6 @@ namespace vk {
 	}
 
 
-	// -- logical devices -----------------------------------------------------
-
-	/* device wait idle */
-	inline auto device_wait_idle(const vk::device& ___device) -> void {
-
-		vk::try_execute<"[vk::device_wait_idle] failed">(
-				::vkDeviceWaitIdle,
-				___device
-		);
-	}
-
 
 	// -- surface formats -----------------------------------------------------
 
@@ -238,13 +227,6 @@ namespace vk {
 	}
 
 
-	/* destroy surface */
-	inline auto destroy_surface(const vk::instance& ___instance, vk::surface& ___surface) noexcept -> void {
-		::vkDestroySurfaceKHR(___instance, ___surface, nullptr);
-		___surface = VK_NULL_HANDLE;
-	}
-
-
 
 	// -- queue families ------------------------------------------------------
 
@@ -265,31 +247,9 @@ namespace vk {
 	}
 
 
-	// -- queue ---------------------------------------------------------------
-
-	/* get device queue */
-	inline auto get_device_queue(const vk::device& ___device, vk::u32 ___family, vk::u32 ___index = 0U) noexcept -> vk::queue {
-		vk::queue ___queue{VK_NULL_HANDLE};
-		::vkGetDeviceQueue(___device, ___family, ___index, &___queue);
-		return ___queue;
-	}
-
 
 	// -- swapchain -----------------------------------------------------------
 
-	/* create swapchain */
-	inline auto create_swapchain(const vk::device& ___device, const vk::swapchain_info& ___info) -> vk::swapchain {
-		vk::swapchain ___swapchain{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateSwapchainKHR,
-						"failed to create swapchain",
-						___device, &___info, nullptr, &___swapchain);
-		return ___swapchain;
-	}
-
-	/* destroy swapchain */
-	inline auto destroy_swapchain(const vk::device& ___device, vk::swapchain& ___swapchain) noexcept -> void {
-		::vkDestroySwapchainKHR(___device, ___swapchain, nullptr);
-	}
 
 	/* get swapchain images count */
 	inline auto get_swapchain_images_count(const vk::device& ___device, const vk::swapchain& ___swapchain) -> vk::u32 {
@@ -302,6 +262,7 @@ namespace vk {
 
 	/* get swapchain images */
 	inline auto get_swapchain_images(const vk::device& ___device, const vk::swapchain& ___swapchain) -> vk::vector<vk::image> {
+
 		auto ___count = vk::get_swapchain_images_count(___device, ___swapchain);
 		vk::vector<vk::image> ___images;
 		___images.resize(___count);
@@ -312,87 +273,47 @@ namespace vk {
 	}
 
 
-	// -- command pool --------------------------------------------------------
-
-	/* reset command pool */
-	inline auto reset_command_pool(const vk::device& ___device,
-								   const vk::command_pool& ___pool,
-								   const vk::command_pool_reset_flags& ___flags) -> void {
-		vk::try_execute(::vkResetCommandPool,
-						"failed to reset command pool",
-						___device, ___pool, ___flags);
-	}
-
-	/* trim command pool */
-	inline auto trim_command_pool(const vk::device& ___device,
-								  const vk::command_pool& ___pool) noexcept -> void {
-		::vkTrimCommandPool(___device, ___pool, 0U /* reserved for future use */);
-	}
-
 
 	// -- command buffer ------------------------------------------------------
 
-	/* reset command buffer */
-	inline auto reset_command_buffer(const vk::command_buffer& ___buffer,
-									 const vk::command_buffer_reset_flags& ___flags) -> void {
-		vk::try_execute(::vkResetCommandBuffer,
-						"failed to reset command buffer",
-						___buffer, ___flags);
-	}
 
-	/* cmd execute commands */
-	inline auto cmd_execute_commands(const vk::command_buffer& ___buffer,
-									 const vk::u32 ___count,
-									 const vk::command_buffer* ___buffers) noexcept -> void {
-		::vkCmdExecuteCommands(___buffer, ___count, ___buffers);
-	}
+	///* cmd execute commands */
+	//inline auto cmd_execute_commands(const vk::command_buffer& ___buffer,
+	//								 const vk::u32 ___count,
+	//								 const vk::command_buffer* ___buffers) noexcept -> void {
+	//	::vkCmdExecuteCommands(___buffer, ___count, ___buffers);
+	//}
 
-	/* begin command buffer */
-	inline auto begin_command_buffer(const vk::command_buffer& ___buffer,
-									 const vk::command_buffer_begin_info& ___info) -> void {
-		try_execute(::vkBeginCommandBuffer,
-					"failed to begin command buffer",
-					___buffer, &___info);
-	}
 
 	/* end command buffer */
-	inline auto end_command_buffer(const vk::command_buffer& ___buffer) -> void {
-		vk::try_execute<"[end_command_buffer] failed">(
-				::vkEndCommandBuffer,
-				___buffer);
-	}
+	//inline auto end_command_buffer(const vk::command_buffer& ___buffer) -> void {
+	//	vk::try_execute<"[end_command_buffer] failed">(
+	//			::vkEndCommandBuffer,
+	//			___buffer);
+	//}
 
-	/* cmd draw */
-	inline auto cmd_draw(const vk::command_buffer& ___buffer,
-						 const vk::u32 ___vertex_count,
-						 const vk::u32 ___instance_count,
-						 const vk::u32 ___first_vertex,
-						 const vk::u32 ___first_instance) noexcept -> void {
-		::vkCmdDraw(___buffer, ___vertex_count, ___instance_count, ___first_vertex, ___first_instance);
-	}
+	///* cmd draw */
+	//inline auto cmd_draw(const vk::command_buffer& ___buffer,
+	//					 const vk::u32 ___vertex_count,
+	//					 const vk::u32 ___instance_count,
+	//					 const vk::u32 ___first_vertex,
+	//					 const vk::u32 ___first_instance) noexcept -> void {
+	//	::vkCmdDraw(___buffer, ___vertex_count, ___instance_count, ___first_vertex, ___first_instance);
+	//}
 
 
 	/* cmd begin render pass */
-	inline auto cmd_begin_render_pass(const vk::command_buffer& ___buffer,
-									  const vk::render_pass_begin_info& ___info,
-									  const vk::subpass_contents& ___contents = VK_SUBPASS_CONTENTS_INLINE) noexcept -> void {
-		::vkCmdBeginRenderPass(___buffer, &___info, ___contents);
-	}
+	//inline auto cmd_begin_render_pass(const vk::command_buffer& ___buffer,
+	//								  const vk::render_pass_begin_info& ___info,
+	//								  const vk::subpass_contents& ___contents = VK_SUBPASS_CONTENTS_INLINE) noexcept -> void {
+	//	::vkCmdBeginRenderPass(___buffer, &___info, ___contents);
+	//}
 
 	/* cmd end render pass */
-	inline auto cmd_end_render_pass(const vk::command_buffer& ___buffer) noexcept -> void {
-		::vkCmdEndRenderPass(___buffer);
-	}
+	//inline auto cmd_end_render_pass(const vk::command_buffer& ___buffer) noexcept -> void {
+	//	::vkCmdEndRenderPass(___buffer);
+	//}
 
-
-	// -- pipeline ------------------------------------------------------------
-
-	/* cmd bind pipeline */
-	inline auto cmd_bind_pipeline(const vk::command_buffer& ___buffer,
-								  const vk::pipeline& ___pipeline,
-								  const vk::pipeline_bind_point& ___point) noexcept -> void {
-		::vkCmdBindPipeline(___buffer, ___point, ___pipeline);
-	}
 
 
 	// -- vertex buffers ------------------------------------------------------
@@ -405,69 +326,6 @@ namespace vk {
 										const vk::device_size* ___offsets) noexcept -> void {
 		::vkCmdBindVertexBuffers(___buffer, ___first_binding, ___binding_count, ___buffers, ___offsets);
 	}
-
-
-
-	// -- memory --------------------------------------------------------------
-
-	/* get buffer memory requirements */
-	inline auto get_buffer_memory_requirements(const vk::device& ___device,
-											   const vk::buffer& ___buffer) -> vk::memory_requirements {
-		vk::memory_requirements ___requirements;
-		::vkGetBufferMemoryRequirements(___device, ___buffer, &___requirements);
-		return ___requirements;
-	}
-
-	/* get physical device memory properties */
-	inline auto get_physical_device_memory_properties(const vk::physical_device& ___device) -> vk::physical_device_memory_properties {
-		vk::physical_device_memory_properties ___properties;
-		::vkGetPhysicalDeviceMemoryProperties(___device, &___properties);
-		return ___properties;
-	}
-
-	/* bind buffer memory */
-	inline auto bind_buffer_memory(const vk::device& ___dev,
-								   const vk::buffer& ___buf,
-								   const vk::device_memory& ___mem,
-								   const vk::device_size& ___sz = 0U) -> void {
-
-		vk::try_execute<"[vk::bind_buffer_memory] failed">(
-				::vkBindBufferMemory,
-				___dev, ___buf, ___mem, ___sz);
-	}
-
-	/* map memory */
-	inline auto map_memory(const vk::device& ___dev,
-						   const vk::device_memory& ___mem,
-						   const vk::device_size& ___offset,
-						   const vk::device_size& ___size) -> void* {
-
-		void* ___data;
-
-		vk::try_execute<"[vk::map_memory] failed">(
-				// function to execute
-				::vkMapMemory,
-				// logical device
-				___dev,
-				// device memory
-				___mem,
-				// offset
-				___offset,
-				// size
-				___size,
-				// flags (reserved for future use, not implemented yet by the Vulkan API)
-				0U,
-				// data pointer to store the mapped memory
-				&___data);
-
-		return ___data;
-	}
-
-	/* unmap memory */
-	inline auto unmap_memory(const vk::device& ___dev, const vk::device_memory& ___mem) noexcept -> void {
-		::vkUnmapMemory(___dev, ___mem);
-	}
-
 
 
 

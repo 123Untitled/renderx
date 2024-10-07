@@ -27,6 +27,9 @@
 namespace vk {
 
 
+	using u8 = ::uint8_t;
+	using u16 = ::uint16_t;
+
 	/* unsigned integer 32 type */
 	using u32 = ::uint32_t;
 
@@ -320,6 +323,9 @@ namespace vk {
 	/* fence info */
 	using fence_info                         = ::VkFenceCreateInfo;
 
+	/* fence create flags */
+	using fence_create_flags                 = ::VkFenceCreateFlags;
+
 
 	// -- image view ----------------------------------------------------------
 
@@ -397,6 +403,12 @@ namespace vk {
 	/* buffer info */
 	using buffer_info                        = ::VkBufferCreateInfo;
 
+	/* buffer usage flags */
+	using buffer_usage_flags                 = ::VkBufferUsageFlags;
+
+	/* sharing mode */
+	using sharing_mode                       = ::VkSharingMode;
+
 
 	// -- memory --------------------------------------------------------------
 
@@ -417,6 +429,9 @@ namespace vk {
 
 	/* memory map flags */
 	using memory_map_flags                   = ::VkMemoryMapFlags;
+
+	/* mapped memory range */
+	using mapped_memory_range                = ::VkMappedMemoryRange;
 
 
 
@@ -452,6 +467,9 @@ namespace vk {
 	/* format */
 	using format                             = ::VkFormat;
 
+	/* format properties */
+	using format_properties                  = ::VkFormatProperties;
+
 	/* extent2D */
 	using extent2D                           = ::VkExtent2D;
 
@@ -473,6 +491,274 @@ namespace vk {
 	using format_feature_flags               = ::VkFormatFeatureFlags;
 
 
+	// -- descriptor set layout -----------------------------------------------
+
+	/* descriptor set */
+	using descriptor_set                     = ::VkDescriptorSet;
+
+	/* descriptor set layout */
+	using descriptor_set_layout              = ::VkDescriptorSetLayout;
+
+	/* descriptor set layout binding */
+	using descriptor_set_layout_binding      = ::VkDescriptorSetLayoutBinding;
+
+	/* descriptor set layout info */
+	using descriptor_set_layout_info         = ::VkDescriptorSetLayoutCreateInfo;
+
+	/* descriptor set allocate info */
+	using descriptor_set_allocate_info       = ::VkDescriptorSetAllocateInfo;
+
+	/* descriptor buffer info */
+	using descriptor_buffer_info             = ::VkDescriptorBufferInfo;
+
+	/* write descriptor info */
+	using write_descriptor_set               = ::VkWriteDescriptorSet;
+
+
+	// -- descriptor pool -----------------------------------------------------
+
+	/* descriptor pool */
+	using descriptor_pool                    = ::VkDescriptorPool;
+
+	/* descriptor pool size */
+	using descriptor_pool_size               = ::VkDescriptorPoolSize;
+
+	/* descriptor pool info */
+	using descriptor_pool_info               = ::VkDescriptorPoolCreateInfo;
+
+	/* descriptor pool create flags */
+	using descriptor_pool_create_flags       = ::VkDescriptorPoolCreateFlags;
+
+
+	// -- push constant -------------------------------------------------------
+
+	/* push constant range */
+	using push_constant_range                = ::VkPushConstantRange;
+
+
+
+
+	// -- index ---------------------------------------------------------------
+
+	/* index type */
+	using index_type                         = ::VkIndexType;
+
+
 } // namespace vk
+
+
+
+
+
+// -- instance ----------------------------------------------------------------
+
+/* create instance */
+#define vk_create_instance vkCreateInstance
+
+/* destroy instance */
+#define vk_destroy_instance vkDestroyInstance
+
+/* get instance proc addr */
+#define vk_get_instance_proc_addr vkGetInstanceProcAddr
+
+
+// -- device ------------------------------------------------------------------
+
+/* create device */
+#define vk_create_device vkCreateDevice
+
+/* destroy device */
+#define vk_destroy_device vkDestroyDevice
+
+/* device wait idle */
+#define vk_device_wait_idle vkDeviceWaitIdle
+
+
+// -- swapchain ---------------------------------------------------------------
+
+/* create swapchain */
+#define vk_create_swapchain_khr vkCreateSwapchainKHR
+
+/* destroy swapchain */
+#define vk_destroy_swapchain_khr vkDestroySwapchainKHR
+
+
+// -- surface -----------------------------------------------------------------
+
+/* destroy surface khr */
+#define vk_destroy_surface_khr vkDestroySurfaceKHR
+
+/* get device queue */
+#define vk_get_device_queue vkGetDeviceQueue
+
+
+// -- command pool ------------------------------------------------------------
+
+/* create command pool */
+#define vk_create_command_pool vkCreateCommandPool
+
+/* destroy command pool */
+#define vk_destroy_command_pool vkDestroyCommandPool
+
+/* reset command pool */
+#define vk_reset_command_pool vkResetCommandPool
+
+/* trim command pool */
+#define vk_trim_command_pool vkTrimCommandPool
+
+
+// -- command buffer ----------------------------------------------------------
+
+/* allocate command buffers */
+#define vk_allocate_command_buffers vkAllocateCommandBuffers
+
+/* free command buffers */
+#define vk_free_command_buffers vkFreeCommandBuffers
+
+/* reset command buffer */
+#define vk_reset_command_buffer vkResetCommandBuffer
+
+/* begin command buffer */
+#define vk_begin_command_buffer vkBeginCommandBuffer
+
+/* cmd execute commands */
+#define vk_cmd_execute_commands vkCmdExecuteCommands
+
+/* end command buffer */
+#define vk_end_command_buffer vkEndCommandBuffer
+
+/* cmd begin render pass */
+#define vk_cmd_begin_render_pass vkCmdBeginRenderPass
+
+/* cmd end render pass */
+#define vk_cmd_end_render_pass vkCmdEndRenderPass
+
+/* cmd draw */
+#define vk_cmd_draw vkCmdDraw
+
+/* cmd draw indexed */
+#define vk_cmd_draw_indexed vkCmdDrawIndexed
+
+/* cmd bind pipeline */
+#define vk_cmd_bind_pipeline vkCmdBindPipeline
+
+/* cmd bind vertex buffers */
+#define vk_cmd_bind_vertex_buffers vkCmdBindVertexBuffers
+
+/* cmd bind index buffer */
+#define vk_cmd_bind_index_buffer vkCmdBindIndexBuffer
+
+/* cmd push constants */
+#define vk_cmd_push_constants vkCmdPushConstants
+
+/* cmd set viewport */
+#define vk_cmd_set_viewport vkCmdSetViewport
+
+/* cmd set scissor */
+#define vk_cmd_set_scissor vkCmdSetScissor
+
+
+// -- render pass -------------------------------------------------------------
+
+/* create render pass */
+#define vk_create_render_pass vkCreateRenderPass
+
+/* destroy render pass */
+#define vk_destroy_render_pass vkDestroyRenderPass
+
+
+// -- shader module -----------------------------------------------------------
+
+/* create shader module */
+#define vk_create_shader_module vkCreateShaderModule
+
+/* destroy shader module */
+#define vk_destroy_shader_module vkDestroyShaderModule
+
+
+// -- pipeline ----------------------------------------------------------------
+
+/* create pipeline */
+#define vk_create_graphics_pipelines vkCreateGraphicsPipelines
+
+/* destroy pipeline */
+#define vk_destroy_pipeline vkDestroyPipeline
+
+
+// -- pipeline layout ---------------------------------------------------------
+
+/* create pipeline layout */
+#define vk_create_pipeline_layout vkCreatePipelineLayout
+
+/* destroy pipeline layout */
+#define vk_destroy_pipeline_layout vkDestroyPipelineLayout
+
+
+// -- buffer ------------------------------------------------------------------
+
+/* create buffer */
+#define vk_create_buffer vkCreateBuffer
+
+/* destroy buffer */
+#define vk_destroy_buffer vkDestroyBuffer
+
+
+// -- device memory -----------------------------------------------------------
+
+/* allocate memory */
+#define vk_allocate_memory vkAllocateMemory
+
+/* free memory */
+#define vk_free_memory vkFreeMemory
+
+/* bind buffer memory */
+#define vk_bind_buffer_memory vkBindBufferMemory
+
+/* map memory */
+#define vk_map_memory vkMapMemory
+
+/* unmap memory */
+#define vk_unmap_memory vkUnmapMemory
+
+/* flush mapped memory ranges */
+#define vk_flush_mapped_memory_ranges vkFlushMappedMemoryRanges
+
+/* invalidate mapped memory ranges */
+#define vk_invalidate_mapped_memory_ranges vkInvalidateMappedMemoryRanges
+
+/* get buffer memory requirements */
+#define vk_get_buffer_memory_requirements vkGetBufferMemoryRequirements
+
+/* get physical device memory properties */
+#define vk_get_physical_device_memory_properties vkGetPhysicalDeviceMemoryProperties
+
+
+
+// -- fence -------------------------------------------------------------------
+
+/* create fence */
+#define vk_create_fence vkCreateFence
+
+/* destroy fence */
+#define vk_destroy_fence vkDestroyFence
+
+/* reset fences */
+#define vk_reset_fences vkResetFences
+
+/* wait for fences */
+#define vk_wait_for_fences vkWaitForFences
+
+
+// -- semaphore ---------------------------------------------------------------
+
+/* create semaphore */
+#define vk_create_semaphore vkCreateSemaphore
+
+/* destroy semaphore */
+#define vk_destroy_semaphore vkDestroySemaphore
+
+
+/* get physical device format properties */
+#define vk_get_physical_device_format_properties vkGetPhysicalDeviceFormatProperties
 
 #endif // ENGINE_VK_TYPEDEFS_HEADER

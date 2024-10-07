@@ -9,22 +9,36 @@
 
 #include "engine/os.hpp"
 
-// -- public lifecycle --------------------------------------------------------
 
-/* physical device and surface constructor */
-vulkan::device::device(const vulkan::surface& surface)
-: _ldevice{}, _pdevice{}, _family{0}, _priority{1.0f} {
+
+// -- private static methods --------------------------------------------------
+
+/* shared */
+auto vulkan::device::_shared(void) -> ___self& {
+	static ___self ___ins{};
+	return ___ins;
+}
+
+
+// -- private lifecycle -------------------------------------------------------
+
+/* default constructor */
+vulkan::device::device(void)
+: _ldevice{nullptr},
+  _pdevice{nullptr},
+  _family{0U}, _priority{1.0f} {
+
+	// get surface
+	auto& surface = vulkan::surface::shared();
 
 	// pick physical device
-	_pdevice = self::pick_physical_device(surface);
+	_pdevice = ___self::_pick_physical_device(surface);
 
 	// get queue family index
 	_family  = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
-	float prio = 1.0f;
-
 	// create device queue info
-	const auto queue_info = vulkan::queue::info(_family, prio);
+	const auto queue_info = vulkan::queue::info(_family, _priority);
 
 	// get physical device features
 	const auto features = _pdevice.features();
@@ -32,6 +46,7 @@ vulkan::device::device(const vulkan::surface& surface)
 	// setup extensions
 	constexpr vk::array extensions {
 		"VK_KHR_swapchain",
+		//"VK_KHR_index_type_uint8",
 		#if defined(ENGINE_OS_MACOS)
 		"VK_KHR_portability_subset"
 		#endif
@@ -42,8 +57,15 @@ vulkan::device::device(const vulkan::surface& surface)
 	constexpr auto layers = vulkan::validation_layers::layers();
 	#endif
 
-	// create device
-	_ldevice = vk::make_shared(_pdevice, vk::device_info{
+
+	//VkPhysicalDeviceIndexTypeUint8FeaturesEXT index_type_uint8_features {
+	//	.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT,
+	//	.pNext = nullptr,
+	//	.indexTypeUint8 = VK_TRUE
+	//};
+
+	// device info
+	const vk::device_info info {
 		// structure type
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		// next structure
@@ -71,59 +93,58 @@ vulkan::device::device(const vulkan::surface& surface)
 		.ppEnabledExtensionNames = extensions.data(),
 		// enabled features
 		.pEnabledFeatures        = &features
-	});
+	};
 
+	// create logical device
+	vk::try_execute<"failed to create device">(
+			::vk_create_device, _pdevice, &info, nullptr, &_ldevice);
+}
+
+/* destructor */
+vulkan::device::~device(void) noexcept {
+
+	// release logical device
+	::vk_destroy_device(_ldevice, nullptr);
 }
 
 
-// -- public conversion operators ---------------------------------------------
+// -- public static accessors -------------------------------------------------
 
-/* vk::device conversion operator */
-vulkan::device::operator const vk::device&(void) const noexcept {
-	return _ldevice;
+/* logical */
+auto vulkan::device::logical(void) noexcept -> const vk::device& {
+	return ___self::_shared()._ldevice;
 }
 
-/* vk::shared<vk::device> conversion operator */
-vulkan::device::operator const vk::shared<vk::device>&(void) const noexcept {
-	return _ldevice;
-}
-
-
-// -- public accessors --------------------------------------------------------
-
-/* physical device */
-auto vulkan::device::physical_device(void) const noexcept -> const vulkan::physical_device& {
-	return _pdevice;
+/* physical */
+auto vulkan::device::physical(void) noexcept -> const vulkan::physical_device& {
+	return ___self::_shared()._pdevice;
 }
 
 /* queue family */
-auto vulkan::device::family(void) const noexcept -> const vk::u32& {
-	return _family;
-}
-
-/* shared */
-auto vulkan::device::shared(void) const noexcept -> const vk::shared<vk::device>& {
-	return _ldevice;
-}
-
-/* handle */
-auto vulkan::device::handle(void) const noexcept -> const vk::device& {
-	return _ldevice;
+auto vulkan::device::family(void) noexcept -> const vk::u32& {
+	return ___self::_shared()._family;
 }
 
 
-// -- public methods ----------------------------------------------------------
+// -- public static methods ---------------------------------------------------
 
 /* wait idle */
-auto vulkan::device::wait_idle(void) const -> void {
-	vk::device_wait_idle(_ldevice);
+auto vulkan::device::wait_idle(void) -> void {
+
+	// wait idle
+	vk::try_execute<"failed to wait idle">(
+				::vk_device_wait_idle,
+				___self::_shared()._ldevice);
+
+	// warning:
+	// this function must not be called from a destructor
 }
 
 
 // -- private static methods --------------------------------------------------
 
 /* pick physical device */
-auto vulkan::device::pick_physical_device(const vulkan::surface& surface) -> vulkan::physical_device {
+auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan::physical_device {
 
 	// get physical devices
 	const auto& pdevices = vulkan::instance::physical_devices();
@@ -134,6 +155,8 @@ auto vulkan::device::pick_physical_device(const vulkan::surface& surface) -> vul
 		auto capabilities = pdevice.surface_capabilities(surface);
 		auto properties   = pdevice.properties();
 		auto features     = pdevice.features();
+
+		// check if physical device supports 8-bit indices
 
 		if (pdevice.supports_swapchain()          == true
 		&&  pdevice.have_surface_formats(surface) == true

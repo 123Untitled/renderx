@@ -8,10 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_RENDERER_HEADER
-#define ENGINE_RENDERER_HEADER
+#ifndef ___ENGINE_RENDERER___
+#define ___ENGINE_RENDERER___
 
 #include <vulkan/vulkan.h>
 
@@ -24,8 +22,6 @@
 #include "engine/vulkan/pipeline.hpp"
 #include "engine/vulkan/commands.hpp"
 #include "engine/vulkan/queue.hpp"
-#include "engine/glfw/events.hpp"
-#include "engine/glfw/window.hpp"
 
 #include "shader_library.hpp"
 
@@ -33,9 +29,20 @@
 #include "engine/vertex/vertex.hpp"
 #include "engine/vertex/position.hpp"
 
+#include "engine/vulkan/device_memory.hpp"
+#include "engine/vulkan/memory_buffer.hpp"
+#include "engine/vulkan/sync.hpp"
+
+#include "renderx/vulkan/allocator.hpp"
+#include "renderx/vulkan/index_buffer.hpp"
+#include "renderx/vulkan/vertex_buffer.hpp"
+#include "renderx/shapes/cuboid.hpp"
+#include "renderx/mesh.hpp"
+#include "renderx/object.hpp"
+
 
 // to be removed !
-using vertex_type = engine::vertex<vx::float2,
+using vertex_type = engine::vertex<vx::float3,
 								   vx::float3>;
 
 
@@ -50,62 +57,15 @@ namespace engine {
 	class renderer final {
 
 
-		public:
-
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = engine::renderer;
-
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			renderer(void);
-
-			/* deleted copy constructor */
-			renderer(const self&) = delete;
-
-			/* deleted move constructor */
-			renderer(self&&) noexcept = delete;
-
-			/* destructor */
-			~renderer(void) noexcept = default;
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
-
-			/* deleted move assignment operator */
-			auto operator=(self&&) noexcept -> self& = delete;
-
-
-			// -- public methods ----------------------------------------------
-
-			/* draw frame */
-			auto draw_frame(void) -> void;
-
-			/* launch */
-			auto launch(void) -> void;
-
-
 		private:
 
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = engine::renderer;
+
+
 			// -- private members ---------------------------------------------
-
-			/* window */
-			glfw::window _window;
-
-			/* gflw events */
-			glfw::events _events;
-
-			/* surface */
-			vulkan::surface _surface;
-
-			/* device */
-			vulkan::device _device;
 
 			/* queue */
 			vulkan::queue _queue;
@@ -114,44 +74,70 @@ namespace engine {
 			vulkan::swapchain _swapchain;
 
 			/* command pool */
-			vulkan::command_pool<vk::void_bit> _pool;
+			vulkan::command_pool _pool;
 
-			/* command buffers */
+			///* command buffers */
 			vulkan::commands<vulkan::primary> _cmds;
 
-			/* image available semaphore */
-			vulkan::semaphore _image_available;
-
-			/* render finished semaphore */
-			vulkan::semaphore _render_finished;
 
 			/* shader library */
 			shader_library _shaders;
 
+
 			/* pipeline */
 			vulkan::pipeline _pipeline;
-
-
-			/* buffer */
-			vulkan::buffer _buffer;
 
 			/* device memory */
 			vulkan::device_memory _memory;
 
-			/* vertices */
-			vk::vector<vertex_type> _vertices;
+			/* sync */
+			vulkan::sync<3U> _sync;
 
-			/* fence */
-			vulkan::fence _fence;
+			/* mesh */
+			xns::vector<rx::mesh> _meshes;
+
+			/* objects */
+			vk::vector<rx::object> _objects;
+
+			vulkan::allocator<vulkan::cpu_coherent> _allocator;
 
 
+		public:
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			renderer(void);
+
+			/* deleted copy constructor */
+			renderer(const ___self&) = delete;
+
+			/* deleted move constructor */
+			renderer(___self&&) noexcept = delete;
+
+			/* destructor */
+			~renderer(void) noexcept = default;
 
 
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(___self&&) noexcept -> ___self& = delete;
 
 
+			// -- public methods ----------------------------------------------
+
+			/* draw frame */
+			auto draw_frame(void) -> void;
+
+			/* run */
+			auto run(void) -> void;
 
 	}; // class renderer
 
 } // namespace engine
 
-#endif // ENGINE_RENDERER_HEADER
+#endif // ___ENGINE_RENDERER___

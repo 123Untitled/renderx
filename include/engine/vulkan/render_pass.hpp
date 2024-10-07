@@ -8,25 +8,15 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef ENGINE_VULKAN_RENDERPASS_HEADER
-#define ENGINE_VULKAN_RENDERPASS_HEADER
-
-// vulkan headers
-#include <vulkan/vulkan.h>
+#ifndef ___ENGINE_VULKAN_RENDERPASS___
+#define ___ENGINE_VULKAN_RENDERPASS___
 
 #include "engine/vk/typedefs.hpp"
-#include "engine/vk/shared.hpp"
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
-
-
-	// -- forward declarations ------------------------------------------------
-
-	/* device */
-	class device;
 
 
 	// -- R E N D E R  P A S S ------------------------------------------------
@@ -45,7 +35,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* render pass */
-			vk::shared<vk::render_pass> _render_pass;
+			vk::render_pass _render_pass;
 
 
 		public:
@@ -53,37 +43,31 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			render_pass(void) noexcept = default;
+			render_pass(void);
 
-			/* logical device constructor */
-			render_pass(const vulkan::device&);
-
-			/* copy constructor */
-			render_pass(const ___self&) noexcept = default;
+			/* deleted copy constructor */
+			render_pass(const ___self&) = delete;
 
 			/* move constructor */
-			render_pass(___self&&) noexcept = default;
+			render_pass(___self&&) noexcept;
 
 			/* destructor */
-			~render_pass(void) noexcept = default;
+			~render_pass(void) noexcept;
 
 
 			// -- public assignment operators ---------------------------------
 
-			/* copy assignment operator */
-			auto operator=(const ___self&) noexcept -> ___self& = default;
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
+			auto operator=(___self&&) noexcept -> ___self&;
 
 
-			// -- public conversion operators ---------------------------------
+			// -- public accessors --------------------------------------------
 
-			/* underlying conversion operator */
-			operator const vk::render_pass&(void) const noexcept;
-
-			/* shared conversion operator */
-			operator const vk::shared<vk::render_pass>&(void) const noexcept;
+			/* underlying */
+			auto underlying(void) const noexcept -> const vk::render_pass&;
 
 
 		private:
@@ -91,10 +75,10 @@ namespace vulkan {
 			// -- private static methods --------------------------------------
 
 			/* create render pass */
-			static auto _create_render_pass(const vulkan::device&) -> vk::shared<vk::render_pass>;
+			static auto _create_render_pass(void) -> vk::render_pass;
 
 	}; // class render_pass
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_RENDERPASS_HEADER
+#endif // ___ENGINE_VULKAN_RENDERPASS___

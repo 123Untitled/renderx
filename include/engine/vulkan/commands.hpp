@@ -8,15 +8,16 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_VULKAN_COMMANDS_HEADER
-#define ENGINE_VULKAN_COMMANDS_HEADER
+#ifndef ___ENGINE_VULKAN_COMMANDS___
+#define ___ENGINE_VULKAN_COMMANDS___
 
 #include "engine/vk/typedefs.hpp"
-#include "engine/vk/shared.hpp"
+#include "engine/vulkan/device.hpp"
 #include "engine/vk/exception.hpp"
-#include <xns/malloc.hpp>
+#include "engine/vk/utils.hpp"
+
+#include "renderx/memory/malloc.hpp"
+#include "renderx/memory/memcpy.hpp"
 
 
 
@@ -31,11 +32,10 @@ namespace vulkan {
 }
 
 
-//#include "vulkan/command_buffer.hpp"
-
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
+
 
 	// -- level types ---------------------------------------------------------
 
@@ -48,31 +48,37 @@ namespace vulkan {
 
 	// -- I S  L E V E L ------------------------------------------------------
 
-	template <typename T>
-	concept is_level = xns::is_same<T, primary> || std::same_as<T, secondary>;
+	template <typename ___type>
+	concept is_level = xns::same_as<___type, primary> || xns::same_as<___type, secondary>;
 
 
 	// -- C O M M A N D S -----------------------------------------------------
 
-	template <typename T>
+	template <typename ___type>
 	class commands final {
 
 
 		// -- assertions ------------------------------------------------------
 
 		/* check if T is a valid level type */
-		static_assert(vulkan::is_level<T>, "commands: invalid level type");
+		static_assert(vulkan::is_level<___type>, "commands: invalid level type");
+
+
+		private:
+
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = vulkan::commands<___type>;
 
 
 		public:
 
 			// -- public types ------------------------------------------------
 
-			/* self type */
-			using self       = vulkan::commands<T>;
 
 			/* level type */
-			using level_type = T;
+			using level_type = ___type;
 
 			/* size type */
 			using size_type  = vk::u32;
@@ -90,12 +96,32 @@ namespace vulkan {
 			using const_ptr  = const vk::command_buffer*;
 
 
+		private:
+
+			// -- private members ---------------------------------------------
+
+			/* pool */
+			vk::command_pool _pool;
+
+			/* data */
+			vk::command_buffer* _data;
+
+			/* size */
+			size_type _size;
+
+			/* capacity */
+			size_type _capacity;
+
+
+
+		public:
+
 
 			// -- public static methods ---------------------------------------
 
 			/* level */
 			static constexpr auto level(void) noexcept -> vk::command_buffer_level {
-				if constexpr (xns::is_same<T, primary>)
+				if constexpr (xns::is_same<___type, primary>)
 					return VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 				else
 					return VK_COMMAND_BUFFER_LEVEL_SECONDARY;
@@ -108,96 +134,90 @@ namespace vulkan {
 			commands(void) = delete;
 
 			/* command pool constructor */
-			commands(const vk::shared<vk::command_pool>& pool) noexcept
-			: _data{nullptr}, _size{0U}, _capacity{0U}, _pool{pool} {
+			commands(const vk::command_pool& ___pool) noexcept
+			: _pool{___pool}, _data{nullptr}, _size{0U}, _capacity{0U} {
 			}
 
 			/* command buffer constructor */
-			commands(const vk::shared<vk::command_pool>& pool, const size_type& size)
-			: _data{nullptr}, _size{size}, _capacity{size}, _pool{pool} {
+			commands(const vk::command_pool& ___pool, const size_type& ___sz)
+			: _pool{___pool}, _data{nullptr}, _size{___sz}, _capacity{___sz} {
+
+				// check if size is zero
+				if (_size == 0U)
+					return;
 
 				// allocate memory
-				_data = self::__allocate(size);
+				_data = rx::malloc<vk::command_buffer>(_size);
 
-				// check if allocation failed
-				if (_data == nullptr)
-					throw vk::exception("failed to allocate memory for vector");
+				// here need exception guard !
 
-				try {
+				// create info
+				const vk::command_buffer_info info {
+					// type of structure
+					.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+					// pointer to next structure
+					.pNext              = nullptr,
+					// command pool from which buffers are allocated
+					.commandPool        = _pool,
+					// level of command buffer
+					.level              = ___self::level(),
+					// number of command buffers to allocate
+					.commandBufferCount = _size
+				};
 
-					const vk::command_buffer_info info {
-						// type of structure
-						.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-						// pointer to next structure
-						.pNext              = nullptr,
-						// command pool from which buffers are allocated
-						.commandPool        = _pool,
-						// level of command buffer
-						.level              = self::level(),
-						// number of command buffers to allocate
-						.commandBufferCount = size
-					};
-
-					// create objects
-					_data = vk::create(_pool.dependency(), _data, info);
-				}
-				catch (const vk::exception& except) {
-					// deallocate memory
-					self::__deallocate(_data);
-					// rethrow exception
-					throw except;
-				}
-
+				// allocate command buffers
+				vk::try_execute<"failed to allocate command buffers">(
+						::vk_allocate_command_buffers,
+						vulkan::device::logical(), &info, _data);
 			}
 
 			/* deleted copy constructor */
-			commands(const self&) = delete;
+			commands(const ___self&) = delete;
 
 			/* move constructor */
-			commands(self&& other) noexcept
-			: _data{other._data}, _size{other._size}, _capacity{other._capacity},
-			  _pool{std::move(other._pool)} {
+			commands(___self&& ___ot) noexcept
+			: _pool{___ot._pool}, _data{___ot._data}, _size{___ot._size}, _capacity{___ot._capacity} {
+
 				// invalidate other
-				other.__init();
+				___ot._init();
 			}
 
 			/* destructor */
 			~commands(void) noexcept {
 
 				// destroy objects
-				__clear();
+				___self::_clear();
 
 				// deallocate memory
-				self::__deallocate(_data);
+				___self::_deallocate();
 			}
 
 
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
+			auto operator=(___self&& other) noexcept -> ___self& {
 
 				// check for self-assignment
 				if (this == &other)
 					return *this;
 
-				// destroy objects
-				__clear();
+				// release command buffers
+				___self::_clear();
 
 				// deallocate memory
-				self::__deallocate(_data);
+				___self::_deallocate();
 
 				// move data
 				_data     = other._data;
 				_size     = other._size;
 				_capacity = other._capacity;
-				_pool     = std::move(other._pool);
 
 				// invalidate other
-				other.__init();
+				other._init();
 
 				return *this;
 			}
@@ -229,13 +249,13 @@ namespace vulkan {
 			// -- public subscript operators ----------------------------------
 
 			/* subscript operator */
-			auto operator[](const size_type index) noexcept -> mut_ref {
-				return reinterpret_cast<mut_ref>(*(_data + index));
+			auto operator[](const size_type ___idx) noexcept -> mut_ref {
+				return reinterpret_cast<mut_ref>(*(_data + ___idx));
 			}
 
 			/* const subscript operator */
-			auto operator[](const size_type index) const noexcept -> const_ref {
-				return reinterpret_cast<const_ref>(*(_data + index));
+			auto operator[](const size_type ___idx) const noexcept -> const_ref {
+				return reinterpret_cast<const_ref>(*(_data + ___idx));
 			}
 
 
@@ -245,9 +265,9 @@ namespace vulkan {
 			auto emplace_back(void) -> void {
 
 				// check if capacity is reached
-				if (__available() == 0U)
+				if (___self::_available() == 0U)
 					// expand capacity
-					__reserve(__expand());
+					___self::_reserve(___self::_expand());
 
 				// create info object
 				const vk::command_buffer_info info {
@@ -258,13 +278,15 @@ namespace vulkan {
 					// command pool from which buffers are allocated
 					.commandPool        = _pool,
 					// level of command buffer
-					.level              = self::level(),
+					.level              = ___self::level(),
 					// number of command buffers to allocate
 					.commandBufferCount = 1U
 				};
 
-				// construct object
-				_data[_size] = vk::create(_pool.dependency(), info);
+				// create command buffer
+				vk::try_execute<"failed to allocate command buffer">(
+						::vk_allocate_command_buffers,
+						vulkan::device::logical(), &info, _data + _size);
 
 				// increment size
 				++_size;
@@ -272,109 +294,82 @@ namespace vulkan {
 
 			/* clear */
 			auto clear(void) noexcept -> void {
+
 				// destroy objects
-				__clear();
+				___self::_clear();
+
 				// reset size
 				_size = 0U;
 			}
 
 			/* reserve */
-			auto reserve(const size_type size) -> void {
+			auto reserve(const size_type ___sz) -> void {
+
 				// check if capacity is sufficient
-				if (size <= _capacity)
+				if (___sz <= _capacity)
 					return;
+
 				// call reserve implementation
-				__reserve(size);
+				___self::_reserve(___sz);
 			}
 
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* allocate */
-			inline static auto __allocate(const size_type size) noexcept -> vk::command_buffer* {
-				// allocate memory
-				return xns::malloc<vk::command_buffer>(size);
-			}
-
-			/* deallocate */
-			inline static auto __deallocate(vk::command_buffer* ptr) noexcept -> void {
-				// check if pointer is null
-				if (ptr == nullptr)
-					return;
-				// deallocate memory
-				xns::free(ptr);
-			}
-
-
 			// -- private methods ---------------------------------------------
 
 			/* init */
-			inline auto __init(void) noexcept -> void {
+			auto _init(void) noexcept -> void {
 				_data     = nullptr;
 				_size     = 0U;
 				_capacity = 0U;
 			}
 
-			/* available */
-			inline auto __available(void) const noexcept -> size_type {
-				return _capacity - _size;
+			/* deallocate */
+			auto _deallocate(void) const noexcept -> void {
+
+				// check if pointer is null
+				if (_data == nullptr)
+					return;
+
+				// deallocate memory
+				rx::free(_data);
 			}
 
 			/* clear */
-			inline auto __clear(void) const noexcept -> void {
+			auto _clear(void) const noexcept -> void {
 
 				if (_size == 0U)
 					return;
 
-				vk::destroy(_pool.dependency(), _pool, _data, _size);
+				// release command buffers
+				::vk_free_command_buffers(vulkan::device::logical(),
+						_pool, _size, _data);
 			}
 
-			/* reserve */
-			auto __reserve(const size_type capacity) -> void {
-
-				// allocate new memory [maybe use realloc here instead ?]
-				auto data = self::__allocate(capacity);
-
-				// check if allocation failed
-				if (data == nullptr)
-					throw vk::exception("failed to allocate memory for vector");
-
-				// copy objects
-				__builtin_memcpy(data, _data, _size * sizeof(vk::command_buffer));
-
-				// deallocate old memory
-				self::__deallocate(_data);
-
-				// update data
-				_data     = data;
-				_capacity = capacity;
+			/* available */
+			auto _available(void) const noexcept -> size_type {
+				return _capacity - _size;
 			}
 
 			/* expand */
-			inline auto __expand(void) const noexcept -> size_type {
-				return _capacity == 0U ? 1U : _capacity * 2U;
+			auto _expand(void) const noexcept -> size_type {
+				return _capacity == 0U ? 1U : _capacity << 1U;
 			}
 
+			/* reserve */
+			auto _reserve(const size_type ___cap) -> void {
 
-			// -- private members ---------------------------------------------
+				// reallocate memory
+				const auto ___ndata = rx::realloc<vk::command_buffer>(_data, ___cap);
 
-			/* data */
-			vk::command_buffer* _data;
-
-			/* size */
-			size_type _size;
-
-			/* capacity */
-			size_type _capacity;
-
-			/* dependency */
-			vk::shared<vk::command_pool> _pool;
-
+				// update members
+				_data     = ___ndata;
+				_capacity = ___cap;
+			}
 
 	}; // class commands
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_COMMANDS_HEADER
+#endif // ___ENGINE_VULKAN_COMMANDS___

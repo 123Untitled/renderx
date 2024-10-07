@@ -8,18 +8,22 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
+#ifndef ___ENGINE_VK_VECTOR___
+#define ___ENGINE_VK_VECTOR___
 
-#ifndef ENGINE_VK_VECTOR_HEADER
-#define ENGINE_VK_VECTOR_HEADER
+//#include "engine/vk/typedefs.hpp"
+//#include "engine/vk/exception.hpp"
 
-#include "engine/vk/typedefs.hpp"
-#include "engine/vk/exception.hpp"
 #include "engine/vk/create.hpp"
 #include "engine/vk/destroy.hpp"
-#include "engine/vk/shared.hpp"
 
-#include <xns/malloc.hpp>
+//#include "engine/vk/shared.hpp"
+//#include "engine/vk/dependency_type.hpp"
+
+#include "engine/vulkan/device.hpp"
+
+#include "renderx/memory/memcpy.hpp"
+#include "renderx/memory/malloc.hpp"
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -29,113 +33,122 @@ namespace vk {
 
 	// -- V E C T O R ---------------------------------------------------------
 
-	template <typename T>
+	template <typename ___type>
 	class vvector final {
 
 
-		// -- assertions ------------------------------------------------------
+		private:
 
-		/* check if T is a opaque handle */
-		static_assert(sizeof(T) == sizeof(void*), "T must be an opaque handle");
+			// -- private types -----------------------------------------------
 
-		/* check if T is trivially copyable */
-		static_assert(std::is_trivially_copyable<T>::value, "T must be trivially copyable");
+			/* self type */
+			using ___self = vk::vvector<___type>;
 
 
 		public:
 
 			// -- public types ------------------------------------------------
 
-			/* self type */
-			using self       = vk::vvector<T>;
-
 			/* value type */
-			using value_type = T;
+			using value_type      = ___type;
 
-			/* mutable reference type */
-			using mut_ref    = value_type&;
+			/* reference type */
+			using reference       = value_type&;
 
-			/* constant reference type */
-			using const_ref  = const value_type&;
+			/* const reference type */
+			using const_reference = const value_type&;
 
-			/* mutable pointer type */
-			using mut_ptr    = value_type*;
+			/* pointer type */
+			using pointer         = value_type*;
 
-			/* constant pointer type */
-			using const_ptr  = const value_type*;
+			/* const pointer type */
+			using const_pointer   = const value_type*;
 
 			/* size type */
-			using size_type  = vk::u32;
+			using size_type       = vk::u32;
 
-			/* dependency type */
-			using dep_type   = xns::conditional<vk::is_destroyable<T, vk::instance>, vk::instance,
-							   xns::conditional<vk::is_destroyable<T, vk::device>, vk::device, void>>;
 
+		private:
+
+			// -- private members ---------------------------------------------
+
+			/* data */
+			pointer _data;
+
+			/* size */
+			size_type _size;
+
+			/* capacity */
+			size_type _capacity;
+
+
+		public:
 
 			// -- public lifecycle --------------------------------------------
 
 			/* deleted default constructor */
-			vvector(void) = delete;
-
-			/* dependency constructor */
-			vvector(const vk::shared<dep_type>& dependency)
-			: _data{nullptr}, _size{0U}, _capacity{0U}, _dependency{dependency} {
+			vvector(void) noexcept
+			: _data{nullptr}, _size{0U}, _capacity{0U} {
 			}
 
 			/* deleted copy constructor */
-			vvector(const self&) = delete;
+			vvector(const ___self&) = delete;
 
 			/* move constructor */
-			vvector(self&& other) noexcept
-			: _data{other._data}, _size{other._size}, _capacity{other._capacity},
-			  _dependency{std::move(other._dependency)} {
+			vvector(___self&& ___ot) noexcept
+			: _data{___ot._data}, _size{___ot._size}, _capacity{___ot._capacity} {
+
 				// invalidate other
-				other.__init();
+				___ot._init();
 			}
 
 			/* destructor */
 			~vvector(void) noexcept {
 
 				// destroy objects
-				__clear();
+				___self::_clear();
 
 				// deallocate memory
-				self::__deallocate(_data);
+				___self::_deallocate();
 			}
 
 
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
+			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&& other) noexcept -> self& {
+			auto operator=(___self&& other) noexcept -> ___self& {
 
 				// check for self-assignment
 				if (this == &other)
 					return *this;
 
 				// destroy objects
-				__clear();
+				___self::_clear();
 
 				// deallocate memory
-				self::__deallocate(_data);
+				___self::_deallocate();
 
 				// move data
 				_data       = other._data;
 				_size       = other._size;
 				_capacity   = other._capacity;
-				_dependency = std::move(other._dependency);
 
 				// invalidate other
-				other.__init();
+				other._init();
 
 				return *this;
 			}
 
 
 			// -- public accessors --------------------------------------------
+
+			/* empty */
+			auto empty(void) const noexcept -> bool {
+				return _size == 0U;
+			}
 
 			/* size */
 			auto size(void) const noexcept -> size_type {
@@ -148,12 +161,12 @@ namespace vk {
 			}
 
 			/* data */
-			auto data(void) noexcept -> mut_ptr {
+			auto data(void) noexcept -> pointer {
 				return _data;
 			}
 
 			/* data */
-			auto data(void) const noexcept -> const_ptr {
+			auto data(void) const noexcept -> const_pointer {
 				return _data;
 			}
 
@@ -161,12 +174,12 @@ namespace vk {
 			// -- public subscript operators ----------------------------------
 
 			/* subscript operator */
-			auto operator[](const size_type index) noexcept -> mut_ref {
+			auto operator[](const size_type index) noexcept -> reference {
 				return _data[index];
 			}
 
 			/* const subscript operator */
-			auto operator[](const size_type index) const noexcept -> const_ref {
+			auto operator[](const size_type index) const noexcept -> const_reference {
 				return _data[index];
 			}
 
@@ -176,13 +189,16 @@ namespace vk {
 			/* emplace back */
 			template <typename... __params>
 			auto emplace_back(__params&&... params) -> void {
+
 				// check if capacity is reached
-				if (__available() == 0U)
+				if (___self::_available() == 0U)
+
 					// expand capacity
-					__reserve(__expand());
+					___self::_reserve(___self::_expand());
 
 				// construct object
-				_data[_size] = vk::create(_dependency, std::forward<__params>(params)...);
+				_data[_size] = vk::create(vulkan::device::logical(),
+										  std::forward<__params>(params)...);
 
 				// increment size
 				++_size;
@@ -190,108 +206,82 @@ namespace vk {
 
 			/* clear */
 			auto clear(void) noexcept -> void {
+
 				// destroy objects
-				__clear();
+				___self::_clear();
+
 				// reset size
 				_size = 0U;
 			}
 
 			/* reserve */
 			auto reserve(const size_type size) -> void {
+
 				// check if capacity is sufficient
 				if (size <= _capacity)
 					return;
+
 				// call reserve implementation
-				__reserve(size);
+				___self::_reserve(size);
 			}
 
 
 		private:
 
-			// -- private static methods --------------------------------------
-
-			/* allocate */
-			inline static auto __allocate(const size_type size) -> mut_ptr {
-				// allocate memory
-				return xns::malloc<value_type>(size);
-			}
-
-			/* deallocate */
-			inline static auto __deallocate(mut_ptr ptr) -> void {
-				// check if pointer is null
-				if (ptr == nullptr)
-					return;
-				// deallocate memory
-				xns::free(ptr);
-			}
-
-
 			// -- private methods ---------------------------------------------
 
 			/* init */
-			inline auto __init(void) noexcept {
+			auto _init(void) noexcept {
 				_data     = nullptr;
 				_size     = 0U;
 				_capacity = 0U;
 			}
 
 			/* available */
-			inline auto __available(void) const noexcept -> size_type {
+			auto _available(void) const noexcept -> size_type {
 				return _capacity - _size;
 			}
 
 			/* clear */
-			inline auto __clear(void) const noexcept -> void {
+			auto _clear(void) const noexcept -> void {
+
+				// get end pointer
+				pointer end = _data + _size;
 
 				// loop over objects
-				for (size_type i = 0U; i < _size; ++i)
-					vk::destroy(_dependency, _data[i]);
+				for (pointer it = _data; it != end; ++it)
+					vk::destroy(vulkan::device::logical(), *it);
 			}
 
 			/* reserve */
-			auto __reserve(const size_type capacity) -> void {
+			auto _reserve(const size_type ___cap) -> void {
 
 				// allocate new memory
-				mut_ptr data = self::__allocate(capacity);
-
-				// check if allocation failed
-				if (data == nullptr)
-					throw vk::exception("failed to allocate memory for vector");
-
-				// copy objects
-				__builtin_memcpy(data, _data, _size * sizeof(value_type));
-
-				// deallocate old memory
-				self::__deallocate(_data);
+				pointer ___ndata = rx::realloc<value_type>(_data, ___cap);
 
 				// update data
-				_data     = data;
-				_capacity = capacity;
+				_data     = ___ndata;
+				_capacity = ___cap;
+			}
+
+			/* deallocate */
+			auto _deallocate(void) noexcept -> void {
+
+				// check if pointer is null
+				if (_data == nullptr)
+					return;
+
+				// deallocate memory
+				rx::free(_data);
 			}
 
 			/* expand */
-			inline auto __expand(void) const noexcept -> size_type {
+			auto _expand(void) const noexcept -> size_type {
 				return _capacity == 0U ? 1U : _capacity * 2U;
 			}
-
-
-
-			// -- private members ---------------------------------------------
-
-			/* data */
-			mut_ptr _data;
-
-			/* size */
-			size_type _size;
-
-			/* capacity */
-			size_type _capacity;
-
-			/* dependency */
-			vk::shared<dep_type> _dependency;
 
 	}; // class vector
 
 } // namespace vk
 
-#endif // ENGINE_VK_VECTOR_HEADER
+#endif // ___ENGINE_VK_VECTOR___

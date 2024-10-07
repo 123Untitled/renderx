@@ -10,6 +10,63 @@
 
 #include "engine/renderer.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "renderx/running.hpp"
+
+#include "renderx/shapes/cuboid.hpp"
+
+#include "renderx/sdl/events.hpp"
+
+
+auto make_projection(void) noexcept -> glm::mat4 {
+
+	float fov = 105.0f;
+	float ratio = rx::sdl::window::width() / rx::sdl::window::height();
+
+	const float near = 0.1f;
+	const float far = 1000.0f;
+
+
+	const float ys = 1 / std::tan(((fov / 180.0f) * M_PI) * 0.5f);
+	const float xs = ys / ratio;
+	const float zs = far / (near - far);
+	const float zt = zs * near;
+
+	glm::mat4 projection {
+		{+xs,   0,   0,   0},
+		{  0, +ys,   0,   0},
+		{  0,   0, -zs,   1},
+		{  0,   0,  zt,   0}
+	};
+
+	return projection;
+}
+
+struct type_matrix {
+	glm::mat4 matrix;
+};
+
+static type_matrix model {
+	.matrix = glm::mat4(1.0f)
+};
+
+static type_matrix proj {
+	//.matrix = glm::perspective(glm::radians(45.0f),
+	//		(float)rx::sdl::window::width() / (float)rx::sdl::window::height(),
+	//		0.1f, 1000.0f)
+	.matrix = make_projection()
+};
+
+static type_matrix const_matrix {
+	.matrix = glm::mat4(1.0f)
+};
+
+// view matrix (backwards 10 units)
+static type_matrix view {
+	.matrix = glm::mat4(1.0f)
+};
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -17,86 +74,114 @@
 /* default constructor */
 engine::renderer::renderer(void)
 :
-	_window{800, 600},
-	_events{},
-	_surface{_window},
-	_device{_surface},
-	_queue{_device},
-	_swapchain{_device, _surface},
-	_pool{_device, _device.family()},
-	_cmds{_pool, _swapchain.size()},
-	_image_available{_device},
-	_render_finished{_device},
-	_shaders{_device},
+	//_events{},
+	_queue{},
+	_swapchain{},
+	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
+	_cmds{_pool.underlying(), _swapchain.size()},
+	_shaders{},
 	
 	_pipeline{
 		vulkan::pipeline_builder<vertex_type>::build(
-				_device.shared(),
 				_shaders,
-				_swapchain.render_pass())
+				_swapchain.render_pass().underlying())
 	},
-	_buffer{},
+
 	_memory{},
+	_sync{},
+	_meshes{},
+	_objects{},
+	_allocator{}
+{
 
-	_vertices{},
-	_fence{_device} {
+		auto cuboid = rx::cube();
 
-		_vertices.emplace_back(
-				vx::float2{+0.0f, -0.5f}, vx::float3{+1.0f, +0.0f, +0.0f}
-		);
+		_meshes.emplace_back(cuboid.first, cuboid.second);
 
-		_vertices.emplace_back(
-				vx::float2{+0.5f, +0.5f}, vx::float3{+0.0f, +1.0f, +0.0f}
-		);
-
-		_vertices.emplace_back(
-				vx::float2{-0.5f, +0.5f}, vx::float3{+0.0f, +0.0f, +1.0f}
-		);
-
-		_buffer = vulkan::buffer{_device, _vertices};
-		_memory = vulkan::device_memory{_buffer, _device};
-
-		std::cout << "renderer created" << std::endl;
-
-		_memory.bind_and_map(_buffer, _vertices);
+		//_mesh = rx::mesh{cuboid.first, cuboid.second};
 
 
+		auto alloc = _allocator.allocate_buffer(_meshes.back().vertices().underlying());
+		alloc.memcpy(cuboid.first.data());
 
+
+		auto alloc_index = _allocator.allocate_buffer(_meshes.back().indices().underlying());
+		alloc_index.memcpy(cuboid.second.data());
+
+
+	_objects.emplace_back(_meshes.back());
 }
 
 
 
 // -- public methods ----------------------------------------------------------
 
-/* launch */
-auto engine::renderer::launch(void) -> void {
+/* run */
+auto engine::renderer::run(void) -> void {
 
-	return ;
+	static vk::u32 i = 0U;
 
-	while (_window.should_close() == false) {
 
-		_events.wait();
+	ws::running::start();
 
-		//_events.poll();
-		self::draw_frame();
+	while (ws::running::state() == true) {
 
-		//sleep(1);
+		if (rx::sdl::events::poll()) {
+			;
+		}
+
+
+
+		for (auto& object : _objects) {
+
+
+			//auto n = 4;
+			//object.rotation().x += n * 0.001f;
+			//object.rotation().y += n * 0.005f;
+			//object.rotation().z += n * -0.003f;
+
+			object.rotation().y = -rx::sdl::events::x();
+			object.rotation().x = +rx::sdl::events::y();
+
+
+		}
+
+		// update model matrix
+		//model.matrix = glm::scale(model.matrix, glm::vec3(z, z, z));
+		//model.matrix = glm::mat4(1.0f);
+		//model.matrix = glm::rotate(model.matrix, (float)glfwGetTime()*0.5f, glm::vec3(-0.0f, 1.0f, 0.3f));
+		//model.matrix = glm::rotate(model.matrix, (float)glfwGetTime()*1.0f, glm::vec3(-0.3f, 0.1f, 0.9f));
+
+		view.matrix = glm::mat4(1.0f);
+		view.matrix = glm::translate(view.matrix, glm::vec3(0, 0, +3));
+
+
+		// update constant matrix
+		//const_matrix.matrix = model.matrix * view.matrix * proj.matrix;
+		const_matrix.matrix = proj.matrix * view.matrix * model.matrix;
+
+
+		___self::draw_frame();
+
+		//std::cout << "--------------- draw frame [" << i++ << "] ---------------" << std::endl;
 	}
 
 	// wait for logical device to be idle
-	_device.wait_idle();
+	vulkan::device::wait_idle();
 }
 
 /* draw frame */
 auto engine::renderer::draw_frame(void) -> void {
 
-	//vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-	//vkResetFences(device, 1, &inFlightFence);
 
-	xns::u32 image_index = 0U;
+	// wait for current fence
+	_sync.wait_current_fence();
+
+	vk::u32 image_index = 0U;
 
 	// here error not means program must stop
-	if (_swapchain.acquire_next_image(_image_available, image_index) == false)
+	if (_swapchain.acquire_next_image(_sync.image_available(),
+										image_index) == false)
 		return;
 
 
@@ -106,130 +191,74 @@ auto engine::renderer::draw_frame(void) -> void {
 	cmd.reset();
 
 
-	cmd.record(_swapchain,
-			   _swapchain.render_pass(),
-			   _swapchain.frames()[image_index],
-			   _pipeline);
+	// -- record command buffer -----------------------------------------------
+
+	// start recording
+	cmd.begin();
+
+	// begin render pass
+	cmd.begin_render_pass(_swapchain,
+						  _swapchain.render_pass(),
+						  _swapchain.frames()[image_index]);
+
+	// dynamic viewport
+	cmd.set_viewport(_swapchain);
+
+	// dynamic scissor
+	cmd.set_scissor(_swapchain);
 
 
+	{ // -- for each mesh -----------------------------------------------------
 
+		for (const auto& object : _objects) {
 
-	vk::buffer buffs[] = {
-		static_cast<vk::shared<vk::buffer>>(_buffer)
-	};
+			// bind pipeline
+			cmd.bind_pipeline(_pipeline);
 
+			// bind vertex buffer
+			cmd.bind_vertex_buffer(object.mesh().vertices());
 
-	/*
-	cmd.cmd_bind_vertex_buffers(buffs);
-	cmd.cmd_set_viewport(_swapchain);
-	cmd.cmd_set_scissor(_swapchain);
-	cmd.cmd_draw(3U);
-	cmd.renderpass_end();
+			// bind index buffer
+			cmd.bind_index_buffer(object.mesh().indices());
+
+			// push constants
+			cmd.push_constants(_pipeline, proj.matrix * view.matrix * object.model());
+
+			// draw indexed
+			cmd.draw_indexed(object.mesh().indices().count());
+		}
+	}
+
+	// end render pass
+	cmd.end_render_pass();
+
+	// end recording
 	cmd.end();
-	*/
 
+	// -- submit command buffer -----------------------------------------------
 
-	// maybe send img_index to queue.submit
-	/* command_buffers[image_index] */
-	_queue.submit({_image_available}, {_render_finished}, _cmds);
-	//_queue.submit(wait, signal, _cmds);
+	// reset fence
+	_sync.reset_current_fence();
+
+	// submit command buffers
+	_queue.submit(_sync.image_available(),
+				  _sync.render_finished(),
+				  _sync.fence(),
+				  cmd);
 
 	// here error not means program must stop
-	if (_queue.present(_swapchain, image_index, {_render_finished}) == false)
+	if (_queue.present(_swapchain, image_index,
+					   _sync.render_finished()
+				) == false)
 		return;
+
+	// next frame
+	++_sync;
 }
 
 
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-
-	//VkCommandBufferBeginInfo beginInfo{};
-	//beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	//
-	//if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-	//	throw std::runtime_error("failed to begin recording command buffer!");
-	//}
-
-	//VkRenderPassBeginInfo renderPassInfo{};
-	//renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	//renderPassInfo.renderPass = renderPass;
-	//renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
-	//renderPassInfo.renderArea.offset = {0, 0};
-	//renderPassInfo.renderArea.extent = swapChainExtent;
-	//
-	//VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-	//renderPassInfo.clearValueCount = 1;
-	//renderPassInfo.pClearValues = &clearColor;
-	//
-	//vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
-	//VkViewport viewport{};
-	//viewport.x = 0.0f;
-	//viewport.y = 0.0f;
-	//viewport.width = static_cast<float>(swapChainExtent.width);
-	//viewport.height = static_cast<float>(swapChainExtent.height);
-	//viewport.minDepth = 0.0f;
-	//viewport.maxDepth = 1.0f;
-	//vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-	//VkRect2D scissor{};
-	//scissor.offset = {0, 0};
-	//scissor.extent = swapChainExtent;
-	//vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-	//vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-	//vkCmdEndRenderPass(commandBuffer);
-
-	//if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-	//	throw std::runtime_error("failed to record command buffer!");
-	//}
-}
-
-/*
-    void drawFrame() {
-        vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-        vkResetFences(device, 1, &inFlightFence);
-
-        uint32_t imageIndex;
-        vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
-
-        vkResetCommandBuffer(commandBuffer, *//*VkCommandBufferResetFlagBits*//* 0);
-        recordCommandBuffer(commandBuffer, imageIndex);
-
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
-            throw std::runtime_error("failed to submit draw command buffer!");
-        }
-
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = signalSemaphores;
-
-        VkSwapchainKHR swapChains[] = {swapChain};
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = swapChains;
-
-        presentInfo.pImageIndices = &imageIndex;
-
-        vkQueuePresentKHR(presentQueue, &presentInfo);
-    }
-	*/
+// this for when swapchain image number is inferior to MAX_FRAMES_IN_FLIGHT
+// Vérifier si une frame précédente est en train d'utiliser cette image (il y a une fence à attendre)
+//if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+//	vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+//}

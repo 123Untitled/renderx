@@ -6,7 +6,6 @@
 #if defined(ENGINE_VL_DEBUG)
 
 #include "engine/vk/array.hpp"
-#include "engine/vk/shared.hpp"
 #include "engine/vk/typedefs.hpp"
 #include "engine/vk/destroy.hpp"
 

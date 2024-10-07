@@ -8,23 +8,15 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
+#ifndef ___ENGINE_VULKAN_DEVICE___
+#define ___ENGINE_VULKAN_DEVICE___
 
-#ifndef ENGINE_VULKAN_DEVICE_HEADER
-#define ENGINE_VULKAN_DEVICE_HEADER
-
-// vulkan headers
-#include <vulkan/vulkan.h>
-
-// local headers
 #include "engine/vk/typedefs.hpp"
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vulkan/surface.hpp"
-#include "engine/vk/shared.hpp"
 
 
-
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
 
@@ -32,85 +24,20 @@ namespace vulkan {
 	// -- D E V I C E ---------------------------------------------------------
 
 	class device final {
-		
-		public:
-
-			// -- public types ------------------------------------------------
-
-			/* self type */
-			using self = vulkan::device;
-
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			device(void) noexcept = default;
-
-			/* surface constructor */
-			device(const vulkan::surface&);
-
-			/* copy constructor */
-			device(const self&) noexcept = default;
-
-			/* move constructor */
-			device(self&&) noexcept = default;
-
-			/* destructor */
-			~device(void) noexcept = default;
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self& = default;
-
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self& = default;
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* vk::device conversion operator */
-			operator const vk::device&(void) const noexcept;
-
-			/* vk::shared<vk::device> conversion operator */
-			operator const vk::shared<vk::device>&(void) const noexcept;
-
-
-			// -- public accessors --------------------------------------------
-
-			/* physical device */
-			auto physical_device(void) const noexcept -> const vulkan::physical_device&;
-
-			/* queue family */
-			auto family(void) const noexcept -> const vk::u32&;
-
-			/* shared */
-			auto shared(void) const noexcept -> const vk::shared<vk::device>&;
-
-			/* handle */
-			auto handle(void) const noexcept -> const vk::device&;
-
-
-
-			// -- public methods ----------------------------------------------
-
-			/* wait idle */
-			auto wait_idle(void) const -> void;
 
 
 		private:
 
-			// -- private static methods --------------------------------------
+			// -- public types ------------------------------------------------
 
-			/* pick physical device */
-			static auto pick_physical_device(const vulkan::surface&) -> vulkan::physical_device;
+			/* self type */
+			using ___self = vulkan::device;
 
 
 			// -- private members ---------------------------------------------
 
 			/* logical device */
-			vk::shared<vk::device> _ldevice;
+			vk::device _ldevice;
 
 			/* physical device */
 			vulkan::physical_device _pdevice;
@@ -121,8 +48,61 @@ namespace vulkan {
 			/* queue priority */
 			float _priority;
 
+
+			// -- private static methods --------------------------------------
+
+			/* shared */
+			static auto _shared(void) -> ___self&;
+
+			/* pick physical device */
+			static auto _pick_physical_device(const vk::surface&) -> vulkan::physical_device;
+
+
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			device(void);
+
+			/* deleted copy constructor */
+			device(const ___self&) = delete;
+
+			/* deleted move constructor */
+			device(___self&&) = delete;
+
+			/* destructor */
+			~device(void) noexcept;
+
+
+			// -- private assignment operators --------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(___self&&) -> ___self& = delete;
+
+
+		public:
+
+			// -- public static accessors -------------------------------------
+
+			/* logical */
+			static auto logical(void) noexcept -> const vk::device&;
+
+			/* physical */
+			static auto physical(void) noexcept -> const vulkan::physical_device&;
+
+			/* queue family */
+			static auto family(void) noexcept -> const vk::u32&;
+
+
+			// -- public static methods ---------------------------------------
+
+			/* wait idle */
+			static auto wait_idle(void) -> void;
+
 	}; // class device
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_DEVICE_HEADER
+#endif // ___ENGINE_VULKAN_DEVICE___

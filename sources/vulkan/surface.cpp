@@ -1,70 +1,48 @@
 #include "engine/vulkan/surface.hpp"
-#include "engine/vulkan/instance.hpp"
 
-#include "engine/vk/destroy.hpp"
-#include "engine/glfw/window.hpp"
+#include "engine/vulkan/instance.hpp"
 #include "engine/exceptions.hpp"
 
-#include <GLFW/glfw3.h>
+#include "renderx/sdl/window.hpp"
+#include <SDL3/SDL_vulkan.h>
 
 
-// -- public lifecycle --------------------------------------------------------
+// -- private static methods --------------------------------------------------
+
+/* shared */
+auto vulkan::surface::_shared(void) -> ___self& {
+	static vulkan::surface ___ins{};
+	return ___ins;
+}
+
+
+// -- private lifecycle -------------------------------------------------------
 
 /* default constructor */
-vulkan::surface::surface(void) noexcept
-: _surface{VK_NULL_HANDLE} {
-}
-
-/* window constructor */
-vulkan::surface::surface(glfw::window& window)
-: _surface{VK_NULL_HANDLE} {
+vulkan::surface::surface(void)
+/* uninitialized surface */ {
 
 	auto& instance = vulkan::instance::shared();
+	auto&   window = rx::sdl::window::shared();
 
 	// create surface
-	if (::glfwCreateWindowSurface(instance,
-								  window.underlying(), nullptr, &_surface) != VK_SUCCESS)
+	if (::sdl_vulkan_create_surface(&window, instance, nullptr, &_surface) == false
+		|| _surface == nullptr)
 		throw engine::exception{"failed to create vulkan surface."};
-}
-
-/* move constructor */
-vulkan::surface::surface(self&& other) noexcept
-: _surface{other._surface} {
-	other._surface = VK_NULL_HANDLE;
 }
 
 /* destructor */
 vulkan::surface::~surface(void) noexcept {
-	if (_surface == VK_NULL_HANDLE)
-		return;
-	vk::destroy(_surface, vulkan::instance::shared());
+
+	// free surface
+	::sdl_vulkan_destroy_surface(vulkan::instance::shared(), _surface, nullptr);
+	//::vk_destroy_surface_khr(vulkan::instance::shared(), _surface, nullptr);
 }
 
 
-// -- public assignment operators ---------------------------------------------
+// -- public static accessors -------------------------------------------------
 
-/* move assignment operator */
-auto vulkan::surface::operator=(self&& other) noexcept -> self& {
-
-	// check for self-assignment
-	if (this == &other)
-		return *this;
-
-	// destroy surface
-	if (_surface != VK_NULL_HANDLE)
-		vk::destroy(_surface, vulkan::instance::shared());
-
-	// move from other
-		  _surface = other._surface;
-	other._surface = VK_NULL_HANDLE;
-
-	return *this;
-}
-
-
-// -- public conversion operators ---------------------------------------------
-
-/* vk::surface conversion operator */
-vulkan::surface::operator const vk::surface&(void) const noexcept {
-	return _surface;
+/* shared */
+auto vulkan::surface::shared(void) -> vk::surface& {
+	return ___self::_shared()._surface;
 }

@@ -8,18 +8,13 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#pragma once
-
-#ifndef ENGINE_VULKAN_SURFACE_HPP
-#define ENGINE_VULKAN_SURFACE_HPP
+#ifndef ___ENGINE_VULKAN_SURFACE___
+#define ___ENGINE_VULKAN_SURFACE___
 
 #include "engine/vk/typedefs.hpp"
 
-namespace glfw {
-	class window;
-}
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {
 
@@ -28,59 +23,63 @@ namespace vulkan {
 
 	class surface final {
 
-		public:
+
+		private:
 
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vulkan::surface;
+			using ___self = vulkan::surface;
 
-
-			// -- public lifecycle --------------------------------------------
-
-			/* default constructor */
-			surface(void) noexcept;
-
-			/* window constructor */
-			surface(glfw::window&);
-
-			/* deleted copy constructor */
-			surface(const self&) = delete;
-
-			/* move constructor */
-			surface(self&&) noexcept;
-
-			/* destructor */
-			~surface(void) noexcept;
-
-
-			// -- public assignment operators ---------------------------------
-
-			/* deleted copy assignment operator */
-			auto operator=(const self&) -> self& = delete;
-
-			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self&;
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* vk::surface conversion operator */
-			operator const vk::surface&(void) const noexcept;
-
-
-		private:
 
 			// -- private members ---------------------------------------------
 
 			/* surface */
 			vk::surface _surface;
 
+
+			// -- private static methods --------------------------------------
+
+			/* shared */
+			static auto _shared(void) -> ___self&;
+
+
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			surface(void);
+
+			/* deleted copy constructor */
+			surface(const ___self&) = delete;
+
+			/* deleted move constructor */
+			surface(___self&&) = delete;
+
+			/* destructor */
+			~surface(void) noexcept;
+
+
+			// -- private assignment operators --------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(___self&&) -> ___self& = delete;
+
+
+		public:
+
+			// -- public static accessors -------------------------------------
+
+			/* shared */
+			static auto shared(void) -> vk::surface&;
+
 	}; // class surface
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_SURFACE_HPP
+#endif // ___ENGINE_VULKAN_SURFACE___
 
 
 
