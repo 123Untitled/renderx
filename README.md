@@ -8,7 +8,8 @@ Enjoy!
 ## Dependencies
 
 - vulkan
-- glfw3
+- sdl
+- glm
 - xns
 
 
