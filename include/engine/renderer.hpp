@@ -41,6 +41,7 @@
 #include "renderx/object.hpp"
 #include "renderx/camera.hpp"
 
+#include "renderx/glfw/events.hpp"
 
 // to be removed !
 using vertex_type = engine::vertex<vx::float3,

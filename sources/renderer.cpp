@@ -18,7 +18,7 @@
 
 #include "renderx/shapes/cuboid.hpp"
 
-#include "renderx/sdl/events.hpp"
+#include "renderx/glfw/monitor.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -26,7 +26,6 @@
 /* default constructor */
 engine::renderer::renderer(void)
 :
-	//_events{},
 	_queue{},
 	_swapchain{},
 	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
@@ -64,21 +63,93 @@ engine::renderer::renderer(void)
 
 	_objects.emplace_back(_meshes.back());
 
-	_camera.ratio(rx::sdl::window::ratio());
+	//_camera.ratio(rx::sdl::window::ratio());
 	_camera.fov(70.0f);
 	_camera.update_projection();
 
-	//rx::sdl::events::subscribe(_camera);
-	
+
+	_camera.transform().position().z = -6.0f;
+
+
+	glfw::monitor m;
 
 }
 
+namespace rx {
 
-auto SDLCALL callback(void *userdata, SDL_Event *event) -> bool {
-	std::cout << "callback" << std::endl;
-	return 1;
-}
 
+	class mouse_delta final {
+
+
+		private:
+
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = rx::mouse_delta;
+
+
+			/* mouse position */
+			double _lx, _ly;
+
+			/* mouse delta */
+			double _dx, _dy;
+
+
+			// -- private static methods --------------------------------------
+
+			/* shared */
+			static auto _shared(void) -> ___self& {
+				static ___self ___ins;
+				return ___ins;
+			}
+
+
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			mouse_delta(void) noexcept
+			: _lx{0.0}, _ly{0.0},
+			  _dx{0.0}, _dy{0.0} {
+			}
+
+		public:
+
+			/* update */
+			static auto update(void) noexcept -> void {
+
+				___self& ins = ___self::_shared();
+
+				double cx, cy;
+
+				// retrieve position
+				::glfw_get_cursor_pos(&glfw::window::shared(),
+						&cx, &cy);
+
+				ins._dx = cx - ins._lx;
+				ins._dy = cy - ins._ly;
+
+				// update last known position
+				ins._lx = cx;
+				ins._ly = cy;
+
+				//if (ins._dx != 0.0 || ins._dy != 0.0)
+				//	std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
+			}
+
+			/* dx */
+			static auto dx(void) noexcept -> double {
+				return ___self::_shared()._dx;
+			}
+
+			/* dy */
+			static auto dy(void) noexcept -> double {
+				return ___self::_shared()._dy;
+			}
+
+	}; // class mouse_delta
+
+} // namespace rx
 
 
 
@@ -87,20 +158,29 @@ auto SDLCALL callback(void *userdata, SDL_Event *event) -> bool {
 /* run */
 auto engine::renderer::run(void) -> void {
 
-	rx::umax last = rx::now();
 
-	//SDL_AddEventWatch(callback, nullptr);
+	rx::umax last = rx::now();
 
 
 	static vk::u32 i = 0U;
 
-	while (rx::running::state() == true) {
+	while (glfw::window::should_close() == false
+			&& rx::running::state() == true) {
+
+		// poll events
+		glfw::events::poll();
 
 		// get current time (nanoseconds)
 		rx::umax now = rx::now();
 
-		// poll events every 100ms
-		rx::sdl::events::poll();
+		//glfw::compute_to_mouse_delta(_camera);
+
+		rx::delta::update();
+		rx::mouse_delta::update();
+
+		_camera.from_tap_event(rx::mouse_delta::dx(),
+							   rx::mouse_delta::dy());
+
 		_camera.update();
 
 		// compute fps
@@ -108,13 +188,16 @@ auto engine::renderer::run(void) -> void {
 
 		//usleep(1'000'000 / 60);
 
-		_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
+		//_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
 
 		___self::draw_frame();
 		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
-		rx::delta::update();
 
 		last = now;
+
+
+		// limit to 120 fps
+		//usleep(1'000'000 / 120);
 
 		//std::cout << "--------------- draw frame [" << i++ << "] ---------------" << std::endl;
 	}

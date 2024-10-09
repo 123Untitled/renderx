@@ -22,10 +22,6 @@
 #include "engine/vulkan/commands.hpp"
 
 
-// to be removed !!!
-#include "renderx/sdl/window.hpp"
-
-
 // -- V U L K A N -------------------------------------------------------------
 
 namespace vulkan {

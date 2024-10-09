@@ -36,8 +36,12 @@ TARGET=$PREFIX'/'$LIBRARY
 # last commit
 COMMIT=$TARGET'/.last_commit'
 
+# branch
+BRANCH='main'
+
 # required programs
 REQUIRED_PROGRAMS=('pwd' 'cd' 'rm' 'mv' 'mkdir' 'echo' 'git' 'curl' 'jq')
+
 
 
 function clean_directories() {
@@ -68,7 +72,8 @@ if [[ ! -d $TARGET ]]; then
 	rm -rf $REPOSITORY
 
 	# clone repository
-	if ! git clone -v $REPO_URL $REPOSITORY; then
+	if ! git clone --branch $BRANCH --single-branch --depth 1 \
+		$REPO_URL $REPOSITORY; then
 		echo 'error: failed to clone xns repository'
 		clean_directories
 		exit 1

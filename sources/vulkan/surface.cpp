@@ -3,8 +3,7 @@
 #include "engine/vulkan/instance.hpp"
 #include "engine/exceptions.hpp"
 
-#include "renderx/sdl/window.hpp"
-#include <SDL3/SDL_vulkan.h>
+#include "renderx/glfw/window.hpp"
 
 
 // -- private static methods --------------------------------------------------
@@ -23,20 +22,19 @@ vulkan::surface::surface(void)
 /* uninitialized surface */ {
 
 	auto& instance = vulkan::instance::shared();
-	auto&   window = rx::sdl::window::shared();
+	auto&   window = glfw::window::shared();
 
 	// create surface
-	if (::sdl_vulkan_create_surface(&window, instance, nullptr, &_surface) == false
-		|| _surface == nullptr)
+	if (::glfw_create_window_surface(instance, &window, nullptr, &_surface) != VK_SUCCESS)
 		throw engine::exception{"failed to create vulkan surface."};
+
 }
 
 /* destructor */
 vulkan::surface::~surface(void) noexcept {
 
 	// free surface
-	::sdl_vulkan_destroy_surface(vulkan::instance::shared(), _surface, nullptr);
-	//::vk_destroy_surface_khr(vulkan::instance::shared(), _surface, nullptr);
+	::vk_destroy_surface_khr(vulkan::instance::shared(), _surface, nullptr);
 }
 
 

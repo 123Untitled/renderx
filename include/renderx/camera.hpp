@@ -3,10 +3,9 @@
 
 #include <glm/glm.hpp>
 #include "renderx/transform.hpp"
-#include "renderx/sdl/window.hpp"
-#include "renderx/sdl/events.hpp"
 
 #include "renderx/time/delta.hpp"
+#include "renderx/glfw/events.hpp"
 
 
 // -- R X ---------------------------------------------------------------------
@@ -16,7 +15,7 @@ namespace rx {
 
 	// -- C A M E R A ---------------------------------------------------------
 
-	class camera final : public rx::sdl::observer {
+	class camera final {
 
 
 		private:
@@ -83,7 +82,7 @@ namespace rx {
 
 			/* default constructor */
 			camera(void) noexcept
-			: _fov{90.0f}, _ratio{1.0f}, _near{0.1f}, _far{1000.0f}, _velocity{10.2f},
+			: _fov{90.0f}, _ratio{800.0f/600.0f}, _near{0.1f}, _far{1000.0f}, _velocity{10.2f},
 			  _projection{___self::_update_projection()} {
 			}
 
@@ -136,6 +135,7 @@ namespace rx {
 			}
 
 
+
 			// -- public accessors --------------------------------------------
 
 			/* fov */
@@ -168,12 +168,17 @@ namespace rx {
 				return _view;
 			}
 
+			/* transform */
+			auto transform(void) noexcept -> rx::transform<float, 3U>& {
+				return _transform;
+			}
+
 
 			// -- public methods ----------------------------------------------
 
 			/* update */
 			auto update(void) noexcept -> void {
-				update_rotation();
+				//update_rotation();
 				update_direction();
 				update_position();
 				update_view();
@@ -185,10 +190,11 @@ namespace rx {
 			/* update rotation */
 			auto update_rotation(void) noexcept -> void {
 
+				return;
 				float sens = 1.24f;
 
 				float x, y;
-				::sdl_get_relative_mouse_state(&x, &y);
+				//::sdl_get_relative_mouse_state(&x, &y);
 
 				auto& _x = _transform.rotation().x;
 				auto& _y = _transform.rotation().y;
@@ -218,10 +224,15 @@ namespace rx {
 			/* update position */
 			auto update_position(void) noexcept -> void {
 
-				const bool front = rx::sdl::events::is_up();
-				const bool back  = rx::sdl::events::is_down();
-				const bool left  = rx::sdl::events::is_left();
-				const bool right = rx::sdl::events::is_right();
+				// get arrow keys
+				const auto& arrows = glfw::events::arrows();
+
+				//std::cout << "arrows: " << arrows[0] << " " << arrows[1] << " " << arrows[2] << " " << arrows[3] << std::endl;
+
+				const bool front = arrows[0];
+				const bool back  = arrows[1];
+				const bool left  = arrows[2];
+				const bool right = arrows[3];
 
 				glm::vec2 movement {0.0f, 0.0f};
 
@@ -250,13 +261,15 @@ namespace rx {
 				}
 
 
-				if (front || back || left || right) {
+				//if (front || back || left || right) {
 
 					const auto velo = _velocity * rx::delta::time<float>();
 
 					_transform.position().x += movement.x * velo;
 					_transform.position().z += movement.y * velo;
-				}
+				//}
+
+					//std::cout << "position: " << _transform.position().x << " " << _transform.position().y << " " << _transform.position().z << std::endl;
 			}
 
 
@@ -275,49 +288,78 @@ namespace rx {
 				_view = glm::translate(_view, /* maybe */ -_transform.position());
 			}
 
+			auto from_tap_event(double x, double y) -> void {
 
-			auto mouse_motion(const ::sdl_mouse_motion_event& event) noexcept -> void override {
-
-				std::cout << "mouse motion: " << event.xrel << ", " << event.yrel << std::endl;
 				float sens = 0.24f;
 
-				_transform.rotation().x += (event.yrel * sens) * rx::delta::time<float>();
-				_transform.rotation().y -= (event.xrel * sens) * rx::delta::time<float>();
+				_transform.rotation().x += ((float)y * sens) * rx::delta::time<float>();
+				_transform.rotation().y -= ((float)x * sens) * rx::delta::time<float>();
 
-				constexpr float pi2 = (float)(2.0 * 3.14159265358979323846264338327950288);
 
 				auto& _x = _transform.rotation().x;
 				auto& _y = _transform.rotation().y;
+
+				constexpr float pi2 = (float)(2.0 * 3.14159265358979323846264338327950288);
 
 				// stay in radian range
 				_x = ((_x > pi2) ? (_x - pi2) : (_x < 0.0f) ? (_x + pi2) : _x);
 				_y = ((_y > pi2) ? (_y - pi2) : (_y < 0.0f) ? (_y + pi2) : _y);
 
 				// update direction
-				update_direction();
-				update_view();
+				//update_direction();
+				//update_view();
+
 
 			}
 
-			auto key_down(const ::sdl_keyboard_event& event) noexcept -> void override {
+
+			//auto mouse_motion(const ::sdl_mouse_motion_event& event) noexcept -> void override {
+			//
+			//	std::cout << "mouse motion: " << event.xrel << ", " << event.yrel << std::endl;
+			//	float sens = 0.24f;
+			//
+			//	_transform.rotation().x += (event.yrel * sens) * rx::delta::time<float>();
+			//	_transform.rotation().y -= (event.xrel * sens) * rx::delta::time<float>();
+			//
+			//	constexpr float pi2 = (float)(2.0 * 3.14159265358979323846264338327950288);
+			//
+			//	auto& _x = _transform.rotation().x;
+			//	auto& _y = _transform.rotation().y;
+			//
+			//	// stay in radian range
+			//	_x = ((_x > pi2) ? (_x - pi2) : (_x < 0.0f) ? (_x + pi2) : _x);
+			//	_y = ((_y > pi2) ? (_y - pi2) : (_y < 0.0f) ? (_y + pi2) : _y);
+			//
+			//	// update direction
+			//	update_direction();
+			//	update_view();
+			//
+			//}
+
+			/*
+			auto from_key_event(const int&key) noexcept -> void {
 
 
 
 				glm::vec2 movement {0.0f, 0.0f};
 
-				if (event.key == SDLK_E) {
+				// up
+				if (key == 69) {
 					movement.x -= _direction.x;
 					movement.y += _direction.y;
 				}
-				if (event.key == SDLK_D) {
+				// down
+				if (key == 68) {
 					movement.x += _direction.x;
 					movement.y -= _direction.y;
 				}
-				if (event.key == SDLK_S) {
+				// left
+				if (key == 83) {
 					movement.x -= _direction.y;
 					movement.y -= _direction.x;
 				}
-				if (event.key == SDLK_F) {
+				// right
+				if (key == 70) {
 					movement.x += _direction.y;
 					movement.y += _direction.x;
 				}
@@ -343,6 +385,7 @@ namespace rx {
 
 
 			}
+			*/
 
 
 

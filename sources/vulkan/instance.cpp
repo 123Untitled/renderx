@@ -3,7 +3,7 @@
 #include "engine/vk/create.hpp"
 #include "engine/system/write.hpp"
 
-#include "renderx/sdl/system.hpp"
+#include "renderx/glfw/system.hpp"
 
 #include "engine/vulkan/validation_layers.hpp"
 #include "engine/os.hpp"
@@ -35,8 +35,8 @@ vulkan::instance::instance(void)
 		.apiVersion         = VK_API_VERSION_1_0
 	};
 
-	// get required extensions (from SDL)
-	auto extensions = rx::sdl::system::vulkan_required_extensions();
+	// get required extensions (from GLFW)
+	auto extensions = glfw::system::vulkan_required_extensions();
 
 	#if defined(ENGINE_VL_DEBUG)
 

@@ -1,10 +1,6 @@
 #include "engine/vulkan/swapchain.hpp"
 
-//#include <xns/math.hpp>
-#include <xns/math/clamp.hpp>
 #include "engine/vk/info.hpp"
-
-#include "renderx/sdl/window.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -258,6 +254,7 @@ auto vulkan::swapchain::pick_present_mode(const vk::vector<vk::present_mode>& mo
     // VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR
 
 	//return VK_PRESENT_MODE_IMMEDIATE_KHR;
+	//return VK_PRESENT_MODE_MAILBOX_KHR;
 
 	// loop over modes
 	for (const auto& mode : modes) {
@@ -303,13 +300,14 @@ auto vulkan::swapchain::pick_extent(const vk::surface_capabilities& capabilities
 		return capabilities.currentExtent;
 	}
 
-	vk::extent2D extent{rx::sdl::window::width(),
-						rx::sdl::window::height()};
+	//vk::extent2D extent{rx::sdl::window::width(),
+	//					rx::sdl::window::height()};
+	vk::extent2D extent{800, 600};
 
-	extent.width  = xns::clamp(extent.width,
+	extent.width  = std::clamp(extent.width,
 			capabilities.minImageExtent.width,
 			capabilities.maxImageExtent.width);
-	extent.height = xns::clamp(extent.height,
+	extent.height = std::clamp(extent.height,
 			capabilities.minImageExtent.height,
 			capabilities.maxImageExtent.height);
 

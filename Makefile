@@ -4,21 +4,11 @@
 # set default target
 .DEFAULT_GOAL := all
 
-# use one shell for all commands
-.ONESHELL:
-
-# delete intermediate files on error
-.DELETE_ON_ERROR:
-
-# silent mode
-.SILENT:
-
 # set shell program
 override SHELL := $(shell which sh)
 
 # set shell flags
 .SHELLFLAGS := -c -e
-
 
 
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
@@ -32,10 +22,8 @@ ifeq ($(os), Linux)
 override threads := $(shell nproc --all)
 endif
 
-
 # set make flags
-override MAKEFLAGS += --warn-undefined-variables --no-builtin-rules \
-					  --no-print-directory \
+override MAKEFLAGS += --warn-undefined-variables  --warn-undefined-functions \
 					  --jobs=$(threads) --output-sync=none
 
 
@@ -74,19 +62,6 @@ override ext_dir := $(cwd_dir)/external
 
 
 
-
-# -- S D L --------------------------------------------------------------------
-
-# sdl directory
-override sdl_dir := $(ext_dir)/sdl
-
-# sdl include directory
-override sdl_include := -I$(sdl_dir)/include
-
-# sdl library directory
-override sdl_library := -L$(sdl_dir)/lib -lSDL3
-
-
 # -- G L M --------------------------------------------------------------------
 
 # glm directory
@@ -109,6 +84,18 @@ override xns_include  := -I$(xns_dir)/include
 
 # xns library directory
 override xns_library  := -L$(ext_dir)/xns/lib -lxns
+
+
+# -- G L F W ------------------------------------------------------------------
+
+# glfw directory
+override glfw_dir := $(ext_dir)/glfw
+
+# glfw include directory
+override glfw_include := -I$(glfw_dir)/include
+
+# glfw library directory
+override glfw_library := -L$(glfw_dir)/lib -lglfw3
 
 
 
@@ -156,6 +143,7 @@ override deps := $(objs:%.o=%.d)
 # compiler
 #override cxx := clang++
 override cxx := $(shell echo $$(brew --prefix llvm)/bin/clang++)
+#override cxx := $(shell echo $$(brew --prefix gcc)/bin/g++*)
 
 # compiler standard
 override std := -std=c++2a
@@ -164,7 +152,7 @@ override std := -std=c++2a
 override opt := -O0
 
 # debug flags
-override debug := -g3
+override debug := -g2
 
 # defines
 override defines := -DENGINE_VL_DEBUG
@@ -190,13 +178,13 @@ override wflags += -Wshadow
 override depflags = -MT $@ -MMD -MP -MF $*.d
 
 # include flags
-override includes := $(addprefix -I, $(inc_dir)) $(vulkan_include) $(xns_include) $(glm_include) $(sdl_include)
+override includes := $(addprefix -I, $(inc_dir)) $(vulkan_include) $(xns_include) $(glm_include) $(glfw_include)
 
 # linker flags
 override ldflags := $(vulkan_library) \
 					$(xns_library) \
 					$(glm_library) \
-					$(sdl_library)
+					$(glfw_library)
 
 # cxx flags
 override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
@@ -205,9 +193,20 @@ override cxxflags = $(std) $(opt) $(debug) $(defines) $(wflags) $(includes)
 
 # -- P H O N Y  T A R G E T S -------------------------------------------------
 
-.PHONY: all clean fclean re shaders xns ascii
+# use one shell for all commands
+.ONESHELL:
 
-.NOTPARALLEL: ascii xns shaders $(compile_db)
+# delete intermediate files on error
+.DELETE_ON_ERROR:
+
+# silent mode
+.SILENT:
+
+# non file targets
+.PHONY: all clean fclean re shaders xns ascii dependencies
+
+# do not run targets in parallel
+.NOTPARALLEL: ascii shaders $(compile_db) dependencies xns $(glm_dir) $(glfw_dir)
 
 
 
@@ -237,6 +236,7 @@ shaders: | $(compile_db)
 	$(sha_dir)/make.sh
 
 
+
 # executable
 $(executable): $(objs)
 	$(cxx) $^ -o $@ $(ldflags)
@@ -249,7 +249,7 @@ $(executable): $(objs)
 	$(call print,32,cxx,$(@F))
 
 # compile commands
-$(compile_db): $(srcs) Makefile | xns
+$(compile_db): $(srcs) Makefile | dependencies
 	node $(tls_dir)/generate_cdb.js '$(cwd_dir)' '$(srcs)' '$(objs)' '$(cxx)' '$(cxxflags)'
 	$(call print,34,cdb,$@)
 
@@ -265,17 +265,19 @@ fclean: clean
 # re
 re: fclean all
 
-
-# sdl
-$(sdl_dir):
-	$(tls_dir)/install_sdl.sh
+# dependencies
+dependencies: | $(glm_dir) $(glfw_dir) xns
 
 # glm
 $(glm_dir):
-	$(tls_dir)/install_glm.sh
+	make '--makefile='$(tls_dir)'/glm.mk'
+
+# glfw
+$(glfw_dir):
+	make '--makefile='$(tls_dir)'/glfw.mk'
 
 # xns
-xns: | $(glm_dir) $(sdl_dir)
+xns:
 	$(tls_dir)/install_xns.sh
 
 

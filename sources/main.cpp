@@ -8,9 +8,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-
-#include "renderx/sdl/exception.hpp"
-
 #include "engine/vulkan/physical_device.hpp"
 #include "engine/vulkan/device.hpp"
 #include "engine/vulkan/surface.hpp"
@@ -25,8 +22,6 @@
 #include "engine/vertex/vertex.hpp"
 #include "engine/exceptions.hpp"
 #include "engine/shader_library.hpp"
-
-#include <xns/literal_map.hpp>
 
 #include "engine/vulkan/libraries/library.hpp"
 
@@ -61,11 +56,12 @@
 #include "renderx/object.hpp"
 #include "renderx/transform.hpp"
 
-#include "renderx/sdl/window.hpp"
 
 
-#include <SDL3/SDL.h>
 #include "renderx/running.hpp"
+
+// include for event tap
+#include <ApplicationServices/ApplicationServices.h>
 
 
 int main(void) {
@@ -74,6 +70,13 @@ int main(void) {
 		rx::running::stop();
 		rx::write("\n");
 	});
+
+
+
+
+
+
+	// launch as daemon
 
 	/*
 	rx::object obj;
@@ -100,10 +103,6 @@ int main(void) {
 		renderer.run();
 	}
 
-	catch (const rx::sdl::exception& except) {
-		std::cerr << except.what() << std::endl;
-		return EXIT_FAILURE;
-	}
 
 	// vulkan catch block
 	catch (const vk::exception& except) {
