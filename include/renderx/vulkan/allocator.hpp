@@ -210,7 +210,7 @@ namespace vulkan {
 
 						// check if memory is out of bounds
 						if (aligned_offset + requirements.size > ___DEFAULT_BLOCK_SIZE___) {
-							throw "out of memory";
+							throw std::runtime_error("out of memory bounds");
 							// not implemented...
 							// will expand memory with linked list ?
 						}
@@ -322,7 +322,7 @@ namespace vulkan {
 						return i;
 				}
 
-				throw "failed to find suitable memory type";
+				throw std::runtime_error("failed to find memory type");
 			}
 
 

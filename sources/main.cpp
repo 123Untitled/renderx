@@ -120,6 +120,14 @@ int main(void) {
 		std::cerr << except.message() << std::endl;
 		return EXIT_FAILURE;
 	}
+	catch (const char* except) {
+		std::cerr << except << std::endl;
+		return EXIT_FAILURE;
+	}
+	catch (const std::string& except) {
+		std::cerr << except << std::endl;
+		return EXIT_FAILURE;
+	}
 
 	catch (...) {
 		std::cerr << "unknown exception" << std::endl;

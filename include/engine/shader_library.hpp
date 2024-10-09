@@ -106,7 +106,7 @@ namespace engine {
 
 				// check if already loaded
 				if (_vmodules.find(name) != _vmodules.end())
-					throw;
+					throw std::runtime_error{"shader already loaded"};
 
 				_vmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>{p};
 			}

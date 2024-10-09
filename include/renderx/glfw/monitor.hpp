@@ -70,12 +70,12 @@ namespace glfw {
 				_monitor = ::glfw_get_primary_monitor();
 
 				if (_monitor == nullptr)
-					throw "no primary monitor found";
+					throw std::runtime_error("no primary monitor found");
 
 				_mode = ::glfw_get_video_mode(_monitor);
 
 				if (_mode == nullptr)
-					throw "no video mode found";
+					throw std::runtime_error("no video mode found");
 
 				int w, h;
 
