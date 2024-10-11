@@ -20,10 +20,13 @@
 /shaders/**/*.spv
 
 # ignore main executable
-/exec_vulkan_engine
+/renderx
 
 # ignore compile database
 /compile_commands.json
 
-# ignore vulkan tutorial
-/VulkanTutorial
+# ignore ninja build file
+/build.ninja
+
+# ignore ninja files
+/.ninja*
