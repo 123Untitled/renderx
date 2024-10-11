@@ -27,7 +27,8 @@ local -r os=$(uname -s)
 # -- T H I S  S C R I P T -----------------------------------------------------
 
 # get current absolute directory path
-local -r cwd_dir=$(pwd -P)
+local -r cwd_dir='.'
+#$(pwd -P)
 
 # get script absolute directory path
 local -r script_dir=${${0%/*}:a}
@@ -71,6 +72,9 @@ local -r sha_dir=$cwd_dir'/shaders'
 # external directory
 local -r ext_dir=$cwd_dir'/external'
 
+# spirv directory
+local -r spv_dir=$cwd_dir'/spirv'
+
 
 # -- F I L E S ----------------------------------------------------------------
 
@@ -79,6 +83,13 @@ local -r srcs=($src_dir'/'**'/'*'.cpp'(.N))
 
 # object files
 local -r objs=(${srcs/%.cpp/.o})
+
+# shader files
+local -r shas=($sha_dir'/'*'.glsl'(.N))
+
+# spirv files
+local -r spvs=(${shas/%.glsl/.spv})
+
 
 
 # -- V U L K A N --------------------------------------------------------------
@@ -248,12 +259,46 @@ function _generate_ninja() {
 
 	for ((i = 1; i <= $#srcs; ++i)); do
 		file+='# compile '${srcs[$i]:t:r}'\n'
-		file+='build '$objs[$i]': compile '$srcs[$i]' | build.ninja\n\n'
+		file+='build '$objs[$i]': compile '$srcs[$i]' | '$ninja'\n\n'
 	done
 
 	file+='build '$executable': link '$objs'\n\n'
 
-	file+='default '$executable'\n\n'
+
+
+	# -- shaders --------------------------------------------------------------
+
+	file+='# rule to compile shaders\n'
+	file+='rule shader\n'
+	file+='  command = glslc -fshader-stage=$stage $in -o $out\n'
+	file+='  description = shader $in\n\n'
+
+
+
+	# loop over shader files
+	for ((i = 1; i <= $#shas; ++i)); do
+
+		# shader file
+		local sha=${shas[$i]}
+
+		# output file
+		local spv=${spvs[$i]}
+
+		# extract stage
+		local stage=${sha:t:r:e}
+
+		file+='# shader '${sha:t:r}'\n'
+		file+='build '$spv': shader '$sha' | '$ninja'\n'
+		file+='  stage = '$stage'\n\n'
+	done
+
+
+	# all target
+	file+='build all: phony '$executable' '$spvs'\n'
+
+	file+='default all\n'
+
+
 
 	echo $file > $ninja
 
@@ -359,7 +404,7 @@ function _build() {
 	_compile_database
 
 	# build shaders
-	$sha_dir'/make.sh'
+	#$sha_dir'/make.sh'
 
 	# build
 	_ninja
@@ -370,7 +415,7 @@ function _build() {
 function _clean() {
 	_generate_ninja
 	ninja -f $ninja -t clean
-	$sha_dir'/make.sh' clean
+	#$sha_dir'/make.sh' clean
 }
 
 # fclean
