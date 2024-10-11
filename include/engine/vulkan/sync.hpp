@@ -1,6 +1,7 @@
 #ifndef ___ENGINE_VULKAN_SYNC___
 #define ___ENGINE_VULKAN_SYNC___
 
+#include "engine/vk/utils.hpp"
 #include "engine/vk/typedefs.hpp"
 #include "engine/vk/info.hpp"
 #include "engine/vulkan/device.hpp"

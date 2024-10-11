@@ -3,12 +3,15 @@
 
 #include "engine/vulkan/shader_module.hpp"
 #include "engine/vk/typedefs.hpp"
+#include "system/directory.hpp"
 
 #include <unordered_map>
 #include <map>
 
 #include <dirent.h>
 #include <unistd.h>
+
+
 
 
 namespace vulkan {
@@ -248,22 +251,15 @@ namespace engine {
 			shader_library(void)
 			: _vmodules{}, _fmodules{} {
 
-				// root
-				DIR* dir = ::opendir("shaders/");
-
-				if (dir == nullptr)
-					throw;
-
-				struct ::dirent* entry = ::readdir(dir);
-
+				/*
 				auto lookup = create_lookup();
 
-				for (; entry != nullptr; entry = ::readdir(dir)) {
+				for (xe::directory dir{"shaders/"}; dir; ++dir) {
 
-					if (entry->d_type != DT_REG)
+					if (not dir.is_regular())
 						continue;
 
-					const auto name = std::string{entry->d_name};
+					const auto name = std::string{dir.name()};
 
 					// get extension
 					const auto ext = name.substr(name.find_last_of('.') + 1);
@@ -287,6 +283,7 @@ namespace engine {
 					// execute function
 					(this->*(res->second))(std::string{"shaders/"} + name);
 				}
+				*/
 			}
 
 			/* copy constructor */
@@ -329,18 +326,8 @@ namespace engine {
 				return res->second;
 			}
 
-
-
-		private:
-
-
-
-
-
-			// -- private types -----------------------------------------------
-
-
 	}; // class shader_library
+
 
 } // namespace engine
 

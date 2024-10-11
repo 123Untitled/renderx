@@ -15,10 +15,10 @@
 
 #if defined(ENGINE_VL_DEBUG)
 
-#include "vk_typedefs.hpp"
+#include "engine/vk/typedefs.hpp"
 #include <iostream>
 
-#include "vulkan_physical_device.hpp"
+#include "engine/vulkan/physical_device.hpp"
 
 /* physical device */
 inline auto operator<<(std::ostream& os, const vulkan::physical_device& type) -> std::ostream& {

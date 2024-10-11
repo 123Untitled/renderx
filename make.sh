@@ -7,6 +7,7 @@ local -r success='\x1b[32m'
 local -r error='\x1b[31m'
 local -r warning='\x1b[33m'
 local -r info='\x1b[34m'
+local -r dim='\x1b[90m'
 local -r reset='\x1b[0m'
 
 
@@ -18,17 +19,13 @@ local -r os=$(uname -s)
 
 # -- T H I S  S C R I P T -----------------------------------------------------
 
-# get current absolute directory path
-local -r cwd_dir=$(pwd -P)
-
 # get script absolute directory path
-local -r script_dir=${${0%/*}:a}
+local -r cwd_dir=${0%/*}
+
+#local -r cwd_dir=${${0%/*}:a}
 
 # get script absolute path
 local -r script=${0:a}
-
-# script name
-local -r script_name=${0##*/}
 
 
 # -- T A R G E T S ------------------------------------------------------------
@@ -37,10 +34,10 @@ local -r script_name=${0##*/}
 local -r project='renderx'
 
 # main executable
-local -r executable=$project
+local -r executable=$cwd_dir'/'$project
 
 # compile commands database
-local -r compile_db='compile_commands.json'
+local -r compile_db=$cwd_dir'/compile_commands.json'
 
 # ninja file
 local -r ninja=$cwd_dir'/build.ninja'
@@ -60,11 +57,11 @@ local -r sha_dir=$cwd_dir'/shaders'
 # external directory
 local -r ext_dir=$cwd_dir'/.external'
 
-# spirv directory
-local -r spv_dir=$cwd_dir'/spirv'
-
 # ninja directory
 local -r ninja_dir=$cwd_dir'/.ninja'
+
+# git directory
+local -r git_dir=$cwd_dir'/.git'
 
 
 # -- F I L E S ----------------------------------------------------------------
@@ -80,13 +77,6 @@ local -r shas=($sha_dir'/'*'.glsl'(.N))
 
 # spirv files
 local -r spvs=(${shas/%.glsl/.spv})
-
-# header files
-local -r hdrs=($inc_dir'/'**'/'*'.hpp'(.N))
-
-# precompiled header
-local -r pchs=(${hdrs/%.hpp/.pch})
-
 
 
 # -- V U L K A N --------------------------------------------------------------
@@ -163,6 +153,7 @@ local -r cxxflags=('-std=c++2a'
 				   '-Wno-unused-function'
 				   '-Wno-unused-private-field'
 				   '-Wno-unused-local-typedef'
+				   '-fdiagnostics-color=always'
 				   '-Winline'
 				   '-Wconversion'
 				   '-Wsign-conversion'
@@ -178,30 +169,73 @@ local -r cxxflags=('-std=c++2a'
 local -r ldflags=($vulkan_library $glfw_library $glm_library $os_dependencies)
 
 
-
-
 # -- F U N C T I O N S --------------------------------------------------------
+
+# check we are in the correct repository
+function _repository() {
+
+	# local variables
+	local -r ssh_repo='git@github.com:123Untitled/renderx.git'
+	local -r pub_repo='https://github.com/123Untitled/renderx.git'
+
+	# check we are in a git repository
+	if [[ ! -d $git_dir ]]; then
+		echo 'please run this script in the' $error$project$reset 'repository.'
+		exit 1
+	fi
+
+	# get the git remote url
+	local -r remote=$(git --git-dir=$git_dir config --get 'remote.origin.url')
+
+	# check we are in the correct repository
+	if [[ $remote != $ssh_repo ]] && [[ $remote != $pub_repo ]]; then
+		echo 'please run this script in the' $error$project$reset 'repository.'
+		exit 1
+	fi
+}
+
+# function to check required tools
+function _check_tools() {
+
+	# required tools
+	local -r required=('uname' 'git' 'curl' 'tar'
+					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
+					   'ccache' 'clang++' 'glslc')
+
+	# loop over required tools
+	for tool in $required; do
+
+		# check if tool is available
+		if ! command -v $tool > '/dev/null'; then
+			echo 'required tool' $error$tool$reset 'not found.'
+			exit 1
+		fi
+	done
+}
 
 # install dependency
 function _install_dependency() {
 
 	# library name
-	local -r libname=$1
+	local -r name=$1
 
 	# version
 	local -r version=$2
 
-	# archive path
-	local -r archive=$libname'.tar.gz'
-
 	# github url
-	local -r url='https://github.com/'$3'/'$libname'/archive/refs/tags/'$version'.tar.gz'
+	local -r url='https://github.com/'$3'/'$name'/archive/refs/tags/'$version'.tar.gz'
+
+	# archive path
+	local -r archive=$cwd_dir'/'$name'.tar.gz'
+
+	# repo directory
+	local -r repo=$cwd_dir'/'$name
 
 	# build directory
-	local -r build=$libname'/build'
+	local -r build=$repo'/build'
 
 	# install prefix
-	local -r prefix=$ext_dir'/'$libname
+	local -r prefix=$ext_dir'/'$name
 
 	# cmake flags
 	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix ${@:4})
@@ -218,17 +252,18 @@ function _install_dependency() {
 	fi
 
 	# extract
-	tar --extract --strip-components=1 --verbose --file $archive --directory $libname
+	tar --extract --strip-components=1 --file $archive --directory $repo
 
 	# configure
-	cmake -S $libname -B $build $flags -G 'Ninja'
+	cmake -S $repo -B $build $flags -G 'Ninja'
 
 	# build and install
 	ninja -C $build install
 
 	# cleanup
-	rm -rf $libname $archive
+	rm -rf $repo $archive
 }
+
 
 # generate ninja file
 function _generate_ninja() {
@@ -259,10 +294,12 @@ function _generate_ninja() {
 
 	# build directory
 	file+='# build directory\n'
-	file+='builddir = .ninja\n\n'
+	file+='builddir = '$ninja_dir'\n\n'
 
+	file+='# ninja file\n'
+	file+='ninja = '$ninja'\n\n'
 	file+='# compiler and flags\n'
-	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n\n'
+	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
 
 
 	# -- rules ----------------------------------------------------------------
@@ -290,19 +327,15 @@ function _generate_ninja() {
 
 	file+='# -- B U I L D S --------------------------------------------------------------\n\n'
 
-	# -- executable -----------------------------------------------------------
-
-	# link
-	file+='# link\n'
-	file+='build '$executable': $\n  link '$objs'\n\n'
 
 	# -- sources --------------------------------------------------------------
 
 	# loop over source files
 	for ((i = 1; i <= $#srcs; ++i)); do
 		file+='# compile '${srcs[$i]:t:r}'\n'
-		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | '$ninja'\n\n'
+		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | $ninja\n\n'
 	done
+
 
 	# -- shaders --------------------------------------------------------------
 
@@ -319,12 +352,19 @@ function _generate_ninja() {
 		local stage=${sha:t:r:e}
 
 		file+='# shader '${sha:t:r}'\n'
-		file+='build '$spv': $\n  shader '$sha' | '$ninja'\n'
+		file+='build '$spv': $\n  shader '$sha' | $ninja\n'
 		file+='  stage = '$stage'\n\n'
 	done
 
 
-	# all target
+
+	# -- executable -----------------------------------------------------------
+
+	# link
+	file+='# link\n'
+	file+='build '$executable': $\n  link '$objs'\n\n'
+
+	## all target
 	file+='# all target\n'
 	file+='build all: phony '$executable' $\n'$spvs'\n\n'
 
@@ -339,7 +379,7 @@ function _generate_ninja() {
 	echo $file > $ninja
 
 	# print success
-	print $success'[+]'$reset $ninja
+	print $success'[+]'$reset ${ninja:t}
 }
 
 
@@ -352,9 +392,9 @@ function _ninja() {
 function _install_dependencies() {
 
 	# install ninja
-	_install_dependency 'ninja' 'v1.12.1' 'ninja-build' '-DBUILD_TESTING=OFF' \
-														'-DCMAKE_BUILD_TYPE=Release' \
-														'-DNINJA_BUILD_BINARY=ON'
+	#_install_dependency 'ninja' 'v1.12.1' 'ninja-build' '-DBUILD_TESTING=OFF' \
+	#													'-DCMAKE_BUILD_TYPE=Release' \
+	#													'-DNINJA_BUILD_BINARY=ON'
 
 	# install glfw
 	_install_dependency 'glfw' '3.4' 'glfw' '-DBUILD_SHARED_LIBS=OFF' \
@@ -372,49 +412,11 @@ function _install_dependencies() {
 # generate compile database
 function _generate_compile_db() {
 
+	# use ninja to generate compile database
 	ninja -f $ninja -t compdb > $compile_db
 
-
-	#echo -n '[\n' > $compile_db
-	#
-	## loop over source files
-	#for ((i = 1; i <= $#srcs; ++i)); do
-	#
-	#	# new entry
-	#	local entry=('\t{\n'
-	#				 '\t\t"directory": "'$cwd_dir'",\n'
-	#				 '\t\t"file": "'$srcs[$i]'",\n'
-	#				 '\t\t"output": "'$objs[$i]'",\n'
-	#				 '\t\t"arguments": [\n'
-	#				 '\t\t\t"'$cxx'",\n')
-	#
-	#	# loop over compiler flags
-	#	for flag in $cxxflags; do
-	#		entry+=('\t\t\t"'$flag'",\n')
-	#	done
-	#
-	#
-	#	entry+=('\t\t\t"-c",\n'
-	#			'\t\t\t"'$srcs[$i]'",\n'
-	#			'\t\t\t"-o",\n'
-	#			'\t\t\t"'$objs[$i]'"\n')
-	#
-	#
-	#	if [[ $i -lt $#srcs ]]; then
-	#		entry+=('\t\t]\n\t},\n')
-	#	else
-	#		entry+=('\t\t]\n\t}\n')
-	#	fi
-	#
-	#	echo -n $entry >> $compile_db
-	#
-	#done
-	#
-	#echo -n ']' >> $compile_db
-
 	# print success
-	print $success'[+]'$reset $compile_db
-
+	print $success'[+]'$reset ${compile_db:t}
 }
 
 # compile db
@@ -458,14 +460,22 @@ function _build() {
 
 # clean
 function _clean() {
-	_generate_ninja
-	ninja -f $ninja -t clean
+
+	# remove all intermediate files
+	local -r deleted=$(rm -rfv $objs $spvs | wc -l)
+
+	# print success
+	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
 }
 
 # fclean
 function _fclean() {
-	_clean
-	rm -rvf $ninja_dir $ext_dir $compile_db '.cache'
+
+	# remove all build files
+	local -r deleted=$(rm -rfv $objs $spvs $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
+
+	# print success
+	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
 }
 
 
@@ -479,6 +489,8 @@ echo $warning \
 	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
 	$reset
 
+_check_tools
+_repository
 
 if [[ $# -eq 0 ]]; then
 	_build
@@ -503,8 +515,3 @@ case $1 in
 		echo 'usage: '$script_name' [clean|fclean]'
 		;;
 esac
-
-
-
-
-

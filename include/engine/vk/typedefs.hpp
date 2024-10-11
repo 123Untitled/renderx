@@ -761,4 +761,23 @@ namespace vk {
 /* get physical device format properties */
 #define vk_get_physical_device_format_properties vkGetPhysicalDeviceFormatProperties
 
+
+
+// -- enumerate ---------------------------------------------------------------
+
+#define vk_enumerate_instance_extension_properties vkEnumerateInstanceExtensionProperties
+#define vk_enumerate_instance_layer_properties vkEnumerateInstanceLayerProperties
+#define vk_enumerate_physical_devices vkEnumeratePhysicalDevices
+#define vk_enumerate_device_extension_properties vkEnumerateDeviceExtensionProperties
+
+
+// -- get ---------------------------------------------------------------------
+
+#define vk_get_physical_device_surface_capabilities_khr vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+#define vk_get_physical_device_surface_support_khr vkGetPhysicalDeviceSurfaceSupportKHR
+#define vk_get_physical_device_surface_formats_khr vkGetPhysicalDeviceSurfaceFormatsKHR
+#define vk_get_physical_device_surface_present_modes_khr vkGetPhysicalDeviceSurfacePresentModesKHR
+#define vk_get_swapchain_images_khr vkGetSwapchainImagesKHR
+
+
 #endif // ENGINE_VK_TYPEDEFS_HEADER

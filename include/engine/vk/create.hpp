@@ -31,9 +31,9 @@ namespace vk {
 	inline auto create(const vk::device& ___device,
 					   const vk::framebuffer_info& ___info) -> vk::framebuffer {
 		vk::framebuffer ___framebuffer{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateFramebuffer,
-					"failed to create framebuffer",
-					___device, &___info, nullptr, &___framebuffer);
+		vk::try_execute<"failed to create framebuffer">(
+				::vkCreateFramebuffer,
+				___device, &___info, nullptr, &___framebuffer);
 		return ___framebuffer;
 	}
 
@@ -50,9 +50,9 @@ namespace vk {
 	inline auto create(const vk::device& ___device,
 					   const vk::image_view_info& info) -> vk::image_view {
 		vk::image_view view{VK_NULL_HANDLE};
-		vk::try_execute(::vkCreateImageView,
-					"failed to create image view",
-					___device, &info, nullptr, &view);
+		vk::try_execute<"failed to create image view">(
+				::vkCreateImageView,
+				___device, &info, nullptr, &view);
 		return view;
 	}
 

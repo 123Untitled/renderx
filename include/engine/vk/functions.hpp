@@ -18,7 +18,6 @@
 #include <vulkan/vulkan.h>
 
 #include "engine/vk/typedefs.hpp"
-//#include "engine/exceptions.hpp"
 #include "engine/vk/exception.hpp"
 
 #include "engine/vk/utils.hpp"
@@ -31,14 +30,12 @@
 namespace vk {
 
 
-
-
 	/* get instance extensions properties count */
 	inline auto get_instance_extension_properties_count(const char* ___layer = nullptr) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkEnumerateInstanceExtensionProperties,
-						"failed to get number of vulkan instance extension properties",
-						___layer, &___count, nullptr);
+		vk::try_execute<"failed to enumerate instance extension properties">(
+				::vk_enumerate_instance_extension_properties,
+				___layer, &___count, nullptr);
 		return ___count;
 	}
 
@@ -47,20 +44,19 @@ namespace vk {
 		auto ___count = vk::get_instance_extension_properties_count(___layer);
 		vk::vector<vk::extension_properties> ___properties;
 		___properties.resize(___count);
-		vk::try_execute(::vkEnumerateInstanceExtensionProperties,
-						"failed to get vulkan instance extension properties",
-						___layer, &___count, ___properties.data());
+		vk::try_execute<"failed to enumerate instance extension properties">(
+				::vk_enumerate_instance_extension_properties,
+				___layer, &___count, ___properties.data());
 		return ___properties;
 	}
-
 
 	/* get instance layer properties count */
 	#if defined(ENGINE_VL_DEBUG)
 	inline auto get_instance_layer_properties_count(void) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkEnumerateInstanceLayerProperties,
-						"failed to get number of vulkan instance layer properties",
-						&___count, nullptr);
+		vk::try_execute<"failed to enumerate instance layer properties">(
+				::vk_enumerate_instance_layer_properties,
+				&___count, nullptr);
 		return ___count;
 	}
 	#endif
@@ -71,9 +67,9 @@ namespace vk {
 		auto ___count = vk::get_instance_layer_properties_count();
 		vk::vector<vk::layer_properties> ___properties;
 		___properties.resize(___count);
-		vk::try_execute(::vkEnumerateInstanceLayerProperties,
-						"failed to get vulkan instance layer properties",
-						&___count, ___properties.data());
+		vk::try_execute<"failed to enumerate instance layer properties">(
+				::vk_enumerate_instance_layer_properties,
+				&___count, ___properties.data());
 		return ___properties;
 	}
 	#endif
@@ -81,9 +77,9 @@ namespace vk {
 	/* get instance proc address */
 	template <typename F>
 	inline auto get_instance_proc_addr(const vk::instance& ___instance, const char* ___name) -> F {
-		auto ___func = ::vkGetInstanceProcAddr(___instance, ___name);
+		auto ___func = ::vk_get_instance_proc_addr(___instance, ___name);
 		if (___func == nullptr)
-			throw vk::exception{"failed to get instance proc address", VK_ERROR_INITIALIZATION_FAILED};
+			throw vk::exception{"failed to get instance proc addr", VK_ERROR_INITIALIZATION_FAILED};
 		return reinterpret_cast<F>(___func);
 	}
 
@@ -93,9 +89,9 @@ namespace vk {
 	/* get physical devices count */
 	inline auto get_physical_devices_count(const vk::instance& ___instance) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkEnumeratePhysicalDevices,
-						"failed to get number of physical devices",
-						___instance, &___count, nullptr);
+		vk::try_execute<"failed to enumerate physical devices">(
+				::vk_enumerate_physical_devices,
+				___instance, &___count, nullptr);
 		return ___count;
 	}
 
@@ -109,10 +105,10 @@ namespace vk {
 		auto ___count = vk::get_physical_devices_count(___instance);
 		vk::vector<T> ___devices;
 		___devices.resize(___count);
-		vk::try_execute(::vkEnumeratePhysicalDevices,
-						"failed to get physical devices",
-						___instance, &___count,
-						reinterpret_cast<vk::physical_device*>(___devices.data()));
+		vk::try_execute<"failed to enumerate physical devices">(
+				::vk_enumerate_physical_devices,
+				___instance, &___count,
+				reinterpret_cast<vk::physical_device*>(___devices.data()));
 		return ___devices;
 	}
 
@@ -120,9 +116,9 @@ namespace vk {
 	inline auto get_device_extension_properties_count(const vk::physical_device& ___device,
 													  const char* ___layer = nullptr) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkEnumerateDeviceExtensionProperties,
-						"failed to get number of vulkan device extension properties",
-						___device, ___layer, &___count, nullptr);
+		vk::try_execute<"failed to enumerate device extension properties">(
+				::vk_enumerate_device_extension_properties,
+				___device, ___layer, &___count, nullptr);
 		return ___count;
 	}
 
@@ -132,9 +128,9 @@ namespace vk {
 		auto ___count = vk::get_device_extension_properties_count(___device, ___layer);
 		vk::vector<vk::extension_properties> ___properties;
 		___properties.resize(___count);
-		vk::try_execute(::vkEnumerateDeviceExtensionProperties,
-						"failed to get vulkan device extension properties",
-						___device, ___layer, &___count, ___properties.data());
+		vk::try_execute<"failed to enumerate device extension properties">(
+				::vk_enumerate_device_extension_properties,
+				___device, ___layer, &___count, ___properties.data());
 		return ___properties;
 	}
 
@@ -142,9 +138,9 @@ namespace vk {
 	inline auto get_physical_device_surface_capabilities(const vk::physical_device& ___device,
 														 const vk::surface& ___surface) -> vk::surface_capabilities {
 		vk::surface_capabilities ___capabilities;
-		vk::try_execute(::vkGetPhysicalDeviceSurfaceCapabilitiesKHR,
-						"failed to get physical device surface capabilities",
-						___device, ___surface, &___capabilities);
+		vk::try_execute<"failed to get physical device surface capabilities">(
+				::vk_get_physical_device_surface_capabilities_khr,
+				___device, ___surface, &___capabilities);
 		return ___capabilities;
 	}
 
@@ -171,9 +167,9 @@ namespace vk {
 	inline auto get_physical_device_surface_support(const vk::physical_device& ___device,
 													const vk::surface& ___surface, vk::u32 ___family) -> bool {
 		vk::u32 ___present = VK_FALSE;
-		vk::try_execute(::vkGetPhysicalDeviceSurfaceSupportKHR,
-						"failed to get physical device surface support",
-						___device, ___family, ___surface, &___present);
+		vk::try_execute<"failed to get physical device surface support">(
+				::vk_get_physical_device_surface_support_khr,
+				___device, ___family, ___surface, &___present);
 		return ___present == VK_TRUE;
 	}
 
@@ -185,9 +181,9 @@ namespace vk {
 	inline auto get_physical_device_surface_formats_count(const vk::physical_device& ___device,
 														  const vk::surface& ___surface) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkGetPhysicalDeviceSurfaceFormatsKHR,
-						"failed to get number of physical device surface formats",
-						___device, ___surface, &___count, nullptr);
+		vk::try_execute<"failed to get physical device surface formats">(
+				::vk_get_physical_device_surface_formats_khr,
+				___device, ___surface, &___count, nullptr);
 		return ___count;
 	}
 
@@ -197,9 +193,9 @@ namespace vk {
 		auto ___count = vk::get_physical_device_surface_formats_count(___device, ___surface);
 		vk::vector<vk::surface_format> ___formats;
 		___formats.resize(___count);
-		vk::try_execute(::vkGetPhysicalDeviceSurfaceFormatsKHR,
-						"failed to get physical device surface formats",
-						___device, ___surface, &___count, ___formats.data());
+		vk::try_execute<"failed to get physical device surface formats">(
+				::vk_get_physical_device_surface_formats_khr,
+				___device, ___surface, &___count, ___formats.data());
 		return ___formats;
 	}
 
@@ -208,9 +204,9 @@ namespace vk {
 	inline auto get_physical_device_surface_present_modes_count(const vk::physical_device& ___device,
 																const vk::surface& ___surface) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkGetPhysicalDeviceSurfacePresentModesKHR,
-						"failed to get number of physical device surface present modes",
-						___device, ___surface, &___count, nullptr);
+		vk::try_execute<"failed to get physical device surface present modes">(
+				::vk_get_physical_device_surface_present_modes_khr,
+				___device, ___surface, &___count, nullptr);
 		return ___count;
 	}
 
@@ -220,9 +216,9 @@ namespace vk {
 		auto ___count = vk::get_physical_device_surface_present_modes_count(___device, ___surface);
 		vk::vector<vk::present_mode> ___modes;
 		___modes.resize(___count);
-		vk::try_execute(::vkGetPhysicalDeviceSurfacePresentModesKHR,
-						"failed to get physical device surface present modes",
-						___device, ___surface, &___count, ___modes.data());
+		vk::try_execute<"failed to get physical device surface present modes">(
+				::vk_get_physical_device_surface_present_modes_khr,
+				___device, ___surface, &___count, ___modes.data());
 		return ___modes;
 	}
 
@@ -254,9 +250,9 @@ namespace vk {
 	/* get swapchain images count */
 	inline auto get_swapchain_images_count(const vk::device& ___device, const vk::swapchain& ___swapchain) -> vk::u32 {
 		vk::u32 ___count = 0U;
-		vk::try_execute(::vkGetSwapchainImagesKHR,
-						"failed to get number of swapchain images",
-						___device, ___swapchain, &___count, nullptr);
+		vk::try_execute<"failed to get swapchain images">(
+				::vk_get_swapchain_images_khr,
+				___device, ___swapchain, &___count, nullptr);
 		return ___count;
 	}
 
@@ -266,68 +262,11 @@ namespace vk {
 		auto ___count = vk::get_swapchain_images_count(___device, ___swapchain);
 		vk::vector<vk::image> ___images;
 		___images.resize(___count);
-		vk::try_execute(::vkGetSwapchainImagesKHR,
-						"failed to get swapchain images",
-						___device, ___swapchain, &___count, ___images.data());
+		vk::try_execute<"failed to get swapchain images">(
+				::vk_get_swapchain_images_khr,
+				___device, ___swapchain, &___count, ___images.data());
 		return ___images;
 	}
-
-
-
-	// -- command buffer ------------------------------------------------------
-
-
-	///* cmd execute commands */
-	//inline auto cmd_execute_commands(const vk::command_buffer& ___buffer,
-	//								 const vk::u32 ___count,
-	//								 const vk::command_buffer* ___buffers) noexcept -> void {
-	//	::vkCmdExecuteCommands(___buffer, ___count, ___buffers);
-	//}
-
-
-	/* end command buffer */
-	//inline auto end_command_buffer(const vk::command_buffer& ___buffer) -> void {
-	//	vk::try_execute<"[end_command_buffer] failed">(
-	//			::vkEndCommandBuffer,
-	//			___buffer);
-	//}
-
-	///* cmd draw */
-	//inline auto cmd_draw(const vk::command_buffer& ___buffer,
-	//					 const vk::u32 ___vertex_count,
-	//					 const vk::u32 ___instance_count,
-	//					 const vk::u32 ___first_vertex,
-	//					 const vk::u32 ___first_instance) noexcept -> void {
-	//	::vkCmdDraw(___buffer, ___vertex_count, ___instance_count, ___first_vertex, ___first_instance);
-	//}
-
-
-	/* cmd begin render pass */
-	//inline auto cmd_begin_render_pass(const vk::command_buffer& ___buffer,
-	//								  const vk::render_pass_begin_info& ___info,
-	//								  const vk::subpass_contents& ___contents = VK_SUBPASS_CONTENTS_INLINE) noexcept -> void {
-	//	::vkCmdBeginRenderPass(___buffer, &___info, ___contents);
-	//}
-
-	/* cmd end render pass */
-	//inline auto cmd_end_render_pass(const vk::command_buffer& ___buffer) noexcept -> void {
-	//	::vkCmdEndRenderPass(___buffer);
-	//}
-
-
-
-	// -- vertex buffers ------------------------------------------------------
-
-	/* cmd bind vertex buffers */
-	inline auto cmd_bind_vertex_buffers(const vk::command_buffer& ___buffer,
-										const vk::u32 ___first_binding,
-										const vk::u32 ___binding_count,
-										const vk::buffer* ___buffers,
-										const vk::device_size* ___offsets) noexcept -> void {
-		::vkCmdBindVertexBuffers(___buffer, ___first_binding, ___binding_count, ___buffers, ___offsets);
-	}
-
-
 
 } // namespace vk
 

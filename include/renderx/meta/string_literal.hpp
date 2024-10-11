@@ -1,74 +1,15 @@
-#ifndef XNS_STRING_LITERAL_HEADER
-#define XNS_STRING_LITERAL_HEADER
+#ifndef ___RENDERX_STRING_LITERAL___
+#define ___RENDERX_STRING_LITERAL___
 
 #include "engine/types.hpp"
-//#include "xns/type_traits/relationships_and_property_queries/is_comparable.hpp"
 
 
+// -- R E N D E R X  N A M E S P A C E ----------------------------------------
 
 namespace rx {
 
 
-	// -- C O P Y -------------------------------------------------------------
-	//
-	//namespace ___impl {
-	//
-	//	/* copy implementation */
-	//	template <typename T, decltype(sizeof(0)) D, decltype(D) S, decltype(S) I>
-	//	constexpr auto ___copy(T (&dst)[D], const T (&src)[S]) noexcept -> void {
-	//		if constexpr (I == D or I == S){
-	//			return;
-	//		} else {
-	//			dst[I] = src[I];
-	//			xns::___impl::___copy<T, D, S, I + 1>(dst, src);
-	//		}
-	//	}
-	//
-	//}
-	//
-	///* copy */
-	//template <typename ___type, xns::size_t ___ds, xns::size_t ___ss>
-	//constexpr auto copy(___type (&___dst)[___ds], const ___type (&___src)[___ss]) noexcept -> void {
-	//	xns::___impl::___copy<___type, ___ds, ___ss, 0U>(___dst, ___src);
-	//}
-	//
-	//
-	//// -- C O M P A R E -------------------------------------------------------
-	//
-	//
-	//namespace ___impl {
-	//
-	//	/* compare implementation */
-	//	template <typename T1, typename T2, decltype(sizeof(0)) S, decltype(S) I>
-	//	constexpr auto ___compare(const T1 (&lhs)[S], const T2 (&rhs)[S]) noexcept -> signed int {
-	//		if constexpr (I == S) {
-	//			return 0;
-	//		} else {
-	//			return (lhs[I] == rhs[I])
-	//				 ? (xns::___impl::___compare<T1, T2, S, I + 1>(lhs, rhs))
-	//				 : (lhs[I] > rhs[I] ? +1 : -1);
-	//		}
-	//	}
-	//
-	//}
-	//
-	///* compare */
-	//template <typename T1, typename T2, decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto compare(const T1 (&lhs)[L], const T2 (&rhs)[R]) noexcept -> signed int {
-	//
-	//	// assert that type is comparable
-	//	static_assert(xns::is_comparable<T1, T2>, "Template parameter 'T' must be a comparable type.");
-	//
-	//	// check for equal size
-	//	if constexpr (L == R)
-	//		return xns::___impl::___compare<T1, T2, L, 0U>(lhs, rhs);
-	//	else
-	//		return (L > R ? +1U : -1U);
-	//}
-	//
-	//
-
-	// -- B A S I C  S T R I N G  L I T E R A L -------------------------------
+	// -- S T R I N G  L I T E R A L ------------------------------------------
 
 	template <rx::size_t ___size>
 	struct string_literal final {
@@ -78,7 +19,7 @@ namespace rx {
 
 		/* check for null size */
 		static_assert(___size > 0U,
-				"string_literal: template parameter '___size' must be greater than zero.");
+			"string_literal: empty string literals are not allowed");
 
 
 		private:
@@ -167,41 +108,69 @@ namespace rx {
 			// -- public comparison operators ---------------------------------
 
 			/* equality operator */
-			//template <typename U, size_type M>
-			//consteval auto operator==(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) == 0;
-			//}
-			//
-			///* inequality operator */
-			//template <typename U, size_type M>
-			//consteval auto operator!=(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) != 0;
-			//}
-			//
-			///* less than operator */
-			//template <typename U, size_type M>
-			//consteval auto operator<(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) < 0;
-			//}
-			//
-			///* greater than operator */
-			//template <typename U, size_type M>
-			//consteval auto operator>(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) > 0;
-			//}
-			//
-			///* less than or equal to operator */
-			//template <typename U, size_type M>
-			//consteval auto operator<=(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) <= 0;
-			//}
-			//
-			///* greater than or equal to operator */
-			//template <typename U, size_type M>
-			//consteval auto operator>=(const basic_string_literal<U, M>& other) const noexcept -> bool {
-			//	return xns::compare(_data, other._data) >= 0;
-			//}
+			template <size_type ___sz>
+			consteval auto operator==(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) == 0;
+			}
 
+			/* inequality operator */
+			template <size_type ___sz>
+			consteval auto operator!=(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) != 0;
+			}
+
+			/* less than operator */
+			template <size_type ___sz>
+			consteval auto operator<(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) < 0;
+			}
+
+			/* greater than operator */
+			template <size_type ___sz>
+			consteval auto operator>(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) > 0;
+			}
+
+			/* less than or equal to operator */
+			template <size_type ___sz>
+			consteval auto operator<=(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) <= 0;
+			}
+
+			/* greater than or equal to operator */
+			template <size_type ___sz>
+			consteval auto operator>=(const rx::string_literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(_data, other._data) >= 0;
+			}
+
+
+		private:
+
+			/* compare implementation */
+			template <size_type S, size_type I>
+			static consteval auto _compare_impl(const char (&lhs)[S], const char (&rhs)[S]) noexcept -> signed int {
+
+				if constexpr (I == S) {
+					return 0;
+				} else {
+					return (lhs[I] == rhs[I])
+						? (___self::_compare_impl<S, I + 1>(lhs, rhs))
+						: (lhs[I] > rhs[I] ? +1 : -1);
+				}
+			}
+
+			/* compare */
+			template <size_type ls, size_type lr>
+			static consteval auto _compare(const char (&lhs)[ls], const char (&rhs)[lr]) noexcept -> signed int {
+
+				// check for equal size
+				if constexpr (ls == lr) {
+					return ___self::_compare_impl<ls, 0U>(lhs, rhs);
+				}
+				else {
+					return (ls > lr) ? +1 : -1;
+				}
+			}
 	};
 
 
@@ -219,8 +188,8 @@ namespace rx {
 	//								 const T2 (&rhs)[R]) noexcept -> bool {
 	//	return xns::compare(lhs._data, rhs) == 0;
 	//}
-	//
-	///* equality operator (reverse) */
+
+	/* equality operator (reverse) */
 	//template <typename T1, typename T2,
 	//		  decltype(sizeof(0)) L, decltype(L) R>
 	//consteval auto operator==(const T1 (&lhs)[L],
@@ -307,6 +276,7 @@ namespace rx {
 	//								 const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
 	//	return xns::compare(lhs, rhs._data) >= 0;
 	//}
+
 
 
 

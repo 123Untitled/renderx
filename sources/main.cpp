@@ -63,20 +63,40 @@
 // include for event tap
 #include <ApplicationServices/ApplicationServices.h>
 
+#include "system/directory.hpp"
+
+#include "containers/static_map.hpp"
+
+
 
 int main(void) {
+
+	try {
+
+		xe::static_map<vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>,
+			"basic"> m{std::string{"shaders/basic.vert.spv"}};
+
+
+		m.for_each([](const auto& value) {
+			//std::cout << value << std::endl;
+		});
+	}
+
+	catch (const vk::exception& except) {
+		except.what();
+	}
+
+	catch (...) {
+		std::cerr << "unknown exception" << std::endl;
+	}
+
+	return 0;
+
 
 	::signal(SIGINT, [](int) {
 		rx::running::stop();
 		rx::write("\n");
 	});
-
-
-
-
-
-
-	// launch as daemon
 
 	/*
 	rx::object obj;
