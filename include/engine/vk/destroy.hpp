@@ -61,7 +61,7 @@ namespace vk {
 	/* is destroyable */
 	template <typename... ___params>
 	concept is_destroyable = requires(___params&&... ___args) {
-		{ vk::destroy(xns::forward<___params>(___args)...) } -> xns::is_same<void>;
+		{ vk::destroy(std::forward<___params>(___args)...) } -> std::same_as<void>;
 	};
 
 

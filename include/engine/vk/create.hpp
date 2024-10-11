@@ -100,12 +100,12 @@ namespace vk {
 	/* is creatable */
 	template <typename ___type, typename... ___params>
 	concept is_creatable = requires(___params&&... ___args) {
-		{ vk::create(xns::forward<___params>(___args)...) } -> xns::is_same<___type>;
+		{ vk::create(std::forward<___params>(___args)...) } -> std::same_as<___type>;
 	};
 
 	/* create return */
 	template <typename... ___params>
-	using create_return = decltype(vk::create(xns::declval<___params>()...));
+	using create_return = decltype(vk::create(std::declval<___params>()...));
 
 
 } // namespace vk

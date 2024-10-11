@@ -17,7 +17,7 @@
 // vulkan headers
 #include <vulkan/vulkan.h>
 
-#include <xns/vector.hpp>
+#include <vector>
 
 
 //#include <vector>
@@ -45,7 +45,7 @@ namespace vk {
 
 	/* vector type */
 	template <typename T>
-	using vector = xns::vector<T>;
+	using vector = std::vector<T>;
 
 
 	/* result */

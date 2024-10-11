@@ -23,7 +23,7 @@
 
 #include "engine/vk/utils.hpp"
 
-#include <xns/string.hpp>
+#include <string_view>
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -150,7 +150,7 @@ namespace vk {
 
 	/* supports swapchain */
 	inline auto supports_swapchain(const vk::extension_properties& ___property) noexcept -> bool {
-		return xns::string_view{___property.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+		return std::string_view{___property.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 	}
 
 	/* get physical device properties */

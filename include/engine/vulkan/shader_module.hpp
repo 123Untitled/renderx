@@ -22,35 +22,77 @@
 
 
 #include <cstddef>
-#include <xns/string_literal.hpp>
-#include <xns/unique_descriptor.hpp>
+#include "renderx/meta/string_literal.hpp"
 #include <sys/stat.h>
+#include <fstream>
+#include <vector>
 
 
 
-inline auto get_file_content(const xns::string_view& path) -> xns::vector<char> {
+inline auto get_file_content(const std::string_view& path) -> std::vector<char> {
 
-	xns::unique_descriptor file{::open(path.data(), O_RDONLY)};
+	// open file
+	std::ifstream file{path.data(), std::ios::binary};
 
+	// check if file is open
+	if (not file.is_open())
+		throw vk::exception{"failed to open shader file"};
+
+	// get file size
+	file.seekg(0, std::ios::end);
+
+	// get file size
+	const auto size = file.tellg();
+
+	// check if file size is valid
+	if (size == -1)
+		throw vk::exception{"failed to open shader file"};
+
+	// reset file position
+	file.seekg(0, std::ios::beg);
+
+	// create buffer
+	std::vector<char> buffer;
+
+	// resize buffer
+	buffer.resize((std::size_t)size);
+
+	// read file
+	file.read(buffer.data(), size);
+
+	// check if file is readed
 	if (not file)
-		throw vk::exception{"failed to open shader file"};
-
-	struct stat stat;
-	if (::fstat(file, &stat) == -1)
-		throw vk::exception{"failed to open shader file"};
-
-	const vk::u32 size = static_cast<vk::u32>(stat.st_size);
-
-	xns::vector<char> buffer;
-	buffer.resize(size);
-
-
-	const auto readed = ::read(file, buffer.data(), size);
-
-	if (readed != size)
 		throw vk::exception{"failed to read shader file"};
 
+	// close file
+	file.close();
+
+	// return buffer
 	return buffer;
+
+
+
+	//xns::unique_descriptor file{::open(path.data(), O_RDONLY)};
+	//
+	//if (not file)
+	//	throw vk::exception{"failed to open shader file"};
+	//
+	//struct stat stat;
+	//if (::fstat(file, &stat) == -1)
+	//	throw vk::exception{"failed to open shader file"};
+	//
+	//const vk::u32 size = static_cast<vk::u32>(stat.st_size);
+	//
+	//xns::vector<char> buffer;
+	//buffer.resize(size);
+	//
+	//
+	//const auto readed = ::read(file, buffer.data(), size);
+	//
+	//if (readed != size)
+	//	throw vk::exception{"failed to read shader file"};
+
+	//return buffer;
 }
 
 
@@ -90,7 +132,7 @@ namespace vulkan {
 			}
 
 			/* path constructor */
-			shader_module(const xns::string& ___path)
+			shader_module(const std::string& ___path)
 			/* uninitialized module */ {
 
 				// get shader data

@@ -22,8 +22,8 @@
 #include <unordered_map>
 #include <map>
 
-#include <xns/string.hpp>
-#include <xns/literal_map.hpp>
+//#include <xns/string.hpp>
+//#include <xns/literal_map.hpp>
 #include <filesystem>
 
 
@@ -99,7 +99,7 @@ namespace engine {
 			/* load vertex */
 			auto load_vertex(const std::string& path) -> void {
 
-				xns::string p{path.data(), path.size()};
+				std::string p{path.data(), path.size()};
 
 				// get base name
 				const auto name = std::filesystem::path{path}.stem().string();
@@ -114,7 +114,7 @@ namespace engine {
 			/* load fragment */
 			auto load_fragment(const std::string& path) -> void {
 
-				xns::string p{path.data(), path.size()};
+				std::string p{path.data(), path.size()};
 				const auto name = std::filesystem::path{path}.stem().string();
 
 				if (_fmodules.find(name) != _fmodules.end())

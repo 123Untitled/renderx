@@ -14,6 +14,12 @@ set(executable "renderx")
 project(${executable} VERSION 0.1.0 LANGUAGES CXX)
 
 
+# -- G E N E R A T O R --------------------------------------------------------
+
+# use ninja
+find_program(NINJA_FOUND ninja REQUIRED)
+
+
 # -- D I R E C T O R I E S -----------------------------------------------------
 
 # set the source directory
@@ -30,6 +36,13 @@ file(GLOB_RECURSE srcs ${src_dir}/*.cpp)
 
 
 # -- C O M P I L E R  O P T I O N S -------------------------------------------
+
+
+# use ccache
+find_program(CCACHE_FOUND ccache REQUIRED)
+
+# set ccache as the compiler
+set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
 
 # define c++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -117,10 +130,10 @@ find_package(Vulkan REQUIRED)
 add_executable(${executable} ${srcs})
 
 # link libraries
-target_link_libraries(${executable} glfw glm Vulkan::Vulkan ${CMAKE_SOURCE_DIR}/external/xns/lib/libxns.a)
+target_link_libraries(${executable} glfw glm Vulkan::Vulkan)
 
 # include directories
-target_include_directories(${executable} PRIVATE ${inc_dir} ${CMAKE_SOURCE_DIR}/external/xns/include)
+target_include_directories(${executable} PRIVATE ${inc_dir})
 
 # set compile options
 target_compile_options(${executable} PRIVATE ${cxxflags})

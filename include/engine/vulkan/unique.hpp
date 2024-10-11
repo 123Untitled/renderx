@@ -141,7 +141,7 @@ namespace vk {
 	/* make unique */
 	template <typename... ___params>
 	auto make_unique(___params&&... ___args) -> vk::unique<vk::create_return<___params...>> {
-		return {vk::create(xns::forward<___params>(___args)...)};
+		return {vk::create(std::forward<___params>(___args)...)};
 	}
 
 } // namespace vk

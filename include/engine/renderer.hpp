@@ -96,7 +96,7 @@ namespace engine {
 			vulkan::sync<3U> _sync;
 
 			/* mesh */
-			xns::vector<rx::mesh> _meshes;
+			std::vector<rx::mesh> _meshes;
 
 			/* objects */
 			vk::vector<rx::object> _objects;

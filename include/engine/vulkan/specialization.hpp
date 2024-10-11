@@ -13,12 +13,11 @@
 #ifndef ENGINE_VULKAN_SPECIALIZATION_HEADER
 #define ENGINE_VULKAN_SPECIALIZATION_HEADER
 
-#include <xns/integer_sequence.hpp>
-#include <xns/type_at.hpp>
-#include <xns/is_trivially_copyable.hpp>
-#include <xns/is_nothrow_default_constructible.hpp>
-#include <xns/is_empty.hpp>
-#include <xns/literal_map.hpp>
+#include "renderx/meta/integer_sequence.hpp"
+#include "renderx/meta/type_at.hpp"
+#include <type_traits>
+#include <iostream>
+#include "renderx/meta/string_literal.hpp"
 
 #include "engine/vk/typedefs.hpp"
 
@@ -37,15 +36,15 @@ namespace vulkan {
 		// -- assertions ------------------------------------------------------
 
 		/* check if all types are trivially copyable */
-		static_assert(xns::are_trivially_copyable<___types...>,
+		static_assert((std::is_trivially_copyable_v<___types> and ...),
 				"specialization: all types must be trivially copyable");
 
 		/* check if all types are nothrow constructible */
-		static_assert(xns::are_nothrow_default_constructible<___types...>,
+		static_assert((std::is_nothrow_default_constructible_v<___types> and ...),
 				"specialization: all types must be nothrow constructible");
 
 		/* check if all types are not empty classes */
-		static_assert((not xns::is_empty<___types> and ...),
+		static_assert((not std::is_empty_v<___types> and ...),
 				"specialization: all types must not be empty classes");
 
 
@@ -117,7 +116,7 @@ namespace vulkan {
 				/* variadic constructor */
 				template <typename... ___params>
 				constexpr ___impl(___params&&... ___args) noexcept
-				: ___wrapper<___idxs, ___types>{xns::forward<___params>(___args)}... {
+				: ___wrapper<___idxs, ___types>{std::forward<___params>(___args)}... {
 				}
 
 				/* copy constructor */
@@ -226,7 +225,7 @@ namespace vulkan {
 			/* variadic constructor */
 			template <typename... ___params>
 			constexpr specialization(___params&&... ___args) noexcept
-			: _impl{xns::forward<___params>(___args)...},
+			: _impl{std::forward<___params>(___args)...},
 			  _entries{},
 			  _info{
 				// map entry count
@@ -357,25 +356,25 @@ namespace vulkan {
 	/* test specialization */
 	inline auto test_specialization(void) noexcept -> void {
 
-		xns::literal_map<vulkan::specialization<int, float>, "sp1", "sp2"> sp_map{
-			vulkan::specialization<int, float>{123, 99.9f},
-			vulkan::specialization<int, float>{42, 42.0f}
-		};
-
-		xns::get<"sp1">(sp_map).print();
-
-		//vulkan::specialization<int, float> sp1{};
-
-		constexpr int    i = 123;
-		constexpr short  s = 4242;
-		constexpr double d = 99.9;
-		constexpr char   c = 'x';
-
-		vulkan::specialization sp{i, s, d, c};
-
-		const auto& info = sp.info();
-		const auto& entry = sp[0];
-		sp.print();
+		//xns::literal_map<vulkan::specialization<int, float>, "sp1", "sp2"> sp_map{
+		//	vulkan::specialization<int, float>{123, 99.9f},
+		//	vulkan::specialization<int, float>{42, 42.0f}
+		//};
+		//
+		//xns::get<"sp1">(sp_map).print();
+		//
+		////vulkan::specialization<int, float> sp1{};
+		//
+		//constexpr int    i = 123;
+		//constexpr short  s = 4242;
+		//constexpr double d = 99.9;
+		//constexpr char   c = 'x';
+		//
+		//vulkan::specialization sp{i, s, d, c};
+		//
+		//const auto& info = sp.info();
+		//const auto& entry = sp[0];
+		//sp.print();
 
 		//auto& e = sp[0];
 	}

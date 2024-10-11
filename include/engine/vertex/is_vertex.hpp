@@ -14,7 +14,7 @@
 #define ENGINE_META_VERTEX_HPP
 
 #include "engine/vk/typedefs.hpp"
-#include <xns/is_same.hpp>
+#include <concepts>
 
 #include "engine/vertex/vertex.hpp"
 
@@ -34,7 +34,7 @@ namespace engine {
 		/* vertex concept */
 		template <typename ___type>
 		concept is_vertex = requires {
-			{ ___type::pipeline_vertex_input_state_info() } -> xns::same_as<const vk::pipeline_vertex_input_state_info&>;
+			{ ___type::pipeline_vertex_input_state_info() } -> std::same_as<const vk::pipeline_vertex_input_state_info&>;
 		};
 
 	} // namespace meta
@@ -55,14 +55,14 @@ namespace vx {
 		/* false specialization */
 		template <typename ___type>
 		struct ___is_vertex final {
-			___xns_not_instantiable(___is_vertex);
+			//___xns_not_instantiable(___is_vertex);
 			static constexpr bool value = false;
 		};
 
 		/* true specialization */
 		template <typename... ___types>
 		struct ___is_vertex<engine::vertex<___types...>> final {
-			___xns_not_instantiable(___is_vertex);
+			//___xns_not_instantiable(___is_vertex);
 			static constexpr bool value = true;
 		};
 

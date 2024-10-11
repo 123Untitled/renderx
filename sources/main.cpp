@@ -115,11 +115,6 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	// memory catch block
-	catch (const xns::exception& except) {
-		std::cerr << except.message() << std::endl;
-		return EXIT_FAILURE;
-	}
 	catch (const char* except) {
 		std::cerr << except << std::endl;
 		return EXIT_FAILURE;

@@ -16,6 +16,8 @@
 #include "engine/vk/exception.hpp"
 #include "engine/vk/utils.hpp"
 
+#include <concepts>
+
 #include "renderx/memory/malloc.hpp"
 #include "renderx/memory/memcpy.hpp"
 
@@ -49,7 +51,7 @@ namespace vulkan {
 	// -- I S  L E V E L ------------------------------------------------------
 
 	template <typename ___type>
-	concept is_level = xns::same_as<___type, primary> || xns::same_as<___type, secondary>;
+	concept is_level = std::same_as<___type, primary> || std::same_as<___type, secondary>;
 
 
 	// -- C O M M A N D S -----------------------------------------------------
@@ -121,7 +123,7 @@ namespace vulkan {
 
 			/* level */
 			static constexpr auto level(void) noexcept -> vk::command_buffer_level {
-				if constexpr (xns::is_same<___type, primary>)
+				if constexpr (std::same_as<___type, primary>)
 					return VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 				else
 					return VK_COMMAND_BUFFER_LEVEL_SECONDARY;
