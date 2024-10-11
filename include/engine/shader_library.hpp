@@ -1,20 +1,5 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#pragma once
-
-#ifndef ENGINE_SHADER_LIBRARY_HPP
-#define ENGINE_SHADER_LIBRARY_HPP
-
-
-#include <vulkan/vulkan.h>
+#ifndef ___RENDERX_SHADER_LIBRARY___
+#define ___RENDERX_SHADER_LIBRARY___
 
 #include "engine/vulkan/shader_module.hpp"
 #include "engine/vk/typedefs.hpp"
@@ -22,38 +7,8 @@
 #include <unordered_map>
 #include <map>
 
-//#include <xns/string.hpp>
-//#include <xns/literal_map.hpp>
-#include <filesystem>
-
-
-
-#if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
-      && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
-      && (')' == 41) && ('*' == 42) && ('+' == 43) && (',' == 44) \
-      && ('-' == 45) && ('.' == 46) && ('/' == 47) && ('0' == 48) \
-      && ('1' == 49) && ('2' == 50) && ('3' == 51) && ('4' == 52) \
-      && ('5' == 53) && ('6' == 54) && ('7' == 55) && ('8' == 56) \
-      && ('9' == 57) && (':' == 58) && (';' == 59) && ('<' == 60) \
-      && ('=' == 61) && ('>' == 62) && ('?' == 63) && ('A' == 65) \
-      && ('B' == 66) && ('C' == 67) && ('D' == 68) && ('E' == 69) \
-      && ('F' == 70) && ('G' == 71) && ('H' == 72) && ('I' == 73) \
-      && ('J' == 74) && ('K' == 75) && ('L' == 76) && ('M' == 77) \
-      && ('N' == 78) && ('O' == 79) && ('P' == 80) && ('Q' == 81) \
-      && ('R' == 82) && ('S' == 83) && ('T' == 84) && ('U' == 85) \
-      && ('V' == 86) && ('W' == 87) && ('X' == 88) && ('Y' == 89) \
-      && ('Z' == 90) && ('[' == 91) && ('\\' == 92) && (']' == 93) \
-      && ('^' == 94) && ('_' == 95) && ('a' == 97) && ('b' == 98) \
-      && ('c' == 99) && ('d' == 100) && ('e' == 101) && ('f' == 102) \
-      && ('g' == 103) && ('h' == 104) && ('i' == 105) && ('j' == 106) \
-      && ('k' == 107) && ('l' == 108) && ('m' == 109) && ('n' == 110) \
-      && ('o' == 111) && ('p' == 112) && ('q' == 113) && ('r' == 114) \
-      && ('s' == 115) && ('t' == 116) && ('u' == 117) && ('v' == 118) \
-      && ('w' == 119) && ('x' == 120) && ('y' == 121) && ('z' == 122) \
-      && ('{' == 123) && ('|' == 124) && ('}' == 125) && ('~' == 126))
-/* The character set is not based on ISO-646.  */
-#error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
-#endif
+#include <dirent.h>
+#include <unistd.h>
 
 
 namespace vulkan {
@@ -99,28 +54,24 @@ namespace engine {
 			/* load vertex */
 			auto load_vertex(const std::string& path) -> void {
 
-				std::string p{path.data(), path.size()};
-
-				// get base name
-				const auto name = std::filesystem::path{path}.stem().string();
+				std::cout << "loading vertex shader: " << path << std::endl;
 
 				// check if already loaded
-				if (_vmodules.find(name) != _vmodules.end())
+				if (_vmodules.contains(path))
 					throw std::runtime_error{"shader already loaded"};
 
-				_vmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>{p};
+				_vmodules[path] = vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>{path};
 			}
 
 			/* load fragment */
 			auto load_fragment(const std::string& path) -> void {
 
-				std::string p{path.data(), path.size()};
-				const auto name = std::filesystem::path{path}.stem().string();
+				std::cout << "loading fragment shader: " << path << std::endl;
 
-				if (_fmodules.find(name) != _fmodules.end())
+				if (_fmodules.contains(path))
 					throw;
 
-				_fmodules[name] = vulkan::shader_module<VK_SHADER_STAGE_FRAGMENT_BIT>{p};
+				_fmodules[path] = vulkan::shader_module<VK_SHADER_STAGE_FRAGMENT_BIT>{path};
 			}
 
 			/* load compute */
@@ -298,42 +249,45 @@ namespace engine {
 			: _vmodules{}, _fmodules{} {
 
 				// root
-				constexpr std::string_view root{"shaders/spirv/"};
+				DIR* dir = ::opendir("shaders/");
 
-				// search for vertex shaders
-				std::filesystem::recursive_directory_iterator it{root};
+				if (dir == nullptr)
+					throw;
 
+				struct ::dirent* entry = ::readdir(dir);
 
-				// create lookup
-				const auto lookup = create_lookup();
+				auto lookup = create_lookup();
 
+				for (; entry != nullptr; entry = ::readdir(dir)) {
 
-				// iterate over files
-				for (;it != std::filesystem::end(it); ++it) {
-
-					if (not it->is_regular_file())
+					if (entry->d_type != DT_REG)
 						continue;
 
-					if (it->path().extension() != ".spv")
-						continue;
+					const auto name = std::string{entry->d_name};
 
-					// get parent directory name
-					const auto parent = it->path().parent_path().filename().string();
+					// get extension
+					const auto ext = name.substr(name.find_last_of('.') + 1);
+
+					if (ext != "spv")
+						continue;
 
 					// get stage
-					const auto res = lookup.find(parent);
+					const auto base = name.substr(0, name.find_last_of('.'));
+
+
+					// get stage
+					const auto stage = base.substr(base.find_first_of('.') + 1);
+
+					// find stage
+					const auto res = lookup.find(stage);
 
 					if (res == lookup.end())
-						throw;
-
-					// get path
-					const auto path = it->path().string();
+						throw "unknown stage";
 
 					// execute function
-					(this->*(res->second))(path);
+					(this->*(res->second))(std::string{"shaders/"} + name);
 				}
 			}
-
 
 			/* copy constructor */
 			shader_library(const ___self&) = default;
@@ -352,23 +306,25 @@ namespace engine {
 			// -- public accessors --------------------------------------------
 
 			/* get vertex module */
-			auto vertex_module(const std::string& name) const -> const vulkan::vertex_module& {
+			template <rx::size_t sz>
+			auto vertex_module(const char (&name)[sz]) const -> const vulkan::vertex_module& {
 
 				const auto res = _vmodules.find(name);
 
 				if (res == _vmodules.end())
-					throw;
+					throw std::runtime_error{"vertex module not found"};
 
 				return res->second;
 			}
 
 			/* get fragment module */
-			auto fragment_module(const std::string& name) const -> const vulkan::fragment_module& {
+			template <rx::size_t sz>
+			auto fragment_module(const char (&name)[sz]) const -> const vulkan::fragment_module& {
 
 				const auto res = _fmodules.find(name);
 
 				if (res == _fmodules.end())
-					throw;
+					throw std::runtime_error{"fragment module not found"};
 
 				return res->second;
 			}

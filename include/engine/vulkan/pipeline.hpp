@@ -183,9 +183,10 @@ namespace vulkan {
 
 				// shader stages
 				const vk::array stages {
-					___shaders.vertex_module("basic").stage_info(),
-					___shaders.fragment_module("basic").stage_info(/* specialization */)
+					___shaders.vertex_module("shaders/basic.vert.spv").stage_info(),
+					___shaders.fragment_module("shaders/basic.frag.spv").stage_info(/* specialization */)
 				};
+					
 
 				// vertex input info
 				const auto vertex_input_info = ___vertex::info();

@@ -110,6 +110,11 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
+	catch (const std::exception& except) {
+		std::cerr << except.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	catch (const engine::exception& except) {
 		except.print();
 		return EXIT_FAILURE;

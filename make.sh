@@ -1,21 +1,13 @@
 #!/usr/bin/env -S zsh --no-rcs --no-globalrcs --errexit --pipefail
 
 
+# -- C O L O R S --------------------------------------------------------------
+
 local -r success='\x1b[32m'
 local -r error='\x1b[31m'
 local -r warning='\x1b[33m'
 local -r info='\x1b[34m'
 local -r reset='\x1b[0m'
-
-
-echo $info \
-	'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n' \
-	'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n' \
-	' ╱         ╱         ╱         ╱         ╱\n' \
-	'╱         ╱         ╱        ▁╱       ▁▁╱ \n' \
-	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
-	$reset
-
 
 
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
@@ -27,8 +19,7 @@ local -r os=$(uname -s)
 # -- T H I S  S C R I P T -----------------------------------------------------
 
 # get current absolute directory path
-local -r cwd_dir='.'
-#$(pwd -P)
+local -r cwd_dir=$(pwd -P)
 
 # get script absolute directory path
 local -r script_dir=${${0%/*}:a}
@@ -52,13 +43,10 @@ local -r executable=$project
 local -r compile_db='compile_commands.json'
 
 # ninja file
-local -r ninja='build.ninja'
+local -r ninja=$cwd_dir'/build.ninja'
 
 
 # -- D I R E C T O R I E S ----------------------------------------------------
-
-# root directory
-#local -r cwd_dir='.'
 
 # source directory
 local -r src_dir=$cwd_dir'/sources'
@@ -70,10 +58,13 @@ local -r inc_dir=$cwd_dir'/include'
 local -r sha_dir=$cwd_dir'/shaders'
 
 # external directory
-local -r ext_dir=$cwd_dir'/external'
+local -r ext_dir=$cwd_dir'/.external'
 
 # spirv directory
 local -r spv_dir=$cwd_dir'/spirv'
+
+# ninja directory
+local -r ninja_dir=$cwd_dir'/.ninja'
 
 
 # -- F I L E S ----------------------------------------------------------------
@@ -89,6 +80,12 @@ local -r shas=($sha_dir'/'*'.glsl'(.N))
 
 # spirv files
 local -r spvs=(${shas/%.glsl/.spv})
+
+# header files
+local -r hdrs=($inc_dir'/'**'/'*'.hpp'(.N))
+
+# precompiled header
+local -r pchs=(${hdrs/%.hpp/.pch})
 
 
 
@@ -147,7 +144,7 @@ fi
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-local -r cxx='ccache clang++'
+local -r cxx='clang++'
 
 # cxx flags
 local -r cxxflags=('-std=c++2a'
@@ -200,11 +197,8 @@ function _install_dependency() {
 	# github url
 	local -r url='https://github.com/'$3'/'$libname'/archive/refs/tags/'$version'.tar.gz'
 
-	# repository path
-	local -r repo=$libname'-'$version
-
 	# build directory
-	local -r build=$repo'/build'
+	local -r build=$libname'/build'
 
 	# install prefix
 	local -r prefix=$ext_dir'/'$libname
@@ -215,8 +209,8 @@ function _install_dependency() {
 	# return if already installed
 	[[ -d $prefix ]] && return
 
-	# create external directory
-	mkdir -p $ext_dir
+	# create external and build directories
+	mkdir -p $ext_dir $build
 
 	# download if not present
 	if [[ ! -f $archive ]]; then
@@ -224,16 +218,16 @@ function _install_dependency() {
 	fi
 
 	# extract
-	tar --extract --verbose --file $archive
+	tar --extract --strip-components=1 --verbose --file $archive --directory $libname
 
 	# configure
-	cmake -S $repo -B $build $flags -G 'Ninja'
+	cmake -S $libname -B $build $flags -G 'Ninja'
 
 	# build and install
 	ninja -C $build install
 
 	# cleanup
-	rm -rf $repo $archive
+	rm -rf $libname $archive
 }
 
 # generate ninja file
@@ -242,38 +236,75 @@ function _generate_ninja() {
 	# check ninja file exists and is up to date
 	[[ -f $ninja ]] && [[ $ninja -nt $script ]] && return
 
-	local file=''
+	# file content
+	local file='\n'
 
-	file+='# Minimal version of Ninja required by this file\n'
+
+	# -- logo -----------------------------------------------------------------
+
+	file+='# -----------------------------------------------------------------------------\n'
+	file+='# ░▒▓███████▓▒░░▒▓█▓▒░▒▓███████▓▒░       ░▒▓█▓▒░░▒▓██████▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓████████▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░\n'
+	file+='# -----------------------------------------------------------------------------\n\n'
+
+
+	# minimal version
+	file+='# minimal version of Ninja required by this file\n'
 	file+='ninja_required_version = 1.10\n\n'
 
-	file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	# build directory
+	file+='# build directory\n'
+	file+='builddir = .ninja\n\n'
 
+	file+='# compiler and flags\n'
+	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n\n'
+
+
+	# -- rules ----------------------------------------------------------------
+
+	file+='# -- R U L E S ----------------------------------------------------------------\n\n'
+
+	file+='# rule to compile source files\n'
 	file+='rule compile\n'
 	file+='  command = $cxx $cxxflags -MT $out -MMD -MP -MF $out.d -c $in -o $out\n'
 	file+='  description = compile $in\n'
 	file+='  depfile = $out.d\n'
 	file+='  deps = gcc\n\n'
 
-	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n'
-
-	for ((i = 1; i <= $#srcs; ++i)); do
-		file+='# compile '${srcs[$i]:t:r}'\n'
-		file+='build '$objs[$i]': compile '$srcs[$i]' | '$ninja'\n\n'
-	done
-
-	file+='build '$executable': link '$objs'\n\n'
-
-
-
-	# -- shaders --------------------------------------------------------------
-
 	file+='# rule to compile shaders\n'
 	file+='rule shader\n'
 	file+='  command = glslc -fshader-stage=$stage $in -o $out\n'
-	file+='  description = shader $in\n\n'
+	file+='  description = shader $stage\n\n'
+
+	file+='# rule to link object files\n'
+	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n\n'
 
 
+
+	# -- builds ---------------------------------------------------------------
+
+	file+='# -- B U I L D S --------------------------------------------------------------\n\n'
+
+	# -- executable -----------------------------------------------------------
+
+	# link
+	file+='# link\n'
+	file+='build '$executable': $\n  link '$objs'\n\n'
+
+	# -- sources --------------------------------------------------------------
+
+	# loop over source files
+	for ((i = 1; i <= $#srcs; ++i)); do
+		file+='# compile '${srcs[$i]:t:r}'\n'
+		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | '$ninja'\n\n'
+	done
+
+	# -- shaders --------------------------------------------------------------
 
 	# loop over shader files
 	for ((i = 1; i <= $#shas; ++i)); do
@@ -288,23 +319,29 @@ function _generate_ninja() {
 		local stage=${sha:t:r:e}
 
 		file+='# shader '${sha:t:r}'\n'
-		file+='build '$spv': shader '$sha' | '$ninja'\n'
+		file+='build '$spv': $\n  shader '$sha' | '$ninja'\n'
 		file+='  stage = '$stage'\n\n'
 	done
 
 
 	# all target
-	file+='build all: phony '$executable' '$spvs'\n'
+	file+='# all target\n'
+	file+='build all: phony '$executable' $\n'$spvs'\n\n'
 
-	file+='default all\n'
+	# default target
+	file+='# default target\n'
+	file+='default all'
 
+	# create ninja directory
+	mkdir -p $ninja_dir
 
-
+	# write to ninja file
 	echo $file > $ninja
 
 	# print success
 	print $success'[+]'$reset $ninja
 }
+
 
 # ninja
 function _ninja() {
@@ -313,6 +350,11 @@ function _ninja() {
 
 # install dependencies
 function _install_dependencies() {
+
+	# install ninja
+	_install_dependency 'ninja' 'v1.12.1' 'ninja-build' '-DBUILD_TESTING=OFF' \
+														'-DCMAKE_BUILD_TYPE=Release' \
+														'-DNINJA_BUILD_BINARY=ON'
 
 	# install glfw
 	_install_dependency 'glfw' '3.4' 'glfw' '-DBUILD_SHARED_LIBS=OFF' \
@@ -324,45 +366,51 @@ function _install_dependencies() {
 	# install glm
 	_install_dependency 'glm' '1.0.1' 'g-truc' '-DBUILD_SHARED_LIBS=OFF' \
 											   '-DGLM_BUILD_TESTS=OFF'
+
 }
 
 # generate compile database
 function _generate_compile_db() {
 
+	ninja -f $ninja -t compdb > $compile_db
 
-	echo -n '[\n' > $compile_db
 
-	# loop over source files
-	for ((i = 1; i <= $#srcs; ++i)); do
-
-		# new entry
-		local entry=('\t{\n'
-					 '\t\t"directory": "'$cwd_dir'",\n'
-					 '\t\t"file": "'$srcs[$i]'",\n'
-					 '\t\t"output": "'$objs[$i]'",\n'
-					 '\t\t"arguments": [\n'
-					 '\t\t\t"'$cxx'",\n'
-					 '\t\t\t"-c",\n'
-					 '\t\t\t"'$srcs[$i]'",\n'
-					 '\t\t\t"-o",\n'
-					 '\t\t\t"'$objs[$i]'",\n')
-
-		# loop over compiler flags
-		for flag in $cxxflags; do
-			entry+=('\t\t\t"'$flag'",\n')
-		done
-
-		if [[ $i -lt $#srcs ]]; then
-			entry+=('\t\t]\n\t},\n')
-		else
-			entry+=('\t\t]\n\t}\n')
-		fi
-
-		echo -n $entry >> $compile_db
-
-	done
-
-	echo -n ']' >> $compile_db
+	#echo -n '[\n' > $compile_db
+	#
+	## loop over source files
+	#for ((i = 1; i <= $#srcs; ++i)); do
+	#
+	#	# new entry
+	#	local entry=('\t{\n'
+	#				 '\t\t"directory": "'$cwd_dir'",\n'
+	#				 '\t\t"file": "'$srcs[$i]'",\n'
+	#				 '\t\t"output": "'$objs[$i]'",\n'
+	#				 '\t\t"arguments": [\n'
+	#				 '\t\t\t"'$cxx'",\n')
+	#
+	#	# loop over compiler flags
+	#	for flag in $cxxflags; do
+	#		entry+=('\t\t\t"'$flag'",\n')
+	#	done
+	#
+	#
+	#	entry+=('\t\t\t"-c",\n'
+	#			'\t\t\t"'$srcs[$i]'",\n'
+	#			'\t\t\t"-o",\n'
+	#			'\t\t\t"'$objs[$i]'"\n')
+	#
+	#
+	#	if [[ $i -lt $#srcs ]]; then
+	#		entry+=('\t\t]\n\t},\n')
+	#	else
+	#		entry+=('\t\t]\n\t}\n')
+	#	fi
+	#
+	#	echo -n $entry >> $compile_db
+	#
+	#done
+	#
+	#echo -n ']' >> $compile_db
 
 	# print success
 	print $success'[+]'$reset $compile_db
@@ -403,9 +451,6 @@ function _build() {
 	# generate compile database
 	_compile_database
 
-	# build shaders
-	#$sha_dir'/make.sh'
-
 	# build
 	_ninja
 }
@@ -415,14 +460,24 @@ function _build() {
 function _clean() {
 	_generate_ninja
 	ninja -f $ninja -t clean
-	#$sha_dir'/make.sh' clean
 }
 
 # fclean
 function _fclean() {
 	_clean
-	rm -rvf $ninja '.ninja'*(.N) $ext_dir $compile_db '.cache'
+	rm -rvf $ninja_dir $ext_dir $compile_db '.cache'
 }
+
+
+# -- M A I N ------------------------------------------------------------------
+
+echo $warning \
+	'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n' \
+	'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n' \
+	' ╱         ╱         ╱         ╱         ╱\n' \
+	'╱         ╱         ╱        ▁╱       ▁▁╱ \n' \
+	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
+	$reset
 
 
 if [[ $# -eq 0 ]]; then
@@ -443,7 +498,13 @@ case $1 in
 		_fclean
 		;;
 
+	# unknown (usage)
 	*)
 		echo 'usage: '$script_name' [clean|fclean]'
 		;;
 esac
+
+
+
+
+

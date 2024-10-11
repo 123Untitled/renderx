@@ -2,7 +2,7 @@
 # -- G I T  I G N O R E -------------------------------------------------------
 
 # ignore external dependencies
-/external
+/.external
 
 # ignore clangd cache
 /.cache
@@ -28,5 +28,5 @@
 # ignore ninja build file
 /build.ninja
 
-# ignore ninja files
-/.ninja*
+# ignore ninja build directory
+/.ninja
