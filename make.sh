@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh --no-rcs --no-globalrcs --errexit --pipefail
+#!/usr/bin/env -S zsh --no-rcs --no-globalrcs --errexit --pipefail
 
 
 # -- C O L O R S --------------------------------------------------------------
@@ -21,7 +21,6 @@ local -r os=$(uname -s)
 
 # get script absolute directory path
 local -r cwd_dir=${0%/*}
-
 #local -r cwd_dir=${${0%/*}:a}
 
 # get script absolute path
@@ -81,18 +80,28 @@ local -r spvs=(${shas/%.glsl/.spv})
 
 # -- V U L K A N --------------------------------------------------------------
 
-# check for vulkan
-if [[ -z $VULKAN_SDK ]]; then
+# setup vulkan sdk
+function _setup_vulkan() {
 
-	# search for vulkan sdk
-	local -r setup=(~'/VulkanSDK/'**'/setup-env.sh'(.N))
+	# check for vulkan
+	if [[ -z $VULKAN_SDK ]]; then
 
-	# check if found
-	[[ -z $setup ]] && (echo $error'Vulkan SDK not installed'$reset; exit 1)
+		# search for vulkan sdk
+		local -r setup=(~'/VulkanSDK/'**'/setup-env.sh'(.N))
 
-	# warn to source vulkan sdk
-	echo 'required Vulkan SDK found at:' $warning$setup$reset
-fi
+		# check if found
+		[[ -z $setup ]] && (echo $error'Vulkan SDK not installed'$reset; exit 1)
+
+		# warn to source vulkan sdk
+		echo 'requires Vulkan SDK to be sourced:' $warning$setup$reset
+
+		# exit with error
+		exit 1
+	fi
+
+}
+
+# -- V U L K A N --------------------------------------------------------------
 
 # vulkan include
 local -r vulkan_include='-I'$VULKAN_SDK'/include'
@@ -494,6 +503,7 @@ echo $warning \
 	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
 	$reset
 
+_setup_vulkan
 _check_tools
 _repository
 
