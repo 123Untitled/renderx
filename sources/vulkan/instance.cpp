@@ -34,7 +34,16 @@ vulkan::instance::instance(void)
 	};
 
 	// get required extensions (from GLFW)
-	auto extensions = glfw::system::vulkan_required_extensions();
+	//auto extensions = glfw::system::vulkan_required_extensions();
+
+	vk::array extensions {
+		#if defined(ENGINE_VL_DEBUG)
+		"VK_EXT_debug_utils",
+		#endif
+		"VK_KHR_surface",
+		"VK_KHR_wayland_surface",
+	};
+
 
 	#if defined(ENGINE_VL_DEBUG)
 

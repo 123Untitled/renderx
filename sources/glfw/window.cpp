@@ -113,7 +113,7 @@ glfw::window::window(void)
 	::glfw_window_hint(GLFW_VISIBLE, GLFW_TRUE);
 
 	// transparent
-	::glfw_window_hint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+	//::glfw_window_hint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 
 	// no decorations
 	::glfw_window_hint(GLFW_DECORATED, GLFW_TRUE);
@@ -133,7 +133,7 @@ glfw::window::window(void)
 	::glfw_set_window_user_pointer(_window, this);
 
 
-	::glfw_set_window_opacity(_window, 0.95f);
+	//::glfw_set_window_opacity(_window, 0.95f);
 
 
 	// -- setup callbacks -----------------------------------------------------

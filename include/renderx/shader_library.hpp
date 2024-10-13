@@ -235,7 +235,7 @@ namespace engine {
 
 				const auto& s = entries[key];
 
-				if (*str != *(s.name) || strcmp (str + 1, s.name + 1U) != 0)
+				if (*str != *(s.name) || __builtin_strcmp (str + 1, s.name + 1U) != 0)
 					throw;
 
 				return s.stage;

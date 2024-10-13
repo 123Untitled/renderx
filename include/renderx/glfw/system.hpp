@@ -12,6 +12,7 @@
 #define ___ENGINE_GLFW_SYSTEM_HPP___
 
 #include "renderx/glfw/init.hpp"
+#include <vector>
 
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------

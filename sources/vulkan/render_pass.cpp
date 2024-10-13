@@ -3,6 +3,8 @@
 #include "renderx/vk/array.hpp"
 #include "renderx/vulkan/device.hpp"
 
+#include <stdexcept>
+
 
 // -- public lifecycle --------------------------------------------------------
 

@@ -13,9 +13,14 @@
 #ifndef ENGINE_VK_TYPEDEFS_HEADER
 #define ENGINE_VK_TYPEDEFS_HEADER
 
+#include "renderx/os.hpp"
 
 // vulkan headers
 #include <vulkan/vulkan.h>
+
+#if defined(RENDERX_OS_LINUX)
+	#include <vulkan/vulkan_wayland.h>
+#endif
 
 #include <vector>
 
@@ -140,6 +145,12 @@ namespace vk {
 
 	/* surface capabilities */
 	using surface_capabilities               = ::VkSurfaceCapabilitiesKHR;
+
+	/* wayland surface create info */
+	#if defined(RENDERX_OS_LINUX)
+	using wayland_surface_create_info_khr    = ::VkWaylandSurfaceCreateInfoKHR;
+	#endif
+
 
 
 	// -- queue family --------------------------------------------------------
@@ -593,6 +604,11 @@ namespace vk {
 
 /* get device queue */
 #define vk_get_device_queue vkGetDeviceQueue
+
+/* create wayland surface khr */
+#if defined(RENDERX_OS_LINUX)
+#	define vk_create_wayland_surface_khr vkCreateWaylandSurfaceKHR
+#endif
 
 
 // -- command pool ------------------------------------------------------------

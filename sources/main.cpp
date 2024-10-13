@@ -28,9 +28,64 @@
 #include "renderx/system/directory.hpp"
 #include "renderx/containers/static_map.hpp"
 
+#include <signal.h>
+
+#include "renderx/vulkan/instance.hpp"
+#include "renderx/wayland/wayland.hpp"
+
+
+auto create_vulkan_surface(wl::display& display, wl::surface& surface) -> void {
+
+	const vk::wayland_surface_create_info_khr info {
+		// structure type
+		.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
+		// next structure
+		.pNext = nullptr,
+		// flags
+		.flags = 0U,
+		// wayland display
+		.display = &display.get(),
+		// wayland surface (window)
+		.surface = &surface.get()
+	};
+
+	vk::surface surface_khr;
+
+    // Créer la surface Vulkan avec Wayland
+    if (::vk_create_wayland_surface_khr(vulkan::instance::shared(),
+									&info, nullptr, &surface_khr) != VK_SUCCESS) {
+		throw std::runtime_error("Could not create vulkan surface");
+    }
+}
+
 
 
 int main(void) {
+
+
+	// wayland
+	{
+		wl::display display;
+		wl::compositor compositor{display};
+		wl::surface surface{compositor};
+
+		create_vulkan_surface(display, surface);
+
+		surface.commit();
+
+		display.roundtrip();
+
+		std::cout << "Wayland display: " << &display.get() << std::endl;
+		while (display.dispatch() != 0U) {
+			// do nothing
+		}
+
+		sleep(1);
+
+		return 0;
+	}
+
+
 
 
 	//glfw::window::resized();

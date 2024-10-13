@@ -132,7 +132,7 @@ local -r glm_library=('-L'$ext_dir'/glm/lib' '-lglm')
 
 # linux dependencies
 if [[ $os =~ 'Linux' ]]; then
-	local -r os_dependencies=('-lX11' '-lXxf86vm' '-lXrandr' '-lpthread' '-lXi' '-ldl')
+	local -r os_dependencies=('-lwayland-client' '-lX11' '-lXxf86vm' '-lXrandr' '-lpthread' '-lXi' '-ldl')
 
 # macos dependencies
 elif [[ $os =~ 'Darwin' ]]; then
@@ -149,6 +149,7 @@ local -r cxx='clang++'
 local -r cxxflags=('-std=c++2a'
 				   '-O0'
 				   '-g2'
+				   '-gdwarf-4'
 				   '-DENGINE_VL_DEBUG'
 				   '-Wall'
 				   '-Wextra'

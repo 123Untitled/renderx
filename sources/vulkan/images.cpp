@@ -8,6 +8,8 @@
 #include "renderx/memory/malloc.hpp"
 #include "renderx/memory/allocation_guard.hpp"
 
+#include <stdexcept>
+
 
 // -- public lifecycle --------------------------------------------------------
 
