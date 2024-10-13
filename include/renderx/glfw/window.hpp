@@ -14,6 +14,8 @@
 #include "renderx/glfw/glfw.hpp"
 #include "renderx/glfw/typedefs.hpp"
 
+#include "renderx/vk/typedefs.hpp"
+
 
 // -- G L F W -----------------------------------------------------------------
 
@@ -38,14 +40,17 @@ namespace glfw {
 			/* window */
 			::glfw_window* _window;
 
+			/* resize */
+			bool _resize;
+
 
 			// -- private static methods --------------------------------------
 
 			/* shared */
 			static auto _shared(void) noexcept -> ___self&;
 
-			/* resize callback */
-			static auto _resize_callback(::glfw_window* const, const int, const int) noexcept -> void;
+			/* size callback */
+			static auto _size_callback(::glfw_window* const, const int, const int) noexcept -> void;
 
 			/* close callback */
 			static auto _close_callback(::glfw_window* const) noexcept -> void;
@@ -61,6 +66,9 @@ namespace glfw {
 
 			/* refresh callback */
 			static auto _refresh_callback(::glfw_window* const) noexcept -> void;
+
+			/* framebuffer size callback */
+			static auto _framebuffer_size_callback(::glfw_window* const, const int, const int) noexcept -> void;
 
 
 			// -- private lifecycle -------------------------------------------
@@ -105,6 +113,12 @@ namespace glfw {
 
 			/* show */
 			static auto show(void) noexcept -> void;
+
+			/* framebuffer size */
+			static auto framebuffer_size(void) -> vk::extent2D;
+
+			/* resized */
+			static auto resized(void) noexcept -> bool;
 
 	}; // class window
 

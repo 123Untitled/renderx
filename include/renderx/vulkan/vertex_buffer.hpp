@@ -11,9 +11,9 @@
 #ifndef ___RENDERX_VULKAN_VERTEX_BUFFER___
 #define ___RENDERX_VULKAN_VERTEX_BUFFER___
 
-#include "engine/vertex/vertex.hpp"
-#include "engine/vulkan/buffer.hpp"
-#include "engine/vk/typedefs.hpp"
+#include "renderx/vertex/vertex.hpp"
+#include "renderx/vulkan/buffer.hpp"
+#include "renderx/vk/typedefs.hpp"
 
 
 // -- V U L K A N -------------------------------------------------------------

@@ -1,7 +1,7 @@
 #include "renderx/glfw/system.hpp"
-#include "engine/exceptions.hpp"
-#include "engine/os.hpp"
-#include "engine/vk/typedefs.hpp"
+#include "renderx/exceptions.hpp"
+#include "renderx/os.hpp"
+#include "renderx/vk/typedefs.hpp"
 #include "renderx/glfw/typedefs.hpp"
 
 #include <vulkan/vulkan.h>

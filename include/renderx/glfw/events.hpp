@@ -133,7 +133,7 @@ namespace glfw {
 
 				//if (glfwRawMouseMotionSupported() == GLFW_FALSE) {
 				//	std::cout << "glfw: raw mouse motion is not supported." << std::endl;
-				//	throw engine::exception{"glfw: raw mouse motion is not supported."};
+				//	throw "glfw: raw mouse motion is not supported.";
 				//}
 			}
 

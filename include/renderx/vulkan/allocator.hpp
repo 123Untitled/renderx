@@ -1,9 +1,9 @@
 #ifndef ___RENDERX_VULKAN_ALLOCATOR_HPP___
 #define ___RENDERX_VULKAN_ALLOCATOR_HPP___
 
-#include "engine/vk/typedefs.hpp"
-#include "engine/vulkan/device.hpp"
-#include "engine/vk/utils.hpp"
+#include "renderx/vk/typedefs.hpp"
+#include "renderx/vulkan/device.hpp"
+#include "renderx/vk/utils.hpp"
 #include "renderx/hint.hpp"
 #include "renderx/memory/memcpy.hpp"
 

@@ -4,8 +4,8 @@
 #include "renderx/vulkan/vertex_buffer.hpp"
 #include "renderx/vulkan/index_buffer.hpp"
 #include "renderx/shapes/cuboid.hpp"
-#include "engine/vertex/vertex.hpp"
-#include "engine/vulkan/command_buffer.hpp"
+#include "renderx/vertex/vertex.hpp"
+#include "renderx/vulkan/command_buffer.hpp"
 
 #include <map>
 #include <string_view>

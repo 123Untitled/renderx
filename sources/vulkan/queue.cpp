@@ -8,8 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#include "engine/vulkan/queue.hpp"
-#include "engine/vulkan/device.hpp"
+#include "renderx/vulkan/queue.hpp"
+#include "renderx/vulkan/device.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -40,7 +40,7 @@ auto vulkan::queue::info(const vk::u32 index,
 	};
 }
 
-#include "engine/vulkan/command_buffer.hpp"
+#include "renderx/vulkan/command_buffer.hpp"
 
 // -- public methods ----------------------------------------------------------
 
@@ -77,14 +77,14 @@ auto vulkan::queue::submit(const vk::semaphore& wait,
 
 	// see vkQueueSubmit2KHR
 	vk::try_execute<"failed to submit queue">(
-			::vkQueueSubmit, _queue, 1U, // submit count
+			::vk_queue_submit, _queue, 1U, // submit count
 						&info, fence);
 }
 
 /* present */
 auto vulkan::queue::present(const vulkan::swapchain& swapchain,
 							const vk::u32&           image_index,
-							const vk::semaphore&     wait) const -> bool {
+							const vk::semaphore&     wait) const -> vk::result {
 
 	// create present info
 	const vk::present_info info{
@@ -107,13 +107,9 @@ auto vulkan::queue::present(const vulkan::swapchain& swapchain,
 	};
 
 	// here error not means program must stop
-	if (::vkQueuePresentKHR(_queue, &info) != VK_SUCCESS) {
-		std::cout << "failed to present swapchain image" << std::endl;
-		return false;
-	}
+	const vk::result state = ::vk_queue_present_khr(_queue, &info);
 
-	return true;
-
+	return state;
 }
 
 /* wait idle */

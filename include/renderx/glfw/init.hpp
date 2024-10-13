@@ -14,7 +14,7 @@
 #define ___ENGINE_GLFW_INIT_HPP___
 
 #include "renderx/glfw/glfw.hpp"
-#include "engine/exceptions.hpp"
+#include "renderx/exceptions.hpp"
 #include "renderx/glfw/typedefs.hpp"
 
 
@@ -56,7 +56,7 @@ namespace glfw {
 			/* destructor */
 			~init(void) noexcept {
 				// terminate glfw
-				::glfwTerminate();
+				::glfw_terminate();
 			}
 
 

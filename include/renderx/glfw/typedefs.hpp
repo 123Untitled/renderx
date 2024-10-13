@@ -27,6 +27,9 @@
 #define glfw_set_window_focus_callback glfwSetWindowFocusCallback
 #define glfw_set_window_maximize_callback glfwSetWindowMaximizeCallback
 #define glfw_set_window_refresh_callback glfwSetWindowRefreshCallback
+#define glfw_set_framebuffer_size_callback glfwSetFramebufferSizeCallback
+
+#define glfw_get_framebuffer_size glfwGetFramebufferSize
 
 
 #define glfw_set_window_opacity glfwSetWindowOpacity
@@ -43,6 +46,7 @@
 #define glfw_vulkan_supported glfwVulkanSupported
 #define glfw_set_error_callback glfwSetErrorCallback
 #define glfw_init glfwInit
+#define glfw_terminate glfwTerminate
 #define glfw_poll_events glfwPollEvents
 #define glfw_wait_events glfwWaitEvents
 #define glfw_get_required_instance_extensions glfwGetRequiredInstanceExtensions

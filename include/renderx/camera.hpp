@@ -6,6 +6,7 @@
 
 #include "renderx/time/delta.hpp"
 #include "renderx/glfw/events.hpp"
+#include "renderx/glfw/window.hpp"
 
 
 // -- R X ---------------------------------------------------------------------

@@ -1,8 +1,8 @@
 #ifndef ___RENDERX_SHAPES_CUBOID___
 #define ___RENDERX_SHAPES_CUBOID___
 
-#include "engine/vertex/vertex.hpp"
-#include "engine/vertex/position.hpp"
+#include "renderx/vertex/vertex.hpp"
+#include "renderx/vertex/position.hpp"
 
 
 // -- R X ---------------------------------------------------------------------

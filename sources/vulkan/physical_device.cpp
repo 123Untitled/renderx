@@ -1,25 +1,16 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
+#include "renderx/vulkan/physical_device.hpp"
 
-#include "engine/vulkan/physical_device.hpp"
-
-#include "engine/vulkan/surface.hpp"
-#include "engine/vk/functions.hpp"
-#include "engine/exceptions.hpp"
+#include "renderx/vulkan/device.hpp"
+#include "renderx/vulkan/surface.hpp"
+#include "renderx/vk/functions.hpp"
+#include "renderx/exceptions.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
 vulkan::physical_device::physical_device(void) noexcept
-: _pdevice{VK_NULL_HANDLE} {
+: _pdevice{nullptr} {
 }
 
 /* vk::physical_device constructor */
@@ -66,13 +57,28 @@ auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
 }
 
 /* have surface formats */
-auto vulkan::physical_device::have_surface_formats(const vk::surface& surface) const -> bool {
-	return bool{vk::get_physical_device_surface_formats_count(_pdevice, surface) > 0};
+auto vulkan::physical_device::have_surface_formats(void) const -> bool {
+
+	vk::u32 count = 0U;
+
+	// get physical device surface formats count
+	vk::try_execute<"failed to get physical device surface formats count">(
+			::vk_get_physical_device_surface_formats_khr,
+			_pdevice, vulkan::surface::shared(), &count, nullptr);
+
+	return count > 0U;
 }
 
 /* have present modes */
 auto vulkan::physical_device::have_present_modes(const vk::surface& surface) const -> bool {
-	return bool{vk::get_physical_device_surface_present_modes_count(_pdevice, surface) > 0};
+
+	vk::u32 count = 0U;
+
+	vk::try_execute<"failed to get physical device surface present modes">(
+			::vk_get_physical_device_surface_present_modes_khr,
+			_pdevice, vulkan::surface::shared(), &count, nullptr);
+
+	return count > 0U;
 }
 
 /* is support surface and queue family */
@@ -87,18 +93,56 @@ auto vulkan::physical_device::extension_properties(void) const -> vk::vector<vk:
 }
 
 /* surface capabilities */
-auto vulkan::physical_device::surface_capabilities(const vk::surface& surface) const -> vk::surface_capabilities {
-	return vk::get_physical_device_surface_capabilities(_pdevice, surface);
+auto vulkan::physical_device::surface_capabilities(void) const -> vk::surface_capabilities {
+
+	vk::surface_capabilities capabilities;
+
+	vk::try_execute<"failed to get physical device surface capabilities">(
+			::vk_get_physical_device_surface_capabilities_khr,
+			_pdevice, vulkan::surface::shared(), &capabilities);
+
+	return capabilities;
 }
 
+
 /* surface formats */
-auto vulkan::physical_device::surface_formats(const vk::surface& surface) const -> vk::vector<vk::surface_format> {
-	return vk::get_physical_device_surface_formats(_pdevice, surface);
+auto vulkan::physical_device::surface_formats() const -> std::vector<vk::surface_format> {
+
+	vk::u32 count = 0U;
+
+	// get physical device surface formats count
+	vk::try_execute<"failed to get physical device surface formats count">(
+			::vk_get_physical_device_surface_formats_khr,
+			_pdevice, vulkan::surface::shared(), &count, nullptr);
+
+	std::vector<vk::surface_format> formats;
+	formats.resize(count);
+
+	// get physical device surface formats
+	vk::try_execute<"failed to get physical device surface formats">(
+			::vk_get_physical_device_surface_formats_khr,
+			_pdevice, vulkan::surface::shared(), &count, formats.data());
+
+	return formats;
 }
 
 /* surface present modes */
-auto vulkan::physical_device::surface_present_modes(const vk::surface& surface) const -> vk::vector<vk::present_mode> {
-	return vk::get_physical_device_surface_present_modes(_pdevice, surface);
+auto vulkan::physical_device::surface_present_modes(void) const -> vk::vector<vk::present_mode> {
+
+	vk::u32 count = 0U;
+
+	vk::try_execute<"failed to get physical device surface present modes">(
+			::vk_get_physical_device_surface_present_modes_khr,
+			_pdevice, vulkan::surface::shared(), &count, nullptr);
+
+	vk::vector<vk::present_mode> pmodes;
+	pmodes.resize(count);
+
+	vk::try_execute<"failed to get physical device surface present modes">(
+			::vk_get_physical_device_surface_present_modes_khr,
+			_pdevice, vulkan::surface::shared(), &count, pmodes.data());
+
+	return pmodes;
 }
 
 /* properties */

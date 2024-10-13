@@ -8,7 +8,7 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#include "engine/renderer.hpp"
+#include "renderx/renderer.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,18 +24,19 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-engine::renderer::renderer(void)
+rx::renderer::renderer(void)
 :
 	_queue{},
-	_swapchain{},
+	_smanager{},
+
 	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
-	_cmds{_pool.underlying(), _swapchain.size()},
+	_cmds{_pool.underlying(), _smanager.size()},
 	_shaders{},
 	
 	_pipeline{
 		vulkan::pipeline_builder<vertex_type>::build(
 				_shaders,
-				_swapchain.render_pass().underlying())
+				_smanager.render_pass().underlying())
 	},
 
 	_memory{},
@@ -133,8 +134,8 @@ namespace rx {
 				ins._lx = cx;
 				ins._ly = cy;
 
-				//if (ins._dx != 0.0 || ins._dy != 0.0)
-				//	std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
+				if (ins._dx != 0.0 || ins._dy != 0.0)
+					std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
 			}
 
 			/* dx */
@@ -151,37 +152,52 @@ namespace rx {
 
 } // namespace rx
 
+auto rx::renderer::entrypoint(void* ptr) -> void* {
+
+	auto& renderer = *static_cast<rx::renderer*>(ptr);
+
+	try {
+		renderer.test();
+	}
+	catch (const vk::exception& e) {
+		rx::running::stop();
+		std::cerr << e.what() << std::endl;
+	}
+
+	return nullptr;
+}
 
 
 // -- public methods ----------------------------------------------------------
 
 /* run */
-auto engine::renderer::run(void) -> void {
+auto rx::renderer::run(void) -> void {
 
+	::pthread_t thread;
+
+	::pthread_create(&thread, nullptr, &rx::renderer::entrypoint, this);
 
 	rx::umax last = rx::now();
 
-
 	static vk::u32 i = 0U;
 
-	while (glfw::window::should_close() == false
-			&& rx::running::state() == true) {
+	while (rx::running::state() == true &&
+		 glfw::window::should_close() == false) {
 
 		// poll events
-		glfw::events::poll();
+		//glfw::events::poll();
+		glfw::events::wait();
 
 		// get current time (nanoseconds)
-		rx::umax now = rx::now();
+		//rx::umax now = rx::now();
 
 		//glfw::compute_to_mouse_delta(_camera);
 
-		rx::delta::update();
-		rx::mouse_delta::update();
+		//rx::mouse_delta::update();
 
-		_camera.from_tap_event(rx::mouse_delta::dx(),
-							   rx::mouse_delta::dy());
+		//_camera.from_tap_event(rx::mouse_delta::dx(),
+		//					   rx::mouse_delta::dy());
 
-		_camera.update();
 
 		// compute fps
 		//float fps = 1.0f / rx::delta::time<float>();
@@ -190,10 +206,10 @@ auto engine::renderer::run(void) -> void {
 
 		//_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
 
-		___self::draw_frame();
+		//___self::_draw_frame();
 		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
 
-		last = now;
+		//last = now;
 
 
 		// limit to 120 fps
@@ -206,18 +222,46 @@ auto engine::renderer::run(void) -> void {
 	vulkan::device::wait_idle();
 }
 
+auto rx::renderer::test(void) -> void {
+
+	while (rx::running::state() == true) {
+
+		rx::delta::update();
+
+		_camera.update();
+
+		// draw frame
+		_draw_frame();
+	}
+}
+
 /* draw frame */
-auto engine::renderer::draw_frame(void) -> void {
+auto rx::renderer::_draw_frame(void) -> void {
 
 	// wait for current fence
 	_sync.wait_current_fence();
 
 	vk::u32 image_index = 0U;
 
+	const auto& swapchain = _smanager.swapchain();
+
 	// here error not means program must stop
-	if (_swapchain.acquire_next_image(_sync.image_available(),
-										image_index) == false)
-		return;
+	const vk::result status = swapchain.acquire_next_image(_sync.image_available(),
+															image_index);
+
+	if (status == VK_ERROR_OUT_OF_DATE_KHR) {
+
+		std::cout << "recreating swapchain (after acquire)" << std::endl;
+
+		auto extent = glfw::window::framebuffer_size();
+		_camera.ratio((float)extent.width / (float)extent.height);
+		_camera.update_projection();
+		_smanager.recreate();
+		return; // maybe goto start of the function ?
+	}
+	else if (status != VK_SUCCESS && status != VK_SUBOPTIMAL_KHR) {
+		throw vk::exception{"failed to acquire next image", status};
+	}
 
 
 	auto& cmd = _cmds[image_index];
@@ -231,16 +275,19 @@ auto engine::renderer::draw_frame(void) -> void {
 	// start recording
 	cmd.begin();
 
+	const auto& render_pass = _smanager.render_pass();
+	const auto& frames = _smanager.frames();
+
 	// begin render pass
-	cmd.begin_render_pass(_swapchain,
-						  _swapchain.render_pass(),
-						  _swapchain.frames()[image_index]);
+	cmd.begin_render_pass(swapchain,
+						  render_pass,
+						  frames[image_index]);
 
 	// dynamic viewport
-	cmd.set_viewport(_swapchain);
+	cmd.set_viewport(swapchain);
 
 	// dynamic scissor
-	cmd.set_scissor(_swapchain);
+	cmd.set_scissor(swapchain);
 
 
 	{ // -- for each mesh -----------------------------------------------------
@@ -285,10 +332,27 @@ auto engine::renderer::draw_frame(void) -> void {
 				  cmd);
 
 	// here error not means program must stop
-	if (_queue.present(_swapchain, image_index,
-					   _sync.render_finished()
-				) == false)
-		return;
+	const vk::result state = _queue.present(swapchain, image_index,
+											_sync.render_finished());
+
+	if (status == VK_ERROR_OUT_OF_DATE_KHR
+	  || status == VK_SUBOPTIMAL_KHR
+	  || glfw::window::resized() == true) {
+
+		std::cout << "recreating swapchain (after present)" << std::endl;
+
+		auto extent = glfw::window::framebuffer_size();
+		_camera.ratio((float)extent.width / (float)extent.height);
+		_camera.update_projection();
+
+		// recreate swapchain
+		_smanager.recreate();
+	}
+	else if (state != VK_SUCCESS) {
+		throw vk::exception{"failed to queue present", state};
+	}
+
+	//std::cout << "draw frame" << std::endl;
 
 	// next frame
 	++_sync;

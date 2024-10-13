@@ -1,7 +1,7 @@
 #ifndef ___RENDERX_STRING_LITERAL___
 #define ___RENDERX_STRING_LITERAL___
 
-#include "engine/types.hpp"
+#include "renderx/types.hpp"
 
 
 // -- R E N D E R X  N A M E S P A C E ----------------------------------------

@@ -1,4 +1,4 @@
-#!/usr/bin/env -S zsh --no-rcs --no-globalrcs --errexit --pipefail
+#!/usr/bin/env zsh --no-rcs --no-globalrcs --errexit --pipefail
 
 
 # -- C O L O R S --------------------------------------------------------------
@@ -238,7 +238,7 @@ function _install_dependency() {
 	local -r prefix=$ext_dir'/'$name
 
 	# cmake flags
-	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix ${@:4})
+	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix '-DCMAKE_BUILD_TYPE=Release' ${@:4})
 
 	# return if already installed
 	[[ -d $prefix ]] && return
@@ -248,7 +248,9 @@ function _install_dependency() {
 
 	# download if not present
 	if [[ ! -f $archive ]]; then
+		echo -n $success
 		curl --progress-bar --location $url --output $archive
+		echo -n $reset
 	fi
 
 	# extract
@@ -262,6 +264,9 @@ function _install_dependency() {
 
 	# cleanup
 	rm -rf $repo $archive
+
+	# print success
+	echo $success'[+]'$reset $name $version
 }
 
 
@@ -472,7 +477,7 @@ function _clean() {
 function _fclean() {
 
 	# remove all build files
-	local -r deleted=$(rm -rfv $objs $spvs $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
+	local -r deleted=$(rm -rfv $objs $spvs $executable $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
@@ -508,6 +513,12 @@ case $1 in
 	# fclean
 	fclean)
 		_fclean
+		;;
+
+	# ninja
+	ninja)
+		touch $script
+		_generate_ninja
 		;;
 
 	# unknown (usage)

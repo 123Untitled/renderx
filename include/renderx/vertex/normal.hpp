@@ -1,7 +1,7 @@
 #ifndef ___RENDERX_VERTEX_NORMAL___
 #define ___RENDERX_VERTEX_NORMAL___
 
-#include "engine/vk/format.hpp"
+#include "renderx/vk/format.hpp"
 #include <glm/glm.hpp>
 
 

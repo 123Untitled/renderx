@@ -1,13 +1,13 @@
-#include "engine/vulkan/device.hpp"
-#include "engine/vulkan/physical_device.hpp"
-#include "engine/vulkan/queue.hpp"
-#include "engine/vulkan/instance.hpp"
-#include "engine/vulkan/validation_layers.hpp"
+#include "renderx/vulkan/device.hpp"
+#include "renderx/vulkan/physical_device.hpp"
+#include "renderx/vulkan/queue.hpp"
+#include "renderx/vulkan/instance.hpp"
+#include "renderx/vulkan/validation_layers.hpp"
 
 
-#include "engine/vk/array.hpp"
+#include "renderx/vk/array.hpp"
 
-#include "engine/os.hpp"
+#include "renderx/os.hpp"
 
 
 
@@ -152,14 +152,13 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 	// loop over devices
 	for (const auto& pdevice : pdevices) {
 
-		auto capabilities = pdevice.surface_capabilities(surface);
+		auto capabilities = pdevice.surface_capabilities();
 		auto properties   = pdevice.properties();
 		auto features     = pdevice.features();
 
 		// check if physical device supports 8-bit indices
-
 		if (pdevice.supports_swapchain()          == true
-		&&  pdevice.have_surface_formats(surface) == true
+		&&  pdevice.have_surface_formats() == true
 		&&  pdevice.have_present_modes(surface)   == true
 		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
 		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)) {
@@ -168,5 +167,5 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 		}
 	}
 	// no suitable physical device found
-	throw vk::exception{"failed to find suitable physical device"};
+	throw "failed to find suitable physical device";
 }
