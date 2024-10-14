@@ -33,15 +33,30 @@ vulkan::instance::instance(void)
 		.apiVersion         = VK_API_VERSION_1_0
 	};
 
+	// no more need !!
 	// get required extensions (from GLFW)
 	//auto extensions = glfw::system::vulkan_required_extensions();
 
 	vk::array extensions {
+
+		// debug utils
 		#if defined(ENGINE_VL_DEBUG)
 		"VK_EXT_debug_utils",
 		#endif
+
+		// common
 		"VK_KHR_surface",
+
+		// linux
+		#if defined(RENDERX_OS_LINUX)
 		"VK_KHR_wayland_surface",
+
+		// macos
+		#elif defined(RENDERX_OS_MACOS)
+		"VK_KHR_portability_enumeration",
+		"VK_KHR_get_physical_device_properties2",
+		"VK_EXT_metal_surface",
+		#endif
 	};
 
 

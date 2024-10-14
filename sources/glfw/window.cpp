@@ -116,7 +116,7 @@ glfw::window::window(void)
 	//::glfw_window_hint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 
 	// no decorations
-	::glfw_window_hint(GLFW_DECORATED, GLFW_TRUE);
+	::glfw_window_hint(GLFW_DECORATED, GLFW_FALSE);
 
 	// focus on show
 	::glfw_window_hint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);

@@ -1,3 +1,4 @@
+#include "renderx/exceptions.hpp"
 #include "renderx/vulkan/surface.hpp"
 
 #include "renderx/vulkan/instance.hpp"

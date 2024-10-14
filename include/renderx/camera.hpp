@@ -228,12 +228,13 @@ namespace rx {
 				// get arrow keys
 				const auto& arrows = glfw::events::arrows();
 
-				//std::cout << "arrows: " << arrows[0] << " " << arrows[1] << " " << arrows[2] << " " << arrows[3] << std::endl;
 
 				const bool front = arrows[0];
 				const bool back  = arrows[1];
 				const bool left  = arrows[2];
 				const bool right = arrows[3];
+
+				std::cout << "arrows: " << arrows[0] << " " << arrows[1] << " " << arrows[2] << " " << arrows[3] << std::endl;
 
 				glm::vec2 movement {0.0f, 0.0f};
 
@@ -265,12 +266,13 @@ namespace rx {
 				//if (front || back || left || right) {
 
 					const auto velo = _velocity * rx::delta::time<float>();
+					std::cout << "velocity: " << velo << std::endl;
 
 					_transform.position().x += movement.x * velo;
 					_transform.position().z += movement.y * velo;
 				//}
 
-					//std::cout << "position: " << _transform.position().x << " " << _transform.position().y << " " << _transform.position().z << std::endl;
+				//std::cout << "position: " << _transform.position().x << " " << _transform.position().y << " " << _transform.position().z << std::endl;
 			}
 
 

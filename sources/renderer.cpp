@@ -72,7 +72,7 @@ rx::renderer::renderer(void)
 	_camera.transform().position().z = -6.0f;
 
 
-	glfw::monitor m;
+	//glfw::monitor m;
 
 }
 
@@ -152,20 +152,20 @@ namespace rx {
 
 } // namespace rx
 
-auto rx::renderer::entrypoint(void* ptr) -> void* {
-
-	auto& renderer = *static_cast<rx::renderer*>(ptr);
-
-	try {
-		renderer.test();
-	}
-	catch (const vk::exception& e) {
-		rx::running::stop();
-		std::cerr << e.what() << std::endl;
-	}
-
-	return nullptr;
-}
+//auto rx::renderer::entrypoint(void* ptr) -> void* {
+//
+//	auto& renderer = *static_cast<rx::renderer*>(ptr);
+//
+//	try {
+//		renderer.test();
+//	}
+//	catch (const vk::exception& e) {
+//		rx::running::stop();
+//		std::cerr << e.what() << std::endl;
+//	}
+//
+//	return nullptr;
+//}
 
 
 // -- public methods ----------------------------------------------------------
@@ -173,9 +173,8 @@ auto rx::renderer::entrypoint(void* ptr) -> void* {
 /* run */
 auto rx::renderer::run(void) -> void {
 
-	::pthread_t thread;
-
-	::pthread_create(&thread, nullptr, &rx::renderer::entrypoint, this);
+	//::pthread_t thread;
+	//::pthread_create(&thread, nullptr, &rx::renderer::entrypoint, this);
 
 	rx::umax last = rx::now();
 
@@ -184,19 +183,19 @@ auto rx::renderer::run(void) -> void {
 	while (rx::running::state() == true &&
 		 glfw::window::should_close() == false) {
 
+		rx::delta::update();
 		// poll events
-		//glfw::events::poll();
-		glfw::events::wait();
+		glfw::events::poll();
+		//glfw::events::wait();
 
 		// get current time (nanoseconds)
 		//rx::umax now = rx::now();
 
 		//glfw::compute_to_mouse_delta(_camera);
 
-		//rx::mouse_delta::update();
-
-		//_camera.from_tap_event(rx::mouse_delta::dx(),
-		//					   rx::mouse_delta::dy());
+		rx::mouse_delta::update();
+		_camera.from_tap_event(rx::mouse_delta::dx(),
+							   rx::mouse_delta::dy());
 
 
 		// compute fps
@@ -204,13 +203,14 @@ auto rx::renderer::run(void) -> void {
 
 		//usleep(1'000'000 / 60);
 
-		//_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
+		_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
 
-		//___self::_draw_frame();
 		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
 
 		//last = now;
 
+		___self::_draw_frame();
+		_camera.update();
 
 		// limit to 120 fps
 		//usleep(1'000'000 / 120);
@@ -226,7 +226,6 @@ auto rx::renderer::test(void) -> void {
 
 	while (rx::running::state() == true) {
 
-		rx::delta::update();
 
 		_camera.update();
 
