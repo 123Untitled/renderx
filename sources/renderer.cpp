@@ -8,17 +8,19 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#include "renderx/renderer.hpp"
+#include "ve/renderer.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "renderx/time/delta.hpp"
-#include "renderx/running.hpp"
+#include "ve/time/delta.hpp"
+#include "ve/running.hpp"
 
-#include "renderx/shapes/cuboid.hpp"
+#include "ve/shapes/cuboid.hpp"
 
-#include "renderx/glfw/monitor.hpp"
+#include "ve/glfw/monitor.hpp"
+
+#include "ve/geometry/mesh_library.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -41,28 +43,12 @@ rx::renderer::renderer(void)
 
 	_memory{},
 	_sync{},
-	_meshes{},
 	_objects{},
-	_allocator{},
 	_camera{}
 {
 
-	auto cuboid = rx::cube();
-
-	_meshes.emplace_back(cuboid.first, cuboid.second);
-
-	//_mesh = rx::mesh{cuboid.first, cuboid.second};
-
-
-	auto alloc = _allocator.allocate_buffer(_meshes.back().vertices().underlying());
-	alloc.memcpy(cuboid.first.data());
-
-
-	auto alloc_index = _allocator.allocate_buffer(_meshes.back().indices().underlying());
-	alloc_index.memcpy(cuboid.second.data());
-
-
-	_objects.emplace_back(_meshes.back());
+	// add cube object
+	_objects.emplace_back(rx::mesh_library::get<"icosphere">());
 
 	//_camera.ratio(rx::sdl::window::ratio());
 	_camera.fov(70.0f);
@@ -134,8 +120,8 @@ namespace rx {
 				ins._lx = cx;
 				ins._ly = cy;
 
-				if (ins._dx != 0.0 || ins._dy != 0.0)
-					std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
+				//if (ins._dx != 0.0 || ins._dy != 0.0)
+				//	std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
 			}
 
 			/* dx */
@@ -152,29 +138,11 @@ namespace rx {
 
 } // namespace rx
 
-//auto rx::renderer::entrypoint(void* ptr) -> void* {
-//
-//	auto& renderer = *static_cast<rx::renderer*>(ptr);
-//
-//	try {
-//		renderer.test();
-//	}
-//	catch (const vk::exception& e) {
-//		rx::running::stop();
-//		std::cerr << e.what() << std::endl;
-//	}
-//
-//	return nullptr;
-//}
-
 
 // -- public methods ----------------------------------------------------------
 
 /* run */
 auto rx::renderer::run(void) -> void {
-
-	//::pthread_t thread;
-	//::pthread_create(&thread, nullptr, &rx::renderer::entrypoint, this);
 
 	rx::umax last = rx::now();
 
@@ -186,7 +154,6 @@ auto rx::renderer::run(void) -> void {
 		rx::delta::update();
 		// poll events
 		glfw::events::poll();
-		//glfw::events::wait();
 
 		// get current time (nanoseconds)
 		//rx::umax now = rx::now();
@@ -203,7 +170,9 @@ auto rx::renderer::run(void) -> void {
 
 		//usleep(1'000'000 / 60);
 
-		_objects[0].rotation().y += 1.00f * rx::delta::time<float>();
+		_objects[0].rotation().y += 0.04f * rx::delta::time<float>();
+		_objects[0].rotation().x += 0.02f * rx::delta::time<float>();
+		_objects[0].rotation().z += 0.01f * rx::delta::time<float>();
 
 		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
 
@@ -289,6 +258,15 @@ auto rx::renderer::_draw_frame(void) -> void {
 	cmd.set_scissor(swapchain);
 
 
+	struct push_constants {
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+	};
+
+	static push_constants pc;
+
+
 	{ // -- for each mesh -----------------------------------------------------
 
 		for (const auto& object : _objects) {
@@ -302,11 +280,18 @@ auto rx::renderer::_draw_frame(void) -> void {
 			// bind index buffer
 			cmd.bind_index_buffer(object.mesh().indices());
 
+
+			pc.model = object.model();
+			pc.view = _camera.view();
+			pc.projection = _camera.projection();
+
+
 			// push constants
-			cmd.push_constants(_pipeline, 
-					_camera.projection() *
-					_camera.view() *
-					object.model());
+			cmd.push_constants(_pipeline,
+					pc);
+					//_camera.projection() *
+					//_camera.view() *
+					//object.model());
 
 			// draw indexed
 			cmd.draw_indexed(object.mesh().indices().count());

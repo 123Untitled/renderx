@@ -1,7 +1,7 @@
-#include "renderx/vulkan/render_pass.hpp"
-#include "renderx/vk/utils.hpp"
-#include "renderx/vk/array.hpp"
-#include "renderx/vulkan/device.hpp"
+#include "ve/vulkan/render_pass.hpp"
+#include "ve/vk/utils.hpp"
+#include "ve/vk/array.hpp"
+#include "ve/vulkan/device.hpp"
 
 #include <stdexcept>
 
@@ -145,7 +145,7 @@ auto vulkan::render_pass::_create_render_pass(void) -> vk::render_pass {
 		//	// flags
 		//	0U,
 		//	// format (find depth format) !!!
-		//	find_supported_format(___dev),
+		//	find_supported_format(),
 		//	// samples (multisampling)
 		//	msaa_samples,
 		//	// load op
@@ -161,7 +161,7 @@ auto vulkan::render_pass::_create_render_pass(void) -> vk::render_pass {
 		//	// final layout
 		//	VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		//},
-		//
+
 		//// resolve attachment
 		//vk::attachment_description {
 		//	// flags

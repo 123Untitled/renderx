@@ -1,5 +1,5 @@
-#include "renderx/vulkan/device_memory.hpp"
-#include "renderx/vulkan/buffer.hpp"
+#include "ve/vulkan/device_memory.hpp"
+#include "ve/vulkan/buffer.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------

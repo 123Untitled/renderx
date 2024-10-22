@@ -1,9 +1,9 @@
-#include "renderx/vulkan/physical_device.hpp"
+#include "ve/vulkan/physical_device.hpp"
 
-#include "renderx/vulkan/device.hpp"
-#include "renderx/vulkan/surface.hpp"
-#include "renderx/vk/functions.hpp"
-#include "renderx/exceptions.hpp"
+#include "ve/vulkan/device.hpp"
+#include "ve/vulkan/surface.hpp"
+#include "ve/vk/functions.hpp"
+#include "ve/exceptions.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------

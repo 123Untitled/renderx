@@ -1,7 +1,7 @@
-#include "renderx/vulkan/semaphore.hpp"
+#include "ve/vulkan/semaphore.hpp"
 
-#include "renderx/vk/utils.hpp"
-#include "renderx/vulkan/device.hpp"
+#include "ve/vk/utils.hpp"
+#include "ve/vulkan/device.hpp"
 
 
 

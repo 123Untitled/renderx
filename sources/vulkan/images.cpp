@@ -1,12 +1,12 @@
-#include "renderx/vulkan/images.hpp"
+#include "ve/vulkan/images.hpp"
 
-#include "renderx/vulkan/device.hpp"
-#include "renderx/vulkan/swapchain.hpp"
+#include "ve/vulkan/device.hpp"
+#include "ve/vulkan/swapchain.hpp"
 
-#include "renderx/vk/utils.hpp"
+#include "ve/vk/utils.hpp"
 
-#include "renderx/memory/malloc.hpp"
-#include "renderx/memory/allocation_guard.hpp"
+#include "ve/memory/malloc.hpp"
+#include "ve/memory/allocation_guard.hpp"
 
 #include <stdexcept>
 

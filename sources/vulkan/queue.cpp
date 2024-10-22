@@ -8,8 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#include "renderx/vulkan/queue.hpp"
-#include "renderx/vulkan/device.hpp"
+#include "ve/vulkan/queue.hpp"
+#include "ve/vulkan/device.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -40,7 +40,7 @@ auto vulkan::queue::info(const vk::u32 index,
 	};
 }
 
-#include "renderx/vulkan/command_buffer.hpp"
+#include "ve/vulkan/command_buffer.hpp"
 
 // -- public methods ----------------------------------------------------------
 

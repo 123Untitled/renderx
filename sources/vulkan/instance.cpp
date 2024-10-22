@@ -1,10 +1,10 @@
-#include "renderx/vulkan/instance.hpp"
-#include "renderx/system/write.hpp"
+#include "ve/vulkan/instance.hpp"
+#include "ve/system/write.hpp"
 
-#include "renderx/glfw/system.hpp"
+#include "ve/glfw/system.hpp"
 
-#include "renderx/vulkan/validation_layers.hpp"
-#include "renderx/os.hpp"
+#include "ve/vulkan/validation_layers.hpp"
+#include "ve/os.hpp"
 
 
 // -- private static methods --------------------------------------------------
@@ -46,6 +46,8 @@ vulkan::instance::instance(void)
 
 		// common
 		"VK_KHR_surface",
+
+		//"VK_EXT_mesh_shader",
 
 		// linux
 		#if defined(RENDERX_OS_LINUX)

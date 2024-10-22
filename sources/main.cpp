@@ -1,37 +1,38 @@
-#include "renderx/vulkan/physical_device.hpp"
-#include "renderx/vulkan/device.hpp"
-#include "renderx/vulkan/surface.hpp"
-#include "renderx/vulkan/shader_module.hpp"
-#include "renderx/vulkan/swapchain.hpp"
-#include "renderx/vulkan/command_pool.hpp"
-#include "renderx/vulkan/command_buffer.hpp"
-#include "renderx/vk/typedefs.hpp"
-#include "renderx/os.hpp"
-#include "renderx/vertex/vertex.hpp"
-#include "renderx/exceptions.hpp"
-#include "renderx/shader_library.hpp"
-#include "renderx/vulkan/libraries/library.hpp"
-#include "renderx/vulkan/not_used/resource.hpp"
-#include "renderx/renderer.hpp"
-#include "renderx/vulkan/pipeline.hpp"
-#include "renderx/vulkan/commands.hpp"
-#include "renderx/vulkan/specialization.hpp"
-#include "renderx/vertex/position.hpp"
-#include "renderx/vertex/rotation.hpp"
-#include "renderx/shader_library.hpp"
-#include "renderx/vulkan/fence.hpp"
-#include "renderx/vertex/normal.hpp"
-#include "renderx/vulkan/allocator.hpp"
-#include "renderx/object.hpp"
-#include "renderx/transform.hpp"
-#include "renderx/running.hpp"
-#include "renderx/system/directory.hpp"
-#include "renderx/containers/static_map.hpp"
+#include "ve/vulkan/physical_device.hpp"
+#include "ve/vulkan/device.hpp"
+#include "ve/vulkan/surface.hpp"
+#include "ve/vulkan/shader_module.hpp"
+#include "ve/vulkan/swapchain.hpp"
+#include "ve/vulkan/command_pool.hpp"
+#include "ve/vulkan/command_buffer.hpp"
+#include "ve/vk/typedefs.hpp"
+#include "ve/os.hpp"
+#include "ve/vertex/vertex.hpp"
+#include "ve/exceptions.hpp"
+#include "ve/shader_library.hpp"
+#include "ve/vulkan/libraries/library.hpp"
+#include "ve/vulkan/not_used/resource.hpp"
+#include "ve/renderer.hpp"
+#include "ve/vulkan/pipeline.hpp"
+#include "ve/vulkan/commands.hpp"
+#include "ve/vulkan/specialization.hpp"
+#include "ve/vertex/position.hpp"
+#include "ve/vertex/rotation.hpp"
+#include "ve/shader_library.hpp"
+#include "ve/vulkan/fence.hpp"
+#include "ve/vertex/normal.hpp"
+#include "ve/vulkan/allocator.hpp"
+#include "ve/object.hpp"
+#include "ve/transform.hpp"
+#include "ve/running.hpp"
+#include "ve/system/directory.hpp"
+#include "ve/containers/static_map.hpp"
 
 #include <signal.h>
 
-#include "renderx/vulkan/instance.hpp"
-#include "renderx/wayland/wayland.hpp"
+#include "ve/vulkan/instance.hpp"
+#include "ve/wayland/wayland.hpp"
+
 
 //
 //auto create_vulkan_surface(wl::display& display, wl::surface& surface) -> void {
@@ -59,9 +60,20 @@
 //}
 
 
+#include "ve/obj_parser.hpp"
+#include "ve/geometry/mesh_library.hpp"
+
+#include "ve/geometry/icosphere.hpp"
+#include "ve/structures/vector3.hpp"
+#include "ve/math/pow.hpp"
 
 int main(void) {
 
+
+
+	//rx::obj_parser::parse("assets/models/cube.obj");
+	//
+	//return 0;
 
 	// wayland
 	/*
@@ -118,9 +130,8 @@ int main(void) {
 	try {
 		rx::renderer renderer;
 		renderer.run();
+
 	}
-
-
 	// vulkan catch block
 	catch (const vk::exception& except) {
 		std::cerr << except.what() << std::endl;

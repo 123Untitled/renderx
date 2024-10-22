@@ -1,11 +1,11 @@
-#include "renderx/glfw/system.hpp"
-#include "renderx/exceptions.hpp"
-#include "renderx/os.hpp"
-#include "renderx/vk/typedefs.hpp"
-#include "renderx/glfw/typedefs.hpp"
+#include "ve/glfw/system.hpp"
+#include "ve/exceptions.hpp"
+#include "ve/os.hpp"
+#include "ve/vk/typedefs.hpp"
+#include "ve/glfw/typedefs.hpp"
 
 #include <vulkan/vulkan.h>
-#include "renderx/glfw/glfw.hpp"
+#include "ve/glfw/glfw.hpp"
 
 #include <iostream>
 

@@ -8,8 +8,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#include "renderx/memory/memcpy.hpp"
-#include "renderx/vk/exception.hpp"
+#include "ve/memory/memcpy.hpp"
+#include "ve/vk/exception.hpp"
 
 
 // -- private static methods --------------------------------------------------
@@ -198,13 +198,13 @@ auto vk::exception::what(void) const noexcept -> const char* {
 
 	char* ptr = buffer;
 
-	rx::memcpy(ptr, _where, len1);
+	ve::memcpy(ptr, _where, len1);
 
 	ptr += len1;
 
 	*ptr = ' ';
 
-	rx::memcpy(++ptr, _what, len2);
+	ve::memcpy(++ptr, _what, len2);
 
 	ptr += len2;
 

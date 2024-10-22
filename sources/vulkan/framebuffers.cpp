@@ -1,11 +1,11 @@
-#include "renderx/vulkan/framebuffers.hpp"
-#include "renderx/vulkan/image_views.hpp"
-#include "renderx/vulkan/render_pass.hpp"
-#include "renderx/vulkan/device.hpp"
+#include "ve/vulkan/framebuffers.hpp"
+#include "ve/vulkan/image_views.hpp"
+#include "ve/vulkan/render_pass.hpp"
+#include "ve/vulkan/device.hpp"
 
-#include "renderx/vk/utils.hpp"
+#include "ve/vk/utils.hpp"
 
-#include "renderx/memory/malloc.hpp"
+#include "ve/memory/malloc.hpp"
 
 // -- private methods ---------------------------------------------------------
 

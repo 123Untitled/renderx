@@ -1,8 +1,8 @@
-#include "renderx/glfw/window.hpp"
-#include "renderx/glfw/system.hpp"
-#include "renderx/exceptions.hpp"
+#include "ve/glfw/window.hpp"
+#include "ve/glfw/system.hpp"
+#include "ve/exceptions.hpp"
 
-#include "renderx/running.hpp"
+#include "ve/running.hpp"
 
 // -- private static methods --------------------------------------------------
 

@@ -20,8 +20,8 @@ local -r os=$(uname -s)
 # -- T H I S  S C R I P T -----------------------------------------------------
 
 # get script absolute directory path
-local -r cwd_dir=${0%/*}
-#local -r cwd_dir=${${0%/*}:a}
+#local -r cwd_dir=${0%/*}
+local -r cwd_dir=${${0%/*}:a}
 
 # get script absolute path
 local -r script=${0:a}
@@ -30,7 +30,7 @@ local -r script=${0:a}
 # -- T A R G E T S ------------------------------------------------------------
 
 # project name
-local -r project='renderx'
+local -r project='void_engine'
 
 # main executable
 local -r executable=$cwd_dir'/'$project
@@ -128,6 +128,16 @@ local -r glm_include='-I'$ext_dir'/glm/include'
 local -r glm_library=('-L'$ext_dir'/glm/lib' '-lglm')
 
 
+# -- T I N Y O B J L O A D E R ------------------------------------------------
+
+# tinyobjloader include
+local -r tinyobjloader_include='-I'$ext_dir'/tinyobjloader/include'
+
+# tinyobjloader library
+local -r tinyobjloader_library=('-L'$ext_dir'/tinyobjloader/lib' '-ltinyobjloader')
+
+
+
 # -- O S  D E P E N D E N C I E S ---------------------------------------------
 
 # linux dependencies
@@ -148,8 +158,9 @@ local -r cxx='clang++'
 # cxx flags
 local -r cxxflags=('-std=c++2a'
 				   '-O0'
-				   '-g2'
-				   '-gdwarf-4'
+				   #'-fsanitize=address'
+				   '-g3'
+				   #'-gdwarf-4'
 				   '-DENGINE_VL_DEBUG'
 				   '-Wall'
 				   '-Wextra'
@@ -173,10 +184,18 @@ local -r cxxflags=('-std=c++2a'
 				   '-I'$inc_dir
 				   $vulkan_include
 				   $glfw_include
-				   $glm_include)
+				   $glm_include
+				   $tinyobjloader_include)
 
 # linker flags
-local -r ldflags=($vulkan_library $glfw_library $glm_library $os_dependencies)
+local -r ldflags=(
+				$vulkan_library
+				$glfw_library
+				$glm_library
+				$os_dependencies
+				$tinyobjloader_library
+			)
+				#-fsanitize=address)
 
 
 # -- F U N C T I O N S --------------------------------------------------------
@@ -422,13 +441,20 @@ function _install_dependencies() {
 	_install_dependency 'glm' '1.0.1' 'g-truc' '-DBUILD_SHARED_LIBS=OFF' \
 											   '-DGLM_BUILD_TESTS=OFF'
 
+
+	# install tinyobjloader
+	_install_dependency 'tinyobjloader' 'v1.0.6' 'tinyobjloader' '-DBUILD_SHARED_LIBS=OFF'
+
 }
 
 # generate compile database
 function _generate_compile_db() {
 
+	# use custom script to generate compile database
+	node $cwd_dir'/generate_cdb.js' $cwd_dir "$srcs" "$objs" "$cxx" "$cxxflags"
+
 	# use ninja to generate compile database
-	ninja -f $ninja -t compdb > $compile_db
+	#ninja -f $ninja -t compdb > $compile_db
 
 	# print success
 	print $success'[+]'$reset ${compile_db:t}
@@ -477,7 +503,7 @@ function _build() {
 function _clean() {
 
 	# remove all intermediate files
-	local -r deleted=$(rm -rfv $objs $spvs | wc -l)
+	local -r deleted=$(rm -rfv $objs $spvs $ninja $ninja_dir $compile_db | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
@@ -495,6 +521,8 @@ function _fclean() {
 
 
 # -- M A I N ------------------------------------------------------------------
+
+
 
 echo $warning \
 	'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n' \
@@ -530,6 +558,13 @@ case $1 in
 	ninja)
 		touch $script
 		_generate_ninja
+		;;
+
+	# lldb
+	lldb)
+		echo $VULKAN_SDK'/lib'
+		install_name_tool -add_rpath $VULKAN_SDK'/lib' $executable && echo $success'[+]'$reset 'install_name_tool done'
+		lldb $executable
 		;;
 
 	# unknown (usage)

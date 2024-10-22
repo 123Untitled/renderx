@@ -1,11 +1,11 @@
-#include "renderx/vulkan/swapchain.hpp"
-#include "renderx/vk/utils.hpp"
+#include "ve/vulkan/swapchain.hpp"
+#include "ve/vk/utils.hpp"
 
 #include <iostream>
-#include "renderx/vk/info.hpp"
-#include "renderx/surface_formats.hpp"
+#include "ve/vk/info.hpp"
+#include "ve/surface_formats.hpp"
 
-#include "renderx/glfw/window.hpp"
+#include "ve/glfw/window.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------

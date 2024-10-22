@@ -1,15 +1,15 @@
-#include "renderx/exceptions.hpp"
-#include "renderx/vulkan/surface.hpp"
+#include "ve/exceptions.hpp"
+#include "ve/vulkan/surface.hpp"
 
-#include "renderx/vulkan/instance.hpp"
-#include "renderx/vk/exception.hpp"
+#include "ve/vulkan/instance.hpp"
+#include "ve/vk/exception.hpp"
 
-#include "renderx/glfw/window.hpp"
+#include "ve/glfw/window.hpp"
 
-#include "renderx/os.hpp"
+#include "ve/os.hpp"
 
 #if defined(RENDERX_OS_LINUX)
-#include "renderx/wayland/window.hpp"
+#include "ve/wayland/window.hpp"
 #endif // RENDERX_OS_LINUX
 
 

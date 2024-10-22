@@ -1,13 +1,13 @@
-#include "renderx/vulkan/device.hpp"
-#include "renderx/vulkan/physical_device.hpp"
-#include "renderx/vulkan/queue.hpp"
-#include "renderx/vulkan/instance.hpp"
-#include "renderx/vulkan/validation_layers.hpp"
+#include "ve/vulkan/device.hpp"
+#include "ve/vulkan/physical_device.hpp"
+#include "ve/vulkan/queue.hpp"
+#include "ve/vulkan/instance.hpp"
+#include "ve/vulkan/validation_layers.hpp"
 
 
-#include "renderx/vk/array.hpp"
+#include "ve/vk/array.hpp"
 
-#include "renderx/os.hpp"
+#include "ve/os.hpp"
 
 
 

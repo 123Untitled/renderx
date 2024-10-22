@@ -1,10 +1,10 @@
-#include "renderx/vulkan/image_views.hpp"
-#include "renderx/vulkan/images.hpp"
-#include "renderx/vulkan/device.hpp"
+#include "ve/vulkan/image_views.hpp"
+#include "ve/vulkan/images.hpp"
+#include "ve/vulkan/device.hpp"
 
-#include "renderx/vk/utils.hpp"
+#include "ve/vk/utils.hpp"
 
-#include "renderx/memory/malloc.hpp"
+#include "ve/memory/malloc.hpp"
 
 
 // -- private methods ---------------------------------------------------------
