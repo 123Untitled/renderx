@@ -52,6 +52,7 @@ vulkan::instance::instance(void)
 		// linux
 		#if defined(RENDERX_OS_LINUX)
 		"VK_KHR_wayland_surface",
+		"VK_KHR_xcb_surface",
 
 		// macos
 		#elif defined(RENDERX_OS_MACOS)
@@ -192,22 +193,22 @@ vulkan::instance::_callback(const vk::debug_utils_message_severity_flag_bit seve
 
 		// verbose
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-			rx::write("\x1b[7;35m verbose: ");
+			ve::write("\x1b[7;35m verbose: ");
 			break;
 
 		// info
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-			rx::write("\x1b[7;36m info: ");
+			ve::write("\x1b[7;36m info: ");
 			break;
 
 		// warning
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-			rx::write("\x1b[7;32m warning: ");
+			ve::write("\x1b[7;32m warning: ");
 			break;
 
 		// error
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-			rx::write("\x1b[7;31m error: ");
+			ve::write("\x1b[7;31m error: ");
 			break;
 
 		default:
@@ -216,15 +217,15 @@ vulkan::instance::_callback(const vk::debug_utils_message_severity_flag_bit seve
 
 	// general
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT)
-		rx::write("[general] \x1b[0m\r\n");
+		ve::write("[general] \x1b[0m\r\n");
 
 	// validation
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT)
-		rx::write("[validation] \x1b[0m\r\n");
+		ve::write("[validation] \x1b[0m\r\n");
 
 	// performance
 	if (type & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
-		rx::write("[performance] \x1b[0m\r\n");
+		ve::write("[performance] \x1b[0m\r\n");
 
 
 	std::cerr << cdata->pMessage << std::endl << std::endl;

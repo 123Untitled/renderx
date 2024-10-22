@@ -66,8 +66,55 @@
 #include "ve/geometry/icosphere.hpp"
 #include "ve/structures/vector3.hpp"
 #include "ve/math/pow.hpp"
+#include "ve/structures/matrix.hpp"
 
 int main(void) {
+
+
+
+	// array constructor
+	ve::matrix<float, 3U, 2U> mat2{
+		{
+			1.0f, 2.0f,
+			3.0f, 4.0f,
+			5.0f, 6.0f
+		}
+	};
+
+
+	// multi dimensional array constructor
+	ve::matrix<float, 3U, 2U> mat1{
+		{
+			{1.0f, 2.0f},
+			{3.0f, 4.0f},
+			{5.0f, 6.0f}
+		}
+	};
+
+
+	// variadic constructor
+	ve::matrix<float, 3U, 2U> mat0{
+			1.0f, 2.0f,
+			3.0f, 4.0f,
+			5.0f, 6.0f
+	};
+
+
+	mat0 -= mat1;
+
+	// row constructor
+	//ve::matrix<float, 2, 2> mat3{
+	//		{1.0f, 2.0f},
+	//		{3.0f, 4.0f}
+	//};
+
+	return 0;
+
+
+	//using matrix = ve::matrix<float, 2, 2>;
+
+	return 0;
+
 
 
 
@@ -122,7 +169,7 @@ int main(void) {
 
 	::signal(SIGINT, [](int) {
 		rx::running::stop();
-		rx::write("\n");
+		ve::write("\n");
 	});
 
 

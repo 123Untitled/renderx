@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 
+#include "ve/hint.hpp"
 
 #include "ve/vk/array.hpp"
 
@@ -50,8 +51,10 @@ vulkan::device::device(void)
 		"VK_KHR_swapchain",
 		//"VK_KHR_index_type_uint8",
 		#if defined(ENGINE_OS_MACOS)
-		"VK_KHR_portability_subset"
+		"VK_KHR_portability_subset",
 		#endif
+
+		//"VK_EXT_mesh_shader",
 	};
 
 	// get validation layers
@@ -153,6 +156,21 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 	// get physical devices
 	const auto& pdevices = vulkan::instance::physical_devices();
 
+	enum : unsigned {
+		_ppd_swapchain = 0b0001,
+		_ppd_surface   = 0b0010,
+		_ppd_present   = 0b0100,
+		_ppd_gpu       = 0b1000
+	};
+	enum : unsigned {
+		_ppd_swapchain_shift = 0,
+		_ppd_surface_shift   = 1,
+		_ppd_present_shift   = 2,
+		_ppd_gpu_shift       = 3
+	};
+
+	unsigned ppd = 0U;
+
 	// loop over devices
 	for (const auto& pdevice : pdevices) {
 
@@ -160,26 +178,27 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 		auto properties   = pdevice.properties();
 		auto features     = pdevice.features();
 
-		// check if physical device supports 8-bit indices
-		if (pdevice.supports_swapchain() == false)
-			continue;
-		std::cout << "supports swapchain" << std::endl;
+		// check if physical device supports tesselation shaders
+		if (features.tessellationShader == true)
+			ve::hint::success("tesselation shader supported");
 
-		if (pdevice.have_surface_formats() == false)
-			continue;
-		std::cout << "have surface formats" << std::endl;
+		// check if physical device supports swapchain
+		ppd |= (static_cast<unsigned>(pdevice.supports_swapchain()) << _ppd_swapchain_shift);
 
-		if (pdevice.have_present_modes() == true)
-			continue;
-		std::cout << "have present modes" << std::endl;
+		// check if physical device has surface formats
+		ppd |= (static_cast<unsigned>(pdevice.have_surface_formats()) << _ppd_surface_shift);
 
-		if (properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		 && properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
-			continue;
-		std::cout << "discrete or integrated gpu" << std::endl;
+		// check if physical device has present modes
+		ppd |= (static_cast<unsigned>(pdevice.have_present_modes()) << _ppd_present_shift);
 
-		// return physical device
-		return pdevice;
+		// check if physical device is a gpu
+		if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			ppd |= (1U << _ppd_gpu_shift);
+
+		// check if physical device is suitable
+		if (ppd == 0b1111)
+			return pdevice;
 	}
 
 	// no suitable physical device found

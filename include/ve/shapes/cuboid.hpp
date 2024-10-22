@@ -7,8 +7,6 @@
 
 #include "ve/obj_parser.hpp"
 
-#include <tiny_obj_loader.h>
-
 #include <vector>
 #include <iostream>
 #include <string>
@@ -24,61 +22,6 @@ namespace rx {
 	}
 
 	inline auto cube(void) -> ve::mesh {
-
-		//return rx::obj_parser::parse("assets/models/icosasedron.obj");
-
-		// exemple of using tinyobjloader
-		std::vector<ve::vert3x> vertices;
-		std::vector<rx::u32>     indices;
-
-
-		tinyobj::attrib_t attrib;
-		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> materials;
-		std::string warn;
-
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, "assets/models/sphere.obj")) {
-			throw std::runtime_error(warn);
-		}
-
-		// loop over shapes
-		for (const auto& shape : shapes) {
-
-			// get indices
-			for (const auto& index : shape.mesh.indices) {
-
-				std::cout << "index: " << index.vertex_index << std::endl;
-				indices.push_back((unsigned)index.vertex_index);
-			}
-
-			// get vertices
-			for (size_t i = 0; i < attrib.vertices.size(); i += 3) {
-
-				//vertices.push_back({
-				//	// position
-				//	attrib.vertices[i + 0],
-				//	attrib.vertices[i + 1],
-				//	attrib.vertices[i + 2],
-				//	// normal
-				//	attrib.normals[i + 0],
-				//	attrib.normals[i + 1],
-				//	attrib.normals[i + 2],
-				//	// uv
-				//	attrib.texcoords[i + 0],
-				//	attrib.texcoords[i + 1]
-				//});
-			}
-
-			// get normals
-
-
-		}
-
-		return ve::mesh{vertices, indices};
-
-
-		//return rx::obj_parser::parse("assets/models/sphere.obj");
-		//return rx::obj_parser::parse("assets/models/icosahedron.obj");
 
 
 		std::vector<ve::vert3x> vtxs;

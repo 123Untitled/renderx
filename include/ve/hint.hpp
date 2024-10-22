@@ -1,22 +1,28 @@
-/* ------------------------------------------------------------------------- */
-/*        :::::::::  :::::::::: ::::    ::: :::::::::  :::::::::: :::::::::  */
-/*       :+:    :+: :+:        :+:+:   :+: :+:    :+: :+:        :+:    :+:  */
-/*      +:+    +:+ +:+        :+:+:+  +:+ +:+    +:+ +:+        +:+    +:+   */
-/*     +#++:++#:  +#++:++#   +#+ +:+ +#+ +#+    +:+ +#++:++#   +#++:++#:     */
-/*    +#+    +#+ +#+        +#+  +#+#+# +#+    +#+ +#+        +#+    +#+     */
-/*   #+#    #+# #+#        #+#   #+#+# #+#    #+# #+#        #+#    #+#      */
-/*  ###    ### ########## ###    #### #########  ########## ###    ###       */
-/* ------------------------------------------------------------------------- */
+/*****************************************************************************/
+/*                                                                           */
+/*      dMP dMP .aMMMb  dMP dMMMMb                                           */
+/*     dMP dMP dMP"dMP amr dMP VMP                                           */
+/*    dMP dMP dMP dMP dMP dMP dMP                                            */
+/*    YMvAP  dMP aMP dMP dMP.aMP                                             */
+/*     VP    VMMMP  dMP dMMMMP                                               */
+/*                                                                           */
+/*       dMMMMMP dMMMMb   aMMMMP dMP dMMMMb  dMMMMMP                         */
+/*      dMP     dMP dMP dMP     amr dMP dMP dMP                              */
+/*     dMMMP   dMP dMP dMP MMP dMP dMP dMP dMMMP                             */
+/*    dMP     dMP dMP dMP.dMP dMP dMP dMP dMP                                */
+/*   dMMMMMP dMP dMP  VMMMP" dMP dMP dMP dMMMMMP                             */
+/*                                                                           */
+/*****************************************************************************/
 
-#ifndef ___RENDERX_HINT___
-#define ___RENDERX_HINT___
+#ifndef ___ve_hint___
+#define ___ve_hint___
 
 #include "ve/system/write.hpp"
 
 
-// -- R E N D E R X  N A M E S P A C E ----------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- H I N T  N A M E S P A C E ------------------------------------------
@@ -25,39 +31,39 @@ namespace rx {
 
 
 		/* success */
-		template <rx::size_t ___sz>
+		template <ve::size_t ___sz>
 		auto success(const char (&___msg)[___sz]) noexcept -> void {
-			rx::write<STDOUT_FILENO>("\x1b[32m");
-			rx::write<STDOUT_FILENO>(___msg);
-			rx::write<STDOUT_FILENO>("\x1b[0m\n");
+			ve::write<STDOUT_FILENO>("\x1b[32m");
+			ve::write<STDOUT_FILENO>(___msg);
+			ve::write<STDOUT_FILENO>("\x1b[0m\n");
 		}
 
 		/* warning */
-		template <rx::size_t ___sz>
+		template <ve::size_t ___sz>
 		auto warning(const char (&___msg)[___sz]) noexcept -> void {
-			rx::write<STDOUT_FILENO>("\x1b[33m");
-			rx::write<STDOUT_FILENO>(___msg);
-			rx::write<STDOUT_FILENO>("\x1b[0m\n");
+			ve::write<STDOUT_FILENO>("\x1b[33m");
+			ve::write<STDOUT_FILENO>(___msg);
+			ve::write<STDOUT_FILENO>("\x1b[0m\n");
 		}
 
 		/* error */
-		template <rx::size_t ___sz>
+		template <ve::size_t ___sz>
 		auto error(const char (&___msg)[___sz]) noexcept -> void {
-			rx::write<STDERR_FILENO>("\x1b[31m");
-			rx::write<STDERR_FILENO>(___msg);
-			rx::write<STDERR_FILENO>("\x1b[0m\n");
+			ve::write<STDERR_FILENO>("\x1b[31m");
+			ve::write<STDERR_FILENO>(___msg);
+			ve::write<STDERR_FILENO>("\x1b[0m\n");
 		}
 
 		/* info */
-		template <rx::size_t ___sz>
+		template <ve::size_t ___sz>
 		auto info(const char (&___msg)[___sz]) noexcept -> void {
-			rx::write<STDOUT_FILENO>("\x1b[34m");
-			rx::write<STDOUT_FILENO>(___msg);
-			rx::write<STDOUT_FILENO>("\x1b[0m\n");
+			ve::write<STDOUT_FILENO>("\x1b[34m");
+			ve::write<STDOUT_FILENO>(___msg);
+			ve::write<STDOUT_FILENO>("\x1b[0m\n");
 		}
 
 	} // namespace hint
 
-} // namespace ws
+} // namespace ve
 
-#endif // ___RENDERX_HINT___
+#endif // ___ve_hint___

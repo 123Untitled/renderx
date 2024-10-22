@@ -1,3 +1,19 @@
+/*****************************************************************************/
+/*                                                                           */
+/*      dMP dMP .aMMMb  dMP dMMMMb                                           */
+/*     dMP dMP dMP"dMP amr dMP VMP                                           */
+/*    dMP dMP dMP dMP dMP dMP dMP                                            */
+/*    YMvAP  dMP aMP dMP dMP.aMP                                             */
+/*     VP    VMMMP  dMP dMMMMP                                               */
+/*                                                                           */
+/*       dMMMMMP dMMMMb   aMMMMP dMP dMMMMb  dMMMMMP                         */
+/*      dMP     dMP dMP dMP     amr dMP dMP dMP                              */
+/*     dMMMP   dMP dMP dMP MMP dMP dMP dMP dMMMP                             */
+/*    dMP     dMP dMP dMP.dMP dMP dMP dMP dMP                                */
+/*   dMMMMMP dMP dMP  VMMMP" dMP dMP dMP dMMMMMP                             */
+/*                                                                           */
+/*****************************************************************************/
+
 #include "ve/structures/vector3.hpp"
 
 #include "ve/math/sqrt.hpp"

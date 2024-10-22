@@ -128,15 +128,6 @@ local -r glm_include='-I'$ext_dir'/glm/include'
 local -r glm_library=('-L'$ext_dir'/glm/lib' '-lglm')
 
 
-# -- T I N Y O B J L O A D E R ------------------------------------------------
-
-# tinyobjloader include
-local -r tinyobjloader_include='-I'$ext_dir'/tinyobjloader/include'
-
-# tinyobjloader library
-local -r tinyobjloader_library=('-L'$ext_dir'/tinyobjloader/lib' '-ltinyobjloader')
-
-
 
 # -- O S  D E P E N D E N C I E S ---------------------------------------------
 
@@ -185,7 +176,7 @@ local -r cxxflags=('-std=c++2a'
 				   $vulkan_include
 				   $glfw_include
 				   $glm_include
-				   $tinyobjloader_include)
+			)
 
 # linker flags
 local -r ldflags=(
@@ -193,7 +184,6 @@ local -r ldflags=(
 				$glfw_library
 				$glm_library
 				$os_dependencies
-				$tinyobjloader_library
 			)
 				#-fsanitize=address)
 
@@ -440,10 +430,6 @@ function _install_dependencies() {
 	# install glm
 	_install_dependency 'glm' '1.0.1' 'g-truc' '-DBUILD_SHARED_LIBS=OFF' \
 											   '-DGLM_BUILD_TESTS=OFF'
-
-
-	# install tinyobjloader
-	_install_dependency 'tinyobjloader' 'v1.0.6' 'tinyobjloader' '-DBUILD_SHARED_LIBS=OFF'
 
 }
 

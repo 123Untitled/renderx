@@ -168,7 +168,7 @@ namespace vulkan {
 								::vk_allocate_memory,
 								vulkan::device::logical(), &info, nullptr, &_memory);
 
-						rx::hint::success("new memory block allocated");
+						ve::hint::success("new memory block allocated");
 					}
 
 					/* deleted copy constructor */
@@ -184,7 +184,7 @@ namespace vulkan {
 						::vk_free_memory(
 								vulkan::device::logical(), _memory, nullptr);
 
-						rx::hint::info("memory block released");
+						ve::hint::info("memory block released");
 					}
 
 
