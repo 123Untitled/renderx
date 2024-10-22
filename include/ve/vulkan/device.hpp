@@ -87,13 +87,13 @@ namespace vulkan {
 			// -- public static accessors -------------------------------------
 
 			/* logical */
-			static auto logical(void) noexcept -> const vk::device&;
+			static auto logical(void) -> const vk::device&;
 
 			/* physical */
-			static auto physical(void) noexcept -> const vulkan::physical_device&;
+			static auto physical(void) -> const vulkan::physical_device&;
 
 			/* queue family */
-			static auto family(void) noexcept -> const vk::u32&;
+			static auto family(void) -> const vk::u32&;
 
 
 			// -- public static methods ---------------------------------------

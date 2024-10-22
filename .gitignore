@@ -20,7 +20,7 @@
 /shaders/**/*.spv
 
 # ignore main executable
-/renderx
+/void_engine
 
 # ignore compile database
 /compile_commands.json

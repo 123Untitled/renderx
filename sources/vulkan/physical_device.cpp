@@ -70,7 +70,7 @@ auto vulkan::physical_device::have_surface_formats(void) const -> bool {
 }
 
 /* have present modes */
-auto vulkan::physical_device::have_present_modes(const vk::surface& surface) const -> bool {
+auto vulkan::physical_device::have_present_modes(void) const -> bool {
 
 	vk::u32 count = 0U;
 

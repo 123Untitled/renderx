@@ -15,7 +15,7 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* device and queue family constructor */
-vulkan::queue::queue(void) noexcept
+vulkan::queue::queue(void) /* noexcept */ // may throw because shared device may be instanciate here
 : _queue{nullptr} {
 
 	// get device queue

@@ -4,6 +4,8 @@
 #include "ve/vulkan/instance.hpp"
 #include "ve/vulkan/validation_layers.hpp"
 
+#include <stdexcept>
+
 
 #include "ve/vk/array.hpp"
 
@@ -111,17 +113,17 @@ vulkan::device::~device(void) noexcept {
 // -- public static accessors -------------------------------------------------
 
 /* logical */
-auto vulkan::device::logical(void) noexcept -> const vk::device& {
+auto vulkan::device::logical(void) -> const vk::device& {
 	return ___self::_shared()._ldevice;
 }
 
 /* physical */
-auto vulkan::device::physical(void) noexcept -> const vulkan::physical_device& {
+auto vulkan::device::physical(void) -> const vulkan::physical_device& {
 	return ___self::_shared()._pdevice;
 }
 
 /* queue family */
-auto vulkan::device::family(void) noexcept -> const vk::u32& {
+auto vulkan::device::family(void) -> const vk::u32& {
 	return ___self::_shared()._family;
 }
 
@@ -143,6 +145,8 @@ auto vulkan::device::wait_idle(void) -> void {
 
 // -- private static methods --------------------------------------------------
 
+#include <iostream>
+
 /* pick physical device */
 auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan::physical_device {
 
@@ -157,15 +161,28 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 		auto features     = pdevice.features();
 
 		// check if physical device supports 8-bit indices
-		if (pdevice.supports_swapchain()          == true
-		&&  pdevice.have_surface_formats() == true
-		&&  pdevice.have_present_modes(surface)   == true
-		&& (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)) {
-		// &&  features.geometryShader == true) {
-			return pdevice;
-		}
+		if (pdevice.supports_swapchain() == false)
+			continue;
+		std::cout << "supports swapchain" << std::endl;
+
+		if (pdevice.have_surface_formats() == false)
+			continue;
+		std::cout << "have surface formats" << std::endl;
+
+		if (pdevice.have_present_modes() == true)
+			continue;
+		std::cout << "have present modes" << std::endl;
+
+		if (properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		 && properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			continue;
+		std::cout << "discrete or integrated gpu" << std::endl;
+
+		// return physical device
+		return pdevice;
 	}
+
 	// no suitable physical device found
-	throw "failed to find suitable physical device";
+	throw std::runtime_error{"failed to find suitable physical device"};
 }
+// &&  features.geometryShader == true) {

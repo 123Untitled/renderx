@@ -46,7 +46,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			queue(void) noexcept;
+			queue(void);
 
 
 			// -- public static methods ---------------------------------------

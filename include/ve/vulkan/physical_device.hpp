@@ -96,7 +96,7 @@ namespace vulkan {
 			auto have_surface_formats(void) const -> bool;
 
 			/* have present modes */
-			auto have_present_modes(const vk::surface&) const -> bool;
+			auto have_present_modes(void) const -> bool;
 
 			/* is support surface and queue family */
 			auto is_support_surface_and_queue_family(const vk::surface&, const vk::u32) const -> bool;

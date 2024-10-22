@@ -567,6 +567,12 @@ case $1 in
 		lldb $executable
 		;;
 
+	# gpu
+	gpu)
+		lspci | grep -i vga
+		;;
+
+
 	# unknown (usage)
 	*)
 		echo 'usage: '$script_name' [clean|fclean]'
