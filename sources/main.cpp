@@ -68,8 +68,63 @@
 #include "ve/math/pow.hpp"
 #include "ve/structures/matrix.hpp"
 
+						/* example of sequences for
+						lhs {0, 1}
+							{2, 3}
+							{4, 5}
+
+						rhs {0, 1, 2}
+							{3, 4, 5}
+
+						ret {0, 0, 0}
+							{0, 0, 0}
+							{0, 0, 0}
+
+						ret sequence: 0, 1, 2, 3, 4, 5, 6, 7, 8
+						lhs sequence: 0, 1, 0, 1, 0, 1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 5
+						rhs sequence: 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5
+						*/
+
+template <unsigned... s1, unsigned... s2, unsigned... s3>
+static auto test_mul(const float(&lhs)[6], const float(&rhs)[6], ve::index_sequence<s1...>,
+																  ve::index_sequence<s2...>,
+																  ve::index_sequence<s3...>) noexcept -> float (&)[9] {
+
+	static float result[9]{};
+
+
+	((result[s1] = ((lhs[s2] * rhs[s3]) + ...)), ...);
+
+	return result;
+}
+
+
 int main(void) {
 
+	float lhs[6] = {1.0f, 2.0f,
+					3.0f, 4.0f,
+					5.0f, 6.0f};
+
+	float rhs[6] = {1.0f, 2.0f, 3.0f,
+					4.0f, 5.0f, 6.0f};
+
+
+	using se1 = ve::index_sequence<0, 1, 2, 3, 4, 5, 6, 7, 8>;
+	using se2 = ve::index_sequence<0, 1, 0, 1, 0, 1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 5>;
+	using se3 = ve::index_sequence<0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5>;
+
+
+	auto& result = test_mul(lhs, rhs, se1{}, se2{}, se3{});
+
+	for (unsigned i = 0; i < 3; ++i) {
+		for (unsigned j = 0; j < 3; ++j) {
+			std::cout << result[(i * 3) + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+
+	return 0;
 
 
 	// array constructor
@@ -100,7 +155,8 @@ int main(void) {
 	};
 
 
-	mat0 -= mat1;
+	mat0 *= mat1;
+	mat0.print();
 
 	// row constructor
 	//ve::matrix<float, 2, 2> mat3{

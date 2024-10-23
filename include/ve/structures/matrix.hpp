@@ -88,6 +88,64 @@ namespace ve {
 				((this->_mat[indices] = mat[indices]), ...);
 			}
 
+			template <size_type... indices>
+			struct __impl final {
+
+
+				static auto _copy(const value_type(&m1)[VE_MATRIX_SIZE],
+								  const value_type(&m2)[VE_MATRIX_SIZE]) noexcept -> void {
+					((m1[indices] = m2[indices]), ...);
+				}
+
+				static auto _copy(const value_type(&m1)[VE_MATRIX_SIZE],
+								  const value_type& scalar) noexcept -> void {
+					((m1[indices] = scalar), ...);
+				}
+
+				static auto _add(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type(&m2)[VE_MATRIX_SIZE]) noexcept -> void {
+					((m1[indices] += m2[indices]), ...);
+				}
+
+				static auto _sub(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type(&m2)[VE_MATRIX_SIZE]) noexcept -> void {
+					((m1[indices] -= m2[indices]), ...);
+				}
+
+				static auto _mul(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type(&m2)[VE_MATRIX_SIZE]) noexcept -> void {
+					((m1[indices] *= m2[indices]), ...);
+				}
+
+				static auto _div(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type(&m2)[VE_MATRIX_SIZE]) noexcept -> void {
+					((m1[indices] /= m2[indices]), ...);
+				}
+
+				static auto _add(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type& scalar) noexcept -> void {
+					((m1[indices] += scalar), ...);
+				}
+
+				static auto _sub(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type& scalar) noexcept -> void {
+					((m1[indices] -= scalar), ...);
+				}
+
+				static auto _mul(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type& scalar) noexcept -> void {
+					((m1[indices] *= scalar), ...);
+				}
+
+				static auto _div(const value_type(&m1)[VE_MATRIX_SIZE],
+								 const value_type& scalar) noexcept -> void {
+					((m1[indices] /= scalar), ...);
+				}
+
+
+
+			};
+
 		public:
 
 			// -- public lifecycle --------------------------------------------
@@ -142,15 +200,6 @@ namespace ve {
 
 			// -- public subscript operators ----------------------------------
 
-			/* operator[] */
-			auto operator[](const unsigned i) noexcept -> type(&)[cols] {
-				return _mat[i];
-			}
-
-			/* const operator[] */
-			auto operator[](const unsigned i) const noexcept -> const type(&)[cols] {
-				return _mat[i];
-			}
 
 			template <size_type... indices>
 			auto _print(ve::index_sequence<indices...>) const noexcept -> void {
@@ -167,56 +216,253 @@ namespace ve {
 			}
 
 
-			// -- public arithmetic operators ---------------------------------
+		private:
 
-			enum _op_ {
-				VE_MATRIX_ADD,
-				VE_MATRIX_SUB,
-				VE_MATRIX_MUL,
-				VE_MATRIX_DIV
-			};
+			// -- private arithmetic methods ----------------------------------
 
-			template <_op_ operation, size_type... indices>
-			auto _operation(const ___self& other, ve::index_sequence<indices...>) noexcept -> void {
-				if constexpr (operation == VE_MATRIX_ADD) {
-					((_mat[indices] += other._mat[indices]), ...);
-				}
-				else if constexpr (operation == VE_MATRIX_SUB) {
-					((_mat[indices] -= other._mat[indices]), ...);
-				}
-				else if constexpr (operation == VE_MATRIX_MUL) {
-					((_mat[indices] *= other._mat[indices]), ...);
-				}
-				else if constexpr (operation == VE_MATRIX_DIV) {
-					((_mat[indices] /= other._mat[indices]), ...);
-				}
+			/* add */
+			template <size_type... indices>
+			auto _add(const ___self& other, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] += other._mat[indices]), ...);
 			}
+
+			/* sub */
+			template <size_type... indices>
+			auto _sub(const ___self& other, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] -= other._mat[indices]), ...);
+			}
+
+
+			/* add scalar */
+			template <size_type... indices>
+			auto _add_scalar(const type& scalar, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] += scalar), ...);
+			}
+
+			/* sub scalar */
+			template <size_type... indices>
+			auto _sub_scalar(const type& scalar, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] -= scalar), ...);
+			}
+
+			/* mul scalar */
+			template <size_type... indices>
+			auto _mul_scalar(const type& scalar, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] *= scalar), ...);
+			}
+
+			/* div scalar */
+			template <size_type... indices>
+			auto _div_scalar(const type& scalar, ve::index_sequence<indices...>) noexcept -> void {
+				((_mat[indices] /= scalar), ...);
+			}
+
+			template <size_type value>
+			static constexpr size_type compute = value;
+
+			/* mul element */
+			template <size_type row, size_type col, typename t1, typename t2, size_type... idx>
+			static auto _mul_element(const t1& m1, const t2& m2, ve::index_sequence<idx...>) noexcept -> value_type {
+				return ((m1._mat[compute<row * cols + idx>] * m2._mat[compute<idx * cols + col>]) + ...);
+			}
+
+			/* mul */
+			template <size_type row, size_type col, typename t1, typename t2, size_type... idx>
+			static auto _mul(const t1& m1, const t2& m2, ve::index_sequence<idx...>) noexcept -> void {
+				m1._mat[compute<row * cols + col>] = _mul_element<row, col>(m1, m2, ve::make_index_sequence<cols>{});
+			}
+			/*
+			   lhs (row) sequence: 000 111 222
+			   rhs (col) sequence: 012 012 012
+			   */
+
+			/*
+			   matrix multiplication
+			   try something like this:
+				3x index sequences (result, lhs, rhs)
+
+				*/
+
+				template <typename m1, typename m2, size_type... s1, size_type... s2, size_type... s3>
+				static auto _multiply(const m1& lhs, const m2& rhs, index_sequence<s1...>,
+																	index_sequence<s2...>,
+																	index_sequence<s3...>) noexcept -> void {
+
+					___self result;
+
+					((result[s1] = ((lhs[s2] * rhs[s3]) + ...)), ...);
+				}
+
+				/* make matrix sequence */
+				template <size_type s1, size_type s2, size_type s3>
+				class make_matrix_sequence {
+
+
+					public:
+
+						/* lhs type */
+						using lhs_type = ve::matrix<type, s1, s2>;
+
+						/* rhs type */
+						using rhs_type = ve::matrix<type, s2, s3>;
+
+						/* ret type */
+						using ret_type = ve::matrix<type, s1, s3>;
+
+
+					private:
+
+						constexpr static size_type ret_size = s1 * s3;
+
+
+						/* example of sequences for
+						lhs {0, 1}
+							{2, 3}
+							{4, 5}
+
+						rhs {0, 1, 2}
+							{3, 4, 5}
+
+						ret {0, 0, 0}
+							{0, 0, 0}
+							{0, 0, 0}
+
+						ret sequence: 0, 1, 2, 3, 4, 5, 6, 7, 8
+						lhs sequence: 0, 1, 0, 1, 0, 1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 5
+						rhs sequence: 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5
+						*/
+
+
+
+						/* result sequence */
+						template <size_type...>
+						struct _ret_seq;
+
+						template <size_type i, size_type... seq> requires (i > 0U)
+						struct _ret_seq<i, seq...> {
+							using _type = typename _ret_seq<i - 1U, i - 1U, seq...>::_type;
+						};
+
+						template <size_type... seq> requires (sizeof...(seq) == ret_size)
+						struct _ret_seq<seq...> {
+							using _type = ve::index_sequence<seq...>;
+						};
+
+
+
+
+						/* result sequence */
+						// not implemented yet...
+
+						/* lhs sequence */
+						// not implemented yet...
+
+						/* rhs sequence */
+						// not implemented yet...
+				};
+
+
+		public:
+
+			// -- public arithmetic operators ---------------------------------
 
 			/* += operator */
 			auto operator+=(const ___self& other) noexcept -> ___self& {
-				___self::_operation<VE_MATRIX_ADD>(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+				___self::_add(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
 				return *this;
 			}
 
 			/* -= operator */
 			auto operator-=(const ___self& other) noexcept -> ___self& {
-				___self::_operation<VE_MATRIX_SUB>(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+				___self::_sub(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
 				return *this;
 			}
 
 			/* *= operator */
+			/* on this operator, the matrix must be square, because the result matrix
+			 * will have the same number of rows as the left matrix and the same number
+			 * of columns as the right matrix */
 			auto operator*=(const ___self& other) noexcept -> ___self& {
-				___self::_operation<VE_MATRIX_MUL>(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+
+				// result matrix
+				___self result;
+				// test multiplication
+				_mul_element<0, 0>(result, other, ve::make_index_sequence<cols>{});
+
+				return *this;
+				// multiply matrices
+				//result._mul(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+			}
+
+
+
+			/* += operator (scalar) */
+			auto operator+=(const type& scalar) noexcept -> ___self& {
+				___self::_add_scalar(scalar, ve::make_index_sequence<VE_MATRIX_SIZE>{});
 				return *this;
 			}
 
-			/* /= operator */
-			auto operator/=(const ___self& other) noexcept -> ___self& {
-				___self::_operation<VE_MATRIX_DIV>(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+			/* -= operator (scalar) */
+			auto operator-=(const type& scalar) noexcept -> ___self& {
+				___self::_sub_scalar(scalar, ve::make_index_sequence<VE_MATRIX_SIZE>{});
 				return *this;
 			}
+
+			/* *= operator (scalar) */
+			auto operator*=(const type& scalar) noexcept -> ___self& {
+				___self::_mul_scalar(scalar, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+				return *this;
+			}
+
+			/* /= operator (scalar) */
+			auto operator/=(const type& scalar) noexcept -> ___self& {
+				___self::_div_scalar(scalar, ve::make_index_sequence<VE_MATRIX_SIZE>{});
+				return *this;
+			}
+
 
 	}; // class matrix
+
+
+	// -- non-member arithmetic operators -------------------------------------
+
+	/* + operator */
+	template <typename type, unsigned rows, unsigned cols>
+	auto operator+(const ve::matrix<type, rows, cols>& lhs,
+				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
+
+		// copy lhs matrix and add rhs matrix
+		return ve::matrix<type, rows, cols>{lhs} += rhs;
+	}
+
+	/* - operator */
+	template <typename type, unsigned rows, unsigned cols>
+	auto operator-(const ve::matrix<type, rows, cols>& lhs,
+				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
+
+		// copy lhs matrix and subtract rhs matrix
+		return ve::matrix<type, rows, cols>{lhs} -= rhs;
+	}
+
+	/* * operator */
+	template <typename type, unsigned rows, unsigned cols>
+	auto operator*(const ve::matrix<type, rows, cols>& lhs,
+				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
+
+		// copy lhs matrix and multiply rhs matrix
+		return ve::matrix<type, rows, cols>{lhs} *= rhs;
+	}
+
+	/* / operator */
+	template <typename type, unsigned rows, unsigned cols>
+	auto operator/(const ve::matrix<type, rows, cols>& lhs,
+				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
+
+		// copy lhs matrix and divide rhs matrix
+		return ve::matrix<type, rows, cols>{lhs} /= rhs;
+	}
+
+
 
 
 
