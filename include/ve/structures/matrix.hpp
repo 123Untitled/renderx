@@ -381,6 +381,7 @@ namespace ve {
 			/* on this operator, the matrix must be square, because the result matrix
 			 * will have the same number of rows as the left matrix and the same number
 			 * of columns as the right matrix */
+			/*
 			auto operator*=(const ___self& other) noexcept -> ___self& {
 
 				// result matrix
@@ -392,6 +393,7 @@ namespace ve {
 				// multiply matrices
 				//result._mul(other, ve::make_index_sequence<VE_MATRIX_SIZE>{});
 			}
+			*/
 
 
 
@@ -450,11 +452,19 @@ namespace ve {
 
 		ve::matrix<type, s1, s3> ret;
 
+		// loop over result matrix
 		for (unsigned r = 0U; r < s1 * s3; ++r) {
 
-			for (unsigned	
+			// loop over lhs matrix
+			for (unsigned c = 0U; c < s2; ++c) {
 
+				// loop over rhs matrix
+				for (unsigned i = 0U; i < s2; ++i) {
 
+					// multiply and add
+					ret._mat[r] += lhs._mat[r * s2 + i] * rhs._mat[i * s3 + c];
+				}
+			}
 		}
 	}
 
