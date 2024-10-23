@@ -142,9 +142,8 @@ namespace ve {
 					((m1[indices] /= scalar), ...);
 				}
 
-
-
 			};
+
 
 		public:
 
@@ -445,12 +444,18 @@ namespace ve {
 	}
 
 	/* * operator */
-	template <typename type, unsigned rows, unsigned cols>
-	auto operator*(const ve::matrix<type, rows, cols>& lhs,
-				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
+	template <typename type, unsigned s1, unsigned s2, unsigned s3>
+	auto operator*(const ve::matrix<type, s1, s2>& lhs,
+				   const ve::matrix<type, s2, s3>& rhs) noexcept -> ve::matrix<type, s1, s3> {
 
-		// copy lhs matrix and multiply rhs matrix
-		return ve::matrix<type, rows, cols>{lhs} *= rhs;
+		ve::matrix<type, s1, s3> ret;
+
+		for (unsigned r = 0U; r < s1 * s3; ++r) {
+
+			for (unsigned	
+
+
+		}
 	}
 
 	/* / operator */

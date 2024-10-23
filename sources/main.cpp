@@ -101,6 +101,7 @@ static auto test_mul(const float(&lhs)[6], const float(&rhs)[6], ve::index_seque
 
 int main(void) {
 
+
 	float lhs[6] = {1.0f, 2.0f,
 					3.0f, 4.0f,
 					5.0f, 6.0f};
@@ -125,6 +126,8 @@ int main(void) {
 
 
 	return 0;
+
+
 
 
 	// array constructor

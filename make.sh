@@ -219,7 +219,8 @@ function _check_tools() {
 	# required tools
 	local -r required=('uname' 'git' 'curl' 'tar'
 					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
-					   'ccache' 'clang++' 'glslc')
+					   'clang++' 'glslc')
+					   #'ccache'
 
 	# loop over required tools
 	for tool in $required; do
@@ -323,7 +324,8 @@ function _generate_ninja() {
 	file+='# ninja file\n'
 	file+='ninja = '$ninja'\n\n'
 	file+='# compiler and flags\n'
-	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	# ccache commented (not installed at 42)
 
 
 	# -- rules ----------------------------------------------------------------
