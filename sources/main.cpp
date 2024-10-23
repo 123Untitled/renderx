@@ -1,72 +1,6 @@
-#include "ve/vulkan/physical_device.hpp"
-#include "ve/vulkan/device.hpp"
-#include "ve/vulkan/surface.hpp"
-#include "ve/vulkan/shader_module.hpp"
-#include "ve/vulkan/swapchain.hpp"
-#include "ve/vulkan/command_pool.hpp"
-#include "ve/vulkan/command_buffer.hpp"
-#include "ve/vk/typedefs.hpp"
-#include "ve/os.hpp"
-#include "ve/vertex/vertex.hpp"
-#include "ve/exceptions.hpp"
-#include "ve/shader_library.hpp"
-#include "ve/vulkan/libraries/library.hpp"
-#include "ve/vulkan/not_used/resource.hpp"
-#include "ve/renderer.hpp"
-#include "ve/vulkan/pipeline.hpp"
-#include "ve/vulkan/commands.hpp"
-#include "ve/vulkan/specialization.hpp"
-#include "ve/vertex/position.hpp"
-#include "ve/vertex/rotation.hpp"
-#include "ve/shader_library.hpp"
-#include "ve/vulkan/fence.hpp"
-#include "ve/vertex/normal.hpp"
-#include "ve/vulkan/allocator.hpp"
-#include "ve/object.hpp"
-#include "ve/transform.hpp"
-#include "ve/running.hpp"
-#include "ve/system/directory.hpp"
-#include "ve/containers/static_map.hpp"
-
-#include <signal.h>
-
-#include "ve/vulkan/instance.hpp"
-#include "ve/wayland/wayland.hpp"
+#include "ve/all.hpp"
 
 
-//
-//auto create_vulkan_surface(wl::display& display, wl::surface& surface) -> void {
-//
-//	const vk::wayland_surface_create_info_khr info {
-//		// structure type
-//		.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
-//		// next structure
-//		.pNext = nullptr,
-//		// flags
-//		.flags = 0U,
-//		// wayland display
-//		.display = &display.get(),
-//		// wayland surface (window)
-//		.surface = &surface.get()
-//	};
-//
-//	vk::surface surface_khr;
-//
-//    // Créer la surface Vulkan avec Wayland
-//    if (::vk_create_wayland_surface_khr(vulkan::instance::shared(),
-//									&info, nullptr, &surface_khr) != VK_SUCCESS) {
-//		throw std::runtime_error("Could not create vulkan surface");
-//    }
-//}
-
-
-#include "ve/obj_parser.hpp"
-#include "ve/geometry/mesh_library.hpp"
-
-#include "ve/geometry/icosphere.hpp"
-#include "ve/structures/vector3.hpp"
-#include "ve/math/pow.hpp"
-#include "ve/structures/matrix.hpp"
 
 						/* example of sequences for
 						lhs {0, 1}
@@ -99,8 +33,8 @@ static auto test_mul(const float(&lhs)[6], const float(&rhs)[6], ve::index_seque
 }
 
 
-int main(void) {
 
+void test_mult() {
 
 	float lhs[6] = {1.0f, 2.0f,
 					3.0f, 4.0f,
@@ -109,122 +43,52 @@ int main(void) {
 	float rhs[6] = {1.0f, 2.0f, 3.0f,
 					4.0f, 5.0f, 6.0f};
 
-
 	using se1 = ve::index_sequence<0, 1, 2, 3, 4, 5, 6, 7, 8>;
 	using se2 = ve::index_sequence<0, 1, 0, 1, 0, 1, 2, 3, 2, 3, 2, 3, 4, 5, 4, 5, 4, 5>;
 	using se3 = ve::index_sequence<0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5, 0, 3, 1, 4, 2, 5>;
-
 
 	auto& result = test_mul(lhs, rhs, se1{}, se2{}, se3{});
 
 	for (unsigned i = 0; i < 3; ++i) {
 		for (unsigned j = 0; j < 3; ++j) {
-			std::cout << result[(i * 3) + j] << " ";
-		}
+			std::cout << result[(i * 3) + j] << " "; }
 		std::cout << std::endl;
 	}
 
+}
 
-	return 0;
 
+int main(void) {
 
 
 
 	// array constructor
-	ve::matrix<float, 3U, 2U> mat2{
-		{
-			1.0f, 2.0f,
-			3.0f, 4.0f,
-			5.0f, 6.0f
-		}
-	};
-
+	ve::matrix<float, 3U, 3U> mat1{ { 1.0f, 2.0f, 3.0f,
+									  4.0f, 5.0f, 6.0f,
+									  7.0f, 8.0f, 9.0f } };
 
 	// multi dimensional array constructor
-	ve::matrix<float, 3U, 2U> mat1{
-		{
-			{1.0f, 2.0f},
-			{3.0f, 4.0f},
-			{5.0f, 6.0f}
-		}
-	};
-
+	ve::matrix<float, 3U, 3U> mat2{ { {1.0f, 2.0f, 3.0f},
+									  {4.0f, 5.0f, 6.0f},
+									  {7.0f, 8.0f, 9.0f} } };
 
 	// variadic constructor
-	ve::matrix<float, 3U, 2U> mat0{
-			1.0f, 2.0f,
-			3.0f, 4.0f,
-			5.0f, 6.0f
-	};
-
-
-	mat0 *= mat1;
-	mat0.print();
+	//ve::matrix<float, 3U, 2U> mat3{ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
 
 	// row constructor
-	//ve::matrix<float, 2, 2> mat3{
-	//		{1.0f, 2.0f},
-	//		{3.0f, 4.0f}
-	//};
-
-	return 0;
+	//ve::matrix<float, 3U, 2U> mat4{ {1.0f, 2.0f}, {3.0f, 4.0f}, {5.0f, 6.0f} };
 
 
-	//using matrix = ve::matrix<float, 2, 2>;
+	auto res = mat1 * mat2;
 
-	return 0;
+	//res.print();
 
-
-
-
-	//rx::obj_parser::parse("assets/models/cube.obj");
-	//
-	//return 0;
-
-	// wayland
-	/*
-	{
-		wl::display display;
-		wl::compositor compositor{display};
-		wl::surface surface{compositor};
-
-		create_vulkan_surface(display, surface);
-
-		surface.commit();
-
-		display.roundtrip();
-
-		std::cout << "Wayland display: " << &display.get() << std::endl;
-		while (display.dispatch() != 0U) {
-			// do nothing
-		}
-
-		sleep(1);
-
-		return 0;
-	}
-	*/
-
-
-
-
-	//glfw::window::resized();
-	//
-	//while (glfw::window::should_close() == false) {
-	//	glfw::events::wait();
-	//}
-	//
 	//return 0;
 
 
 
-	//xe::static_map<vulkan::shader_module<VK_SHADER_STAGE_VERTEX_BIT>,
-	//	"basic"> m{std::string{"shaders/basic.vert.spv"}};
-	//
-	//
-	//m.for_each([](const auto& value) {
-	//		});
-	//
+
+
 
 	::signal(SIGINT, [](int) {
 		rx::running::stop();

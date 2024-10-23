@@ -30,6 +30,7 @@ out gl_PerVertex {
 
 void main(void) {
 
+
 	// compute model position
 	vec4 model_position = pco.model * vec4(in_position, 1.0);
 

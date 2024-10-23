@@ -76,6 +76,7 @@ namespace ve {
 
 			// -- public members ----------------------------------------------
 
+		public:
 			/* matrix */
 			type _mat[VE_MATRIX_SIZE];
 
@@ -150,7 +151,9 @@ namespace ve {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			matrix(void) noexcept = default;
+			matrix(void) noexcept
+			: _mat{} {
+			}
 
 			/* array constructor */
 			matrix(const type(&array)[VE_MATRIX_SIZE]) noexcept {
@@ -165,14 +168,15 @@ namespace ve {
 
 			/* variadic constructor */
 			template <typename... types> requires ((sizeof...(types) <= VE_MATRIX_SIZE)
-												&& (std::same_as<type, std::remove_cvref_t<types>> && ...))
+												&& (std::convertible_to<types, value_type> && ...))
+													//std::same_as<type, std::remove_cvref_t<types>> && ...))
 			matrix(types&&... args) noexcept
-			: _mat{static_cast<type>(/*forward*/args)...} {
+			: _mat{static_cast<value_type>(/*forward*/args)...} {
 			}
 
 			/* rows constructor */
-			template <size_type... sizes> requires ((sizeof...(sizes) == cols)
-													&& ((sizes == rows) && ...) && false) // NOT IMPLEMENTED YET...
+			template <size_type... sizes> requires ((sizeof...(sizes) == rows)
+													&& ((sizes == cols) && ...)) // NOT IMPLEMENTED YET...
 			matrix(const type (&...arrays)[sizes]) noexcept {
 			}
 
@@ -452,34 +456,33 @@ namespace ve {
 
 		ve::matrix<type, s1, s3> ret;
 
-		// loop over result matrix
-		for (unsigned r = 0U; r < s1 * s3; ++r) {
+		// loop over rows of lhs
+		for (unsigned r = 0U; r < s1; ++r) {
 
-			// loop over lhs matrix
-			for (unsigned c = 0U; c < s2; ++c) {
-
-				// loop over rhs matrix
+			// loop over columns of rhs
+			for (unsigned c = 0U; c < s3; ++c) {
+				// loop over columns of lhs / rows of rhs
 				for (unsigned i = 0U; i < s2; ++i) {
-
-					// multiply and add
-					ret._mat[r] += lhs._mat[r * s2 + i] * rhs._mat[i * s3 + c];
+					// Perform the multiplication and sum
+					ret._mat[r * s3 + c] += lhs._mat[r * s2 + i] * rhs._mat[i * s3 + c];
 				}
 			}
 		}
-	}
 
-	/* / operator */
-	template <typename type, unsigned rows, unsigned cols>
-	auto operator/(const ve::matrix<type, rows, cols>& lhs,
-				   const ve::matrix<type, rows, cols>& rhs) noexcept -> ve::matrix<type, rows, cols> {
-
-		// copy lhs matrix and divide rhs matrix
-		return ve::matrix<type, rows, cols>{lhs} /= rhs;
+		return ret;
 	}
 
 
+	// -- aliases -------------------------------------------------------------
 
+	template <typename type>
+	using mat4x4 = ve::matrix<type, 4U, 4U>;
 
+	template <typename type>
+	using mat3x3 = ve::matrix<type, 3U, 3U>;
+
+	template <typename type>
+	using mat2x2 = ve::matrix<type, 2U, 2U>;
 
 } // namespace ve
 

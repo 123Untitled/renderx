@@ -9,17 +9,9 @@
 /*****************************************************************************/
 
 #include "ve/renderer.hpp"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "ve/time/delta.hpp"
 #include "ve/running.hpp"
-
-#include "ve/shapes/cuboid.hpp"
-
 #include "ve/glfw/monitor.hpp"
-
 #include "ve/geometry/mesh_library.hpp"
 
 

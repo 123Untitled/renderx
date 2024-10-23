@@ -8,6 +8,8 @@
 #include "ve/glfw/events.hpp"
 #include "ve/glfw/window.hpp"
 
+#include "ve/structures/matrix.hpp"
+
 
 // -- R X ---------------------------------------------------------------------
 
@@ -74,6 +76,15 @@ namespace rx {
 					{  0,   0, -zs,   1},
 					{  0,   0,  zt,   0}
 				};
+
+
+				ve::matrix<float, 4U, 4U> mat {
+					+xs,    0,    0,    0,
+					  0,  +ys,    0,    0,
+					  0,    0,  -zs,    1,
+					  0,    0,   zt,    0
+				};
+
 			}
 
 

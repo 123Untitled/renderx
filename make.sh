@@ -71,12 +71,6 @@ local -r srcs=($src_dir'/'**'/'*'.cpp'(.N))
 # object files
 local -r objs=(${srcs/%.cpp/.o})
 
-# shader files
-local -r shas=($sha_dir'/'*'.glsl'(.N))
-
-# spirv files
-local -r spvs=(${shas/%.glsl/.spv})
-
 
 # -- V U L K A N --------------------------------------------------------------
 
@@ -339,14 +333,8 @@ function _generate_ninja() {
 	file+='  depfile = $out.d\n'
 	file+='  deps = gcc\n\n'
 
-	file+='# rule to compile shaders\n'
-	file+='rule shader\n'
-	file+='  command = glslc -fshader-stage=$stage $in -o $out\n'
-	file+='  description = shader $stage\n\n'
-
 	file+='# rule to link object files\n'
 	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n\n'
-
 
 
 	# -- builds ---------------------------------------------------------------
@@ -363,27 +351,6 @@ function _generate_ninja() {
 	done
 
 
-	# -- shaders --------------------------------------------------------------
-
-	# loop over shader files
-	for ((i = 1; i <= $#shas; ++i)); do
-
-		# shader file
-		local sha=${shas[$i]}
-
-		# output file
-		local spv=${spvs[$i]}
-
-		# extract stage
-		local stage=${sha:t:r:e}
-
-		file+='# shader '${sha:t:r}'\n'
-		file+='build '$spv': $\n  shader '$sha' | $ninja\n'
-		file+='  stage = '$stage'\n\n'
-	done
-
-
-
 	# -- executable -----------------------------------------------------------
 
 	# link
@@ -392,7 +359,7 @@ function _generate_ninja() {
 
 	## all target
 	file+='# all target\n'
-	file+='build all: phony '$executable' $\n'$spvs'\n\n'
+	file+='build all: phony '$executable'\n\n'
 
 	# default target
 	file+='# default target\n'
@@ -476,6 +443,9 @@ function _build() {
 	# install dependencies
 	_install_dependencies
 
+	# compile shaders
+	$sha_dir'/make.sh'
+
 	# generate ninja file
 	_generate_ninja
 
@@ -490,8 +460,11 @@ function _build() {
 # clean
 function _clean() {
 
+	# clean shaders
+	$sha_dir'/make.sh' 'rm'
+
 	# remove all intermediate files
-	local -r deleted=$(rm -rfv $objs $spvs $ninja $ninja_dir $compile_db | wc -l)
+	local -r deleted=$(rm -rfv $objs $ninja $ninja_dir $compile_db | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
@@ -500,8 +473,11 @@ function _clean() {
 # fclean
 function _fclean() {
 
+	# clean shaders
+	$sha_dir'/make.sh' 'rm'
+
 	# remove all build files
-	local -r deleted=$(rm -rfv $objs $spvs $executable $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
+	local -r deleted=$(rm -rfv $objs $executable $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'

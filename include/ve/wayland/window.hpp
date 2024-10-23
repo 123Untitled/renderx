@@ -90,3 +90,27 @@ namespace wl {
 #endif // RENDERX_OS_LINUX
 
 #endif // ___RENDERX_WAYLAND_WINDOW___
+
+	// wayland
+	/*
+	{
+		wl::display display;
+		wl::compositor compositor{display};
+		wl::surface surface{compositor};
+
+		create_vulkan_surface(display, surface);
+
+		surface.commit();
+
+		display.roundtrip();
+
+		std::cout << "Wayland display: " << &display.get() << std::endl;
+		while (display.dispatch() != 0U) {
+			// do nothing
+		}
+
+		sleep(1);
+
+		return 0;
+	}
+	*/
