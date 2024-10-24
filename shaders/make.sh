@@ -67,7 +67,7 @@ function _compile() {
 	done
 
 	if (($count > 0)); then
-		echo '\n'$count 'spir-v compiled.'
+		echo ' '$count 'spir-v compiled.'
 	else
 		echo 'done.'
 	fi
@@ -75,16 +75,15 @@ function _compile() {
 
 function _prepare() {
 
+	# append spir-v directory to directories
+	local directories=(
+		${stages/#/$spv_dir'/'}
+	)
+
 	# create directories
-	for stage in $stages; do
-
-		local dir=$spv_dir'/'$stage
-
-		if [[ ! -d $dir ]]; then
-			mkdir -p $dir
-			echo $success'[+]'$reset ${dir:t}
-		fi
-	done
+	if ! mkdir -p $directories; then
+		echo $error'[x]'$reset 'failed to create directories.'
+	fi
 }
 
 
@@ -99,13 +98,7 @@ function _clean() {
 
 
 case $1 in
-	clean)
-		_clean
-		;;
-	fclean)
-		_clean
-		;;
-	rm)
+	clean|clear|fclean|rm)
 		_clean
 		;;
 	*)
