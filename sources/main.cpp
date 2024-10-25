@@ -74,10 +74,26 @@ struct stest {
 
 
 #include "ve/vulkan/descriptor_set_layout.hpp"
+#include "ve/vulkan/descriptor_pool.hpp"
 
 auto main(int, char**) -> int {
 
-	vulkan::descriptor_set_layout l;
+	vk::descriptor_set_layout_binding b1{
+		.binding = 0U,
+		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		.descriptorCount = 1U,
+		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+	};
+
+	vk::descriptor_set_layout_binding b2{
+		.binding = 1U,
+		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		.descriptorCount = 1U,
+		.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT
+	};
+
+	vulkan::descriptor_set_layout l{b1, b2};
+	vulkan::descriptor_pool p{2U};
 
 
 	test<"vertex">();

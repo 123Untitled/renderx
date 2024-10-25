@@ -713,6 +713,15 @@ namespace vk {
 #define vk_destroy_pipeline_layout vkDestroyPipelineLayout
 
 
+// -- pipeline layout ---------------------------------------------------------
+
+/* create pipeline layout */
+#define vk_create_pipeline_layout vkCreatePipelineLayout
+
+/* destroy pipeline layout */
+#define vk_destroy_pipeline_layout vkDestroyPipelineLayout
+
+
 // -- buffer ------------------------------------------------------------------
 
 /* create buffer */
