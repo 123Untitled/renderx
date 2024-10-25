@@ -1,6 +1,7 @@
 #ifndef ___void_engine_vk_unique___
 #define ___void_engine_vk_unique___
 
+#include "ve/vk/create.hpp"
 #include "ve/vk/destroy.hpp"
 
 
@@ -51,7 +52,7 @@ namespace vk {
 			/* variadic constructor */
 			template <typename... Ts>
 			unique(Ts&&... args) noexcept
-			: _data{args...} {
+			: _data{vk::create(std::forward<Ts>(args)...)} {
 			}
 
 			/* deleted copy constructor */
@@ -59,10 +60,7 @@ namespace vk {
 
 			/* move constructor */
 			unique(___self&& ___ot) noexcept
-			: _data{___ot._data} {
-
-				// invalidate other
-				___ot._data = nullptr;
+			: _data{std::exchange(___ot._data, nullptr)} {
 			}
 
 			/* destructor */

@@ -1,9 +1,9 @@
 #ifndef ___void_engine_vulkan_pipeline_layout___
 #define ___void_engine_vulkan_pipeline_layout___
 
-#include "ve/vulkan/device.hpp"
+#include "ve/vk/unique.hpp"
 #include "ve/vk/typedefs.hpp"
-#include "ve/vk/utils.hpp"
+#include "ve/types.hpp"
 
 
 // -- V U L K A N -------------------------------------------------------------
@@ -27,7 +27,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pipeline layout */
-			vk::pipeline_layout _layout;
+			vk::unique<vk::pipeline_layout> _layout;
 
 
 		public:
@@ -57,9 +57,11 @@ namespace vulkan {
 				};
 
 				// create layout
+				/*
 				vk::try_execute<"failed to create pipeline layout">(
 					::vkCreatePipelineLayout,
 					vulkan::device::logical(), &info, nullptr, &_layout);
+					*/
 			}
 
 			/* push constant constructor */

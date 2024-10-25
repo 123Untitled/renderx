@@ -12,12 +12,15 @@ namespace vk {
 
 
 	/* create pipeline layout */
-	inline auto create(const vk::pipeline_layout& layout,
-					   const vk::pipeline_layout_info& info) noexcept -> void {
+	inline auto create(const vk::pipeline_layout_info& info) noexcept -> vk::pipeline_layout {
+
+		vk::pipeline_layout layout;
 
 		try_execute<"failed to create pipeline layout">(
 			::vk_create_pipeline_layout,
 			vulkan::device::logical(), &info, nullptr, &layout);
+
+		return layout;
 	}
 
 
