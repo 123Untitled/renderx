@@ -131,10 +131,9 @@ namespace glfw {
 
 				//glfwSetInputMode(&window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-				if (glfwRawMouseMotionSupported() == GLFW_FALSE) {
-					std::cout << "glfw: raw mouse motion is not supported." << std::endl;
-					throw "glfw: raw mouse motion is not supported.";
-				}
+				//if (glfwRawMouseMotionSupported() == GLFW_FALSE) {
+				//	throw std::runtime_error("glfw: raw mouse motion is not supported.");
+				//}
 			}
 
 			/* deleted copy constructor */
@@ -171,7 +170,7 @@ namespace glfw {
 			}
 
 			/* arrows */
-			static auto arrows(void) noexcept -> const bool (&)[4] {
+			static auto arrows(void) -> const bool (&)[4] {
 				return ___self::shared()._arrows;
 			}
 

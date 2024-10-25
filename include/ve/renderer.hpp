@@ -13,8 +13,6 @@
 #include "ve/vulkan/commands.hpp"
 #include "ve/vulkan/queue.hpp"
 
-#include "shader_library.hpp"
-
 //#include "vulkan/global/instance.hpp"
 #include "ve/vertex/vertex.hpp"
 #include "ve/vertex/position.hpp"
@@ -70,11 +68,6 @@ namespace rx {
 
 			///* command buffers */
 			vulkan::commands<vulkan::primary> _cmds;
-
-
-			/* shader library */
-			engine::shader_library _shaders;
-
 
 			/* pipeline */
 			vulkan::pipeline _pipeline;

@@ -1,5 +1,7 @@
 #!/usr/bin/env -S zsh --no-rcs --no-globalrcs --pipefail
 
+# this script compiles slangs to spir-v
+
 
 # -- C O L O R S --------------------------------------------------------------
 
@@ -29,25 +31,10 @@ declare -r spv_dir=$cwd_dir'/spir-v'
 declare -r script=${0:a}
 
 # source files
-declare -r srcs=($src_dir'/'**'/'*'.glsl'(.N))
+declare -r srcs=($src_dir'/'**'/'*'.sl'(.N))
 
-# glslc flags
-declare -r glflags=('-x' 'glsl' '-Werror' '-O0'
-					'-mfmt=bin'
-					'-std=450'
-					'--target-env=vulkan1.3'
-					'--target-spv=spv1.5'
-				)
-
-
-declare -r stages=(
-	'vertex'
-	'fragment'
-	'tesscontrol'
-	'tesseval'
-	'geometry'
-	'compute'
-)
+# slflags
+declare -r slflags=('-lang' 'slang' '-target' 'spirv' '-entry' 'main')
 
 function _compile() {
 
@@ -56,15 +43,13 @@ function _compile() {
 	# loop over glsl files
 	for file in $srcs; do
 
-		local stage=${${file##$src_dir'/'}%%/*}
-		local name=${${file##*/}%.*}
-		local spv=$spv_dir'/'$stage'/'$name'.spv'
+		local -r spv=$spv_dir'/'${file:t:r}'.spv'
 
 		if [[ -f $spv ]] && [[ $spv -nt $file ]] && [[ $spv -nt $script ]]; then
 			continue
 		fi
 
-		if glslc $glflags -fshader-stage=$stage $file -o $spv; then
+		if slangc $slflags $file -o $spv; then
 			echo -n $success'[✓]'$reset
 			((++count))
 		else
@@ -82,9 +67,7 @@ function _compile() {
 function _prepare() {
 
 	# append spir-v directory to directories
-	local directories=(
-		${stages/#/$spv_dir'/'}
-	)
+	local directories=($spv_dir)
 
 	# create directories
 	if ! mkdir -p $directories; then

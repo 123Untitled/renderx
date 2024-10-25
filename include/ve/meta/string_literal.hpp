@@ -1,25 +1,42 @@
-#ifndef ___RENDERX_STRING_LITERAL___
-#define ___RENDERX_STRING_LITERAL___
+/*****************************************************************************/
+/*                                                                           */
+/*      dMP dMP .aMMMb  dMP dMMMMb                                           */
+/*     dMP dMP dMP"dMP amr dMP VMP                                           */
+/*    dMP dMP dMP dMP dMP dMP dMP                                            */
+/*    YMvAP  dMP aMP dMP dMP.aMP                                             */
+/*     VP    VMMMP  dMP dMMMMP                                               */
+/*                                                                           */
+/*       dMMMMMP dMMMMb   aMMMMP dMP dMMMMb  dMMMMMP                         */
+/*      dMP     dMP dMP dMP     amr dMP dMP dMP                              */
+/*     dMMMP   dMP dMP dMP MMP dMP dMP dMP dMMMP                             */
+/*    dMP     dMP dMP dMP.dMP dMP dMP dMP dMP                                */
+/*   dMMMMMP dMP dMP  VMMMP" dMP dMP dMP dMMMMMP                             */
+/*                                                                           */
+/*****************************************************************************/
+
+#ifndef ___ve_meta_literal___
+#define ___ve_meta_literal___
 
 #include "ve/types.hpp"
+#include "ve/meta/index_sequence.hpp"
 
 
-// -- R E N D E R X  N A M E S P A C E ----------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- S T R I N G  L I T E R A L ------------------------------------------
 
-	template <rx::size_t ___size>
-	struct string_literal final {
+	template <ve::u32 ___size>
+	struct literal final {
 
 
 		// -- assertions ------------------------------------------------------
 
 		/* check for null size */
 		static_assert(___size > 0U,
-			"string_literal: empty string literals are not allowed");
+			"literal: empty string literals are not allowed");
 
 
 		private:
@@ -27,18 +44,12 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::string_literal<___size>;
+			using ___self = ve::literal<___size>;
 
 
 		public:
 
 			// -- public types ------------------------------------------------
-
-			/* value type */
-			using value_type = char;
-
-			/* const reference type */
-			using const_reference = const value_type(&)[___size];
 
 			/* size type */
 			using size_type = decltype(___size);
@@ -47,32 +58,40 @@ namespace rx {
 			// -- public members ----------------------------------------------
 
 			/* data */
-			value_type _data[___size];
+			const char data[___size];
 
 
 			// -- public lifecycle --------------------------------------------
 
 			/* deleted default constructor */
-			string_literal(void) = delete;
+			consteval literal(void) noexcept = default;
 
 			/* array constructor */
 			template <size_type ___sz>
-			consteval string_literal(const char (&___str)[___sz]) noexcept
-			: _data{} {
-
-				for (size_type i = 0U; i < ___sz; ++i)
-					_data[i] = ___str[i];
+			consteval literal(const char (&___str)[___sz]) noexcept
+			: literal{___str, ve::make_index_sequence<___sz>{}} {
 			}
 
 
+		private:
+
+			/* sequence constructor */
+			template <size_type... indices>
+			consteval literal(const char (&___str)[___size], ve::index_sequence<indices...>) noexcept
+			: data{___str[indices]...} {
+			}
+
+
+		public:
+
 			/* copy constructor */
-			consteval string_literal(const ___self&) noexcept = default;
+			consteval literal(const ___self&) noexcept = default;
 
 			/* move constructor */
-			consteval string_literal(___self&&) noexcept = default;
+			consteval literal(___self&&) noexcept = default;
 
 			/* destructor */
-			constexpr ~string_literal(void) noexcept = default;
+			constexpr ~literal(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -86,22 +105,15 @@ namespace rx {
 
 			// -- public accessors --------------------------------------------
 
-			/* data */
-			consteval auto data(void) const noexcept -> const_reference {
-				return _data;
-			}
-
-			/* size */
-			consteval auto size(void) const noexcept -> size_type {
-				return ___size - 1U; // assume null-terminated
-			}
-
-
-			// -- public conversion operators ---------------------------------
-
-			/* const reference conversion operator */
-			constexpr operator const_reference(void) const noexcept {
-				return _data;
+			/* length */
+			consteval auto length(void) const noexcept -> size_type {
+				size_type size = 0U;
+				for (size_type i = 0U; i < ___size; ++i) {
+					if (data[i] == '\0')
+						break;
+					++size;
+				}
+				return size;
 			}
 
 
@@ -109,66 +121,104 @@ namespace rx {
 
 			/* equality operator */
 			template <size_type ___sz>
-			consteval auto operator==(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) == 0;
+			consteval auto operator==(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) == 0;
 			}
 
 			/* inequality operator */
 			template <size_type ___sz>
-			consteval auto operator!=(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) != 0;
+			consteval auto operator!=(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) != 0;
 			}
 
 			/* less than operator */
 			template <size_type ___sz>
-			consteval auto operator<(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) < 0;
+			consteval auto operator<(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) < 0;
 			}
 
 			/* greater than operator */
 			template <size_type ___sz>
-			consteval auto operator>(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) > 0;
+			consteval auto operator>(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) > 0;
 			}
 
 			/* less than or equal to operator */
 			template <size_type ___sz>
-			consteval auto operator<=(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) <= 0;
+			consteval auto operator<=(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) <= 0;
 			}
 
 			/* greater than or equal to operator */
 			template <size_type ___sz>
-			consteval auto operator>=(const rx::string_literal<___sz>& other) const noexcept -> bool {
-				return ___self::_compare(_data, other._data) >= 0;
+			consteval auto operator>=(const ve::literal<___sz>& other) const noexcept -> bool {
+				return ___self::_compare(data, other.data) >= 0;
+			}
+
+
+			/* equality operator */
+			template <size_type ___sz>
+			consteval auto operator==(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) == 0;
+			}
+
+			/* inequality operator */
+			template <size_type ___sz>
+			consteval auto operator!=(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) != 0;
+			}
+
+			/* less than operator */
+			template <size_type ___sz>
+			consteval auto operator<(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) < 0;
+			}
+
+			/* greater than operator */
+			template <size_type ___sz>
+			consteval auto operator>(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) > 0;
+			}
+
+			/* less than or equal to operator */
+			template <size_type ___sz>
+			consteval auto operator<=(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) <= 0;
+			}
+
+			/* greater than or equal to operator */
+			template <size_type ___sz>
+			consteval auto operator>=(const char (&other)[___sz]) const noexcept -> bool {
+				return ___self::_compare(data, other) >= 0;
 			}
 
 
 		private:
 
 			/* compare implementation */
-			template <size_type S, size_type I>
-			static consteval auto _compare_impl(const char (&lhs)[S], const char (&rhs)[S]) noexcept -> signed int {
+			template <size_type size, size_type index>
+			static consteval auto _compare_impl(const char (&lhs)[size], const char (&rhs)[size]) noexcept -> signed int {
 
-				if constexpr (I == S) {
+				if constexpr (index == size) {
 					return 0;
 				} else {
-					return (lhs[I] == rhs[I])
-						? (___self::_compare_impl<S, I + 1>(lhs, rhs))
-						: (lhs[I] > rhs[I] ? +1 : -1);
+					return (lhs[index] == rhs[index])
+						? (___self::_compare_impl<size, index + 1U>(lhs, rhs))
+						: (lhs[index] > rhs[index] ? +1 : -1);
 				}
 			}
 
 			/* compare */
-			template <size_type ls, size_type lr>
-			static consteval auto _compare(const char (&lhs)[ls], const char (&rhs)[lr]) noexcept -> signed int {
+			template <size_type lsize, size_type rsize>
+			static consteval auto _compare(const char (&lhs)[lsize], const char (&rhs)[rsize]) noexcept -> signed int {
 
-				// check for equal size
-				if constexpr (ls == lr) {
-					return ___self::_compare_impl<ls, 0U>(lhs, rhs);
+				// check for unequal sizes
+				if constexpr (lsize != rsize) {
+					return (lsize > rsize) ? +1 : -1;
 				}
 				else {
-					return (ls > lr) ? +1 : -1;
+					// return comparison
+					return ___self::_compare_impl<lsize, 0U>(lhs, rhs);
 				}
 			}
 	};
@@ -177,109 +227,39 @@ namespace rx {
 	// -- deduction guides ----------------------------------------------------
 
 	template <rx::size_t ___size>
-	string_literal(const char (&)[___size]) -> string_literal<___size>;
+	literal(const char (&)[___size]) -> literal<___size>;
 
 
+		struct ___impl_copy final {
 
-	/* equality operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//consteval auto operator==(const xns::basic_string_literal<T1, L>& lhs,
-	//								 const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) == 0;
-	//}
+			// copy
+			template <ve::literal lit, ve::u32 size>
+			static consteval auto copy(char (&buffer)[size], ve::u32& offset) noexcept -> void {
+				for (ve::u32 i = 0U; i < lit.length(); ++i)
+					buffer[offset++] = lit.data[i];
+			}
 
-	/* equality operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//consteval auto operator==(const T1 (&lhs)[L],
-	//								 const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) == 0;
-	//}
-	//
-	///* inequality operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//consteval auto operator!=(const xns::basic_string_literal<T1, L>& lhs,
-	//								 const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) != 0;
-	//}
-	//
-	///* inequality operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator!=(const T1 (&lhs)[L],
-	//								 const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) != 0;
-	//}
-	//
-	///* less than operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator<(const xns::basic_string_literal<T1, L>& lhs,
-	//								const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) < 0;
-	//}
-	//
-	///* less than operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator<(const T1 (&lhs)[L],
-	//								const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) < 0;
-	//}
-	//
-	///* greater than operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator>(const xns::basic_string_literal<T1, L>& lhs,
-	//								const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) > 0;
-	//}
-	//
-	///* greater than operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator>(const T1 (&lhs)[L],
-	//								const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) > 0;
-	//}
-	//
-	///* less than or equal to operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator<=(const xns::basic_string_literal<T1, L>& lhs,
-	//								 const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) <= 0;
-	//}
-	//
-	///* less than or equal to operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator<=(const T1 (&lhs)[L],
-	//								 const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) <= 0;
-	//}
-	//
-	///* greater than or equal to operator */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator>=(const xns::basic_string_literal<T1, L>& lhs,
-	//								 const T2 (&rhs)[R]) noexcept -> bool {
-	//	return xns::compare(lhs._data, rhs) >= 0;
-	//}
-	//
-	///* greater than or equal to operator (reverse) */
-	//template <typename T1, typename T2,
-	//		  decltype(sizeof(0)) L, decltype(L) R>
-	//constexpr auto operator>=(const T1 (&lhs)[L],
-	//								 const xns::basic_string_literal<T2, R>& rhs) noexcept -> bool {
-	//	return xns::compare(lhs, rhs._data) >= 0;
-	//}
+		};
+
+	/* merge */
+	template <ve::literal... literals>
+	consteval auto merge(void) noexcept -> ve::literal<((... + literals.length()) + 1U)> {
+
+		// create buffer
+		char buffer[(... + literals.length()) + 1U]{};
+
+		// copy
+		ve::u32 offset = 0U;
+		((___impl_copy::copy<literals>(buffer, offset)), ...);
+
+		// null-terminate
+		buffer[offset] = '\0';
+
+		// return literal
+		return ve::literal{buffer};
+	}
 
 
+} // namespace ve
 
-
-} // namespace xns
-
-#endif // XNS_STRING_LITERAL_HEADER
+#endif // ___ve_meta_literal___

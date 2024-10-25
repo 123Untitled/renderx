@@ -3,64 +3,74 @@
 
 # -- C O L O R S --------------------------------------------------------------
 
-local -r success='\x1b[32m'
-local -r error='\x1b[31m'
-local -r warning='\x1b[33m'
-local -r info='\x1b[34m'
-local -r dim='\x1b[90m'
-local -r reset='\x1b[0m'
+declare -rg success='\x1b[32m'
+declare -rg error='\x1b[31m'
+declare -rg warning='\x1b[33m'
+declare -rg info='\x1b[34m'
+declare -rg dim='\x1b[90m'
+declare -rg reset='\x1b[0m'
+
+
+# -- L O G O ------------------------------------------------------------------
+
+echo $warning \
+	'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n' \
+	'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n' \
+	' ╱         ╱         ╱         ╱         ╱\n' \
+	'╱         ╱         ╱        ▁╱       ▁▁╱ \n' \
+	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
+	$reset
 
 
 # -- O P E R A T I N G  S Y S T E M -------------------------------------------
 
 # get operating system
-local -r os=$(uname -s)
+declare -rg os=$(uname -s)
 
 
 # -- T H I S  S C R I P T -----------------------------------------------------
 
 # get script absolute directory path
-#local -r cwd_dir=${0%/*}
-local -r cwd_dir=${${0%/*}:a}
+declare -rg cwd_dir=${${0%/*}:a}
 
 # get script absolute path
-local -r script=${0:a}
+declare -rg script=${0:a}
 
 
 # -- T A R G E T S ------------------------------------------------------------
 
 # project name
-local -r project='void_engine'
+declare -rg project='void_engine'
 
 # main executable
-local -r executable=$cwd_dir'/'$project
+declare -rg executable=$cwd_dir'/'$project
 
 # compile commands database
-local -r compile_db=$cwd_dir'/compile_commands.json'
+declare -rg compile_db=$cwd_dir'/compile_commands.json'
 
 # ninja file
-local -r ninja=$cwd_dir'/build.ninja'
+declare -rg ninja=$cwd_dir'/build.ninja'
 
 
 # -- D I R E C T O R I E S ----------------------------------------------------
 
 # source directory
-local -r src_dir=$cwd_dir'/sources'
+declare -rg src_dir=$cwd_dir'/sources'
 
 # include directory
-local -r inc_dir=$cwd_dir'/include'
+declare -rg inc_dir=$cwd_dir'/include'
 
 # shader directory
-local -r sha_dir=$cwd_dir'/shaders'
+declare -rg sha_dir=$cwd_dir'/shaders'
 
 # external directory
-local -r ext_dir=$cwd_dir'/.external'
+declare -rg ext_dir=$cwd_dir'/.external'
 
 # ninja directory
-local -r ninja_dir=$cwd_dir'/.ninja'
+declare -rg ninja_dir=$cwd_dir'/.ninja'
 
 # git directory
-local -r git_dir=$cwd_dir'/.git'
+declare -rg git_dir=$cwd_dir'/.git'
 
 
 # -- F I L E S ----------------------------------------------------------------
@@ -74,52 +84,42 @@ local -r objs=(${srcs/%.cpp/.o})
 
 # -- V U L K A N --------------------------------------------------------------
 
-# setup vulkan sdk
-function _setup_vulkan() {
+# check for vulkan sdk environment variable
+if [[ -z $VULKAN_SDK ]]; then
 
-	# check for vulkan
-	if [[ -z $VULKAN_SDK ]]; then
+	# search for vulkan sdk versions
+	local -r vulkan_versions=(~'/VulkanSDK/'*(/N))
 
-		# search for vulkan sdk
-		local -r setup=(~'/VulkanSDK/'**'/setup-env.sh'(.N))
+	# check if vulkan sdk is installed
+	[[ -z $vulkan_versions ]] && (echo $error'Vulkan SDK'$reset 'is not installed.'; exit 1)
 
-		# check if found
-		[[ -z $setup ]] && (echo $error'Vulkan SDK not installed'$reset; exit 1)
+	# get first version
+	local version=$vulkan_versions[1]
 
-		# warn to source vulkan sdk
-		echo 'requires Vulkan SDK to be sourced:' $warning$setup$reset
+	# loop over versions (if more than one)
+	for ((i = 2; i <= ${#vulkan_versions}; ++i)); do
 
-		# exit with error
+		# compare versions
+		if [[ $vulkan_versions[i] > $version ]]; then
+			version=$vulkan_versions[i]
+		fi
+	done
+
+	# check if setup-env.sh exists
+	if [[ ! -f $version'/setup-env.sh' ]]; then
+		echo 'Vulkan' $error'setup-env.sh'$reset 'not found.'
 		exit 1
 	fi
 
-}
+	# source setup-env.sh
+	if ! source $version'/setup-env.sh' > '/dev/null' 2>&1; then
+		echo 'error while sourcing' $error'setup-env.sh'$reset
+		exit 1
+	fi
 
-# -- V U L K A N --------------------------------------------------------------
-
-# vulkan include
-local -r vulkan_include='-I'$VULKAN_SDK'/include'
-
-# vulkan library
-local -r vulkan_library=('-L'$VULKAN_SDK'/lib' '-lvulkan')
-
-
-# -- G L F W ------------------------------------------------------------------
-
-# glfw include
-local -r glfw_include='-I'$ext_dir'/glfw/include'
-
-# glfw library
-local -r glfw_library=('-L'$ext_dir'/glfw/lib' '-lglfw3')
-
-
-# -- G L M --------------------------------------------------------------------
-
-# glm include
-local -r glm_include='-I'$ext_dir'/glm/include'
-
-# glm library
-local -r glm_library=('-L'$ext_dir'/glm/lib' '-lglm')
+	# print success
+	echo $success'[>]'$reset 'using Vulkan' $version:t
+fi
 
 
 
@@ -139,46 +139,34 @@ fi
 
 # compiler
 local -r cxx='clang++'
+#local -r cxx='/opt/homebrew/opt/llvm/bin/clang++'
 
 # cxx flags
-local -r cxxflags=('-std=c++2a'
-				   '-O0'
-				   #'-fsanitize=address'
-				   '-g3'
-				   #'-gdwarf-4'
+local -r cxxflags=('-std=c++2a' '-O0'
+				   '-g3' #'-fsanitize=address' '-gdwarf-4'
 				   '-DENGINE_VL_DEBUG'
-				   '-Wall'
-				   '-Wextra'
-				   '-Werror'
-				   '-fno-rtti'
-				   '-Wpedantic'
-				   '-Weffc++'
-				   '-Wno-unused'
-				   '-Wno-unused-variable'
-				   '-Wno-unused-parameter'
-				   '-Wno-unused-function'
-				   '-Wno-unused-private-field'
-				   '-Wno-unused-local-typedef'
+				   '-Wall' '-Wextra' '-Werror' '-Wpedantic' '-Weffc++'
+				   '-fno-rtti' '-Winline'
+				   '-Wno-unused' '-Wno-unused-variable' '-Wno-unused-parameter'
+				   '-Wno-unused-function' '-Wno-unused-private-field' '-Wno-unused-local-typedef'
 				   '-fdiagnostics-color=always'
-				   '-Winline'
-				   '-Wconversion'
-				   '-Wsign-conversion'
-				   '-Wfloat-conversion'
-				   '-Wnarrowing'
+				   '-Wconversion' '-Wsign-conversion' '-Wfloat-conversion' '-Wnarrowing'
 				   '-Wshadow'
 				   '-I'$inc_dir
-				   $vulkan_include
-				   $glfw_include
-				   $glm_include
-			)
+				   '-I'$VULKAN_SDK'/include'
+				   '-I'$ext_dir'/glfw/include'
+				   '-I'$ext_dir'/glm/include'
+			   )
 
 # linker flags
-local -r ldflags=(
-				$vulkan_library
-				$glfw_library
-				$glm_library
-				$os_dependencies
-			)
+local -r ldflags=('-L'$VULKAN_SDK'/lib' '-lvulkan'
+				  '-L'$ext_dir'/glfw/lib' '-lglfw3'
+				  '-L'$ext_dir'/glm/lib' '-lglm'
+				  $vulkan_library
+				  $glfw_library
+				  $glm_library
+				  $os_dependencies
+			  )
 				#-fsanitize=address)
 
 
@@ -213,8 +201,7 @@ function _check_tools() {
 	# required tools
 	local -r required=('uname' 'git' 'curl' 'tar'
 					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
-					   'clang++' 'glslc')
-					   #'ccache'
+					   'clang++' 'glslc' 'ccache')
 
 	# loop over required tools
 	for tool in $required; do
@@ -318,7 +305,7 @@ function _generate_ninja() {
 	file+='# ninja file\n'
 	file+='ninja = '$ninja'\n\n'
 	file+='# compiler and flags\n'
-	file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
 	# ccache commented (not installed at 42)
 
 
@@ -488,15 +475,7 @@ function _fclean() {
 
 
 
-echo $warning \
-	'   ▁▁▁▁▁▁▁▁  ▁▁▁▁▁▁▁▁  ▁▁▁▁ ▁▁▁  ▁▁▁▁▁▁▁▁ \n' \
-	'  ╱        ╲╱        ╲╱    ╱   ╲╱        ╲\n' \
-	' ╱         ╱         ╱         ╱         ╱\n' \
-	'╱         ╱         ╱        ▁╱       ▁▁╱ \n' \
-	'╲▁▁╱▁▁╱▁▁╱╲▁▁▁╱▁▁▁▁╱╲▁▁▁▁╱▁▁▁╱╲▁▁▁▁▁▁▁▁╱  \n' \
-	$reset
 
-_setup_vulkan
 _check_tools
 _repository
 

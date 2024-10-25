@@ -25,11 +25,9 @@ rx::renderer::renderer(void)
 
 	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
 	_cmds{_pool.underlying(), _smanager.size()},
-	_shaders{},
 	
 	_pipeline{
 		vulkan::pipeline_builder<vertex_type>::build(
-				_shaders,
 				_smanager.render_pass().underlying())
 	},
 
@@ -40,18 +38,16 @@ rx::renderer::renderer(void)
 {
 
 	// add cube object
+	//_objects.emplace_back(rx::mesh_library::get<"fibonacci_sphere">());
 	_objects.emplace_back(rx::mesh_library::get<"icosphere">());
 
 	//_camera.ratio(rx::sdl::window::ratio());
 	_camera.fov(70.0f);
 	_camera.update_projection();
 
-
 	_camera.transform().position().z = -6.0f;
 
-
 	//glfw::monitor m;
-
 }
 
 namespace rx {
@@ -254,6 +250,7 @@ auto rx::renderer::_draw_frame(void) -> void {
 		glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 projection;
+		glm::vec3 camera_position;
 	};
 
 	static push_constants pc;
@@ -276,6 +273,7 @@ auto rx::renderer::_draw_frame(void) -> void {
 			pc.model = object.model();
 			pc.view = _camera.view();
 			pc.projection = _camera.projection();
+			pc.camera_position = _camera.transform().position();
 
 
 			// push constants

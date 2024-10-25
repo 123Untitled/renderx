@@ -78,12 +78,12 @@ namespace rx {
 				};
 
 
-				ve::matrix<float, 4U, 4U> mat {
-					+xs,    0,    0,    0,
-					  0,  +ys,    0,    0,
-					  0,    0,  -zs,    1,
-					  0,    0,   zt,    0
-				};
+				//ve::matrix<float, 4U, 4U> mat {
+				//	+xs,    0,    0,    0,
+				//	  0,  +ys,    0,    0,
+				//	  0,    0,  -zs,    1,
+				//	  0,    0,   zt,    0
+				//};
 
 			}
 
@@ -94,7 +94,7 @@ namespace rx {
 
 			/* default constructor */
 			camera(void) noexcept
-			: _fov{90.0f}, _ratio{800.0f/600.0f}, _near{0.1f}, _far{1000.0f}, _velocity{10.2f},
+			: _fov{90.0f}, _ratio{800.0f/600.0f}, _near{0.001f}, _far{1000.0f}, _velocity{5.0f},
 			  _projection{___self::_update_projection()} {
 			}
 

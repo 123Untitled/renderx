@@ -58,8 +58,32 @@ void test_mult() {
 }
 
 
-int main(void) {
+template <ve::literal s>
+auto test() -> bool {
 
+
+	return false;
+	//return s == "vertex";
+}
+
+template <typename T>
+struct stest {
+
+};
+
+
+
+
+auto main(int, char**) -> int {
+
+
+	test<"vertex">();
+
+	constexpr auto lit = ve::merge<"vertex", " is", " cool">();
+
+	std::cout << lit.data << std::endl;
+
+	//return 0;
 
 
 	// array constructor

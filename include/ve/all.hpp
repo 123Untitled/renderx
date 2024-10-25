@@ -5,27 +5,34 @@
 #include "ve/vulkan/swapchain.hpp"
 #include "ve/vulkan/command_pool.hpp"
 #include "ve/vulkan/command_buffer.hpp"
-#include "ve/vk/typedefs.hpp"
-#include "ve/os.hpp"
-#include "ve/vertex/vertex.hpp"
-#include "ve/exceptions.hpp"
-#include "ve/shader_library.hpp"
-#include "ve/vulkan/libraries/library.hpp"
 #include "ve/vulkan/not_used/resource.hpp"
-#include "ve/renderer.hpp"
 #include "ve/vulkan/pipeline.hpp"
 #include "ve/vulkan/commands.hpp"
 #include "ve/vulkan/specialization.hpp"
+#include "ve/vulkan/fence.hpp"
+#include "ve/vulkan/allocator.hpp"
+
+#include "ve/vk/typedefs.hpp"
+
+#include "ve/os.hpp"
+
+#include "ve/vertex/vertex.hpp"
 #include "ve/vertex/position.hpp"
 #include "ve/vertex/rotation.hpp"
-#include "ve/shader_library.hpp"
-#include "ve/vulkan/fence.hpp"
 #include "ve/vertex/normal.hpp"
-#include "ve/vulkan/allocator.hpp"
+
+#include "ve/exceptions.hpp"
+#include "ve/libraries/shader_library.hpp"
+
+#include "ve/system/directory.hpp"
+
+#include "ve/renderer.hpp"
+
+#include "ve/libraries/shader_library.hpp"
+
 #include "ve/object.hpp"
 #include "ve/transform.hpp"
 #include "ve/running.hpp"
-#include "ve/system/directory.hpp"
 #include "ve/containers/static_map.hpp"
 
 #include <signal.h>
@@ -37,6 +44,7 @@
 #include "ve/geometry/mesh_library.hpp"
 
 #include "ve/geometry/icosphere.hpp"
-#include "ve/structures/vector3.hpp"
 #include "ve/math/pow.hpp"
+
+#include "ve/structures/vector3.hpp"
 #include "ve/structures/matrix.hpp"

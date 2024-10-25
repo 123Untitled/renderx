@@ -1,18 +1,34 @@
-#ifndef ___CONTAINERS_STATIC_MAP___
-#define ___CONTAINERS_STATIC_MAP___
+/*****************************************************************************/
+/*                                                                           */
+/*      dMP dMP .aMMMb  dMP dMMMMb                                           */
+/*     dMP dMP dMP"dMP amr dMP VMP                                           */
+/*    dMP dMP dMP dMP dMP dMP dMP                                            */
+/*    YMvAP  dMP aMP dMP dMP.aMP                                             */
+/*     VP    VMMMP  dMP dMMMMP                                               */
+/*                                                                           */
+/*       dMMMMMP dMMMMb   aMMMMP dMP dMMMMb  dMMMMMP                         */
+/*      dMP     dMP dMP dMP     amr dMP dMP dMP                              */
+/*     dMMMP   dMP dMP dMP MMP dMP dMP dMP dMMMP                             */
+/*    dMP     dMP dMP dMP.dMP dMP dMP dMP dMP                                */
+/*   dMMMMMP dMP dMP  VMMMP" dMP dMP dMP dMMMMMP                             */
+/*                                                                           */
+/*****************************************************************************/
+
+#ifndef ___ve_containers_static_map___
+#define ___ve_containers_static_map___
 
 #include "ve/meta/string_literal.hpp"
 #include <utility>
 
 
-// -- X  E N G I N E  N A M E S P A C E ---------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace xe {
+namespace ve {
 
 
 	// -- S T A T I C  M A P --------------------------------------------------
 
-	template <typename ___type, rx::string_literal... ___keys>
+	template <typename ___type, ve::literal... ___keys>
 	class static_map final {
 
 
@@ -35,11 +51,11 @@ namespace xe {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = xe::static_map<___type, ___keys...>;
+			using ___self = ve::static_map<___type, ___keys...>;
 
 
-			template <rx::string_literal>
-			struct wrapper {
+			template <ve::literal>
+			struct ___wrapper {
 				value_type _value;
 			};
 
@@ -47,7 +63,7 @@ namespace xe {
 			// -- private classes ---------------------------------------------
 
 			/* implementation */
-			class ___impl : public wrapper<___keys>... {
+			class ___impl : public ___wrapper<___keys>... {
 
 
 				public:
@@ -60,7 +76,7 @@ namespace xe {
 					/* parameter constructor */
 					template <typename... ___params>
 					___impl(___params&&... ___args)
-					: ___self::wrapper<___keys>{std::forward<___params>(___args)}... {
+					: ___self::___wrapper<___keys>{std::forward<___params>(___args)}... {
 					}
 
 					/* copy constructor */
@@ -93,7 +109,7 @@ namespace xe {
 			// -- private static methods --------------------------------------
 
 			/* have key */
-			template <rx::string_literal ___key>
+			template <ve::literal ___key>
 			static consteval auto _have_key(void) noexcept -> bool {
 				return ((___key == ___keys) || ...);
 			}
@@ -116,25 +132,25 @@ namespace xe {
 			// -- public accessors --------------------------------------------
 
 			/* get */
-			template <rx::string_literal ___key>
+			template <ve::literal ___key>
 			auto get(void) noexcept -> value_type& {
 
 				// check if key exists
 				static_assert(___self::_have_key<___key>(), "key not found");
 
 				// retrieve value
-				return static_cast<___self::wrapper<___key>&>(_impl)._value;
+				return static_cast<___self::___wrapper<___key>&>(_impl)._value;
 			}
 
 			/* const get */
-			template <rx::string_literal ___key>
+			template <ve::literal ___key>
 			auto get(void) const noexcept -> const value_type& {
 
 				// check if key exists
 				static_assert(___self::_have_key<___key>(), "key not found");
 
 				// retrieve value
-				return static_cast<const ___self::wrapper<___key>&>(_impl)._value;
+				return static_cast<const ___self::___wrapper<___key>&>(_impl)._value;
 			}
 
 
@@ -156,8 +172,51 @@ namespace xe {
 				((fn(___self::get<___keys>()), ...));
 			}
 
+
+		// -- friends ---------------------------------------------------------
+
+		/* get as friend */
+		template <ve::literal, typename ___tp, ve::literal... ___ks>
+		friend auto get(const ve::static_map<___tp, ___ks...>&) noexcept -> const ___tp&;
+
+		/* get as friend */
+		template <ve::literal, typename ___tp, ve::literal... ___ks>
+		friend auto get(ve::static_map<___tp, ___ks...>&) noexcept -> ___tp&;
+
 	}; // class static_map
 
-} // namespace xe
 
-#endif // ___CONTAINERS_STATIC_MAP___
+	// -- non-member functions ------------------------------------------------
+
+	/* get */
+	template <ve::literal ___key, typename ___type, ve::literal... ___keys>
+	auto get(const ve::static_map<___type, ___keys...>& map) noexcept -> const ___type& {
+
+		// map type
+		using ___map = ve::static_map<___type, ___keys...>;
+
+		// check if key exists
+		static_assert(___map::template _have_key<___key>(), "key not found");
+
+		// retrieve value
+		return static_cast<const typename ___map::template ___wrapper<___key>&>(map._impl)._value;
+	}
+
+	/* get */
+	template <ve::literal ___key, typename ___type, ve::literal... ___keys>
+	auto get(ve::static_map<___type, ___keys...>& map) noexcept -> ___type& {
+
+		// map type
+		using ___map = ve::static_map<___type, ___keys...>;
+
+		// check if key exists
+		static_assert(___map::template _have_key<___key>(), "key not found");
+
+		// retrieve value
+		return static_cast<typename ___map::template ___wrapper<___key>&>(map._impl)._value;
+	}
+
+
+} // namespace ve
+
+#endif // ___ve_containers_static_map___

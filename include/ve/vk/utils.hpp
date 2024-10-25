@@ -13,7 +13,7 @@
 namespace vk {
 
 	/* try execute */
-	template <rx::string_literal ___msg, typename ___function, typename... ___params>
+	template <ve::literal ___msg, typename ___function, typename... ___params>
 	inline auto try_execute(___function&& ___func, ___params&&... ___args) -> void {
 
 		// assert return type is vk::result
@@ -22,7 +22,7 @@ namespace vk {
 
 		// execute function
 		if (auto ___result = ___func(std::forward<___params>(___args)...); ___result != VK_SUCCESS)
-			throw vk::exception{___msg.data(), ___result};
+			throw vk::exception{___msg.data, ___result};
 	}
 
 } // namespace vk

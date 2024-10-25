@@ -25,7 +25,7 @@ namespace rx {
 			using ___self = rx::mesh_library;
 
 			/* mesh map */
-			using ___map = xe::static_map<ve::mesh, "icosphere">;
+			using ___map = ve::static_map<ve::mesh, "icosphere", "fibonacci_sphere">;
 
 
 			// -- private members ---------------------------------------------
@@ -47,7 +47,7 @@ namespace rx {
 
 			/* default constructor */
 			mesh_library(void)
-			: _meshes{ve::make_icosphere()} {
+			: _meshes{ve::make_icosphere(), ve::make_fibonacci_sphere()} {
 			}
 
 			/* deleted copy constructor */
@@ -74,9 +74,9 @@ namespace rx {
 			// -- public static methods ---------------------------------------
 
 			/* get */
-			template <rx::string_literal key>
+			template <ve::literal key>
 			static auto get(void) -> const ve::mesh& {
-				return ___self::_shared()._meshes.get<key>();
+				return ___self::_shared()._meshes.template get<key>();
 			}
 
 

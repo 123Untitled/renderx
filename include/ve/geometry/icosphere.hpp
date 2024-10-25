@@ -68,6 +68,7 @@ namespace ve {
 			/* default constructor */
 			icosphere(void) {
 
+				{
 				// 1.618033988749895 (golden ratio)
 				//constexpr float v = (1.0f + ve::sqrt_compile_time(5.0f)) / 2.0f;
 				constexpr float v = 1.618033988749895f;
@@ -132,6 +133,37 @@ namespace ve {
 					8,  4,  0  
 					// -------------------
 				};
+				}
+
+				/*
+				// 6 vertices
+				_vertices = {
+					{ 0,  0,  L},  // 0 - sommet supérieur
+					{ 0,  0, -L},  // 1 - sommet inférieur
+					{ L,  0,  0},  // 2 - à droite
+					{-L,  0,  0},  // 3 - à gauche
+					{ 0,  L,  0},  // 4 - en haut
+					{ 0, -L,  0}   // 5 - en bas
+				};
+
+				// 8 triangles
+				_indices = {
+					// Triangles autour du sommet supérieur (0)
+					0, 4, 2,  // 0
+					0, 2, 5,  // 1
+					0, 5, 3,  // 2
+					0, 3, 4,  // 3
+
+					// Triangles autour du sommet inférieur (1)
+					1, 2, 4,  // 4
+					1, 5, 2,  // 5
+					1, 3, 5,  // 6
+					1, 4, 3   // 7
+				};
+				*/
+
+
+
 
 
 				___self::_subdivide(5);
@@ -152,7 +184,6 @@ namespace ve {
 
 			/* cache type */
 			using ___cache_type = std::unordered_map<std::pair<::uint32_t, ::uint32_t>, ::uint32_t, pair_hash>;
-			//using ___cache_type = std::unordered_map<std::string, ::uint32_t>;
 
 
 
@@ -166,10 +197,6 @@ namespace ve {
 				const std::pair<::uint32_t, ::uint32_t> key = (v1 < v2)
 					? std::make_pair(v1, v2)
 					: std::make_pair(v2, v1);
-
-				//const std::string key = (v1 < v2)
-				//	? std::to_string(v1) + "-" + std::to_string(v2)
-				//	: std::to_string(v2) + "-" + std::to_string(v1);
 
 				if (const auto it = cache.find(key); it != cache.end()) {
 					return it->second;
@@ -289,6 +316,111 @@ namespace ve {
 	inline auto make_icosphere(void) -> ve::mesh {
 		return ve::icosphere{}.mesh();
 	}
+
+
+
+	class fibonacci_sphere final {
+
+		private:
+
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = ve::fibonacci_sphere;
+
+
+			// -- private members ---------------------------------------------
+
+			/* vertices */
+			std::vector<ve::vert3x> _vertices;
+
+			/* indices */
+			std::vector<::uint32_t> _indices;
+
+
+		public:
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			fibonacci_sphere(void) {
+
+				// golden angle (radians)
+				constexpr float ga = 2.39996322972865332f;
+
+				// golden angle (degrees)
+				constexpr float ga_deg = 137.5077640500378546463487f;
+
+				const ::uint32_t num_points = 10000U;
+
+				// loop over points
+				for (::uint32_t i = 0U; i < num_points; ++i) {
+
+					// compute latitude
+					//const float lat = 2.0f * (static_cast<float>(i) / static_cast<float>(num_points - 1U)) - 1.0f;
+					//const float phi = std::asin(lat);
+					//
+					//// compute longitude
+					//const float theta = ga * static_cast<float>(i);
+					//
+					//// compute position
+					//const ve::vector3 position{
+					//	std::cos(theta) * std::cos(phi),
+					//	std::sin(theta) * std::cos(phi),
+					//	std::sin(phi)
+					//};
+					//
+					//// compute normal
+					//const ve::vector3 normal = position;
+					//
+					//// add vertex
+					//_vertices.emplace_back(position, normal);
+
+					// add index
+					//_indices.emplace_back(i);
+
+
+						// Position y des points (de -1 à 1)
+						float y = 1.0f - (i / float(num_points - 1)) * 2.0f;
+						float radius_circle = std::sqrt(1.0f - y * y);
+
+						// Angle pour la distribution uniforme des points
+						float theta = ga * i;
+
+						float x = std::cos(theta) * radius_circle;
+						float z = std::sin(theta) * radius_circle;
+
+						_vertices.push_back({x, y, z});
+				}
+
+				// La surface est découpée en couches, on lie les points des couches adjacentes
+				for (uint32_t i = 0; i < num_points - 1; ++i) {
+					uint32_t next = i + 1;
+
+					// On crée des triangles avec les voisins
+					if (i < num_points - 2) {
+						_indices.push_back(i);
+						_indices.push_back(next);
+						_indices.push_back((i + 2) % num_points); // Connecter les points proches
+					}
+				}
+
+
+			}
+
+			/* mesh */
+			auto mesh(void) const noexcept -> ve::mesh {
+				return ve::mesh{ _vertices, _indices };
+			}
+
+
+	}; // class fibonacci_sphere
+
+	/* make fibonacci sphere */
+	inline auto make_fibonacci_sphere(void) -> ve::mesh {
+		return ve::fibonacci_sphere{}.mesh();
+	}
+
 
 
 

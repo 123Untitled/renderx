@@ -28,9 +28,9 @@ vulkan::instance::instance(void)
 		.pNext              = nullptr,
 		.pApplicationName   = "application",
 		.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0),
-		.pEngineName        = "renderx",
+		.pEngineName        = "void engine",
 		.engineVersion      = VK_MAKE_API_VERSION(0, 1, 0, 0),
-		.apiVersion         = VK_API_VERSION_1_0
+		.apiVersion         = VK_API_VERSION_1_3
 	};
 
 	// no more need !!

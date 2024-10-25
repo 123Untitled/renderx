@@ -27,7 +27,7 @@ namespace ve {
 
 	// -- I N D E X  S E Q U E N C E ------------------------------------------
 
-	template <rx::u32... ___indices>
+	template <ve::u32... ___indices>
 	class index_sequence final {
 
 

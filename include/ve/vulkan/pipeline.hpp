@@ -19,7 +19,7 @@
 #include "ve/vulkan/specialization.hpp"
 #include "ve/vulkan/shader_module.hpp"
 
-#include "ve/shader_library.hpp"
+#include "ve/libraries/shader_library.hpp"
 
 #include <glm/glm.hpp>
 
@@ -177,13 +177,15 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* build */
-			static auto build(const engine::shader_library& ___shaders,
-							  const vk::render_pass& ___render_pass) -> vulkan::pipeline {
+			static auto build(const vk::render_pass& ___render_pass) -> vulkan::pipeline {
 
 				// shader stages
 				const vk::array stages {
-					___shaders.vertex_module("shaders/basic.vert.spv").stage_info(),
-					___shaders.fragment_module("shaders/basic.frag.spv").stage_info(/* specialization */)
+					ve::shader_library::vertex_stage_info<"basic">(/* specialization */),
+					ve::shader_library::fragment_stage_info<"basic">(),
+					ve::shader_library::tesscontrol_stage_info<"subdivisor">(),
+					ve::shader_library::tesseval_stage_info<"evaluator">(),
+					
 				};
 					
 
@@ -191,10 +193,11 @@ namespace vulkan {
 				const auto vertex_input_info = ___vertex::info();
 
 				// input assembly info
-				const auto input_assembly_info = ___self::input_assembly_info<VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_FALSE>();
+				const auto input_assembly_info = ___self::input_assembly_info<VK_PRIMITIVE_TOPOLOGY_PATCH_LIST>();
+				//const auto input_assembly_info = ___self::input_assembly_info<VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST>();
 
 				// tesselation info
-				const auto tesselation_info = ___self::tesselation_info(); 
+				const auto tesselation_info = ___self::tesselation_info(3U); // 3 control points (triangle)
 
 				// viewport
 				const auto viewport = ___self::viewport();
@@ -275,8 +278,7 @@ namespace vulkan {
 			// -- public interface --------------------------------------------
 
 			/* input assembly info */
-			template <vk::primitive_topology ___topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-					              vk::bool32 ___restart  = VK_FALSE>
+			template <vk::primitive_topology ___topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST>
 			static constexpr auto input_assembly_info(void) noexcept -> vk::pipeline_input_assembly_state_info {
 
 				return vk::pipeline_input_assembly_state_info {
@@ -288,13 +290,13 @@ namespace vulkan {
 					.flags = 0U,
 					// topology
 					.topology = ___topology,
-					// primitive restart enable (only for indexed draws)
-					.primitiveRestartEnable = ___restart,
+					// primitive restart enable
+					.primitiveRestartEnable = VK_FALSE,
 				};
 			}
 
 			/* tessellation info */
-			static constexpr auto tesselation_info(void) noexcept -> vk::pipeline_tesselation_state_info {
+			static constexpr auto tesselation_info(const vk::u32& points = 0U) noexcept -> vk::pipeline_tesselation_state_info {
 
 				return vk::pipeline_tesselation_state_info {
 					// type of struct
@@ -304,7 +306,7 @@ namespace vulkan {
 					// flags
 					.flags = 0U,
 					// patch control points (only for tesselation shaders)
-					.patchControlPoints = 0U,
+					.patchControlPoints = points,
 				};
 			}
 
@@ -527,15 +529,14 @@ namespace vulkan {
 			/* pipeline layout */
 			static auto layout(void) -> vk::pipeline_layout {
 
-				struct model_matrix_temp {
-					glm::mat4 matrix;
-				};
-
 
 				const vk::push_constant_range pcr {
-					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+						| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+						| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
+						,
 					.offset = 0U,
-					.size = sizeof(model_matrix_temp) * 3
+					.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
 				};
 
 

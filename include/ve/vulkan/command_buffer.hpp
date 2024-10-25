@@ -190,7 +190,7 @@ namespace vulkan {
 					// color
 					vk::clear_value{
 						.color = vk::clear_color_value{
-							.float32 = {0.2f, 0.2f, 0.2f, 1.0f}
+							.float32 = {0.04f, 0.04f, 0.04f, 1.0f}
 						}
 					},
 					// depth
@@ -405,7 +405,11 @@ namespace vulkan {
 						// pipeline layout
 						pipeline.layout(),
 						// stage flags
-						VK_SHADER_STAGE_VERTEX_BIT,
+						VK_SHADER_STAGE_VERTEX_BIT
+						//| VK_SHADER_STAGE_FRAGMENT_BIT
+						| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+						| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
+						,
 						// offset
 						0U,
 						// size
