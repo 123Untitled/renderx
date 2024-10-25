@@ -19,6 +19,7 @@ auto vk::exception::_strerror(const vk::result& result) noexcept -> const char* 
 
 	switch (result) {
 
+		/*
 		case VK_SUCCESS:
 			return "VK_SUCCESS";
 
@@ -159,6 +160,7 @@ auto vk::exception::_strerror(const vk::result& result) noexcept -> const char* 
 			
 		case VK_INCOMPATIBLE_SHADER_BINARY_EXT:
 			return "VK_INCOMPATIBLE_SHADER_BINARY_EXT";
+			*/
 			
 			/*
 		case VK_ERROR_OUT_OF_POOL_MEMORY_KHR:

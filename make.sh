@@ -144,7 +144,7 @@ local -r cxx='clang++'
 # cxx flags
 local -r cxxflags=('-std=c++2a' '-O0'
 				   '-g3' #'-fsanitize=address' '-gdwarf-4'
-				   '-DENGINE_VL_DEBUG'
+				   #'-DENGINE_VL_DEBUG'
 				   '-Wall' '-Wextra' '-Werror' '-Wpedantic' '-Weffc++'
 				   '-fno-rtti' '-Winline'
 				   '-Wno-unused' '-Wno-unused-variable' '-Wno-unused-parameter'
@@ -201,7 +201,8 @@ function _check_tools() {
 	# required tools
 	local -r required=('uname' 'git' 'curl' 'tar'
 					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
-					   'clang++' 'glslc' 'ccache')
+					   'clang++' 'glslc')
+					   #'ccache'
 
 	# loop over required tools
 	for tool in $required; do
@@ -305,7 +306,7 @@ function _generate_ninja() {
 	file+='# ninja file\n'
 	file+='ninja = '$ninja'\n\n'
 	file+='# compiler and flags\n'
-	file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
 	# ccache commented (not installed at 42)
 
 

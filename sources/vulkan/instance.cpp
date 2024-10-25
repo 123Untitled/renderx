@@ -2,6 +2,7 @@
 #include "ve/system/write.hpp"
 
 #include "ve/glfw/system.hpp"
+#include "ve/vk/functions.hpp"
 
 #include "ve/vulkan/validation_layers.hpp"
 #include "ve/os.hpp"

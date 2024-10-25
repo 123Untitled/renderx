@@ -192,9 +192,23 @@ auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan
 		ppd |= (static_cast<unsigned>(pdevice.have_present_modes()) << _ppd_present_shift);
 
 		// check if physical device is a gpu
-		if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		 || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+		//if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		// || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
 			ppd |= (1U << _ppd_gpu_shift);
+
+		if (pdevice.supports_swapchain())
+			std::cout << "swapchain support" << std::endl;
+
+		if (pdevice.have_surface_formats())
+			std::cout << "surface formats" << std::endl;
+
+		if (pdevice.have_present_modes())
+			std::cout << "present mode" << std::endl;
+
+		std::cout << "gpu: " << properties.deviceType << std::endl;
+
+
+		
 
 		// check if physical device is suitable
 		if (ppd == 0b1111)

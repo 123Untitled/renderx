@@ -23,6 +23,8 @@
 #include "ve/mesh.hpp"
 
 
+#include <unordered_map>
+#include <map>
 
 // Fonction de hash pour std::pair (déjà définie ci-dessus)
 struct pair_hash {
@@ -381,11 +383,11 @@ namespace ve {
 
 
 						// Position y des points (de -1 à 1)
-						float y = 1.0f - (i / float(num_points - 1)) * 2.0f;
+						float y = 1.0f - ((float)i / float(num_points - 1)) * 2.0f;
 						float radius_circle = std::sqrt(1.0f - y * y);
 
 						// Angle pour la distribution uniforme des points
-						float theta = ga * i;
+						float theta = ga * (float)i;
 
 						float x = std::cos(theta) * radius_circle;
 						float z = std::sin(theta) * radius_circle;

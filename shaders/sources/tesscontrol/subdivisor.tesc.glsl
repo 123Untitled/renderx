@@ -41,7 +41,7 @@ void main(void) {
 	float distance = distance(pco.camera_position, model_position);
 
 
-	float max_tess_level = 100.0;
+	float max_tess_level = 20.0;
 	float min_tess_level = 1.0;
 	float max_distance   = 0.5;
 
