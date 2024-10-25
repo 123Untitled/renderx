@@ -144,7 +144,7 @@ local -r cxx='clang++'
 # cxx flags
 local -r cxxflags=('-std=c++2a' '-O0'
 				   '-g3' #'-fsanitize=address' '-gdwarf-4'
-				   #'-DENGINE_VL_DEBUG'
+				   '-DENGINE_VL_DEBUG'
 				   '-Wall' '-Wextra' '-Werror' '-Wpedantic' '-Weffc++'
 				   '-fno-rtti' '-Winline'
 				   '-Wno-unused' '-Wno-unused-variable' '-Wno-unused-parameter'

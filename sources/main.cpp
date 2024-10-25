@@ -73,8 +73,11 @@ struct stest {
 
 
 
+#include "ve/vulkan/descriptor_set_layout.hpp"
 
 auto main(int, char**) -> int {
+
+	vulkan::descriptor_set_layout l;
 
 
 	test<"vertex">();

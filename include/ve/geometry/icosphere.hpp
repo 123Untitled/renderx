@@ -168,7 +168,7 @@ namespace ve {
 
 
 
-				___self::_subdivide(5);
+				___self::_subdivide(8);
 				___self::_project_onto_sphere();
 			}
 
