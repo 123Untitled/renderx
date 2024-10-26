@@ -16,12 +16,19 @@ namespace vk {
 	class unique final {
 
 
+		// -- friends ---------------------------------------------------------
+
+		/* make unique as friend */
+		template <typename U, typename... Ts>
+		friend auto make_unique(Ts&&...) -> vk::unique<U>;
+
+
 		public:
 
 			// -- public types ------------------------------------------------
 
-			/* value type */
-			using type = T;
+			/* opaque type */
+			using opaque_type = T;
 
 
 		private:
@@ -35,24 +42,24 @@ namespace vk {
 			// -- private members ---------------------------------------------
 
 			/* data */
-			T _data;
+			opaque_type _data;
+
+
+			// -- private lifecycle -------------------------------------------
+
+			/* data constructor */
+			explicit unique(const opaque_type& data) noexcept
+			: _data{data} {
+			}
 
 
 		public:
-
-
 
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
 			unique(void) noexcept
 			: _data{nullptr} {
-			}
-
-			/* variadic constructor */
-			template <typename... Ts>
-			unique(Ts&&... args) noexcept
-			: _data{vk::create(std::forward<Ts>(args)...)} {
 			}
 
 			/* deleted copy constructor */
@@ -92,24 +99,62 @@ namespace vk {
 					vk::destroy(_data);
 
 				// move data
-				_data = ___ot._data;
-
-				// invalidate other
-				___ot._data = nullptr;
+				_data = std::exchange(___ot._data, nullptr);
 
 				// done
 				return *this;
 			}
 
 
+			// -- public modifiers --------------------------------------------
+
+			/* release */
+			[[nodiscard]] auto release(void) noexcept -> opaque_type {
+				return std::exchange(_data, nullptr);
+			}
+
+			/* swap */
+			auto swap(___self& ___ot) noexcept -> void {
+				std::swap(_data, ___ot._data);
+			}
+
+			/* reset */
+			auto reset(void) noexcept -> void {
+
+				// check if data is valid
+				if (_data == nullptr)
+					return;
+
+				// destroy data
+				vk::destroy(_data);
+
+				// reset data
+				_data = nullptr;
+			}
+
+
 			// -- public accessors --------------------------------------------
 
-			/* value type conversion operator */
-			operator const T&(void) const noexcept {
+			/* get */
+			auto get(void) const noexcept -> const opaque_type& {
+				return _data;
+			}
+
+			/* opaque type conversion operator */
+			operator const opaque_type&(void) const noexcept {
 				return _data;
 			}
 
 	}; // class unique
+
+
+	// -- non-member functions ------------------------------------------------
+
+	/* make unique */
+	template <typename T, typename... Ts>
+	inline auto make_unique(Ts&&... args) -> vk::unique<T> {
+		return vk::unique<T>{vk::create(std::forward<Ts>(args)...)};
+	}
 
 } // namespace vk
 

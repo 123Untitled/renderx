@@ -202,7 +202,9 @@ function _check_tools() {
 	local -r required=('uname' 'git' 'curl' 'tar'
 					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
 					   'clang++' 'glslc')
-					   #'ccache'
+	
+	# optional tools
+	local -r optional=('ccache')
 
 	# loop over required tools
 	for tool in $required; do
@@ -211,6 +213,15 @@ function _check_tools() {
 		if ! command -v $tool > '/dev/null'; then
 			echo 'required tool' $error$tool$reset 'not found.'
 			exit 1
+		fi
+	done
+
+	# loop over optional tools
+	for tool in $optional; do
+
+		# check if tool is available
+		if ! command -v $tool > '/dev/null'; then
+			echo 'optional tool' $warning$tool$reset 'not found.'
 		fi
 	done
 }
@@ -306,8 +317,12 @@ function _generate_ninja() {
 	file+='# ninja file\n'
 	file+='ninja = '$ninja'\n\n'
 	file+='# compiler and flags\n'
-	file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
-	# ccache commented (not installed at 42)
+
+	if ! command -v ccache > '/dev/null'; then
+		file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	else
+		file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+	fi
 
 
 	# -- rules ----------------------------------------------------------------

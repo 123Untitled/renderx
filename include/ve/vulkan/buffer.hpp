@@ -8,20 +8,20 @@
 /*                                                                           */
 /*****************************************************************************/
 
-#ifndef ___RENDERX_VULKAN_BUFFER___
-#define ___RENDERX_VULKAN_BUFFER___
+#ifndef ___void_engine_vulkan_buffer___
+#define ___void_engine_vulkan_buffer___
 
-#include "ve/vertex/vertex.hpp"
+#include "ve/vk/unique.hpp"
 #include "ve/vulkan/device.hpp"
 #include "ve/vk/utils.hpp"
 
 
-// -- V U L K A N -------------------------------------------------------------
+// -- V U L K A N  N A M E S P A C E ------------------------------------------
 
 namespace vulkan {
 
 
-	// -- V E R T E X  B U F F E R --------------------------------------------
+	// -- B U F F E R ---------------------------------------------------------
 
 	class buffer final {
 
@@ -37,7 +37,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::buffer _buffer;
+			vk::unique<vk::buffer> _buffer;
 
 
 		public:
@@ -46,7 +46,7 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			buffer(void) noexcept;
+			buffer(void) noexcept = default;
 
 			/* parameters constructor */
 			buffer(const vk::device_size&, const vk::buffer_usage_flags&);
@@ -55,10 +55,10 @@ namespace vulkan {
 			buffer(const ___self&) = delete;
 
 			/* move constructor */
-			buffer(___self&&) noexcept;
+			buffer(___self&&) noexcept = default;
 
 			/* destructor */
-			~buffer(void) noexcept;
+			~buffer(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -67,7 +67,7 @@ namespace vulkan {
 			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&& ___ot) noexcept -> ___self&;
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public accessors --------------------------------------------
@@ -79,4 +79,4 @@ namespace vulkan {
 
 } // namespace vulkan
 
-#endif // ___RENDERX_VULKAN_BUFFER___
+#endif // ___void_engine_vulkan_buffer___

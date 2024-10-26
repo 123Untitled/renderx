@@ -11,10 +11,7 @@
 #ifndef ___RENDERX_VULKAN_SWAPCHAIN___
 #define ___RENDERX_VULKAN_SWAPCHAIN___
 
-// vulkan headers
-#include <vulkan/vulkan.h>
-
-// local headers
+#include "ve/vk/unique.hpp"
 #include "ve/vulkan/device.hpp"
 #include "ve/vulkan/render_pass.hpp"
 #include "ve/vulkan/semaphore.hpp"
@@ -48,7 +45,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* swapchain */
-			vk::swapchain _swapchain;
+			vk::unique<vk::swapchain> _swapchain;
 
 			/* size */
 			vk::u32 _size;
@@ -75,10 +72,10 @@ namespace vulkan {
 			swapchain(const ___self&) = delete;
 
 			/* move constructor */
-			swapchain(___self&&) noexcept;
+			swapchain(___self&&) noexcept = default;
 
 			/* destructor */
-			~swapchain(void) noexcept;
+			~swapchain(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -87,7 +84,7 @@ namespace vulkan {
 			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self&;
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public accessors --------------------------------------------
@@ -115,10 +112,7 @@ namespace vulkan {
 
 			// -- public modifiers --------------------------------------------
 
-			/* re-create */
-			//auto recreate(const vulkan::device&,
-			//			  const vk::surface&) -> void;
-
+			/* recreate */
 			auto recreate(const vk::u32&,
 					  const vk::surface_format&,
 					  const vk::extent2D&,

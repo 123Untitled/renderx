@@ -6,7 +6,7 @@
 #include "ve/vulkan/command_pool.hpp"
 #include "ve/vulkan/command_buffer.hpp"
 #include "ve/vulkan/not_used/resource.hpp"
-#include "ve/vulkan/pipeline.hpp"
+#include "ve/vulkan/pipeline/pipeline.hpp"
 #include "ve/vulkan/commands.hpp"
 #include "ve/vulkan/specialization.hpp"
 #include "ve/vulkan/fence.hpp"

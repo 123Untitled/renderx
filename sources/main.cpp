@@ -73,64 +73,47 @@ struct stest {
 
 
 
-#include "ve/vulkan/descriptor_set_layout.hpp"
-#include "ve/vulkan/descriptor_pool.hpp"
+#include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
+#include "ve/vulkan/descriptors/descriptor_pool.hpp"
+#include "ve/vulkan/pipeline/pipeline_layout.hpp"
+
+struct test_binding {
+	vk::descriptor_set_layout_binding binding;
+};
+
 
 auto main(int, char**) -> int {
 
-	vk::descriptor_set_layout_binding b1{
+
+
+	const vk::descriptor_set_layout_binding binding{
+		// binding in shader
 		.binding = 0U,
+		// type of descriptor
 		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		// may be an array in shader, so descriptorCount define how many
 		.descriptorCount = 1U,
-		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+		// stage where the descriptor is going to be used
+		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+		// used for texture sampling
+		.pImmutableSamplers = nullptr
 	};
 
-	vk::descriptor_set_layout_binding b2{
-		.binding = 1U,
-		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		.descriptorCount = 1U,
-		.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT
-	};
+	vulkan::descriptor_set_layout::builder builder{};
 
-	vulkan::descriptor_set_layout l{b1, b2};
-	vulkan::descriptor_pool p{2U};
+	builder.add_binding(binding);
+	builder.add_binding(1U, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1U);
 
+	auto layout = builder.build();
 
-	test<"vertex">();
+	vulkan::descriptor_pool::builder pool_builder{};
 
-	constexpr auto lit = ve::merge<"vertex", " is", " cool">();
+	pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
+	pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
 
-	std::cout << lit.data << std::endl;
+	auto pool = pool_builder.build();
 
 	//return 0;
-
-
-	// array constructor
-	ve::matrix<float, 3U, 3U> mat1{ { 1.0f, 2.0f, 3.0f,
-									  4.0f, 5.0f, 6.0f,
-									  7.0f, 8.0f, 9.0f } };
-
-	// multi dimensional array constructor
-	ve::matrix<float, 3U, 3U> mat2{ { {1.0f, 2.0f, 3.0f},
-									  {4.0f, 5.0f, 6.0f},
-									  {7.0f, 8.0f, 9.0f} } };
-
-	// variadic constructor
-	//ve::matrix<float, 3U, 2U> mat3{ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
-
-	// row constructor
-	//ve::matrix<float, 3U, 2U> mat4{ {1.0f, 2.0f}, {3.0f, 4.0f}, {5.0f, 6.0f} };
-
-
-	auto res = mat1 * mat2;
-
-	//res.print();
-
-	//return 0;
-
-
-
-
 
 
 	::signal(SIGINT, [](int) {
@@ -141,7 +124,7 @@ auto main(int, char**) -> int {
 
 	// launch renderer
 	try {
-		rx::renderer renderer;
+		ve::renderer renderer;
 		renderer.run();
 
 	}

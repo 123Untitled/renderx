@@ -271,6 +271,9 @@ namespace vk {
 	/* pipeline shader stage info */
 	using pipeline_shader_stage_info         = ::VkPipelineShaderStageCreateInfo;
 
+	/* shader stage flags */
+	using shader_stage_flags                 = ::VkShaderStageFlags;
+
 	/* pipeline input assembly state info */
 	using pipeline_input_assembly_state_info = ::VkPipelineInputAssemblyStateCreateInfo;
 
@@ -516,6 +519,9 @@ namespace vk {
 	/* descriptor set layout binding */
 	using descriptor_set_layout_binding      = ::VkDescriptorSetLayoutBinding;
 
+	/* descriptor type */
+	using descriptor_type                    = ::VkDescriptorType;
+
 	/* descriptor set layout info */
 	using descriptor_set_layout_info         = ::VkDescriptorSetLayoutCreateInfo;
 
@@ -667,6 +673,9 @@ namespace vk {
 /* cmd bind index buffer */
 #define vk_cmd_bind_index_buffer vkCmdBindIndexBuffer
 
+/* cmd bind descriptor sets */
+#define vk_cmd_bind_descriptor_sets vkCmdBindDescriptorSets
+
 /* cmd push constants */
 #define vk_cmd_push_constants vkCmdPushConstants
 
@@ -713,13 +722,31 @@ namespace vk {
 #define vk_destroy_pipeline_layout vkDestroyPipelineLayout
 
 
-// -- pipeline layout ---------------------------------------------------------
+// -- descriptor pool ---------------------------------------------------------
 
-/* create pipeline layout */
-#define vk_create_pipeline_layout vkCreatePipelineLayout
+/* create descriptor pool */
+#define vk_create_descriptor_pool vkCreateDescriptorPool
 
-/* destroy pipeline layout */
-#define vk_destroy_pipeline_layout vkDestroyPipelineLayout
+/* destroy descriptor pool */
+#define vk_destroy_descriptor_pool vkDestroyDescriptorPool
+
+/* reset descriptor pool */
+#define vk_reset_descriptor_pool vkResetDescriptorPool
+
+
+// -- descriptor set layout ---------------------------------------------------
+
+/* create descriptor set layout */
+#define vk_create_descriptor_set_layout vkCreateDescriptorSetLayout
+
+/* destroy descriptor set layout */
+#define vk_destroy_descriptor_set_layout vkDestroyDescriptorSetLayout
+
+
+// -- descriptor sets ---------------------------------------------------------
+
+/* allocate descriptor sets */
+#define vk_allocate_descriptor_sets vkAllocateDescriptorSets
 
 
 // -- buffer ------------------------------------------------------------------
@@ -807,6 +834,7 @@ namespace vk {
 
 /* wait for fences */
 #define vk_wait_for_fences vkWaitForFences
+
 
 
 // -- semaphore ---------------------------------------------------------------

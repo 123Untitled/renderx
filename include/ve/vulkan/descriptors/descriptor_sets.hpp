@@ -4,7 +4,8 @@
 #include "ve/vk/typedefs.hpp"
 #include "ve/memory/malloc.hpp"
 
-#include "ve/vulkan/descriptor_pool.hpp"
+#include "ve/vulkan/descriptors/descriptor_pool.hpp"
+#include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
 
 #include <stdexcept>
 
@@ -41,24 +42,21 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* device and size constructor */
-			descriptor_sets(vk::u32 ___size)
-			: _pool{___size}, _sets{nullptr} {
+			descriptor_sets(const vulkan::descriptor_set_layout& layout,
+							const vk::u32& size = 1U)
+			: _pool{size}, _sets{nullptr} {
 
-
-				vk::descriptor_set_layout dsl{
-					// layout
-				};
 
 				vk::descriptor_set_allocate_info info{
 					.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 					.pNext = nullptr,
-					.descriptorPool = nullptr, // pool,
-					.descriptorSetCount = ___size, // swapchain size
-					.pSetLayouts = &dsl
+					.descriptorPool = _pool.get(), // descriptor pool
+					.descriptorSetCount = size, // swapchain size
+					.pSetLayouts = &layout.get() // descriptor set layout
 				};
 
 				// allocate descriptor sets
-				_sets = rx::malloc<vk::descriptor_set>(___size);
+				_sets = rx::malloc<vk::descriptor_set>(size);
 
 
 				// create descriptor sets
@@ -68,7 +66,8 @@ namespace vulkan {
 						&info, _sets);
 
 
-				for (vk::u32 i = 0U; i < ___size; ++i) {
+
+				for (vk::u32 i = 0U; i < size; ++i) {
 
 					vk::descriptor_buffer_info buffer_info{
 						.buffer = nullptr, // buffer

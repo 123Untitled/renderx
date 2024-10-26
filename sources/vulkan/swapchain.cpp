@@ -12,7 +12,7 @@
 
 /* default constructor */
 vulkan::swapchain::swapchain(void) noexcept
-: _swapchain{nullptr}, _size{0U}, _extent{} {
+: _swapchain{}, _size{0U}, _extent{} {
 }
 
 /* parameters constructor */
@@ -24,7 +24,7 @@ vulkan::swapchain::swapchain(const vk::u32& size,
 : _swapchain{}, _size{size}, _extent{extent} {
 
 	// create info
-	const vk::swapchain_info sinfo {
+	const vk::swapchain_info info {
 		// structure type
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		// next structure
@@ -64,53 +64,7 @@ vulkan::swapchain::swapchain(const vk::u32& size,
 	};
 
 	// create swapchain
-	vk::try_execute<"failed to create swapchain">(
-			::vk_create_swapchain_khr,
-			vulkan::device::logical(), &sinfo, nullptr, &_swapchain);
-}
-
-/* move constructor */
-vulkan::swapchain::swapchain(vulkan::swapchain&& other) noexcept
-: _swapchain{other._swapchain} {
-
-	// invalidate other
-	other._swapchain = nullptr;
-}
-
-/* destructor */
-vulkan::swapchain::~swapchain(void) noexcept {
-
-	// wait for logical device to be idle
-	vulkan::device::wait_idle();
-
-	// release swapchain
-	::vk_destroy_swapchain_khr(vulkan::device::logical(),
-			_swapchain, nullptr);
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::swapchain::operator=(___self&& other) noexcept -> ___self& {
-
-	// check for self-assignment
-	if (this == &other)
-		return *this;
-
-	// release swapchain
-	if (_swapchain != nullptr) {
-		::vk_destroy_swapchain_khr(vulkan::device::logical(),
-				_swapchain, nullptr); }
-
-	// move swapchain
-	_swapchain = other._swapchain;
-
-	// invalidate other
-	other._swapchain = nullptr;
-
-	// done
-	return *this;
+	_swapchain = vk::make_unique<vk::swapchain>(info);
 }
 
 
@@ -200,10 +154,10 @@ auto vulkan::swapchain::recreate(const vk::u32& size,
 	_extent = extent;
 	_size = size;
 
-	const vk::swapchain old{_swapchain};
+	const vk::swapchain old{_swapchain.release()};
 
 	// create info
-	const vk::swapchain_info sinfo {
+	const vk::swapchain_info info {
 		// structure type
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		// next structure
@@ -242,16 +196,9 @@ auto vulkan::swapchain::recreate(const vk::u32& size,
 		.oldSwapchain = old
 	};
 
-
 	// create swapchain
-	vk::try_execute<"failed to create swapchain">(
-			::vk_create_swapchain_khr,
-			vulkan::device::logical(), &sinfo, nullptr, &_swapchain);
+	_swapchain = vk::make_unique<vk::swapchain>(info);
 
-
-	// destroy old swapchain
-	if (old != nullptr) {
-		::vk_destroy_swapchain_khr(vulkan::device::logical(),
-				old, nullptr); }
-
+	// destroy old swapchain (assuming it is not null)
+	vk::destroy(old);
 }

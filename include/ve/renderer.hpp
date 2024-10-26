@@ -1,5 +1,5 @@
-#ifndef ___RENDERX_RENDERER___
-#define ___RENDERX_RENDERER___
+#ifndef ___void_engine_renderer___
+#define ___void_engine_renderer___
 
 //#include "ve/vertex/basic_vertex.hpp"
 
@@ -9,7 +9,7 @@
 #include "ve/vulkan/semaphore.hpp"
 #include "ve/vulkan/fence.hpp"
 #include "ve/vulkan/command_pool.hpp"
-#include "ve/vulkan/pipeline.hpp"
+#include "ve/vulkan/pipeline/pipeline.hpp"
 #include "ve/vulkan/commands.hpp"
 #include "ve/vulkan/queue.hpp"
 
@@ -27,19 +27,15 @@
 #include "ve/shapes/cuboid.hpp"
 #include "ve/mesh.hpp"
 #include "ve/object.hpp"
-#include "ve/camera.hpp"
 
 #include "ve/glfw/events.hpp"
 
-// to be removed !
-using vertex_type = ve::vert3x;
-//using vertex_type = ve::vertex<vx::float3, vx::float3>;
+#include "ve/scene/scene.hpp"
 
 
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-// -- R E N D E R X  N A M E S P A C E ----------------------------------------
-
-namespace rx {
+namespace ve {
 
 
 	// -- R E N D E R E R -----------------------------------------------------
@@ -52,7 +48,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::renderer;
+			using ___self = ve::renderer;
 
 
 			// -- private members ---------------------------------------------
@@ -66,11 +62,8 @@ namespace rx {
 			/* command pool */
 			vulkan::command_pool _pool;
 
-			///* command buffers */
+			/* command buffers */
 			vulkan::commands<vulkan::primary> _cmds;
-
-			/* pipeline */
-			vulkan::pipeline _pipeline;
 
 			/* device memory */
 			vulkan::device_memory _memory;
@@ -78,11 +71,8 @@ namespace rx {
 			/* sync */
 			vulkan::sync<3U> _sync;
 
-			/* objects */
-			vk::vector<rx::object> _objects;
-
-			/* camera */
-			rx::camera _camera;
+			/* scene */
+			ve::scene _scene;
 
 
 			// -- private methods ---------------------------------------------
@@ -122,12 +112,8 @@ namespace rx {
 			/* run */
 			auto run(void) -> void;
 
-
-			auto test(void) -> void;
-			static auto entrypoint(void*) -> void*;
-
 	}; // class renderer
 
-} // namespace rx
+} // namespace ve
 
-#endif // ___RENDERX_RENDERER___
+#endif // ___void_engine_renderer___

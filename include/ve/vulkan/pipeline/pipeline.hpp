@@ -18,8 +18,11 @@
 #include "ve/vk/array.hpp"
 #include "ve/vulkan/specialization.hpp"
 #include "ve/vulkan/shader_module.hpp"
+#include "./pipeline_layout.hpp"
+
 
 #include "ve/libraries/shader_library.hpp"
+
 
 #include <glm/glm.hpp>
 
@@ -45,10 +48,10 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* pipeline */
-			vk::pipeline _pipeline;
+			vk::unique<vk::pipeline> _pipeline;
 
 			/* pipeline layout */
-			vk::pipeline_layout _layout;
+			vulkan::pipeline_layout _layout;
 
 
 		public:
@@ -56,30 +59,14 @@ namespace vulkan {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			pipeline(void) noexcept
-			: _pipeline{nullptr},
-			  _layout{nullptr} {
-			}
+			pipeline(void) noexcept = default;
 
 			/* info constructor */
-			pipeline(const vk::graphics_pipeline_info& ___info,
-					 const vk::pipeline_layout& ___layout)
+			pipeline(const vk::graphics_pipeline_info& info,
+					 vulkan::pipeline_layout&& layout)
 
-			: _pipeline{}, _layout{___layout} {
-
-				// create pipeline
-				vk::try_execute<"failed to create graphics pipelines">(
-					::vk_create_graphics_pipelines,
-					vulkan::device::logical(),
-					// pipeline cache
-					VK_NULL_HANDLE,
-					// pipeline count
-					1U,
-					// pipeline info
-					&___info,
-					// allocator
-					nullptr,
-					&_pipeline);
+			: _pipeline{vk::make_unique<vk::pipeline>(info)},
+			  _layout{std::move(layout)} {
 			}
 
 
@@ -87,24 +74,10 @@ namespace vulkan {
 			pipeline(const ___self&) = delete;
 
 			/* move constructor */
-			pipeline(___self&& ___ot) noexcept
-			: _pipeline{___ot._pipeline},
-			  _layout{___ot._layout} {
-
-				// invalidate other
-				___ot._pipeline = nullptr;
-				___ot._layout = nullptr;
-			}
+			pipeline(___self&&) noexcept = default;
 
 			/* destructor */
-			~pipeline(void) noexcept {
-
-				if (_pipeline == nullptr)
-					return;
-
-				::vk_destroy_pipeline(vulkan::device::logical(), _pipeline, nullptr);
-				::vk_destroy_pipeline_layout(vulkan::device::logical(), _layout, nullptr);
-			}
+			~pipeline(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -113,32 +86,13 @@ namespace vulkan {
 			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&& ___ot) noexcept -> ___self& {
-
-				if (this == &___ot)
-					return *this;
-
-				if (_pipeline != nullptr)
-					::vk_destroy_pipeline(vulkan::device::logical(), _pipeline, nullptr);
-
-				if (_layout != nullptr)
-					::vk_destroy_pipeline_layout(vulkan::device::logical(), _layout, nullptr);
-
-				_pipeline = ___ot._pipeline;
-				_layout = ___ot._layout;
-
-				// invalidate other
-				___ot._pipeline = nullptr;
-				___ot._layout = nullptr;
-
-				return *this;
-			}
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public accessors --------------------------------------------
 
 			/* layout */
-			auto layout(void) const noexcept -> const vk::pipeline_layout& {
+			auto layout(void) const noexcept -> const vulkan::pipeline_layout& {
 				return _layout;
 			}
 
@@ -177,7 +131,7 @@ namespace vulkan {
 			// -- public static methods ---------------------------------------
 
 			/* build */
-			static auto build(const vk::render_pass& ___render_pass) -> vulkan::pipeline {
+			static auto build(const vk::render_pass& render_pass) -> vulkan::pipeline {
 
 				// shader stages
 				const vk::array stages {
@@ -187,133 +141,38 @@ namespace vulkan {
 					ve::shader_library::tesseval_stage_info<"evaluator">(),
 					
 				};
-					
 
 				// vertex input info
 				const auto vertex_input_info = ___vertex::info();
 
 				// input assembly info
-				const auto input_assembly_info = ___self::input_assembly_info<VK_PRIMITIVE_TOPOLOGY_PATCH_LIST>();
-				//const auto input_assembly_info = ___self::input_assembly_info<VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST>();
+				const vk::pipeline_input_assembly_state_info input_assembly_state_info {
+					// type of struct
+					VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+					// pointer to next struct
+					nullptr,
+					// flags
+					0U,
+					// topology
+					VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
+					// primitive restart enable
+					VK_FALSE
+				};
 
 				// tesselation info
-				const auto tesselation_info = ___self::tesselation_info(3U); // 3 control points (triangle)
+				const vk::pipeline_tesselation_state_info tesselation_state_info {
+					// type of struct
+					VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO,
+					// pointer to next struct
+					nullptr,
+					// flags
+					0U,
+					// patch control points (only for tesselation shaders)
+					3U
+				};
 
 				// viewport
-				const auto viewport = ___self::viewport();
-
-				// scissor
-				const auto scissor = ___self::scissor();
-
-				// viewport info
-				const auto viewport_info = ___self::viewport_info();
-
-				// rasterization info
-				const auto rasterization_info = ___self::rasterization_info();
-
-				// multisample info
-				const auto multisampling = ___self::multisample_info();
-
-				// depth stencil info
-				const auto depth_stencil_info = ___self::depth_stencil_info();
-
-				// color blend attachment
-				const auto color_blend_attachment = ___self::color_blend_attachment();
-
-				// color blend info
-				const auto color_blend_info = ___self::color_blend_info(color_blend_attachment);
-
-				// dynamic state info
-				const auto dynamic_state_info = ___self::dynamic_state_info();
-
-				// pipeline layout
-				const auto layout = ___self::layout();
-
-				// pipeline info
-				vk::graphics_pipeline_info info {
-					// type of struct
-					.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-					// pointer to next struct
-					.pNext               = nullptr,
-					// flags
-					.flags               = 0U,
-					// shader stage count
-					.stageCount          = stages.size(),
-					// shader stages
-					.pStages             = stages.data(),
-					// vertex input state
-					.pVertexInputState   = &vertex_input_info,
-					// input assembly state
-					.pInputAssemblyState = &input_assembly_info,
-					// tesselation state
-					.pTessellationState  = &tesselation_info,
-					// viewport state
-					.pViewportState      = &viewport_info,
-					// rasterization state
-					.pRasterizationState = &rasterization_info,
-					// multisample state
-					.pMultisampleState   = &multisampling,
-					// depth stencil state
-					.pDepthStencilState  = &depth_stencil_info,
-					// color blend state
-					.pColorBlendState    = &color_blend_info,
-					// dynamic state
-					.pDynamicState       = &dynamic_state_info,
-					// pipeline layout
-					.layout              = layout,
-					// render pass
-					.renderPass          = ___render_pass,
-					// subpass
-					.subpass             = 0U,
-					// base pipeline handle
-					.basePipelineHandle  = VK_NULL_HANDLE,
-					// base pipeline index
-					.basePipelineIndex   = -1
-				};
-
-				return vulkan::pipeline{info, layout};
-			}
-
-
-			// -- public interface --------------------------------------------
-
-			/* input assembly info */
-			template <vk::primitive_topology ___topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST>
-			static constexpr auto input_assembly_info(void) noexcept -> vk::pipeline_input_assembly_state_info {
-
-				return vk::pipeline_input_assembly_state_info {
-					// type of struct
-					.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-					// pointer to next struct
-					.pNext = nullptr,
-					// flags
-					.flags = 0U,
-					// topology
-					.topology = ___topology,
-					// primitive restart enable
-					.primitiveRestartEnable = VK_FALSE,
-				};
-			}
-
-			/* tessellation info */
-			static constexpr auto tesselation_info(const vk::u32& points = 0U) noexcept -> vk::pipeline_tesselation_state_info {
-
-				return vk::pipeline_tesselation_state_info {
-					// type of struct
-					.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO,
-					// pointer to next struct
-					.pNext = nullptr,
-					// flags
-					.flags = 0U,
-					// patch control points (only for tesselation shaders)
-					.patchControlPoints = points,
-				};
-			}
-
-			/* viewport */
-			static constexpr auto viewport(void) noexcept -> vk::viewport {
-
-				return vk::viewport {
+				const vk::viewport viewport {
 					// x coordinate
 					.x = 0.0f,
 					// y coordinate
@@ -327,25 +186,17 @@ namespace vulkan {
 					// max depth
 					.maxDepth = 1.0f,
 				};
-			}
 
-			/* scissor */
-			static constexpr auto scissor(void) noexcept {
-
-				// cutout view
-				return vk::scissor {
+				// scissor
+				const vk::scissor scissor {
 					// offset
 					.offset = {0, 0},
 					// extent
 					.extent = {800U, 600U}, // swapchain extent
 				};
-			}
 
-
-			/* viewport info */
-			static constexpr auto viewport_info(void) noexcept -> vk::pipeline_viewport_state_info {
-
-				return vk::pipeline_viewport_state_info {
+				// viewport info
+				const vk::pipeline_viewport_state_info viewport_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -361,14 +212,9 @@ namespace vulkan {
 					// pointer to scissors
 					.pScissors = nullptr,//&_scissor,
 				};
-				// need to setup dynamic viewport and scissor !!!
-			}
 
-
-			/* rasterization info */
-			static constexpr auto rasterization_info(void) noexcept -> vk::pipeline_rasterization_state_info {
-
-				return vk::pipeline_rasterization_state_info {
+				// rasterization info
+				const vk::pipeline_rasterization_state_info rasterization_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -396,12 +242,9 @@ namespace vulkan {
 					// line width
 					.lineWidth = 1.0f, // needs GPU feature (extension: VK_EXT_line_rasterization ? wideLines)
 				};
-			}
 
-			/* multisample info */
-			static constexpr auto multisample_info(void) noexcept -> vk::pipeline_multisample_state_info {
-
-				return vk::pipeline_multisample_state_info {
+				// multisample info
+				const vk::pipeline_multisample_state_info multisample_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -421,12 +264,9 @@ namespace vulkan {
 					// alpha to one enable
 					.alphaToOneEnable = VK_FALSE,
 				};
-			}
 
-			/* depth stencil info */
-			static constexpr auto depth_stencil_info(void) noexcept -> vk::pipeline_depth_stencil_state_info {
-
-				return vk::pipeline_depth_stencil_state_info {
+				// depth stencil info
+				const vk::pipeline_depth_stencil_state_info depth_stencil_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -452,12 +292,9 @@ namespace vulkan {
 					// max depth bounds
 					.maxDepthBounds = 1.0f,
 				};
-			}
 
-			/* color blend attachment */
-			static constexpr auto color_blend_attachment(void) noexcept -> vk::pipeline_color_blend_attachment_state {
-
-				return vk::pipeline_color_blend_attachment_state {
+				// color blend attachment
+				const vk::pipeline_color_blend_attachment_state color_blend_attachment_state {
 					// blend enable
 					.blendEnable         = VK_FALSE,
 					// source color blend factor
@@ -476,12 +313,9 @@ namespace vulkan {
 					.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
 										 | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
 				};
-			}
 
-			/* color blend info */
-			static constexpr auto color_blend_info(const vk::pipeline_color_blend_attachment_state& ___cba) noexcept -> vk::pipeline_color_blend_state_info {
-
-				return vk::pipeline_color_blend_state_info {
+				// color blend info
+				const vk::pipeline_color_blend_state_info color_blend_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -495,24 +329,20 @@ namespace vulkan {
 					// attachment count
 					.attachmentCount = 1U,
 					// attachments
-					.pAttachments = &___cba,
+					.pAttachments = &color_blend_attachment_state,
 					// blend constants
 					.blendConstants = {0.0f, 0.0f, 0.0f, 0.0f},
 				};
-			}
-
-
-			/* dynamic state info */
-			static /*constexpr*/ auto dynamic_state_info(void) noexcept -> vk::pipeline_dynamic_state_info {
 
 				// WARNING need to setup dynamic separtely !
-				static const vk::dynamic_state dynamic_state[] = {
+				const vk::dynamic_state dynamic_states[] = {
 					VK_DYNAMIC_STATE_VIEWPORT,
 					VK_DYNAMIC_STATE_SCISSOR,
 					VK_DYNAMIC_STATE_LINE_WIDTH,
 				};
 
-				return vk::pipeline_dynamic_state_info {
+				// dynamic state info
+				const vk::pipeline_dynamic_state_info dynamic_state_info {
 					// type of struct
 					.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
 					// pointer to next struct
@@ -520,52 +350,72 @@ namespace vulkan {
 					// flags
 					.flags = 0U,
 					// dynamic state count
-					.dynamicStateCount = 2U,
+					.dynamicStateCount = sizeof(dynamic_states) / sizeof(dynamic_states[0]),
 					// dynamic states
-					.pDynamicStates = dynamic_state,
-				};
-			}
-
-			/* pipeline layout */
-			static auto layout(void) -> vk::pipeline_layout {
-
-
-				const vk::push_constant_range pcr {
-					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
-						| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-						| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
-						,
-					.offset = 0U,
-					.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
+					.pDynamicStates = dynamic_states,
 				};
 
 
-				vk::pipeline_layout_info info {
+				// pipeline layout
+				vulkan::pipeline_layout layout{
+					vk::push_constant_range{
+						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+									| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
+									,
+						.offset = 0U,
+						.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
+					}
+				};
+
+				// pipeline info
+				vk::graphics_pipeline_info info {
 					// type of struct
-					.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+					.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
 					// pointer to next struct
-					.pNext = nullptr,
+					.pNext               = nullptr,
 					// flags
-					.flags = 0U,
-					// set layout count
-					.setLayoutCount = 0U,
-					// set layouts
-					.pSetLayouts = nullptr,
-					// push constant range count
-					.pushConstantRangeCount = 1U,
-					// push constant ranges
-					.pPushConstantRanges = &pcr,
+					.flags               = 0U,
+					// shader stage count
+					.stageCount          = stages.size(),
+					// shader stages
+					.pStages             = stages.data(),
+					// vertex input state
+					.pVertexInputState   = &vertex_input_info,
+					// input assembly state
+					.pInputAssemblyState = &input_assembly_state_info,
+					// tesselation state
+					.pTessellationState  = &tesselation_state_info,
+					// viewport state
+					.pViewportState      = &viewport_state_info,
+					// rasterization state
+					.pRasterizationState = &rasterization_state_info,
+					// multisample state
+					.pMultisampleState   = &multisample_state_info,
+					// depth stencil state
+					.pDepthStencilState  = &depth_stencil_state_info,
+					// color blend state
+					.pColorBlendState    = &color_blend_state_info,
+					// dynamic state
+					.pDynamicState       = &dynamic_state_info,
+					// pipeline layout
+					.layout              = layout.get(),
+					// render pass
+					.renderPass          = render_pass,
+					// subpass
+					.subpass             = 0U,
+					// base pipeline handle
+					.basePipelineHandle  = VK_NULL_HANDLE,
+					// base pipeline index
+					.basePipelineIndex   = -1
 				};
 
-				vk::pipeline_layout ___lyt;
-
-				// create pipeline layout
-				vk::try_execute<"failed to create pipeline layout">(
-					::vk_create_pipeline_layout,
-					vulkan::device::logical(), &info, nullptr, &___lyt);
-
-				return ___lyt;
+				return vulkan::pipeline{info, std::move(layout)};
 			}
+
+
+
+
 
 	}; // class pipeline_builder
 

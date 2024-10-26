@@ -14,7 +14,7 @@
 #include "ve/vulkan/swapchain.hpp"
 #include "ve/vulkan/render_pass.hpp"
 #include "ve/vulkan/buffer.hpp"
-#include "ve/vulkan/pipeline.hpp"
+#include "ve/vulkan/pipeline/pipeline.hpp"
 
 #include "ve/vulkan/index_buffer.hpp"
 #include "ve/vulkan/vertex_buffer.hpp"
@@ -243,14 +243,14 @@ namespace vulkan {
 			}
 
 			/* set viewport */
-			auto set_viewport(const vulkan::swapchain& swapchain) const noexcept -> void {
+			auto set_viewport(const vk::extent2D& extent) const noexcept -> void {
 
 				// create viewport
 				const vk::viewport viewport {
 					.x        = 0.0f,
 					.y        = 0.0f,
-					.width    = static_cast<float>(swapchain.extent().width),
-					.height   = static_cast<float>(swapchain.extent().height),
+					.width    = static_cast<float>(extent.width),
+					.height   = static_cast<float>(extent.height),
 					.minDepth = 0.0f,
 					.maxDepth = 1.0f
 				};
@@ -398,12 +398,15 @@ namespace vulkan {
 			auto push_constants(const vulkan::pipeline& pipeline,
 					            const ___constants& constants) const noexcept -> void {
 
+				//static_assert(sizeof(___constants) <= 128U,
+				//		"command_buffer: push constants size must be less than or equal to 128 bytes");
+
 				// push constants
 				::vk_cmd_push_constants(
 						// command buffer
 						_cbuffer,
 						// pipeline layout
-						pipeline.layout(),
+						pipeline.layout().get(),
 						// stage flags
 						VK_SHADER_STAGE_VERTEX_BIT
 						//| VK_SHADER_STAGE_FRAGMENT_BIT
@@ -418,6 +421,30 @@ namespace vulkan {
 						&constants);
 			}
 
+			/* bind descriptor sets */
+			auto bind_descriptor_sets(const vulkan::pipeline_layout& layout,
+									  const vk::u32& first_set,
+									  const vk::descriptor_set& set) const noexcept -> void {
+
+				// bind descriptor sets
+				::vk_cmd_bind_descriptor_sets(
+						// command buffer
+						_cbuffer,
+						// bind point
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						// pipeline layout
+						layout.get(),
+						// first set
+						first_set,
+						// descriptor set count
+						1U,
+						// descriptor sets
+						&set,
+						// dynamic offset count
+						0U,
+						// dynamic offsets
+						nullptr);
+			}
 
 
 			/* record */
