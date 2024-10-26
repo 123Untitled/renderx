@@ -85,7 +85,6 @@ struct test_binding {
 auto main(int, char**) -> int {
 
 
-
 	const vk::descriptor_set_layout_binding binding{
 		// binding in shader
 		.binding = 0U,
