@@ -75,6 +75,7 @@ struct stest {
 
 #include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
 #include "ve/vulkan/descriptors/descriptor_pool.hpp"
+#include "ve/vulkan/descriptors/descriptor_sets.hpp"
 #include "ve/vulkan/pipeline/pipeline_layout.hpp"
 
 struct test_binding {
@@ -83,7 +84,7 @@ struct test_binding {
 
 auto main(int, char**) -> int {
 
-	vulkan::descriptor_sets sets{};
+	vulkan::descriptor_sets set{};
 
 
 	const vk::descriptor_set_layout_binding binding{

@@ -38,6 +38,9 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
+			/* default constructor */
+			descriptor_pool(void) noexcept = default;
+
 			/* builder constructor */
 			descriptor_pool(const ___self::builder&);
 

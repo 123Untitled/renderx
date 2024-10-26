@@ -127,13 +127,13 @@ namespace vulkan {
 				vk::descriptor_buffer_info buffer_info{
 					.buffer = nullptr, // buffer
 					.offset = 0U,
-					.range = sizeof(0// must be size of uniform buffer object or struct ) // can be VK_WHOLE_SIZE
+					.range = sizeof(0) // must be size of uniform buffer object or struct ) // can be VK_WHOLE_SIZE
 				};
 
 				vk::write_descriptor_set wdset{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					.pNext = nullptr,
-					.dstSet = _sets[i], // descriptor set
+					.dstSet = _sets[index],
 					.dstBinding = 0U,
 					.dstArrayElement = 0U,
 					.descriptorCount = 1U,
