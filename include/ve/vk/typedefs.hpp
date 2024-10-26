@@ -748,6 +748,12 @@ namespace vk {
 /* allocate descriptor sets */
 #define vk_allocate_descriptor_sets vkAllocateDescriptorSets
 
+/* free descriptor sets */
+#define vk_free_descriptor_sets vkFreeDescriptorSets
+
+/* update descriptor sets */
+#define vk_update_descriptor_sets vkUpdateDescriptorSets
+
 
 // -- buffer ------------------------------------------------------------------
 
