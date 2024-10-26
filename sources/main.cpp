@@ -81,8 +81,9 @@ struct test_binding {
 	vk::descriptor_set_layout_binding binding;
 };
 
-
 auto main(int, char**) -> int {
+
+	vulkan::descriptor_sets sets{};
 
 
 	const vk::descriptor_set_layout_binding binding{
