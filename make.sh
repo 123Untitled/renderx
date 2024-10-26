@@ -470,7 +470,7 @@ function _clean() {
 	local -r deleted=$(rm -rfv $objs $ninja $ninja_dir $compile_db | wc -l)
 
 	# print success
-	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
+	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
 }
 
 # fclean
@@ -504,12 +504,12 @@ fi
 case $1 in
 
 	# clean
-	clean)
+	clean | clear | rm)
 		_clean
 		;;
 
 	# fclean
-	fclean)
+	fclean | purge)
 		_fclean
 		;;
 
