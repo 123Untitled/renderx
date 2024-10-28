@@ -67,7 +67,8 @@ namespace vk {
 
 			/* move constructor */
 			unique(___self&& ___ot) noexcept
-			: _data{std::exchange(___ot._data, nullptr)} {
+			: _data{___ot._data} {
+				___ot._data = nullptr;
 			}
 
 			/* destructor */

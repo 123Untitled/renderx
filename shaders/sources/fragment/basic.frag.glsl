@@ -6,15 +6,15 @@
 #version 450
 
 layout(location = 0) in  vec3 frag_normal_surface;
-//layout(location = 1) in  vec3 frag_position;
+layout(location = 1) in vec3 in_uv[];
 
 layout(location = 0) out vec4 out_color;
 
 
 void main(void) {
 
-	out_color = vec4(0.8, 0.9, 0.3, 1.0);
-	return;
+	//out_color = vec4(0.8, 0.9, 0.3, 1.0);
+	//return;
 
 	vec3 light_dir = normalize(vec3(0.1, 0.3, -1.0));
 	vec3 light_color = vec3(0.5, 0.5, 0.5);

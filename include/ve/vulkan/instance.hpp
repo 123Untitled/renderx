@@ -74,9 +74,14 @@ namespace vulkan {
 					.flags           = 0U,
 
 					// message severity
-					.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
-									 | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-									 | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+					.messageSeverity =
+						/*
+									 VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+									 |
+									 */
+									 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+									 |
+									 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
 
 					// message type
 					.messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT

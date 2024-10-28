@@ -96,7 +96,9 @@ namespace vulkan {
 			  _size{other._size} {
 
 				// invalidate other
-				___self::_init();
+				other._init();
+
+				std::cout << "MOVE: " << _pool.get() << std::endl;
 			}
 
 			/* destructor */
@@ -138,11 +140,14 @@ namespace vulkan {
 				if (_sets != nullptr)
 					ve::free(_sets);
 
+				// move pool
+				_pool.operator=(std::move(other._pool));
+
 				// copy members
 				___self::_copy_members(other);
 
 				// invalidate other
-				___self::_init();
+				other._init();
 
 				// done
 				return *this;
@@ -181,6 +186,7 @@ namespace vulkan {
 				// less size
 				if (size < _size) {
 
+
 					// free descriptor sets
 					___self::_free_descriptor_sets(
 									(_sets + size),
@@ -194,6 +200,7 @@ namespace vulkan {
 				// more size (reserve)
 				if (size > _size) {
 
+
 					// check if capacity is valid
 					if (___self::_available() < size)
 						___self::_reserve(size);
@@ -205,31 +212,30 @@ namespace vulkan {
 					// update size
 					_size = size;
 				}
-
 			}
 
 			/* push */
-			auto push(const vulkan::descriptor_set_layout& layout) -> void {
-
-				// check if capacity is valid
-				if (___self::_available() == 0U)
-					___self::_reserve(___self::_expand());
-
-				// allocate descriptor sets
-				const vk::descriptor_set_allocate_info info{
-					.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-					.pNext = nullptr,
-					.descriptorPool = _pool.get(), // descriptor pool
-					.descriptorSetCount = 1U, // swapchain size
-					.pSetLayouts = &layout.get() // descriptor set layout
-				};
-
-				// allocate descriptor sets
-				___self::_allocate_descriptor_sets(layout.get(), 1U);
-
-				// update size
-				++_size;
-			}
+			//auto push(const vulkan::descriptor_set_layout& layout) -> void {
+			//
+			//	// check if capacity is valid
+			//	if (___self::_available() == 0U)
+			//		___self::_reserve(___self::_expand());
+			//
+			//	// allocate descriptor sets
+			//	const vk::descriptor_set_allocate_info info{
+			//		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+			//		.pNext = nullptr,
+			//		.descriptorPool = _pool.get(), // descriptor pool
+			//		.descriptorSetCount = 1U, // swapchain size
+			//		.pSetLayouts = &layout.get() // descriptor set layout
+			//	};
+			//
+			//	// allocate descriptor sets
+			//	___self::_allocate_descriptor_sets(layout.get(), 1U);
+			//
+			//	// update size
+			//	++_size;
+			//}
 
 			/* pop */
 			auto pop(void) -> void {
@@ -257,6 +263,8 @@ namespace vulkan {
 			/* write */
 			auto write(const vk::u32& index, const vk::descriptor_buffer_info& binfo) -> void {
 
+				std::cout << "write at index: " << index << std::endl;
+
 				/*
 				vk::descriptor_buffer_info buffer_info{
 					.buffer = nullptr, // buffer
@@ -264,6 +272,7 @@ namespace vulkan {
 					.range = sizeof(0) // must be size of uniform buffer object or struct ) // can be VK_WHOLE_SIZE
 				};
 				*/
+
 
 				const vk::write_descriptor_set wdset{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -301,8 +310,8 @@ namespace vulkan {
 			/* init */
 			auto _init(void) noexcept -> void {
 					_sets = nullptr;
-					_size = 0;
-				_capacity = 0;
+					_size = 0U;
+				_capacity = 0U;
 			}
 
 			/* free */
@@ -332,12 +341,16 @@ namespace vulkan {
 			auto _allocate_descriptor_sets(const vk::descriptor_set_layout& layout,
 											const size_type size) noexcept -> void {
 
+				if (_pool.get() == nullptr) {
+					std::cout << "\x1b[32mNULL POOL\x1b[0m" << std::endl;
+				}
+
 				// allocate descriptor sets
 				const vk::descriptor_set_allocate_info info{
 					.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 					.pNext = nullptr,
 					.descriptorPool = _pool.get(), // descriptor pool
-					.descriptorSetCount = size, // swapchain size
+					.descriptorSetCount = 1U, // swapchain size
 					.pSetLayouts = &layout // descriptor set layout
 				};
 

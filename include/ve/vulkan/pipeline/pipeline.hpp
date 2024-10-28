@@ -362,14 +362,14 @@ namespace vulkan {
 				vulkan::pipeline_layout layout{
 					ve::descriptor_set_layout_library::get<"main">(),
 
-					vk::push_constant_range{
-						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
-									| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
-									,
-						.offset = 0U,
-						.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
-					}
+					//vk::push_constant_range{
+					//	.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+					//				| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+					//				| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
+					//				,
+					//	.offset = 0U,
+					//	.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
+					//}
 				};
 
 				// pipeline info

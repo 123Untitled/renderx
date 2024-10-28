@@ -1,4 +1,5 @@
 #include "ve/vulkan/descriptors/descriptor_pool.hpp"
+#include <iostream>
 
 
 // -- B U I L D E R -----------------------------------------------------------
@@ -7,7 +8,7 @@
 
 /* default constructor */
 vulkan::descriptor_pool::builder::builder(void) noexcept
-: _sizes{}, _flags{0U}, _max_sets{1000U} {
+: _sizes{}, _flags{VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT}, _max_sets{1000U} {
 }
 
 
@@ -56,6 +57,7 @@ auto vulkan::descriptor_pool::builder::build(void) const -> vulkan::descriptor_p
 vulkan::descriptor_pool::descriptor_pool(const vulkan::descriptor_pool::builder& builder)
 : _pool{___self::_create_descriptor_pool(builder)} {
 
+	std::cout << "pool descriptor created" << std::endl;
 	// INFO:
 	// recreate pool when swapchain is recreated
 }

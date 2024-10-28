@@ -82,10 +82,16 @@ namespace ve {
 				// create descriptor sets
 				_sets = vulkan::descriptor_sets{pool_builder};
 
-				_sets.resize(ve::descriptor_set_layout_library::get<"main">(),
+				const auto& layout = ve::descriptor_set_layout_library::get<"main">();
+
+				if (layout == nullptr)
+					std::cout << "LAYOUT IS NULL" << std::endl;
+
+				_sets.resize(layout,
 						(vk::u32)_objects.size() + 1U /* camera */);
 
-				for (auto i = 0U; i < _objects.size(); ++i) {
+
+				for (vk::u32 i = 0U; i < _objects.size(); ++i) {
 					_sets.write(i, vk::descriptor_buffer_info{
 						.buffer = _objects[i].uniform_buffer().get(),
 						.offset = 0U,
@@ -93,12 +99,18 @@ namespace ve {
 					});
 				}
 
+
 				// write camera descriptor
 				_sets.write(
 						// last index is camera
 						static_cast<vk::u32>(_objects.size()),
 						// camera descriptor buffer info
 						_camera.descriptor_buffer_info());
+
+				std::cout << "\x1b[32mSCENE INITIALIZED\x1b[0m" << std::endl;
+				throw std::runtime_error("test");
+
+
 
 			}
 
