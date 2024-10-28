@@ -266,6 +266,9 @@ namespace vulkan {
 				ve::free(_sets);
 			}
 
+			/* free descriptor sets */
+			auto _free_descriptor_sets(const 
+
 			/* reserve */
 			auto _reserve(const size_type capacity) -> void {
 
