@@ -24,8 +24,23 @@ namespace vulkan {
 
 			// -- public types ------------------------------------------------
 
+			/* value type */
+			using value_type      = vk::descriptor_set;
+
+			/* reference type */
+			using reference       = value_type&;
+
+			/* const reference type */
+			using const_reference = const value_type&;
+
+			/* pointer type */
+			using pointer         = value_type*;
+
+			/* const pointer type */
+			using const_pointer   = const value_type*;
+
 			/* size type */
-			using size_type = vk::u32;
+			using size_type       = vk::u32;
 
 
 		private:
@@ -81,9 +96,7 @@ namespace vulkan {
 			  _size{other._size} {
 
 				// invalidate other
-				other._sets = nullptr;
-				other._capacity = 0U;
-				other._size = 0U;
+				___self::_init();
 			}
 
 			/* destructor */
@@ -97,15 +110,21 @@ namespace vulkan {
 				if (_size != 0U) {
 
 					// free descriptor sets
-					::vk_free_descriptor_sets(
-							vulkan::device::logical(),
-							_pool.get(),
-							_size, _sets);
+					___self::_free_descriptor_sets(_sets, _size);
 				}
 
 				// deallocate descriptor sets
 				ve::free(_sets);
 			}
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* move assignment operator */ // not implemented yet...
+			auto operator=(___self&& other) noexcept -> ___self& = delete;
 
 
 			// -- public modifiers --------------------------------------------
@@ -122,16 +141,16 @@ namespace vulkan {
 			}
 
 			/* resize */
-			auto resize(const size_type size) -> void {
+			auto resize(const vulkan::descriptor_set_layout& layout,
+						const size_type size) -> void {
 
 				// less size
 				if (size < _size) {
 
 					// free descriptor sets
-					::vk_free_descriptor_sets(
-							vulkan::device::logical(),
-							_pool.get(),
-							_size - size, (_sets + size));
+					___self::_free_descriptor_sets(
+									(_sets + size),
+									(_size - size));
 
 					// update size
 					_size = size;
@@ -139,14 +158,18 @@ namespace vulkan {
 				}
 
 				// more size (reserve)
-				if (size > _capacity) {
+				if (size > _size) {
 
-					___self::_reserve(size);
+					// check if capacity is valid
+					if (___self::_available() < size)
+						___self::_reserve(size);
 
-					// here implement the allocation of the new descriptor sets...
+					// allocate descriptor sets
+					___self::_allocate_descriptor_sets(layout.get(),
+													(size - _size));
 
-					// set size
-					//_size = size;
+					// update size
+					_size = size;
 				}
 
 			}
@@ -155,8 +178,8 @@ namespace vulkan {
 			auto push(const vulkan::descriptor_set_layout& layout) -> void {
 
 				// check if capacity is valid
-				if (_size >= _capacity)
-					throw std::out_of_range{"descriptor sets capacity exceeded"};
+				if (___self::_available() == 0U)
+					___self::_reserve(___self::_expand());
 
 				// allocate descriptor sets
 				const vk::descriptor_set_allocate_info info{
@@ -167,11 +190,8 @@ namespace vulkan {
 					.pSetLayouts = &layout.get() // descriptor set layout
 				};
 
-				// create descriptor sets
-				vk::try_execute<"failed to allocate descriptor sets">(
-						::vkAllocateDescriptorSets,
-						vulkan::device::logical(),
-						&info, (_sets + _size));
+				// allocate descriptor sets
+				___self::_allocate_descriptor_sets(layout.get(), 1U);
 
 				// update size
 				++_size;
@@ -180,13 +200,11 @@ namespace vulkan {
 			/* pop */
 			auto pop(void) -> void {
 
-				::vk_free_descriptor_sets(
-						vulkan::device::logical(),
-						_pool.get(),
-						1U, (_sets + _size - 1U));
+				if (_size == 0U)
+					return;
 
-				// update size
-				--_size;
+				// free last descriptor set (and update size)
+				___self::_free_descriptor_sets((_sets + --_size), 1U);
 			}
 
 			/* clear */
@@ -195,10 +213,8 @@ namespace vulkan {
 				if (_size == 0U)
 					return;
 
-				::vk_free_descriptor_sets(
-						vulkan::device::logical(),
-						_pool.get(),
-						_size, _sets);
+				// free descriptor sets
+				___self::_free_descriptor_sets(_sets, _size);
 
 				// update size
 				_size = 0U;
@@ -267,7 +283,35 @@ namespace vulkan {
 			}
 
 			/* free descriptor sets */
-			auto _free_descriptor_sets(const 
+			auto _free_descriptor_sets(const_pointer sets,
+									const size_type size) noexcept -> void {
+
+				// this command does not return any failure codes
+				static_cast<void>(::vk_free_descriptor_sets(
+										vulkan::device::logical(),
+										_pool.get(),
+										size,
+										sets));
+			}
+
+			/* allocate descriptor sets */
+			auto _allocate_descriptor_sets(const vk::descriptor_set_layout& layout,
+											const size_type size) noexcept -> void {
+
+				// allocate descriptor sets
+				const vk::descriptor_set_allocate_info info{
+					.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+					.pNext = nullptr,
+					.descriptorPool = _pool.get(), // descriptor pool
+					.descriptorSetCount = size, // swapchain size
+					.pSetLayouts = &layout // descriptor set layout
+				};
+
+				vk::try_execute<"failed to allocate descriptor sets">(
+						::vkAllocateDescriptorSets,
+						vulkan::device::logical(),
+						&info, (_sets + _size));
+			}
 
 			/* reserve */
 			auto _reserve(const size_type capacity) -> void {
