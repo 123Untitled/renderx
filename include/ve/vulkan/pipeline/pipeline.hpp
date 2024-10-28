@@ -20,6 +20,8 @@
 #include "ve/vulkan/shader_module.hpp"
 #include "./pipeline_layout.hpp"
 
+#include "ve/vulkan/descriptors/descriptor_set_layout_library.hpp"
+
 
 #include "ve/libraries/shader_library.hpp"
 
@@ -358,6 +360,8 @@ namespace vulkan {
 
 				// pipeline layout
 				vulkan::pipeline_layout layout{
+					ve::descriptor_set_layout_library::get<"main">(),
+
 					vk::push_constant_range{
 						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
 									| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
