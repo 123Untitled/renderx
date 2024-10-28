@@ -36,6 +36,26 @@ declare -r srcs=($src_dir'/'**'/'*'.sl'(.N))
 # slflags
 declare -r slflags=('-lang' 'slang' '-target' 'spirv' '-entry' 'main')
 
+
+
+
+# function to check required tools
+function _check_tools() {
+
+	# required tools
+	local -r required=('slangc')
+	
+	# loop over required tools
+	for tool in $required; do
+
+		# check if tool is available
+		if ! command -v $tool > '/dev/null'; then
+			echo 'required tool' $error$tool$reset 'not found.'
+			exit 1
+		fi
+	done
+}
+
 function _compile() {
 
 	local count=0
@@ -85,6 +105,7 @@ function _clean() {
 	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
 }
 
+echo $info'[>]'$reset 'slangc' $(slangc -v)
 
 case $1 in
 	clean|clear|fclean|rm)
