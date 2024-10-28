@@ -74,10 +74,6 @@ namespace vulkan {
 			/* reset pool */
 			auto reset(void) const -> void;
 
-		//bool allocateDescriptor(
-		//		const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet &descriptor) const;
-		//void freeDescriptors(std::vector<VkDescriptorSet> &descriptors) const;
-
 
 		private:
 
@@ -176,6 +172,7 @@ bool LveDescriptorPool::allocateDescriptor(
 	}
 	return true;
 }
+
 
 void LveDescriptorPool::freeDescriptors(std::vector<VkDescriptorSet> &descriptors) const {
 	vkFreeDescriptorSets(

@@ -1,13 +1,13 @@
-#ifndef ___RENDEX_MEMORY_ALLOCATION_GUARD___
-#define ___RENDEX_MEMORY_ALLOCATION_GUARD___
+#ifndef ___void_engine_memory_allocation_guard___
+#define ___void_engine_memory_allocation_guard___
 
 #include "ve/memory/malloc.hpp"
 #include "ve/defines.hpp"
 
 
-// -- R X  N A M E S P A C E --------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- A L L O C A T I O N  G U A R D --------------------------------------
@@ -20,7 +20,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::allocation_guard;
+			using ___self = ve::allocation_guard;
 
 
 			// -- private members ---------------------------------------------
@@ -58,7 +58,7 @@ namespace rx {
 					return;
 
 				// release memory
-				rx::free(_data);
+				ve::free(_data);
 			}
 
 
@@ -71,6 +71,6 @@ namespace rx {
 
 	}; // class allocation_guard
 
-} // namespace rx
+} // namespace ve
 
-#endif // ___RENDEX_MEMORY_ALLOCATION_GUARD___
+#endif // ___void_engine_memory_allocation_guard___

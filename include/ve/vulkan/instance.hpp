@@ -11,6 +11,7 @@
 #ifndef ___RENDERX_VULKAN_INSTANCE___
 #define ___RENDERX_VULKAN_INSTANCE___
 
+#include "ve/vk/unique.hpp"
 #include "ve/vulkan/physical_device.hpp"
 #include "ve/vk/typedefs.hpp"
 #include "ve/vk/array.hpp"
@@ -37,7 +38,7 @@ namespace vulkan {
 			// -- private members ---------------------------------------------
 
 			/* instance */
-			vk::instance _instance;
+			vk::unique<vk::instance> _instance;
 
 			/* messenger */
 			#if defined(ENGINE_VL_DEBUG)
@@ -51,10 +52,10 @@ namespace vulkan {
 			static auto _shared(void) -> ___self&;
 
 			/* extension properties */
-			static auto extension_properties(void) -> vk::vector<vk::extension_properties>;
+			static auto extension_properties(void) -> std::vector<vk::extension_properties>;
 
 			/* layer properties */
-			static auto layer_properties(void) -> vk::vector<vk::layer_properties>;
+			static auto layer_properties(void) -> std::vector<vk::layer_properties>;
 
 			/* messenger info */
 			#if defined(ENGINE_VL_DEBUG)
@@ -132,7 +133,7 @@ namespace vulkan {
 			static auto shared(void) -> const vk::instance&;
 
 			/* physical devices */
-			static auto physical_devices(void) -> const vk::vector<vulkan::physical_device>&;
+			static auto physical_devices(void) -> const std::vector<vulkan::physical_device>&;
 
 	}; // class instance
 

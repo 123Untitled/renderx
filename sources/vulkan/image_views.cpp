@@ -97,7 +97,7 @@ vulkan::image_views::image_views(void) noexcept
 /* images constructor */
 vulkan::image_views::image_views(const vulkan::images& images,
 								 const vk::format format)
-: _views{rx::malloc<vk::image_view>(images.size())}, _size{0U} {
+: _views{ve::malloc<vk::image_view>(images.size())}, _size{0U} {
 
 	// create views
 	___self::_create(images, format);
@@ -123,7 +123,7 @@ vulkan::image_views::~image_views(void) noexcept {
 	___self::_destroy();
 
 	// release memory
-	rx::free(_views);
+	ve::free(_views);
 }
 
 
@@ -141,7 +141,7 @@ auto vulkan::image_views::operator=(vulkan::image_views&& ___ot) noexcept -> vul
 
 	// release memory
 	if (_views != nullptr)
-		rx::free(_views);
+		ve::free(_views);
 
 	// move assign
 	_views = ___ot._views;
@@ -188,7 +188,7 @@ auto vulkan::image_views::recreate(const vulkan::images& images,
 	if (_size != images.size()) {
 
 		// reallocate memory
-		_views = rx::realloc<vk::image_view>(_views, images.size());
+		_views = ve::realloc<vk::image_view>(_views, images.size());
 	}
 
 	// create views
@@ -214,7 +214,7 @@ vulkan::image_views::_guard::~_guard(void) noexcept {
 	_self._destroy();
 
 	// release memory
-	rx::free(_self._views);
+	ve::free(_self._views);
 }
 
 // -- public modifiers --------------------------------------------------------

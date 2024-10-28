@@ -40,9 +40,9 @@ namespace vk {
 	}
 
 	/* enumerate instance extensions properties */
-	inline auto enumerate_instance_extension_properties(const char* ___layer = nullptr) -> vk::vector<vk::extension_properties> {
+	inline auto enumerate_instance_extension_properties(const char* ___layer = nullptr) -> std::vector<vk::extension_properties> {
 		auto ___count = vk::get_instance_extension_properties_count(___layer);
-		vk::vector<vk::extension_properties> ___properties;
+		std::vector<vk::extension_properties> ___properties;
 		___properties.resize(___count);
 		vk::try_execute<"failed to enumerate instance extension properties">(
 				::vk_enumerate_instance_extension_properties,
@@ -63,9 +63,9 @@ namespace vk {
 
 	/* enumerate instance layer properties */
 	#if defined(ENGINE_VL_DEBUG)
-	inline auto enumerate_instance_layer_properties(void) -> vk::vector<vk::layer_properties> {
+	inline auto enumerate_instance_layer_properties(void) -> std::vector<vk::layer_properties> {
 		auto ___count = vk::get_instance_layer_properties_count();
-		vk::vector<vk::layer_properties> ___properties;
+		std::vector<vk::layer_properties> ___properties;
 		___properties.resize(___count);
 		vk::try_execute<"failed to enumerate instance layer properties">(
 				::vk_enumerate_instance_layer_properties,
@@ -97,13 +97,13 @@ namespace vk {
 
 	/* enumerate physical devices */
 	template <typename T>
-	auto enumerate_physical_devices(const vk::instance& ___instance) -> vk::vector<T> {
+	auto enumerate_physical_devices(const vk::instance& ___instance) -> std::vector<T> {
 
 		static_assert(sizeof(T) == sizeof(vk::physical_device),
 					  "T must be same size as vk::physical_device");
 
 		auto ___count = vk::get_physical_devices_count(___instance);
-		vk::vector<T> ___devices;
+		std::vector<T> ___devices;
 		___devices.resize(___count);
 		vk::try_execute<"failed to enumerate physical devices">(
 				::vk_enumerate_physical_devices,
@@ -124,9 +124,9 @@ namespace vk {
 
 	/* enumerate device extension properties */
 	inline auto enumerate_device_extension_properties(const vk::physical_device& ___device,
-													  const char* ___layer = nullptr) -> vk::vector<vk::extension_properties> {
+													  const char* ___layer = nullptr) -> std::vector<vk::extension_properties> {
 		auto ___count = vk::get_device_extension_properties_count(___device, ___layer);
-		vk::vector<vk::extension_properties> ___properties;
+		std::vector<vk::extension_properties> ___properties;
 		___properties.resize(___count);
 		vk::try_execute<"failed to enumerate device extension properties">(
 				::vk_enumerate_device_extension_properties,
@@ -176,9 +176,9 @@ namespace vk {
 	}
 
 	/* get physical device queue family properties */
-	inline auto get_physical_device_queue_family_properties(const vk::physical_device& ___device) -> vk::vector<vk::queue_family_properties> {
+	inline auto get_physical_device_queue_family_properties(const vk::physical_device& ___device) -> std::vector<vk::queue_family_properties> {
 		auto ___count = vk::get_physical_device_queue_family_properties_count(___device);
-		vk::vector<vk::queue_family_properties> ___properties;
+		std::vector<vk::queue_family_properties> ___properties;
 		___properties.resize(___count);
 		::vkGetPhysicalDeviceQueueFamilyProperties(___device, &___count, ___properties.data());
 		return ___properties;
@@ -198,10 +198,10 @@ namespace vk {
 	}
 
 	/* get swapchain images */
-	inline auto get_swapchain_images(const vk::device& ___device, const vk::swapchain& ___swapchain) -> vk::vector<vk::image> {
+	inline auto get_swapchain_images(const vk::device& ___device, const vk::swapchain& ___swapchain) -> std::vector<vk::image> {
 
 		auto ___count = vk::get_swapchain_images_count(___device, ___swapchain);
-		vk::vector<vk::image> ___images;
+		std::vector<vk::image> ___images;
 		___images.resize(___count);
 		vk::try_execute<"failed to get swapchain images">(
 				::vk_get_swapchain_images_khr,

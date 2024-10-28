@@ -7,6 +7,9 @@
 #include "ve/object.hpp"
 #include "ve/geometry/mesh_library.hpp"
 #include "ve/mouse_delta.hpp"
+#include "ve/vulkan/descriptors/descriptor_sets.hpp"
+#include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
+#include "ve/vulkan/descriptors/descriptor_pool.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -36,7 +39,7 @@ namespace ve {
 			vulkan::pipeline _pipeline;
 
 			/* objects */
-			vk::vector<rx::object> _objects;
+			std::vector<rx::object> _objects;
 
 
 		public:
@@ -59,6 +62,33 @@ namespace ve {
 				_camera.update_projection();
 
 				_camera.transform().position().z = -6.0f;
+
+				// create descriptor set layout
+				//vulkan::descriptor_set_layout::builder builder{};
+				//
+				//// add binding
+				//builder.add_binding(0U, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1U);
+				//
+				//// build layout
+				//auto layout = builder.build();
+				//
+				//// create descriptor pool
+				//vulkan::descriptor_pool::builder pool_builder{};
+				//
+				//// add pool size
+				//pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
+				//
+				//// build pool
+				//auto pool = pool_builder.build();
+				//
+				//// create descriptor sets
+				//vulkan::descriptor_sets sets{};
+				//
+				//// reserve
+				//sets.reserve(1U);
+				//
+				//// push
+				//sets.push(layout); // it misses the uniform buffer
 
 			}
 

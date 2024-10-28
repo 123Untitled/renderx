@@ -2,6 +2,7 @@
 #define ___void_engine_uniform_buffer___
 
 #include "ve/vulkan/buffer.hpp"
+#include "ve/vulkan/allocator.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -27,6 +28,62 @@ namespace ve {
 			/* buffer */
 			vulkan::buffer _buffer;
 
+			/* allocation */
+			vulkan::allocation _alloc;
+
+
+		public:
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			uniform_buffer(void) noexcept = default;
+
+			template <typename T>
+			uniform_buffer(const T& data)
+			: _buffer{sizeof(T), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT},
+			  _alloc{vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())} {
+
+				// copy data
+				_alloc.memcpy(&data);
+			}
+
+			/* deleted copy constructor */
+			uniform_buffer(const ___self&) = delete;
+
+			/* move constructor */
+			uniform_buffer(___self&&) noexcept = default;
+
+			/* destructor */
+			~uniform_buffer(void) noexcept = default;
+
+
+			// -- public assignment operators ---------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* move assignment operator */
+			auto operator=(___self&&) noexcept -> ___self& = default;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* get */
+			auto get(void) const noexcept -> const vk::buffer& {
+				return _buffer.underlying();
+			}
+
+
+			// -- public methods ----------------------------------------------
+
+			/* update */
+			template <typename T>
+			auto update(const T& data) -> void {
+
+				// copy data
+				_alloc.memcpy(&data);
+			}
 
 	}; // class uniform_buffer
 

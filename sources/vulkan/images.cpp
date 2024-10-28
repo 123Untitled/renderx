@@ -26,10 +26,10 @@ vulkan::images::images(const vulkan::swapchain& ___swp)
 	_size = ___self::_count(___swp);
 
 	// allocate memory for images
-	_images = rx::malloc<vk::image>(_size);
+	_images = ve::malloc<vk::image>(_size);
 
 	// create guard
-	rx::allocation_guard guard{_images};
+	ve::allocation_guard guard{_images};
 
 	// get swapchain images
 	vk::try_execute<"failed to get swapchain images">(
@@ -58,7 +58,7 @@ vulkan::images::~images(void) noexcept {
 		return;
 
 	// release memory
-	rx::free(_images);
+	ve::free(_images);
 }
 
 
@@ -73,7 +73,7 @@ auto vulkan::images::operator=(vulkan::images&& ___ot) noexcept -> vulkan::image
 
 	// release memory
 	if (_images != nullptr)
-		rx::free(_images);
+		ve::free(_images);
 
 	// move assign
 	_images = ___ot._images;
@@ -116,17 +116,17 @@ auto vulkan::images::recreate(const vulkan::swapchain& ___swp) -> void {
 	if (_images == nullptr) {
 
 		// allocate memory for images
-		_images = rx::malloc<vk::image>(nsize);
+		_images = ve::malloc<vk::image>(nsize);
 	}
 
 	// check for size mismatch
 	else if (_size != nsize) {
 
 		// release memory
-		rx::free(_images);
+		ve::free(_images);
 
 		// reallocate memory for images
-		_images = rx::realloc<vk::image>(_images, nsize);
+		_images = ve::realloc<vk::image>(_images, nsize);
 	}
 
 	// update size

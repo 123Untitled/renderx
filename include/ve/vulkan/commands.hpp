@@ -149,7 +149,7 @@ namespace vulkan {
 					return;
 
 				// allocate memory
-				_data = rx::malloc<vk::command_buffer>(_size);
+				_data = ve::malloc<vk::command_buffer>(_size);
 
 				// here need exception guard !
 
@@ -335,7 +335,7 @@ namespace vulkan {
 					return;
 
 				// deallocate memory
-				rx::free(_data);
+				ve::free(_data);
 			}
 
 			/* clear */
@@ -363,7 +363,7 @@ namespace vulkan {
 			auto _reserve(const size_type ___cap) -> void {
 
 				// reallocate memory
-				const auto ___ndata = rx::realloc<vk::command_buffer>(_data, ___cap);
+				const auto ___ndata = ve::realloc<vk::command_buffer>(_data, ___cap);
 
 				// update members
 				_data     = ___ndata;

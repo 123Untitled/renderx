@@ -20,6 +20,14 @@ namespace vulkan {
 	class descriptor_sets final {
 
 
+		public:
+
+			// -- public types ------------------------------------------------
+
+			/* size type */
+			using size_type = vk::u32;
+
+
 		private:
 
 			// -- private types -----------------------------------------------
@@ -52,7 +60,55 @@ namespace vulkan {
 			: _pool{}, _sets{nullptr}, _capacity{0U}, _size{0U} {
 			}
 
+			/* pool constructor */
+			descriptor_sets(vulkan::descriptor_pool&& pool)
+			: _pool{std::move(pool)}, _sets{nullptr}, _capacity{0U}, _size{0U} {
+			}
 
+			/* pool builder constructor */
+			descriptor_sets(const vulkan::descriptor_pool::builder& builder)
+			: _pool{builder.build()}, _sets{nullptr}, _capacity{0U}, _size{0U} {
+			}
+
+			/* deleted copy constructor */
+			descriptor_sets(const ___self&) = delete;
+
+			/* move constructor */
+			descriptor_sets(___self&& other) noexcept
+			: _pool{std::move(other._pool)},
+			  _sets{other._sets},
+			  _capacity{other._capacity},
+			  _size{other._size} {
+
+				// invalidate other
+				other._sets = nullptr;
+				other._capacity = 0U;
+				other._size = 0U;
+			}
+
+			/* destructor */
+			~descriptor_sets(void) noexcept {
+
+				// check for null descriptor sets
+				if (_sets == nullptr)
+					return;
+
+				// check for empty descriptor sets
+				if (_size != 0U) {
+
+					// free descriptor sets
+					::vk_free_descriptor_sets(
+							vulkan::device::logical(),
+							_pool.get(),
+							_size, _sets);
+				}
+
+				// deallocate descriptor sets
+				ve::free(_sets);
+			}
+
+
+			// -- public modifiers --------------------------------------------
 
 			/* reserve */
 			auto reserve(const vk::u32& capacity) -> void {
@@ -61,11 +117,38 @@ namespace vulkan {
 				if (_capacity > capacity)
 					return;
 
-				// reallocate descriptor sets
-				_sets = rx::realloc<vk::descriptor_set>(_sets, capacity);
+				// call reserve
+				___self::_reserve(capacity);
+			}
 
-				// update capacity
-				_capacity = capacity;
+			/* resize */
+			auto resize(const size_type size) -> void {
+
+				// less size
+				if (size < _size) {
+
+					// free descriptor sets
+					::vk_free_descriptor_sets(
+							vulkan::device::logical(),
+							_pool.get(),
+							_size - size, (_sets + size));
+
+					// update size
+					_size = size;
+					return;
+				}
+
+				// more size (reserve)
+				if (size > _capacity) {
+
+					___self::_reserve(size);
+
+					// here implement the allocation of the new descriptor sets...
+
+					// set size
+					//_size = size;
+				}
+
 			}
 
 			/* push */
@@ -122,15 +205,17 @@ namespace vulkan {
 			}
 
 			/* write */
-			auto write(const vk::u32& index) -> void {
+			auto write(const vk::u32& index, const vk::descriptor_buffer_info& binfo) -> void {
 
+				/*
 				vk::descriptor_buffer_info buffer_info{
 					.buffer = nullptr, // buffer
 					.offset = 0U,
 					.range = sizeof(0) // must be size of uniform buffer object or struct ) // can be VK_WHOLE_SIZE
 				};
+				*/
 
-				vk::write_descriptor_set wdset{
+				const vk::write_descriptor_set wdset{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					.pNext = nullptr,
 					.dstSet = _sets[index],
@@ -139,7 +224,7 @@ namespace vulkan {
 					.descriptorCount = 1U,
 					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 					.pImageInfo = nullptr,
-					.pBufferInfo = &buffer_info,
+					.pBufferInfo = &binfo,
 					.pTexelBufferView = nullptr
 				};
 
@@ -156,6 +241,59 @@ namespace vulkan {
 						// descriptor copies
 						nullptr);
 			}
+
+
+
+		private:
+
+			// -- private methods ---------------------------------------------
+
+			/* init */
+			auto _init(void) noexcept -> void {
+					_sets = nullptr;
+					_size = 0;
+				_capacity = 0;
+			}
+
+			/* free */
+			auto _free(void) noexcept -> void {
+
+				// check for empty vector
+				if (_sets == nullptr)
+					return;
+
+				// deallocate memory
+				ve::free(_sets);
+			}
+
+			/* reserve */
+			auto _reserve(const size_type capacity) -> void {
+
+				// reallocate memory
+				_sets = ve::realloc(_sets, capacity);
+
+				// update capacity
+				_capacity = capacity;
+			}
+
+			/* copy */
+			auto _copy_members(const ___self& other) noexcept -> void {
+					_sets = other._sets;
+					_size = other._size;
+				_capacity = other._capacity;
+			}
+
+			/* available */
+			auto _available(void) const noexcept -> size_type {
+				return _capacity - _size;
+			}
+
+			/* expand */
+			auto _expand(void) noexcept -> size_type {
+				return _capacity > 0U ? _capacity * 2U : 1U;
+			}
+
+
 
 			/* device and size constructor */
 			

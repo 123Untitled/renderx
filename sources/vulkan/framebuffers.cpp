@@ -94,7 +94,7 @@ vulkan::framebuffers::framebuffers(void) noexcept
 vulkan::framebuffers::framebuffers(const vulkan::image_views& views,
 								   const vulkan::render_pass& rpass,
 								   const vk::extent2D& extent)
-: _frames{rx::malloc<vk::framebuffer>(views.size())}, _size{0U} {
+: _frames{ve::malloc<vk::framebuffer>(views.size())}, _size{0U} {
 
 	// create framebuffers
 	___self::_create(views, rpass, extent);
@@ -173,7 +173,7 @@ auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
 	if (_size != views.size()) {
 
 		// reallocate memory
-		_frames = rx::realloc<vk::framebuffer>(_frames, views.size());
+		_frames = ve::realloc<vk::framebuffer>(_frames, views.size());
 	}
 
 	// create views
@@ -199,7 +199,7 @@ vulkan::framebuffers::_guard::~_guard(void) noexcept {
 	_self._destroy();
 
 	// release memory
-	rx::free(_self._frames);
+	ve::free(_self._frames);
 }
 
 // -- public modifiers --------------------------------------------------------

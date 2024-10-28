@@ -18,7 +18,7 @@ namespace rx {
 
 	namespace impl {
 		using vertex = ve::vertex<vx::float3, vx::float3>;
-		using package = std::pair<vk::vector<vertex>, vk::vector<vk::u16>>;
+		using package = std::pair<std::vector<vertex>, std::vector<vk::u16>>;
 	}
 
 	inline auto cube(void) -> ve::mesh {

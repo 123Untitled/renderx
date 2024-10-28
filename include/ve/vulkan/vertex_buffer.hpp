@@ -56,7 +56,7 @@ namespace vulkan {
 
 			/* vector constructor */
 			template <typename... ___params>
-			vertex_buffer(const vk::vector<ve::vert3x>& vertices)
+			vertex_buffer(const std::vector<ve::vert3x>& vertices)
 			:
 			  // create buffer
 			  _buffer(sizeof(ve::vert3x) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT),

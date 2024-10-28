@@ -24,12 +24,10 @@ ve::renderer::renderer(void)
 	_queue{},
 	_smanager{},
 	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
-	_cmds{_pool.underlying(), _smanager.size()},
+	_cmds{_pool.get(), _smanager.size()},
 	_memory{},
 	_sync{},
-	_scene{_smanager}
-{
-
+	_scene{_smanager} {
 }
 
 

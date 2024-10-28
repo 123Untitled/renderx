@@ -49,8 +49,8 @@ namespace vk {
 	using device_size = ::VkDeviceSize;
 
 	/* vector type */
-	template <typename T>
-	using vector = std::vector<T>;
+	//template <typename T>
+	//using vector = std::vector<T>;
 
 
 	/* result */

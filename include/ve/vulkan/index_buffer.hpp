@@ -58,7 +58,7 @@ namespace vulkan {
 			index_buffer(void) noexcept = default;
 
 			/* u16 vector constructor */
-			index_buffer(const vk::vector<rx::u16>& indices)
+			index_buffer(const std::vector<rx::u16>& indices)
 			: _buffer(sizeof(rx::u16) * indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT),
 			  _type{VK_INDEX_TYPE_UINT16},
 			  _count((vk::u32)indices.size()),
@@ -69,7 +69,7 @@ namespace vulkan {
 			}
 
 			/* u32 vector constructor */
-			index_buffer(const vk::vector<rx::u32>& indices)
+			index_buffer(const std::vector<rx::u32>& indices)
 			: _buffer(sizeof(rx::u32) * indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT),
 			  _type{VK_INDEX_TYPE_UINT32},
 			  _count((vk::u32)indices.size()),

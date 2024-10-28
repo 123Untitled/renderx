@@ -102,16 +102,16 @@ namespace vulkan {
 			auto is_support_surface_and_queue_family(const vk::surface&, const vk::u32) const -> bool;
 
 			/* extension properties */
-			auto extension_properties(void) const -> vk::vector<vk::extension_properties>;
+			auto extension_properties(void) const -> std::vector<vk::extension_properties>;
 
 			/* surface capabilities */
 			auto surface_capabilities(void) const -> vk::surface_capabilities;
 
 			/* surface formats */
-			auto surface_formats() const -> vk::vector<vk::surface_format>;
+			auto surface_formats() const -> std::vector<vk::surface_format>;
 
 			/* surface present modes */
-			auto surface_present_modes(void) const -> vk::vector<vk::present_mode>;
+			auto surface_present_modes(void) const -> std::vector<vk::present_mode>;
 
 			/* properties */
 			auto properties(void) const -> vk::physical_device_properties;

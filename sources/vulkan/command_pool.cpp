@@ -4,68 +4,28 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* flags constructor */
-vulkan::command_pool::command_pool(const vk::command_pool_create_flags& ___flags)
-: _pool{} {
+vulkan::command_pool::command_pool(const vk::command_pool_create_flags& flags)
+: _pool{vk::make_unique<vk::command_pool>(
+		vk::command_pool_info{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+			.pNext = nullptr,
+			.flags = flags,
+			.queueFamilyIndex = vulkan::device::family()
+		})} {
 
-	// create info
-	vk::command_pool_info info {
-		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		.pNext = nullptr,
-		.flags = ___flags,
-		.queueFamilyIndex = vulkan::device::family()
-	};
-
-	// create command pool
-	vk::try_execute<"failed to create command pool">(
-			::vk_create_command_pool,
-			vulkan::device::logical(), &info, nullptr, &_pool);
-
-	// VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-	// VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	// VK_COMMAND_POOL_CREATE_PROTECTED_BIT;
-}
-
-/* move constructor */
-vulkan::command_pool::command_pool(___self&& ___ot) noexcept
-: _pool{___ot._pool} {
-	___ot._pool = nullptr;
-}
-
-/* destructor */
-vulkan::command_pool::~command_pool(void) noexcept {
-
-	// free command pool
-	::vk_destroy_command_pool(vulkan::device::logical(), _pool, nullptr);
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::command_pool::operator=(___self&& ___ot) noexcept -> ___self& {
-
-	// check for self-assignment
-	if (this == &___ot)
-		return *this;
-
-	// free command pool
-	if (_pool)
-		::vk_destroy_command_pool(vulkan::device::logical(), _pool, nullptr);
-
-	// move assign
-	_pool = ___ot._pool;
-	___ot._pool = nullptr;
-
-	// done
-	return *this;
+	/*
+	VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+	VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	VK_COMMAND_POOL_CREATE_PROTECTED_BIT;
+	*/
 }
 
 
 // -- public accessors --------------------------------------------------------
 
-/* underlying */
-auto vulkan::command_pool::underlying(void) const noexcept -> const vk::command_pool& {
-	return _pool;
+/* get */
+auto vulkan::command_pool::get(void) const noexcept -> const vk::command_pool& {
+	return static_cast<const vk::command_pool&>(_pool);
 }
 
 

@@ -106,11 +106,7 @@ vulkan::instance::instance(void)
 	};
 
 	// create instance
-	vk::try_execute<"failed to create instance">(
-			::vk_create_instance, &info, nullptr, &_instance);
-
-
-	// warning: need exception guard here !!
+	_instance = vk::make_unique<vk::instance>(info);
 
 	// -- messenger -----------------------------------------------------------
 
@@ -149,12 +145,6 @@ vulkan::instance::~instance(void) noexcept {
 	// release messenger
 	func(_instance, _messenger, nullptr);
 	#endif
-
-
-	// -- instance ------------------------------------------------------------
-
-	// release instance
-	::vk_destroy_instance(_instance, nullptr);
 }
 
 
@@ -162,7 +152,7 @@ vulkan::instance::~instance(void) noexcept {
 // -- private static methods --------------------------------------------------
 
 /* extension properties */
-auto vulkan::instance::extension_properties(void) -> vk::vector<vk::extension_properties> {
+auto vulkan::instance::extension_properties(void) -> std::vector<vk::extension_properties> {
 	return vk::enumerate_instance_extension_properties();
 }
 
@@ -175,7 +165,7 @@ auto vulkan::instance::shared(void) -> const vk::instance& {
 }
 
 /* physical devices */
-auto vulkan::instance::physical_devices(void) -> const vk::vector<vulkan::physical_device>& {
+auto vulkan::instance::physical_devices(void) -> const std::vector<vulkan::physical_device>& {
 	static auto __pdevices = vk::enumerate_physical_devices<vulkan::physical_device>(___self::shared());
 	return __pdevices;
 }

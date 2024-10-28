@@ -10,6 +10,34 @@
 namespace vk {
 
 
+	// -- instance ------------------------------------------------------------
+
+	/* destroy instance */
+	inline auto destroy(const vk::instance& instance) noexcept -> void {
+
+		::vk_destroy_instance(instance, nullptr);
+	}
+
+
+	// -- device --------------------------------------------------------------
+
+	/* destroy device */
+	inline auto destroy(const vk::device& device) noexcept -> void {
+
+		::vk_destroy_device(device, nullptr);
+	}
+
+
+	// -- command pool --------------------------------------------------------
+
+	/* destroy command pool */
+	inline auto destroy(const vk::command_pool& pool) noexcept -> void {
+
+		::vk_destroy_command_pool(
+				vulkan::device::logical(), pool, nullptr);
+	}
+
+
 	// -- descriptor set layout -----------------------------------------------
 
 	/* destroy descriptor set layout */

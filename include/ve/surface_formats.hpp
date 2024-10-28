@@ -49,10 +49,10 @@ namespace vulkan {
 					throw std::runtime_error{"no surface formats found"};
 
 				// allocate memory for formats
-				_formats = rx::malloc<vk::surface_format>(_size);
+				_formats = ve::malloc<vk::surface_format>(_size);
 
 				// create guard
-				rx::allocation_guard guard{_formats};
+				ve::allocation_guard guard{_formats};
 
 				// get physical device surface formats
 				vk::try_execute<"failed to get physical device surface formats">(
@@ -82,7 +82,7 @@ namespace vulkan {
 					return;
 
 				// release memory
-				rx::free(_formats);
+				ve::free(_formats);
 			}
 
 

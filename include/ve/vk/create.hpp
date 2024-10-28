@@ -11,6 +11,51 @@
 namespace vk {
 
 
+	// -- instance ------------------------------------------------------------
+
+	/* create instance */
+	inline auto create(const vk::instance_info& info) -> vk::instance {
+
+		vk::instance instance;
+
+		try_execute<"failed to create instance">(
+			::vk_create_instance,
+			&info, nullptr, &instance);
+
+		return instance;
+	}
+
+
+	// -- device --------------------------------------------------------------
+
+	/* create device */
+	inline auto create(const vk::device_info& info) -> vk::device {
+
+		vk::device device;
+
+		try_execute<"failed to create device">(
+			::vk_create_device,
+			vulkan::device::physical(), &info, nullptr, &device);
+
+		return device;
+	}
+
+
+	// -- command pool --------------------------------------------------------
+
+	/* create command pool */
+	inline auto create(const vk::command_pool_info& info) -> vk::command_pool {
+
+		vk::command_pool pool;
+
+		try_execute<"failed to create command pool">(
+			::vk_create_command_pool,
+			vulkan::device::logical(), &info, nullptr, &pool);
+
+		return pool;
+	}
+
+
 	// -- descriptor sets -----------------------------------------------------
 
 	/* create descriptor sets */

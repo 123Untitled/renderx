@@ -88,7 +88,7 @@ auto vulkan::physical_device::is_support_surface_and_queue_family(const vk::surf
 }
 
 /* extension properties */
-auto vulkan::physical_device::extension_properties(void) const -> vk::vector<vk::extension_properties> {
+auto vulkan::physical_device::extension_properties(void) const -> std::vector<vk::extension_properties> {
 	return vk::enumerate_device_extension_properties(_pdevice);
 }
 
@@ -127,7 +127,7 @@ auto vulkan::physical_device::surface_formats() const -> std::vector<vk::surface
 }
 
 /* surface present modes */
-auto vulkan::physical_device::surface_present_modes(void) const -> vk::vector<vk::present_mode> {
+auto vulkan::physical_device::surface_present_modes(void) const -> std::vector<vk::present_mode> {
 
 	vk::u32 count = 0U;
 
@@ -135,7 +135,7 @@ auto vulkan::physical_device::surface_present_modes(void) const -> vk::vector<vk
 			::vk_get_physical_device_surface_present_modes_khr,
 			_pdevice, vulkan::surface::shared(), &count, nullptr);
 
-	vk::vector<vk::present_mode> pmodes;
+	std::vector<vk::present_mode> pmodes;
 	pmodes.resize(count);
 
 	vk::try_execute<"failed to get physical device surface present modes">(

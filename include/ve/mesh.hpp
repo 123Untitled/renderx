@@ -51,7 +51,7 @@ namespace ve {
 			/* vertices / indices constructor */
 			template <typename ___type, typename... ___params>
 			mesh(const std::vector<ve::vert3x>& vertices, const std::vector<___type>& indices)
-			//mesh(const vk::vector<ve::vertex<___params...>>& vertices, const vk::vector<___type>& indices)
+			//mesh(const std::vector<ve::vertex<___params...>>& vertices, const std::vector<___type>& indices)
 			: _vertices{vertices}, _indices{indices} {
 			}
 

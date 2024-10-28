@@ -48,7 +48,7 @@ namespace vulkan {
 			}
 
 			/* properties */
-			static auto properties(void) -> vk::vector<vk::layer_properties> {
+			static auto properties(void) -> std::vector<vk::layer_properties> {
 				return vk::enumerate_instance_layer_properties();
 			}
 
