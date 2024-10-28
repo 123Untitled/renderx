@@ -74,6 +74,15 @@ namespace ve {
 				return _buffer.underlying();
 			}
 
+			/* descriptor buffer info */
+			auto descriptor_buffer_info(void) const noexcept -> vk::descriptor_buffer_info {
+				return vk::descriptor_buffer_info{
+					.buffer = _buffer.underlying(),
+					.offset = 0U,
+					.range = VK_WHOLE_SIZE
+				};
+			}
+
 
 			// -- public methods ----------------------------------------------
 

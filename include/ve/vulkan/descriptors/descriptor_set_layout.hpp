@@ -118,9 +118,9 @@ namespace vulkan {
 
 			/* add binding */
 			auto add_binding(const vk::u32&,
-								const vk::descriptor_type&,
-								const vk::shader_stage_flags&,
-								const vk::u32& = 1) -> void;
+							 const vk::descriptor_type&,
+							 const vk::shader_stage_flags&,
+							 const vk::u32& = 1) -> void;
 
 
 			// -- public methods ----------------------------------------------
