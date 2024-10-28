@@ -46,9 +46,15 @@ namespace ve {
 
 				vulkan::descriptor_set_layout::builder builder;
 
+				// camera uniform
 				builder.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-									   VK_SHADER_STAGE_VERTEX_BIT
-									| VK_SHADER_STAGE_FRAGMENT_BIT);
+									  VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+
+				// model uniform
+				builder.add_binding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+									  VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
 
 				ve::get<"main">(_layouts) = builder.build();
 			}

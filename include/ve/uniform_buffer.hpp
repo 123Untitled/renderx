@@ -94,6 +94,7 @@ namespace ve {
 				_alloc.memcpy(&data);
 			}
 
+
 	}; // class uniform_buffer
 
 } // namespace ve

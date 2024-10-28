@@ -2,12 +2,18 @@
 
 
 // Push constants ou uniformes contenant les matrices de transformation
-layout(push_constant) uniform push_constant_object {
-	mat4 model;
-	mat4 view;
+layout(binding = 0) uniform cam_uniform {
 	mat4 projection;
-	vec3 camera_position;
-} pco;
+	mat4 view;
+	vec3 position;
+	vec3 rotation;
+	vec2 direction;
+} cam;
+
+layout(binding = 1) uniform model_uniform {
+	mat4 model;
+} model;
+
 
 
 // -- I N P U T S -------------------------------------------------------------
@@ -37,7 +43,7 @@ void main(void) {
 
 	vec3 normalized_position = normalize(interpoled_position.xyz);
 
-	gl_Position = pco.projection * pco.view * pco.model * vec4(normalized_position, 1.0);
+	gl_Position = cam.projection * cam.view * model.model * vec4(normalized_position, 1.0);
 
 	out_normal = gl_TessCoord.x * in_normal[0]
 			   + gl_TessCoord.y * in_normal[1]
@@ -46,5 +52,4 @@ void main(void) {
 	out_uv = gl_TessCoord.x * in_uv[0]
 		   + gl_TessCoord.y * in_uv[1]
 		   + gl_TessCoord.z * in_uv[2];
-
 }

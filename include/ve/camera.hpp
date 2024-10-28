@@ -9,6 +9,7 @@
 #include "ve/glfw/window.hpp"
 
 #include "ve/structures/matrix.hpp"
+#include "ve/uniform_buffer.hpp"
 
 
 // -- R X ---------------------------------------------------------------------
@@ -47,17 +48,29 @@ namespace rx {
 			/* velocity */
 			float _velocity;
 
-			/* transform */
-			rx::transform<float, 3U> _transform;
 
-			/* direction */
-			glm::vec2 _direction;
+			struct uniform {
 
-			/* view */
-			glm::mat4 _view;
+				/* projection */
+				glm::mat4 _projection;
 
-			/* projection */
-			glm::mat4 _projection;
+				/* view */
+				glm::mat4 _view;
+
+				/* position */
+				glm::vec3 _position;
+
+				/* rotation */
+				glm::vec3 _rotation;
+
+				/* direction */
+				glm::vec2 _direction;
+
+			} _uniform;
+
+
+			/* uniform buffer */
+			ve::uniform_buffer _uniform_buffer;
 
 
 			// -- private methods ---------------------------------------------
@@ -95,11 +108,18 @@ namespace rx {
 			/* default constructor */
 			camera(void) noexcept
 			: _fov{90.0f}, _ratio{800.0f/600.0f}, _near{0.001f}, _far{1000.0f}, _velocity{5.0f},
-			  _projection{___self::_update_projection()} {
+			  _uniform{
+				  ._projection{___self::_update_projection()},
+				  ._view{1.0f},
+				  ._position{0.0f},
+				  ._rotation{0.0f},
+				  ._direction{0.0f}
+			  },
+			  _uniform_buffer{_uniform} {
 			}
 
-			/* copy constructor */
-			camera(const ___self&) noexcept = default;
+			/* deleted copy constructor */
+			camera(const ___self&) = delete;
 
 			/* move constructor */
 			camera(___self&&) noexcept = default;
@@ -110,8 +130,8 @@ namespace rx {
 
 			// -- public assignment operators ---------------------------------
 
-			/* copy assignment operator */
-			auto operator=(const ___self&) noexcept -> ___self& = default;
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
 			auto operator=(___self&&) noexcept -> ___self& = default;
@@ -123,7 +143,7 @@ namespace rx {
 			auto update_projection(void) noexcept -> void {
 
 				// recalculate projection
-				_projection = ___self::_update_projection();
+				_uniform._projection = ___self::_update_projection();
 			}
 
 			/* fov */
@@ -145,7 +165,6 @@ namespace rx {
 			auto far(const float& value) noexcept -> void {
 				_far = value;
 			}
-
 
 
 			// -- public accessors --------------------------------------------
@@ -172,17 +191,31 @@ namespace rx {
 
 			/* projection */
 			auto projection(void) const noexcept -> const glm::mat4& {
-				return _projection;
+				return _uniform._projection;
 			}
 
 			/* view */
 			auto view(void) const noexcept -> const glm::mat4& {
-				return _view;
+				return _uniform._view;
 			}
 
-			/* transform */
-			auto transform(void) noexcept -> rx::transform<float, 3U>& {
-				return _transform;
+			/* position */
+			auto position(void) noexcept -> glm::vec3& {
+				return _uniform._position;
+			}
+
+			/* position */
+			auto position(void) const noexcept -> const glm::vec3& {
+				return _uniform._position;
+			}
+
+			/* descriptor buffer info */
+			auto descriptor_buffer_info(void) const noexcept -> vk::descriptor_buffer_info {
+				return vk::descriptor_buffer_info{
+					.buffer = _uniform_buffer.get(),
+					.offset = 0U,
+					.range = sizeof(uniform)
+				};
 			}
 
 
@@ -195,6 +228,7 @@ namespace rx {
 				update_position();
 				update_view();
 				//update_projection();
+				_uniform_buffer.update(_uniform);
 			}
 
 
@@ -208,8 +242,8 @@ namespace rx {
 				float x, y;
 				//::sdl_get_relative_mouse_state(&x, &y);
 
-				auto& _x = _transform.rotation().x;
-				auto& _y = _transform.rotation().y;
+				auto& _x = _uniform._rotation.x;
+				auto& _y = _uniform._rotation.y;
 
 				_x += (y * sens) * rx::delta::time<float>();
 				_y -= (x * sens) * rx::delta::time<float>();
@@ -228,8 +262,8 @@ namespace rx {
 
 			/* update direction */
 			auto update_direction(void) noexcept -> void {
-				_direction.x = std::sin(_transform.rotation().y);
-				_direction.y = std::cos(_transform.rotation().y);
+				_uniform._direction.x = std::sin(_uniform._rotation.y);
+				_uniform._direction.y = std::cos(_uniform._rotation.y);
 			}
 
 
@@ -249,20 +283,20 @@ namespace rx {
 				glm::vec2 movement {0.0f, 0.0f};
 
 				if (front) {
-					movement.x -= _direction.x;
-					movement.y += _direction.y;
+					movement.x -= _uniform._direction.x;
+					movement.y += _uniform._direction.y;
 				}
 				if (back) {
-					movement.x += _direction.x;
-					movement.y -= _direction.y;
+					movement.x += _uniform._direction.x;
+					movement.y -= _uniform._direction.y;
 				}
 				if (left) {
-					movement.x -= _direction.y;
-					movement.y -= _direction.x;
+					movement.x -= _uniform._direction.y;
+					movement.y -= _uniform._direction.x;
 				}
 				if (right) {
-					movement.x += _direction.y;
-					movement.y += _direction.x;
+					movement.x += _uniform._direction.y;
+					movement.y += _uniform._direction.x;
 				}
 
 				if ((right || left) && (front || back)) {
@@ -277,8 +311,8 @@ namespace rx {
 
 					const auto velo = _velocity * rx::delta::time<float>();
 
-					_transform.position().x += movement.x * velo;
-					_transform.position().z += movement.y * velo;
+					_uniform._position.x += movement.x * velo;
+					_uniform._position.z += movement.y * velo;
 				//}
 
 				//std::cout << "position: " << _transform.position().x << " " << _transform.position().y << " " << _transform.position().z << std::endl;
@@ -288,28 +322,29 @@ namespace rx {
 			/* update view */
 			auto update_view(void) noexcept -> void {
 
-				_view = glm::mat4(1.0f);
+				_uniform._view = glm::mat4(1.0f);
 
 				// rotate
-				_view = glm::rotate(_view, _transform.rotation().x, glm::vec3(1.0f, 0.0f, 0.0f));
-				_view = glm::rotate(_view, _transform.rotation().y, glm::vec3(0.0f, 1.0f, 0.0f));
-				_view = glm::rotate(_view, _transform.rotation().z, glm::vec3(0.0f, 0.0f, 1.0f));
+				_uniform._view = glm::rotate(_uniform._view, _uniform._rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+				_uniform._view = glm::rotate(_uniform._view, _uniform._rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+				_uniform._view = glm::rotate(_uniform._view, _uniform._rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
 
 				// translate
-				_view = glm::translate(_view, /* maybe */ -_transform.position());
+				_uniform._view = glm::translate(_uniform._view,
+						/* maybe */ -_uniform._position);
 			}
 
 			auto from_tap_event(double x, double y) -> void {
 
 				float sens = 0.24f;
 
-				_transform.rotation().x += ((float)y * sens) * rx::delta::time<float>();
-				_transform.rotation().y -= ((float)x * sens) * rx::delta::time<float>();
+				_uniform._rotation.x += ((float)y * sens) * rx::delta::time<float>();
+				_uniform._rotation.y -= ((float)x * sens) * rx::delta::time<float>();
 
 
-				auto& _x = _transform.rotation().x;
-				auto& _y = _transform.rotation().y;
+				auto& _x = _uniform._rotation.x;
+				auto& _y = _uniform._rotation.y;
 
 				constexpr float pi2 = (float)(2.0 * 3.14159265358979323846264338327950288);
 

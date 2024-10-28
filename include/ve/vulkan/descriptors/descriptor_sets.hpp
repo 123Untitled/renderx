@@ -123,8 +123,42 @@ namespace vulkan {
 			/* deleted copy assignment operator */
 			auto operator=(const ___self&) -> ___self& = delete;
 
-			/* move assignment operator */ // not implemented yet...
-			auto operator=(___self&& other) noexcept -> ___self& = delete;
+			/* move assignment operator */
+			auto operator=(___self&& other) noexcept -> ___self& {
+
+				// check for self assignment
+				if (this == &other)
+					return *this;
+
+				// free descriptor sets
+				if (_size != 0U)
+					___self::_free_descriptor_sets(_sets, _size);
+
+				// deallocate descriptor sets
+				if (_sets != nullptr)
+					ve::free(_sets);
+
+				// copy members
+				___self::_copy_members(other);
+
+				// invalidate other
+				___self::_init();
+
+				// done
+				return *this;
+			}
+
+			// -- public subscript operators ----------------------------------
+
+			/* [] operator */
+			auto operator[](const size_type index) noexcept -> reference {
+				return *(_sets + index);
+			}
+
+			/* const [] operator */
+			auto operator[](const size_type index) const noexcept -> const_reference {
+				return *(_sets + index);
+			}
 
 
 			// -- public modifiers --------------------------------------------
@@ -141,7 +175,7 @@ namespace vulkan {
 			}
 
 			/* resize */
-			auto resize(const vulkan::descriptor_set_layout& layout,
+			auto resize(const vk::descriptor_set_layout& layout,
 						const size_type size) -> void {
 
 				// less size
@@ -165,7 +199,7 @@ namespace vulkan {
 						___self::_reserve(size);
 
 					// allocate descriptor sets
-					___self::_allocate_descriptor_sets(layout.get(),
+					___self::_allocate_descriptor_sets(layout,
 													(size - _size));
 
 					// update size

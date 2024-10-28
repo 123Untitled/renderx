@@ -3,12 +3,17 @@
 
 // -- P U S H   C O N S T A N T S ---------------------------------------------
 
-layout(push_constant) uniform push_constant_object {
-	mat4 model;
-	mat4 view;
+layout(binding = 0) uniform cam_uniform {
 	mat4 projection;
-	vec3 camera_position;
-} pco;
+	mat4 view;
+	vec3 position;
+	vec3 rotation;
+	vec2 direction;
+} cam;
+
+layout(binding = 1) uniform model_uniform {
+	mat4 model;
+} model;
 
 
 
@@ -76,14 +81,14 @@ void main(void) {
 		 vec3 position1 = gl_in[1].gl_Position.xyz;
 		 vec3 position2 = gl_in[2].gl_Position.xyz;
 
-		 vec3 model_position0 = (pco.model * vec4(position0, 1.0)).xyz;
-		 vec3 model_position1 = (pco.model * vec4(position1, 1.0)).xyz;
-		 vec3 model_position2 = (pco.model * vec4(position2, 1.0)).xyz;
+		 vec3 model_position0 = (model.model * vec4(position0, 1.0)).xyz;
+		 vec3 model_position1 = (model.model * vec4(position1, 1.0)).xyz;
+		 vec3 model_position2 = (model.model * vec4(position2, 1.0)).xyz;
 
 		 // Compute distances from the camera to each vertex
-		 float distance0 = distance(pco.camera_position, model_position0);
-		 float distance1 = distance(pco.camera_position, model_position1);
-		 float distance2 = distance(pco.camera_position, model_position2);
+		 float distance0 = distance(cam.position, model_position0);
+		 float distance1 = distance(cam.position, model_position1);
+		 float distance2 = distance(cam.position, model_position2);
 
 		 // Compute average distances for each edge
 		 float avg_distance0 = (distance1 + distance2) * 0.5; // Edge between vertices 1 and 2

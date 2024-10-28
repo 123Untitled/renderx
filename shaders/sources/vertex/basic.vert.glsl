@@ -5,12 +5,12 @@
 
 // -- push constant -----------------------------------------------------------
 
-layout(push_constant) uniform push_constant_object {
-	mat4 model;
-	mat4 view;
-	mat4 projection;
-	vec3 camera_position;
-} pco;
+//layout(push_constant) uniform push_constant_object {
+//	mat4 model;
+//	mat4 view;
+//	mat4 projection;
+//	vec3 camera_position;
+//} pco;
 
 
 // -- user inputs from cpu ----------------------------------------------------
