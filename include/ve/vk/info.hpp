@@ -14,33 +14,6 @@ namespace vk {
 	namespace info {
 
 
-		/* semaphore */
-		inline consteval auto semaphore(void) noexcept -> vk::semaphore_info {
-
-			return vk::semaphore_info{
-				// structure type
-				.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-				// next structure
-				.pNext = nullptr,
-				// flags (reserved for future use)
-				.flags = 0U
-			};
-		}
-
-		/* fence */
-		template <vk::fence_create_flags ___flags>
-		inline consteval auto fence(void) noexcept -> vk::fence_info {
-
-			return vk::fence_info{
-				// structure type
-				.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-				// next structure
-				.pNext = nullptr,
-				// flags
-				.flags = ___flags
-			};
-		}
-
 		/* image view */
 		inline constexpr auto image_view(const vk::format ___fmt) noexcept -> vk::image_view_info {
 

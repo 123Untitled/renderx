@@ -23,7 +23,7 @@ auto vulkan::framebuffers::_destroy(void) noexcept -> void {
 
 /* create */
 auto vulkan::framebuffers::_create(const vulkan::image_views& views,
-								   const vulkan::render_pass& rpass,
+								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent) -> void {
 
 	// create guard
@@ -55,7 +55,7 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 // -- private static methods --------------------------------------------------
 
 /* info */
-auto vulkan::framebuffers::info(const vulkan::render_pass& rpass,
+auto vulkan::framebuffers::info(const ve::render_pass& render_pass,
 								const vk::extent2D& extent) noexcept -> vk::framebuffer_info {
 
 	// return info
@@ -68,7 +68,7 @@ auto vulkan::framebuffers::info(const vulkan::render_pass& rpass,
 		// flags (none)
 		0U,
 		// render pass
-		rpass.underlying(),
+		render_pass,
 		// attachment count
 		0U,
 		// attachments
@@ -92,7 +92,7 @@ vulkan::framebuffers::framebuffers(void) noexcept
 
 /* views / render_pass constructor */
 vulkan::framebuffers::framebuffers(const vulkan::image_views& views,
-								   const vulkan::render_pass& rpass,
+								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent)
 : _frames{ve::malloc<vk::framebuffer>(views.size())}, _size{0U} {
 
@@ -160,7 +160,7 @@ auto vulkan::framebuffers::size(void) const noexcept -> size_type {
 
 /* recreate */
 auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
-									const vulkan::render_pass& rpass,
+									const ve::render_pass& rpass,
 									const vk::extent2D& extent) -> void {
 
 	// destroy

@@ -17,6 +17,10 @@
 #ifndef ___void_engine_vertex___
 #define ___void_engine_vertex___
 
+//#define GLM_FORCE_RADIANS
+//#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+
+#include <glm/glm.hpp>
 
 #include "ve/os.hpp"
 
@@ -25,8 +29,9 @@
 #include "ve/meta/index_sequence.hpp"
 #include "ve/meta/type_at.hpp"
 
-#include "ve/structures/vector3.hpp"
-#include "ve/structures/vector2.hpp"
+//#include "ve/structures/vector3.hpp"
+//#include "ve/structures/vector2.hpp"
+#include "ve/structures/vec.hpp"
 
 #include <iostream>
 
@@ -380,11 +385,17 @@ namespace ve {
 	// packed
 	class __attribute__((packed)) vert3x final {
 
-		public:
 
-			ve::vector3 position;
-			ve::vector3 normal;
-			ve::vector2 uv;
+		public:
+		using vector3 = glm::vec3;
+		using vector2 = glm::vec2;
+
+			vector3 position;
+			vector3 normal;
+			//vector2 uv;
+			//ve::vector3 position;
+			//ve::vector3 normal;
+			//ve::vector2 uv;
 
 
 			// -- public lifecycle --------------------------------------------
@@ -394,32 +405,32 @@ namespace ve {
 
 			/* position constructor */
 			vert3x(const float x, const float y, const float z) noexcept
-			: position{x, y, z}, normal{0.0f, 0.0f, 0.0f}, uv{0.0f, 0.0f} {
+			: position{x, y, z}, normal{0.0f, 0.0f, 0.0f} {//, uv{0.0f, 0.0f} {
 			}
 
 			/* position, normal constructor */
 			vert3x(const float x, const float y, const float z, const float nx, const float ny, const float nz) noexcept
-			: position{x, y, z}, normal{nx, ny, nz}, uv{0.0f, 0.0f} {
+			: position{x, y, z}, normal{nx, ny, nz} {//, uv{0.0f, 0.0f} {
 			}
 
 			/* position, normal, uv constructor */
-			vert3x(const float x, const float y, const float z, const float nx, const float ny, const float nz, const float u, const float v) noexcept
-			: position{x, y, z}, normal{nx, ny, nz}, uv{u, v} {
-			}
+			//vert3x(const float x, const float y, const float z, const float nx, const float ny, const float nz, const float u, const float v) noexcept
+			//: position{x, y, z}, normal{nx, ny, nz}, uv{u, v} {
+			//}
 
 			/* position constructor */
-			vert3x(const ve::vector3& position) noexcept
-			: position{position}, normal{0.0f, 0.0f, 0.0f}, uv{0.0f, 0.0f} {
+			vert3x(const vector3& position) noexcept
+			: position{position}, normal{0.0f, 0.0f, 0.0f} {//, uv{0.0f, 0.0f} {
 			}
 
 			/* position, normal constructor */
-			vert3x(const ve::vector3& position, const ve::vector3& normal) noexcept
-			: position{position}, normal{normal}, uv{0.0f, 0.0f} {
+			vert3x(const vector3& position, const vector3& normal) noexcept
+			: position{position}, normal{normal} {//, uv{0.0f, 0.0f} {
 			}
 
 			/* position, normal, uv constructor */
-			vert3x(const ve::vector3& position, const ve::vector3& normal, const ve::vector2& uv) noexcept
-			: position{position}, normal{normal}, uv{uv} {
+			vert3x(const vector3& position, const vector3& normal, const vector2& uv) noexcept
+			: position{position}, normal{normal} {//, uv{uv} {
 			}
 
 
@@ -439,7 +450,7 @@ namespace ve {
 					VK_VERTEX_INPUT_RATE_VERTEX // pass data to shader for each vertex
 				};
 
-				static vk::vertex_input_attribute_description _descriptions[3U] {
+				static vk::vertex_input_attribute_description _descriptions[] {
 					{
 						// shader location
 						.location = 0U,
@@ -460,6 +471,7 @@ namespace ve {
 						// offset
 						.offset   = offsetof(vert3x, normal)
 					},
+					/*
 					{
 						// shader location
 						.location = 2U,
@@ -470,6 +482,7 @@ namespace ve {
 						// offset
 						.offset   = offsetof(vert3x, uv)
 					}
+					*/
 				};
 
 				/* vertex input state info */
@@ -485,7 +498,7 @@ namespace ve {
 					// vertex binding description
 					&_binding,
 					// vertex attribute description count
-					3U,
+					2U,
 					// vertex attribute description
 					_descriptions
 				};

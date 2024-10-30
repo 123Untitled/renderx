@@ -8,14 +8,17 @@
 
 /* default constructor */
 vulkan::descriptor_pool::builder::builder(void) noexcept
-: _sizes{}, _flags{VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT}, _max_sets{1000U} {
+: _sizes{}, _flags{
+	VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT
+}, _max_sets{1000U} {
+
 }
 
 
 // -- public modifiers --------------------------------------------------------
 
-/* add pool size */
-auto vulkan::descriptor_pool::builder::add_pool_size(const vk::descriptor_type& type,
+/* pool size */
+auto vulkan::descriptor_pool::builder::pool_size(const vk::descriptor_type& type,
 													 const vk::u32& count) -> void {
 
 	// push back pool size
@@ -28,13 +31,13 @@ auto vulkan::descriptor_pool::builder::add_pool_size(const vk::descriptor_type& 
 			});
 }
 
-/* set pool flags */
-auto vulkan::descriptor_pool::builder::set_pool_flags(const vk::descriptor_pool_create_flags& flags) noexcept -> void {
+/* pool flags */
+auto vulkan::descriptor_pool::builder::pool_flags(const vk::descriptor_pool_create_flags& flags) noexcept -> void {
 	_flags = flags;
 }
 
 /* set max sets */
-auto vulkan::descriptor_pool::builder::set_max_sets(const vk::u32& max_sets) noexcept -> void {
+auto vulkan::descriptor_pool::builder::max_sets(const vk::u32& max_sets) noexcept -> void {
 	_max_sets = max_sets;
 }
 

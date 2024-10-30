@@ -36,7 +36,7 @@ namespace ve {
 			// -- private members ---------------------------------------------
 
 			/* camera */
-			rx::camera _camera;
+			ve::camera _camera;
 
 			/* pipeline */
 			vulkan::pipeline _pipeline;
@@ -45,7 +45,13 @@ namespace ve {
 			std::vector<rx::object> _objects;
 
 			/* descriptor sets */
-			vulkan::descriptor_sets _sets;
+			vulkan::descriptor_sets _sets[3U];
+
+			/* uniform buffer */
+			ve::uniform_buffer_long<glm::mat4> _ubo[3U];
+
+			/* uniform buffer */
+			ve::uniform_buffer _ubo_cam[3U];
 
 
 		public:
@@ -57,60 +63,63 @@ namespace ve {
 			: _camera{},
 			  _pipeline{
 				  vulkan::pipeline_builder<ve::vert3x>::build(
-						  _smanager.render_pass().underlying())}
+						  _smanager.render_pass())}
 			{
 				// add cube object
 				//_objects.emplace_back(rx::mesh_library::get<"fibonacci_sphere">());
 				_objects.emplace_back(rx::mesh_library::get<"icosphere">());
 
 				//_camera.ratio(rx::sdl::window::ratio());
-				_camera.fov(70.0f);
+				_camera.projection().fov(70.0f);
 				_camera.update_projection();
 
 				_camera.position().z = -6.0f;
 
 
-
-				// -- descriptor sets -----------------------------------------
-
-				// create descriptor pool
-				vulkan::descriptor_pool::builder pool_builder{};
-
-				// add pool size
-				pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
-
-				// create descriptor sets
-				_sets = vulkan::descriptor_sets{pool_builder};
-
-				const auto& layout = ve::descriptor_set_layout_library::get<"main">();
-
-				if (layout == nullptr)
-					std::cout << "LAYOUT IS NULL" << std::endl;
-
-				_sets.resize(layout,
-						(vk::u32)_objects.size() + 1U /* camera */);
-
-
-				for (vk::u32 i = 0U; i < _objects.size(); ++i) {
-					_sets.write(i, vk::descriptor_buffer_info{
-						.buffer = _objects[i].uniform_buffer().get(),
-						.offset = 0U,
-						.range = sizeof(glm::mat4)
-					});
+				for (vk::u32 i = 0U; i < 3U; ++i) {
+					_ubo[i] = ve::uniform_buffer_long<glm::mat4>{(vk::u32)_objects.size()};
+					_ubo_cam[i] = ve::uniform_buffer{_camera.uniform()};
 				}
 
 
-				// write camera descriptor
-				_sets.write(
-						// last index is camera
-						static_cast<vk::u32>(_objects.size()),
-						// camera descriptor buffer info
-						_camera.descriptor_buffer_info());
+				for (vk::u32 x = 0U; x < 3U; ++x) {
+					for (vk::u32 i = 0U; i < (vk::u32)_objects.size(); ++i) {
+						_ubo[x].update(i, _objects[i].model());
+					}
+					_ubo_cam[x].update(_camera.uniform());
+				}
+					//for (vk::u32 i = 0U; i < (vk::u32)_objects.size(); ++i) {
+					//	_ubo.update(i, _objects[i].model());
+					//}
+
+
+				// -- descriptor sets -----------------------------------------
+
+				for (vk::u32 x = 0U; x < 3U; ++x) {
+					// create descriptor pool
+					vulkan::descriptor_pool::builder pbuilder{};
+
+					pbuilder.max_sets(2U);
+
+					// add pool size (camera)
+					pbuilder.pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
+					// add pool size (objects)
+					pbuilder.pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1U);
+
+					// create descriptor sets
+					_sets[x] = vulkan::descriptor_sets{pbuilder};
+
+					_sets[x].reserve(2U);
+
+					_sets[x].push(ve::descriptor_set_layout_library::get<"camera">());
+					_sets[x].push(ve::descriptor_set_layout_library::get<"object">());
+
+					_sets[x].write(0U, _ubo_cam[x].descriptor_buffer_info(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+					_sets[x].write(1U, _ubo[x].descriptor_buffer_info(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
+				}
 
 				std::cout << "\x1b[32mSCENE INITIALIZED\x1b[0m" << std::endl;
-				throw std::runtime_error("test");
-
-
+				//throw std::runtime_error{"scene init"};
 
 			}
 
@@ -124,14 +133,14 @@ namespace ve {
 					  const vulkan::swapchain_manager& _smanager) -> void {
 
 
-				_camera.from_tap_event(ve::mouse_delta::dx(),
-									   ve::mouse_delta::dy());
+				_camera.update_rotation(ve::mouse_delta::dx(), ve::mouse_delta::dy());
 				_camera.update();
+				_ubo_cam[image_index].update(_camera.uniform());
 
 
-				_objects[0].rotation().y += 0.04f * rx::delta::time<float>();
-				_objects[0].rotation().x += 0.02f * rx::delta::time<float>();
-				_objects[0].rotation().z += 0.01f * rx::delta::time<float>();
+				_objects[0].rotation().y += 0.26f * ve::delta::time();
+				_objects[0].rotation().x += 0.04f * ve::delta::time();
+				_objects[0].rotation().z += 0.02f * ve::delta::time();
 
 
 				const auto& swapchain = _smanager.swapchain();
@@ -147,7 +156,7 @@ namespace ve {
 				cmd.set_viewport(swapchain.extent());
 
 				// dynamic scissor
-				cmd.set_scissor(swapchain);
+				cmd.set_scissor(swapchain.extent());
 
 				// bind pipeline
 				cmd.bind_pipeline(_pipeline);
@@ -155,21 +164,8 @@ namespace ve {
 				// bind camera descriptor
 				cmd.bind_descriptor_sets(
 						_pipeline.layout(),
-						0U,
-						_sets[static_cast<vk::u32>(_objects.size())]);
-				
+						_sets[image_index][0U]);
 
-
-				/*
-				struct push_constants {
-					glm::mat4 model;
-					glm::mat4 view;
-					glm::mat4 projection;
-					glm::vec3 camera_position;
-				};
-				*/
-
-				//static push_constants pc;
 
 
 				{ // -- for each mesh -----------------------------------------------------
@@ -179,11 +175,26 @@ namespace ve {
 						// update object
 						_objects[i].update();
 
-						// bind descriptor sets
+						// update uniform buffer
+						_ubo[image_index].update(i, _objects[i].model());
+
+
+						auto offset = _ubo[image_index].alignment(i);
+
 						cmd.bind_descriptor_sets(
 								_pipeline.layout(),
+								// first set
+								1U, // set in layout shader
+								// descriptor set count
 								1U,
-								_sets[i]);
+								// descriptor sets
+								&_sets[image_index][1U],
+								// dynamic offset count
+								1U,
+								// dynamic offsets
+								&offset);
+
+
 
 
 						// bind vertex buffer
@@ -192,20 +203,14 @@ namespace ve {
 						// bind index buffer
 						cmd.bind_index_buffer(_objects[i].mesh().indices());
 
-						/*
-						pc.model = object.model();
-						pc.view = _camera.view();
-						pc.projection = _camera.projection();
-						pc.camera_position = _camera.position();
 
-						// push constants
-						cmd.push_constants(_pipeline, pc);
-						*/
 
 						// draw indexed
 						cmd.draw_indexed(_objects[i].mesh().indices().count());
 					}
 				}
+
+				//throw std::runtime_error{"scene draw"};
 
 			}
 

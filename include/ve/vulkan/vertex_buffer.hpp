@@ -65,8 +65,11 @@ namespace vulkan {
 			  // allocate memory
 			  _alloc(vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())) {
 
+				  _alloc.map();
 				// copy data
 				_alloc.memcpy(vertices.data());
+
+				_alloc.unmap();
 			}
 
 			/* deleted copy constructor */

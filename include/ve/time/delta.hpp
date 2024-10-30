@@ -1,12 +1,12 @@
-#ifndef ___RENDERX_TIME_DELTA___
-#define ___RENDERX_TIME_DELTA___
+#ifndef ___ve_time_delta___
+#define ___ve_time_delta___
 
 #include "ve/time/now.hpp"
 
 
-// -- R X ---------------------------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- D E L T A -----------------------------------------------------------
@@ -19,7 +19,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::delta;
+			using ___self = ve::delta;
 
 
 			// -- private members ---------------------------------------------
@@ -28,7 +28,7 @@ namespace rx {
 			double _delta;
 
 			/* previous */
-			rx::umax _previous;
+			ve::umax _previous;
 
 
 
@@ -96,13 +96,17 @@ namespace rx {
 			}
 
 			/* time */
-			template <typename ___type = double>
-			static auto time(void) noexcept -> ___type {
-				return static_cast<___type>(___self::_shared()._delta);
+			static auto time(void) noexcept -> float {
+				return static_cast<float>(___self::_shared()._delta);
+			}
+
+			/* fps */
+			static auto fps(void) noexcept -> float {
+				return static_cast<float>(1.0 / ___self::_shared()._delta);
 			}
 
 	}; // class delta
 
-} // namespace rx
+} // namespace ve
 
-#endif // ___RENDERX_TIME_DELTA___
+#endif // ___ve_time_delta___

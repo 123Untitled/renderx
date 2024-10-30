@@ -182,7 +182,7 @@ namespace vulkan {
 
 			/* begin render pass */
 			auto begin_render_pass(const vulkan::swapchain& swapchain,
-								   const vulkan::render_pass& render_pass,
+								   const ve::render_pass& render_pass,
 								   const vk::framebuffer& framebuffer) const noexcept -> void {
 
 				// clear color
@@ -214,7 +214,7 @@ namespace vulkan {
 					// pointer to next structure
 					.pNext           = nullptr,
 					// renderpass
-					.renderPass      = render_pass.underlying(),
+					.renderPass      = render_pass,
 					// framebuffer from swapchain
 					.framebuffer     = framebuffer,
 					// render area
@@ -268,13 +268,13 @@ namespace vulkan {
 			}
 
 			/* set scissor */
-			auto set_scissor(const vulkan::swapchain& swapchain) const noexcept -> void {
+			auto set_scissor(const vk::extent2D& extent) const noexcept -> void {
 
 				const vk::rect2D scissor {
 					// offset
 					vk::offset2D{0, 0},
 					// extent
-					swapchain.extent()
+					extent
 				};
 
 				// set scissor
@@ -406,7 +406,7 @@ namespace vulkan {
 						// command buffer
 						_cbuffer,
 						// pipeline layout
-						pipeline.layout().get(),
+						pipeline.layout(),
 						// stage flags
 						VK_SHADER_STAGE_VERTEX_BIT
 						//| VK_SHADER_STAGE_FRAGMENT_BIT
@@ -422,8 +422,7 @@ namespace vulkan {
 			}
 
 			/* bind descriptor sets */
-			auto bind_descriptor_sets(const vulkan::pipeline_layout& layout,
-									  const vk::u32& first_set,
+			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
 									  const vk::descriptor_set& set) const noexcept -> void {
 
 				// bind descriptor sets
@@ -433,9 +432,9 @@ namespace vulkan {
 						// bind point
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
 						// pipeline layout
-						layout.get(),
+						layout,
 						// first set
-						first_set,
+						0U,
 						// descriptor set count
 						1U,
 						// descriptor sets
@@ -446,11 +445,66 @@ namespace vulkan {
 						nullptr);
 			}
 
+			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
+									  const vk::descriptor_set& set,
+									  const vk::u32& dynamic_offsets) const noexcept -> void {
+
+				// bind descriptor sets
+				::vk_cmd_bind_descriptor_sets(
+						// command buffer
+						_cbuffer,
+						// bind point
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						// pipeline layout
+						layout,
+						// first set
+						0U,
+						// descriptor set count
+						1U,
+						// descriptor sets
+						&set,
+						// dynamic offset count
+						1U,
+						// dynamic offsets
+						&dynamic_offsets);
+			}
+
+			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
+									// first set
+									const vk::u32& first_set,
+									// descriptor set count
+									const vk::u32& set_count,
+									// descriptor sets
+									  const vk::descriptor_set* sets,
+									// dynamic offset count
+									  const vk::u32& dynamic_offset_count,
+									  const vk::u32* dynamic_offsets) const noexcept -> void {
+
+				// bind descriptor sets
+				::vk_cmd_bind_descriptor_sets(
+						// command buffer
+						_cbuffer,
+						// bind point
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						// pipeline layout
+						layout,
+						// first set
+						first_set,
+						// descriptor set count
+						set_count,
+						// descriptor sets
+						sets,
+						// dynamic offset count
+						dynamic_offset_count,
+						// dynamic offsets
+						dynamic_offsets);
+			}
+
 
 			/* record */
 			template <typename ___pconst, typename ___t>
 			auto record(const vulkan::swapchain& swapchain,
-						const vulkan::render_pass& render_pass,
+						const ve::render_pass& render_pass,
 						const vk::framebuffer& framebuffer,
 						const vulkan::pipeline& pipeline,
 						const vulkan::vertex_buffer& vbuffer,

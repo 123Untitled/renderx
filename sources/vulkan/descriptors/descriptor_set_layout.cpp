@@ -1,5 +1,7 @@
 #include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
 
+#include <iostream>
+
 
 // -- builder -----------------------------------------------------------------
 
@@ -30,6 +32,11 @@ auto vulkan::descriptor_set_layout::builder::add_binding(const vk::u32& binding,
 		// used for texture sampling
 		.pImmutableSamplers = nullptr
 	};
+}
+
+/* reset */
+auto vulkan::descriptor_set_layout::builder::reset(void) -> void {
+	_bindings.clear();
 }
 
 
@@ -81,6 +88,10 @@ auto vulkan::descriptor_set_layout::_create_descriptor_set_layout(
 		const vk::descriptor_set_layout_binding* bindings,
 		const vk::u32& count)
 	-> vk::unique<vk::descriptor_set_layout> {
+
+		std::cout << "create descriptor set layout" << std::endl;
+		std::cout << "count: " << count << std::endl;
+		std::cout << "bindings: " << bindings << std::endl;
 
 	// create descriptor set layout
 	return vk::make_unique<vk::descriptor_set_layout>(

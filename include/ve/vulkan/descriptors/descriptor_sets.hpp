@@ -8,6 +8,7 @@
 #include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 
 // -- V U L K A N -------------------------------------------------------------
@@ -200,10 +201,13 @@ namespace vulkan {
 				// more size (reserve)
 				if (size > _size) {
 
+					std::cout << "resize: " << size << std::endl;
+
 
 					// check if capacity is valid
-					if (___self::_available() < size)
+					if (___self::_available() < size) {
 						___self::_reserve(size);
+					}
 
 					// allocate descriptor sets
 					___self::_allocate_descriptor_sets(layout,
@@ -215,27 +219,18 @@ namespace vulkan {
 			}
 
 			/* push */
-			//auto push(const vulkan::descriptor_set_layout& layout) -> void {
-			//
-			//	// check if capacity is valid
-			//	if (___self::_available() == 0U)
-			//		___self::_reserve(___self::_expand());
-			//
-			//	// allocate descriptor sets
-			//	const vk::descriptor_set_allocate_info info{
-			//		.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-			//		.pNext = nullptr,
-			//		.descriptorPool = _pool.get(), // descriptor pool
-			//		.descriptorSetCount = 1U, // swapchain size
-			//		.pSetLayouts = &layout.get() // descriptor set layout
-			//	};
-			//
-			//	// allocate descriptor sets
-			//	___self::_allocate_descriptor_sets(layout.get(), 1U);
-			//
-			//	// update size
-			//	++_size;
-			//}
+			auto push(const vk::descriptor_set_layout& layout) -> void {
+
+				// check if capacity is valid
+				if (___self::_available() == 0U)
+					___self::_reserve(___self::_expand());
+
+				// allocate descriptor sets
+				___self::_allocate_descriptor_sets(layout, 1U);
+
+				// update size
+				++_size;
+			}
 
 			/* pop */
 			auto pop(void) -> void {
@@ -261,7 +256,9 @@ namespace vulkan {
 			}
 
 			/* write */
-			auto write(const vk::u32& index, const vk::descriptor_buffer_info& binfo) -> void {
+			auto write(const vk::u32& index, const vk::descriptor_buffer_info& binfo,
+					const vk::descriptor_type& type
+					) -> void {
 
 				std::cout << "write at index: " << index << std::endl;
 
@@ -273,6 +270,8 @@ namespace vulkan {
 				};
 				*/
 
+				std::cout << "address: " << _sets[index] << std::endl;
+
 
 				const vk::write_descriptor_set wdset{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -281,7 +280,7 @@ namespace vulkan {
 					.dstBinding = 0U,
 					.dstArrayElement = 0U,
 					.descriptorCount = 1U,
-					.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					.descriptorType = type,
 					.pImageInfo = nullptr,
 					.pBufferInfo = &binfo,
 					.pTexelBufferView = nullptr
@@ -341,16 +340,14 @@ namespace vulkan {
 			auto _allocate_descriptor_sets(const vk::descriptor_set_layout& layout,
 											const size_type size) noexcept -> void {
 
-				if (_pool.get() == nullptr) {
-					std::cout << "\x1b[32mNULL POOL\x1b[0m" << std::endl;
-				}
+				std::cout << "allocate sets: " << size << std::endl;
 
 				// allocate descriptor sets
 				const vk::descriptor_set_allocate_info info{
 					.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 					.pNext = nullptr,
 					.descriptorPool = _pool.get(), // descriptor pool
-					.descriptorSetCount = 1U, // swapchain size
+					.descriptorSetCount = size, // swapchain size
 					.pSetLayouts = &layout // descriptor set layout
 				};
 

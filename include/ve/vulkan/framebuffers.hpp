@@ -5,6 +5,9 @@
 #include "ve/types.hpp"
 #include "ve/vk/typedefs.hpp"
 
+namespace ve {
+	class render_pass;
+}
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
 
@@ -15,9 +18,6 @@ namespace vulkan {
 
 	/* image views */
 	class image_views;
-
-	/* render pass */
-	class render_pass;
 
 
 	// -- F R A M E B U F F E R S ---------------------------------------------
@@ -57,14 +57,14 @@ namespace vulkan {
 
 			/* create */
 			auto _create(const vulkan::image_views&,
-						 const vulkan::render_pass&,
+						 const ve::render_pass&,
 						 const vk::extent2D&) -> void;
 
 
 			// -- public static methods ---------------------------------------
 
 			/* info */
-			static auto info(const vulkan::render_pass&,
+			static auto info(const ve::render_pass&,
 							 const vk::extent2D&) noexcept -> vk::framebuffer_info;
 
 
@@ -77,7 +77,7 @@ namespace vulkan {
 
 			/* views / render_pass constructor */
 			framebuffers(const vulkan::image_views&,
-						 const vulkan::render_pass&,
+						 const ve::render_pass&,
 						 const vk::extent2D&);
 
 			/* uncopyable */
@@ -112,7 +112,7 @@ namespace vulkan {
 
 			/* recreate */
 			auto recreate(const vulkan::image_views&,
-						  const vulkan::render_pass&,
+						  const ve::render_pass&,
 						  const vk::extent2D&) -> void;
 
 

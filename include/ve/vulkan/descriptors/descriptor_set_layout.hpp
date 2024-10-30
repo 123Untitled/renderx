@@ -122,6 +122,9 @@ namespace vulkan {
 							 const vk::shader_stage_flags&,
 							 const vk::u32& = 1) -> void;
 
+			/* reset */
+			auto reset(void) -> void;
+
 
 			// -- public methods ----------------------------------------------
 

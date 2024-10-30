@@ -17,7 +17,6 @@
 #ifndef ___ve_structures_matrix___
 #define ___ve_structures_matrix___
 
-#include "ve/structures/vector3.hpp"
 #include "ve/memory/memcpy.hpp"
 #include "ve/types.hpp"
 #include "ve/meta/index_sequence.hpp"
@@ -234,7 +233,6 @@ namespace ve {
 			auto _sub(const ___self& other, ve::index_sequence<indices...>) noexcept -> void {
 				((_mat[indices] -= other._mat[indices]), ...);
 			}
-
 
 			/* add scalar */
 			template <size_type... indices>

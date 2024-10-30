@@ -147,10 +147,33 @@ auto vulkan::physical_device::surface_present_modes(void) const -> std::vector<v
 
 /* properties */
 auto vulkan::physical_device::properties(void) const -> vk::physical_device_properties {
-	return vk::get_physical_device_properties(_pdevice);
+	vk::physical_device_properties properties;
+	::vkGetPhysicalDeviceProperties(_pdevice, &properties);
+	return properties;
 }
 
 /* features */
 auto vulkan::physical_device::features(void) const -> vk::physical_device_features {
 	return vk::get_physical_device_features(_pdevice);
+}
+
+/* max usable sample count */
+auto vulkan::physical_device::max_usable_sample_count(void) const -> vk::u32 {
+
+	const auto count = properties().limits.framebufferColorSampleCounts;
+
+	if (count & VK_SAMPLE_COUNT_64_BIT)
+		return VK_SAMPLE_COUNT_64_BIT;
+	if (count & VK_SAMPLE_COUNT_32_BIT)
+		return VK_SAMPLE_COUNT_32_BIT;
+	if (count & VK_SAMPLE_COUNT_16_BIT)
+		return VK_SAMPLE_COUNT_16_BIT;
+	if (count & VK_SAMPLE_COUNT_8_BIT)
+		return VK_SAMPLE_COUNT_8_BIT;
+	if (count & VK_SAMPLE_COUNT_4_BIT)
+		return VK_SAMPLE_COUNT_4_BIT;
+	if (count & VK_SAMPLE_COUNT_2_BIT)
+		return VK_SAMPLE_COUNT_2_BIT;
+
+	return VK_SAMPLE_COUNT_1_BIT;
 }

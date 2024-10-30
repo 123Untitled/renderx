@@ -7,75 +7,32 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::fence::fence(const vk::fence_create_flags& ___flags)
-/* uninitialized fence */ {
+ve::fence::fence(void)
+: ve::fence{VK_FENCE_CREATE_SIGNALED_BIT} {
+}
 
-	// create info
-	const vk::fence_info info {
-		// structure type
-		VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		// next structure
-		nullptr,
-		// flag
-		___flags
-	};
+/* flags constructor */
+ve::fence::fence(const vk::fence_create_flags& flags)
+: _fence{
 
 	// create fence
-	vk::try_execute<"failed to create fence">(
-			::vk_create_fence,
-			vulkan::device::logical(), &info, nullptr, &_fence);
-}
+	vk::make_unique<vk::fence>(
 
-/* move constructor */
-vulkan::fence::fence(___self&& ___ot) noexcept
-: _fence{___ot._fence} {
-
-	// invalidate other
-	___ot._fence = nullptr;
-}
-
-/* destructor */
-vulkan::fence::~fence(void) noexcept {
-
-	// check if fence is null
-	if (_fence == nullptr)
-		return;
-
-	// destroy fence
-	::vk_destroy_fence(vulkan::device::logical(),
-			_fence, nullptr);
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::fence::operator=(___self&& ___ot) noexcept -> ___self& {
-
-	// check for self-assignment
-	if (this == &___ot)
-		return *this;
-
-	// release fence
-	if (_fence != nullptr)
-		::vk_destroy_fence(vulkan::device::logical(),
-				_fence, nullptr);
-
-	// move fence
-	_fence = ___ot._fence;
-
-	// invalidate other
-	___ot._fence = nullptr;
-
-	// done
-	return *this;
+			// create info
+			vk::fence_info{
+				// structure type
+				VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+				// next structure
+				nullptr,
+				// flag
+				flags})} {
 }
 
 
 // -- public accessors --------------------------------------------------------
 
-/* underlying */
-auto vulkan::fence::underlying(void) const noexcept -> const vk::fence& {
+/* get */
+auto ve::fence::get(void) const noexcept -> const vk::fence& {
 	return _fence;
 }
 
@@ -83,33 +40,60 @@ auto vulkan::fence::underlying(void) const noexcept -> const vk::fence& {
 // -- public methods ----------------------------------------------------------
 
 /* reset */
-auto vulkan::fence::reset(void) -> void {
+auto ve::fence::reset(void) -> void {
 
 	// reset fence
-	::vk_reset_fences(
+	vk::try_execute<"failed to reset fence">(
+		// function
+		::vk_reset_fences,
 		// device
 		vulkan::device::logical(),
 		// fence count
 		1U,
 		// fences array
-		&_fence
+		&(_fence.get())
 	);
+/*
+   On success, this command returns
+   VK_SUCCESS
+   On failure, this command returns
+   VK_ERROR_OUT_OF_DEVICE_MEMORY
+*/
+
+
 }
 
 /* wait */
-auto vulkan::fence::wait(void) -> void {
+auto ve::fence::wait(void) -> void {
 
 	// wait all fences
-	::vk_wait_for_fences(
+	vk::try_execute<"failed to wait for fence">(
+			// function
+			::vk_wait_for_fences,
 			// device
 			vulkan::device::logical(),
 			// fence count
 			1U,
 			// fences array
-			&_fence,
+			&(_fence.get()),
 			// wait all
 			VK_TRUE,
 			// timeout
 			UINT64_MAX
 	);
+
+	/*
+	   On success, this command returns
+
+	   VK_SUCCESS
+	   VK_TIMEOUT
+
+	   On failure, this command returns
+
+	   VK_ERROR_OUT_OF_HOST_MEMORY
+	   VK_ERROR_OUT_OF_DEVICE_MEMORY
+	   VK_ERROR_DEVICE_LOST
+	*/
+
+
 }

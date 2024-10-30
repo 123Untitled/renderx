@@ -139,13 +139,6 @@ namespace vk {
 		return std::string_view{___property.extensionName} == VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 	}
 
-	/* get physical device properties */
-	inline auto get_physical_device_properties(const vk::physical_device& ___device) noexcept -> vk::physical_device_properties {
-		vk::physical_device_properties ___properties;
-		::vkGetPhysicalDeviceProperties(___device, &___properties);
-		return ___properties;
-	}
-
 	/* get physical device features */
 	inline auto get_physical_device_features(const vk::physical_device& ___device) noexcept -> vk::physical_device_features {
 		vk::physical_device_features ___features;

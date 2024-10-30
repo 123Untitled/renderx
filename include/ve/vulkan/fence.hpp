@@ -1,22 +1,13 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
+#ifndef ___ve_vulkan_fence___
+#define ___ve_vulkan_fence___
 
-#ifndef ___RENDERX_VULKAN_FENCE___
-#define ___RENDERX_VULKAN_FENCE___
-
+#include "ve/vk/unique.hpp"
 #include "ve/vk/typedefs.hpp"
 
 
-// -- V U L K A N -------------------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace vulkan {
+namespace ve {
 
 
 	// -- F E N C E -----------------------------------------------------------
@@ -29,33 +20,33 @@ namespace vulkan {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = vulkan::fence;
+			using ___self = ve::fence;
 
 
 			// -- private members ---------------------------------------------
 
 			/* fence */
-			vk::fence _fence;
+			vk::unique<vk::fence> _fence;
 
 
 		public:
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted default constructor */
-			fence(void) = delete;
+			/* default constructor */
+			fence(void);
 
 			/* flags constructor */
-			fence(const vk::fence_create_flags& = VK_FENCE_CREATE_SIGNALED_BIT);
+			fence(const vk::fence_create_flags&);
 
 			/* deleted copy constructor */
 			fence(const ___self&) = delete;
 
 			/* move constructor */
-			fence(___self&&) noexcept;
+			fence(___self&&) noexcept = default;
 
 			/* destructor */
-			~fence(void) noexcept;
+			~fence(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -64,13 +55,13 @@ namespace vulkan {
 			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self&;
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public accessors --------------------------------------------
 
-			/* underlying */
-			auto underlying(void) const noexcept -> const vk::fence&;
+			/* get */
+			auto get(void) const noexcept -> const vk::fence&;
 
 
 			// -- public methods ----------------------------------------------
@@ -83,6 +74,6 @@ namespace vulkan {
 
 	}; // class fence
 
-} // namespace vulkan
+} // namespace ve
 
-#endif // ___RENDERX_VULKAN_FENCE___
+#endif // ___ve_vulkan_fence___

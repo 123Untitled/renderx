@@ -39,7 +39,7 @@ namespace rx {
 			glm::mat4 _model;
 
 			/* uniform buffer */
-			ve::uniform_buffer _uniform_buffer;
+			//ve::uniform_buffer _uniform_buffer;
 
 
 		public:
@@ -48,12 +48,12 @@ namespace rx {
 
 			/* default constructor */
 			object(void) noexcept
-			: _mesh{nullptr}, _transform{}, _model{glm::mat4{1.0f}}, _uniform_buffer{_model} {
+			: _mesh{nullptr}, _transform{}, _model{glm::mat4{1.0f}} {
 			}
 
 			/* mesh constructor */
 			object(const ve::mesh& ___mesh) noexcept
-			: _mesh{&___mesh}, _transform{}, _model{glm::mat4{1.0f}}, _uniform_buffer{_model} {
+			: _mesh{&___mesh}, _transform{}, _model{glm::mat4{1.0f}} {
 			}
 
 
@@ -63,7 +63,7 @@ namespace rx {
 			inline auto update(void) noexcept -> void {
 
 				_model = _transform.model();
-				_uniform_buffer.update(_model);
+				//_uniform_buffer.update(_model);
 			}
 
 			/* mesh */
@@ -90,9 +90,9 @@ namespace rx {
 			}
 
 			/* uniform buffer */
-			inline auto uniform_buffer(void) noexcept -> ve::uniform_buffer& {
-				return _uniform_buffer;
-			}
+			//inline auto uniform_buffer(void) noexcept -> ve::uniform_buffer& {
+			//	return _uniform_buffer;
+			//}
 
 	}; // class object
 

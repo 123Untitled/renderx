@@ -17,6 +17,9 @@
 #ifndef ___ve_geometry_icosphere___
 #define ___ve_geometry_icosphere___
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+
 #include "ve/math/sqrt.hpp"
 #include "ve/math/pow.hpp"
 #include "ve/vertex/vertex.hpp"
@@ -52,6 +55,8 @@ namespace ve {
 
 			/* self type */
 			using ___self = ve::icosphere;
+
+			using vector3 = ve::vert3x::vector3;
 
 
 			// -- private members ---------------------------------------------
@@ -137,39 +142,10 @@ namespace ve {
 				};
 				}
 
-				/*
-				// 6 vertices
-				_vertices = {
-					{ 0,  0,  L},  // 0 - sommet supérieur
-					{ 0,  0, -L},  // 1 - sommet inférieur
-					{ L,  0,  0},  // 2 - à droite
-					{-L,  0,  0},  // 3 - à gauche
-					{ 0,  L,  0},  // 4 - en haut
-					{ 0, -L,  0}   // 5 - en bas
-				};
 
-				// 8 triangles
-				_indices = {
-					// Triangles autour du sommet supérieur (0)
-					0, 4, 2,  // 0
-					0, 2, 5,  // 1
-					0, 5, 3,  // 2
-					0, 3, 4,  // 3
-
-					// Triangles autour du sommet inférieur (1)
-					1, 2, 4,  // 4
-					1, 5, 2,  // 5
-					1, 3, 5,  // 6
-					1, 4, 3   // 7
-				};
-				*/
-
-
-
-
-
-				___self::_subdivide(3);
+				___self::_subdivide(2);
 				___self::_project_onto_sphere();
+				//___self::_recompute_normals();
 			}
 
 
@@ -189,6 +165,14 @@ namespace ve {
 
 
 
+			auto _midpoint(const vector3& v1, const vector3& v2) const noexcept -> vector3 {
+				return vector3{
+					(v1.x + v2.x) / 2.0f,
+					(v1.y + v2.y) / 2.0f,
+					(v1.z + v2.z) / 2.0f
+				};
+			}
+
 			// -- private methods ---------------------------------------------
 
 			/* midpoint index */
@@ -204,8 +188,8 @@ namespace ve {
 					return it->second;
 				}
 
-				const ve::vector3 midpoint = ve::midpoint(_vertices[v1].position,
-														  _vertices[v2].position);
+				const vector3 midpoint = _midpoint(_vertices[v1].position,
+												   _vertices[v2].position);
 
 				const auto index = static_cast<::uint32_t>(_vertices.size());
 				_vertices.emplace_back(midpoint);
@@ -274,7 +258,7 @@ namespace ve {
 				for (auto& vertex : _vertices) {
 
 					// normalize
-					vertex.position.normalize();
+					vertex.position = glm::normalize(vertex.position);
 
 					// assign normal
 					vertex.normal = vertex.position;
@@ -284,13 +268,18 @@ namespace ve {
 			/* recompute normals */
 			auto _recompute_normals(void) noexcept -> void {
 
+				// initialize normals
+				for (auto& vertex : _vertices) {
+					vertex.normal = glm::vec3{0.0f};
+				}
+
 				// loop over indices
 				for (::size_t i = 0U; i < _indices.size(); i += 3U) {
 
 					// get indices
-					const auto i1 = _indices[i    ];
-					const auto i2 = _indices[i + 1];
-					const auto i3 = _indices[i + 2];
+					const auto i1 = _indices[i + 0U];
+					const auto i2 = _indices[i + 1U];
+					const auto i3 = _indices[i + 2U];
 
 					// get positions
 					const auto& p1 = _vertices[i1].position;
@@ -302,13 +291,16 @@ namespace ve {
 					const auto edge2 = p3 - p1;
 
 					// compute normal
-					auto cross{ve::cross(edge1, edge2)};
-					cross.normalize();
+					auto face_normal = glm::normalize(glm::cross(edge1, edge2));
 
 					// assign normals
-					_vertices[i1].normal = cross;
-					_vertices[i2].normal = cross;
-					_vertices[i3].normal = cross;
+					_vertices[i1].normal += face_normal;
+					_vertices[i2].normal += face_normal;
+					_vertices[i3].normal += face_normal;
+				}
+
+				for (auto& vertex : _vertices) {
+					vertex.normal = glm::normalize(vertex.normal);
 				}
 			}
 

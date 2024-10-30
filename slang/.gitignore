@@ -1,0 +1,5 @@
+# ignore spir-v directory
+spir-v
+
+# ignore spv files
+**/*.spv

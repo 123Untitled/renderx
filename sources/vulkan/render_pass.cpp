@@ -9,59 +9,15 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::render_pass::render_pass(void)
+ve::render_pass::render_pass(void)
 : _render_pass{___self::_create_render_pass()} {
 }
 
-/* move constructor */
-vulkan::render_pass::render_pass(___self&& ___ot) noexcept
-: _render_pass{___ot._render_pass} {
 
-	// invalidate other
-	___ot._render_pass = nullptr;
-}
+// -- public conversion operators ---------------------------------------------
 
-/* destructor */
-vulkan::render_pass::~render_pass(void) noexcept {
-
-	if (_render_pass == nullptr)
-		return;
-
-	// release render pass
-	::vk_destroy_render_pass(vulkan::device::logical(),
-			_render_pass, nullptr);
-}
-
-
-// -- public assignment operators ---------------------------------------------
-
-/* move assignment operator */
-auto vulkan::render_pass::operator=(___self&& ___ot) noexcept -> ___self& {
-
-	// check for self-assignment
-	if (this == &___ot)
-		return *this;
-
-	// release render pass
-	if (_render_pass != nullptr)
-		::vk_destroy_render_pass(vulkan::device::logical(),
-				_render_pass, nullptr);
-
-	// move data
-	_render_pass = ___ot._render_pass;
-
-	// invalidate other
-	___ot._render_pass = nullptr;
-
-	// done
-	return *this;
-}
-
-
-// -- public accessors --------------------------------------------------------
-
-/* underlying */
-auto vulkan::render_pass::underlying(void) const noexcept -> const vk::render_pass& {
+/* const vk::render_pass& conversion operator */
+ve::render_pass::operator const vk::render_pass&(void) const noexcept {
 	return _render_pass;
 }
 
@@ -105,7 +61,7 @@ auto find_supported_format(void) -> vk::format {
 // -- private static methods --------------------------------------------------
 
 /* create render pass */
-auto vulkan::render_pass::_create_render_pass(void) -> vk::render_pass {
+auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 
 
 	// msaa samples
@@ -298,13 +254,6 @@ auto vulkan::render_pass::_create_render_pass(void) -> vk::render_pass {
 		dependencies.data()
 	};
 
-
-	vk::render_pass ___rpass;
-
 	// create render pass
-	vk::try_execute<"failed to create render pass">(
-			::vk_create_render_pass,
-			vulkan::device::logical(), &info, nullptr, &___rpass);
-
-	return ___rpass;
+	return vk::make_unique<vk::render_pass>(info);
 }

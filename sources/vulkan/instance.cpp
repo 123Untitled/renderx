@@ -124,7 +124,12 @@ vulkan::instance::instance(void)
 			_instance, &messenger_info, nullptr, &_messenger);
 	#endif
 
-	//auto p = ___self::extension_properties();
+	auto p = ___self::extension_properties();
+
+	for (const auto& e : p) {
+		ve::write(e.extensionName);
+		ve::write("\n");
+	}
 }
 
 /* destructor */

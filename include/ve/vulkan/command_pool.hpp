@@ -1,28 +1,12 @@
-/*****************************************************************************/
-/*                                                                           */
-/*      dMP dMP .aMMMb  dMP dMMMMb                                           */
-/*     dMP dMP dMP"dMP amr dMP VMP                                           */
-/*    dMP dMP dMP dMP dMP dMP dMP                                            */
-/*    YMvAP  dMP aMP dMP dMP.aMP                                             */
-/*     VP    VMMMP  dMP dMMMMP                                               */
-/*                                                                           */
-/*       dMMMMMP dMMMMb   aMMMMP dMP dMMMMb  dMMMMMP                         */
-/*      dMP     dMP dMP dMP     amr dMP dMP dMP                              */
-/*     dMMMP   dMP dMP dMP MMP dMP dMP dMP dMMMP                             */
-/*    dMP     dMP dMP dMP.dMP dMP dMP dMP dMP                                */
-/*   dMMMMMP dMP dMP  VMMMP" dMP dMP dMP dMMMMMP                             */
-/*                                                                           */
-/*****************************************************************************/
-
-#ifndef ___void_engine_vulkan_command_pool___
-#define ___void_engine_vulkan_command_pool___
+#ifndef ___ve_vulkan_command_pool___
+#define ___ve_vulkan_command_pool___
 
 #include "ve/vk/unique.hpp"
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace vulkan {
+namespace ve {
 
 
 	// -- C O M M A N D  P O O L ----------------------------------------------
@@ -35,7 +19,7 @@ namespace vulkan {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = vulkan::command_pool;
+			using ___self = ve::command_pool;
 
 
 			// -- private members ---------------------------------------------
@@ -48,11 +32,11 @@ namespace vulkan {
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted default constructor */
-			command_pool(void) = delete;
+			/* default constructor */
+			command_pool(void);
 
 			/* flags constructor */
-			command_pool(const vk::command_pool_create_flags& = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+			command_pool(const vk::command_pool_create_flags&);
 
 			/* deleted copy constructor */
 			command_pool(const ___self&) = delete;
@@ -73,10 +57,10 @@ namespace vulkan {
 			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* get */
-			auto get(void) const noexcept -> const vk::command_pool&;
+			/* const vk::command_pool& conversion operator */
+			operator const vk::command_pool&(void) const noexcept;
 
 
 			// -- public methods ----------------------------------------------
@@ -92,6 +76,6 @@ namespace vulkan {
 
 	}; // class command_pool
 
-} // namespace vulkan
+} // namespace ve
 
-#endif // ___void_engine_vulkan_command_pool___
+#endif // ___ve_vulkan_command_pool___

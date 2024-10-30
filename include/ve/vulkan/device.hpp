@@ -95,6 +95,18 @@ namespace vulkan {
 			/* queue family */
 			static auto family(void) -> const vk::u32&;
 
+			/* minimum uniform buffer offset alignment */
+			static auto min_uniform_buffer_offset_alignment(void) -> vk::device_size {
+				return ___self::_shared()._pdevice.properties().limits.minUniformBufferOffsetAlignment;
+			}
+
+			/* max uniform buffer range */
+			static auto max_uniform_buffer_range(void) -> vk::device_size {
+				return ___self::_shared()._pdevice.properties().limits.maxUniformBufferRange;
+			}
+
+
+
 
 			// -- public static methods ---------------------------------------
 

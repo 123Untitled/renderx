@@ -21,6 +21,9 @@ declare -r cwd_dir=${${0%/*}:a}
 # source directory
 declare -r src_dir=$cwd_dir'/sources'
 
+# include directory
+declare -r inc_dir=$cwd_dir'/include'
+
 # spir-v directory
 declare -r spv_dir=$cwd_dir'/spir-v'
 
@@ -33,8 +36,37 @@ declare -r script=${0:a}
 # source files
 declare -r srcs=($src_dir'/'**'/'*'.sl'(.N))
 
+
+
+# -- C O M P I L E R ----------------------------------------------------------
+
+# lang
+declare -r lang='slang'
+
+# target
+declare -r target='spirv'
+
+# entry
+declare -r entry='main'
+
+# profile
+declare -r profile='spirv_1_5'
+
+# debug
+declare -r debug='-gmaximal'
+
+# optimization
+declare -r optimization='-O0'
+
+
 # slflags
-declare -r slflags=('-lang' 'slang' '-target' 'spirv' '-entry' 'main')
+declare -r slflags=('-lang'    $lang
+					'-target'  $target
+					'-entry'   $entry
+					'-profile' $profile
+					'-I'$inc_dir
+					$debug
+					$optimization)
 
 
 
@@ -58,31 +90,81 @@ function _check_tools() {
 
 function _compile() {
 
+	local -r file=$1
+	local -r spv=$2
+
+	if [[ -f $spv ]] && [[ $spv -nt $file ]] && [[ $spv -nt $script ]]; then
+		exit 0
+	fi
+
+	if slangc $slflags $file -o $spv; then
+		echo -n $success'[✓]'$reset
+		exit 1
+	else
+		echo -n $error'[x]'$reset
+		exit 2
+	fi
+}
+
+function _handle_compilation() {
+
+	# count of compiled files
 	local count=0
+
+	# exit status
+	local state=''
+
+	# pid array
+	local pids=()
+	local nprocesses=0
+
+	local max_jobs=8
+
 
 	# loop over glsl files
 	for file in $srcs; do
 
-		local -r spv=$spv_dir'/'${file:t:r}'.spv'
+		# compile file
+		_compile $file $spv_dir'/'${file:t:r}'.spv' &
 
-		if [[ -f $spv ]] && [[ $spv -nt $file ]] && [[ $spv -nt $script ]]; then
-			continue
-		fi
+		# append pid to pids
+		pids+=($!)
+		# increment nprocesses
+		nprocesses=$((++nprocesses))
 
-		if slangc $slflags $file -o $spv; then
-			echo -n $success'[✓]'$reset
-			((++count))
-		else
-			echo -n $error'[x]'$reset
+		if [[ $nprocesses -eq $max_jobs ]]; then
+			nprocesses=0
+			wait
 		fi
 	done
 
-	if (($count > 0)); then
-		echo ' '$count 'spir-v compiled.'
-	else
-		echo 'done.'
+
+	# loop over pids
+	for pid in $pids; do
+		# wait for pid
+		wait $pid
+		# get exit status
+		state=$?
+
+		# check if compilation failed
+		if [[ $state -eq 2 ]]; then
+			wait
+			echo $error'failed to compile spir-v.'$reset
+			exit 1
+
+		elif [[ $state -eq 1 ]]; then
+			count=$((++count))
+		fi
+	done
+
+	# print success
+	if [[ $count -gt 0 ]]; then
+		echo $success'[✓]'$reset $count 'spir-v compiled.'
 	fi
 }
+
+
+
 
 function _prepare() {
 
@@ -105,7 +187,6 @@ function _clean() {
 	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
 }
 
-echo $info'[>]'$reset 'slangc' $(slangc -v)
 
 case $1 in
 	clean|clear|fclean|rm)
@@ -113,7 +194,7 @@ case $1 in
 		;;
 	*)
 		_prepare
-		_compile
+		_handle_compilation
 		;;
 esac
 

@@ -21,6 +21,7 @@
 #include "./pipeline_layout.hpp"
 
 #include "ve/vulkan/descriptors/descriptor_set_layout_library.hpp"
+#include "ve/vulkan/descriptors/pipeline_layout_library.hpp"
 
 
 #include "ve/libraries/shader_library.hpp"
@@ -52,9 +53,6 @@ namespace vulkan {
 			/* pipeline */
 			vk::unique<vk::pipeline> _pipeline;
 
-			/* pipeline layout */
-			vulkan::pipeline_layout _layout;
-
 
 		public:
 
@@ -64,11 +62,8 @@ namespace vulkan {
 			pipeline(void) noexcept = default;
 
 			/* info constructor */
-			pipeline(const vk::graphics_pipeline_info& info,
-					 vulkan::pipeline_layout&& layout)
-
-			: _pipeline{vk::make_unique<vk::pipeline>(info)},
-			  _layout{std::move(layout)} {
+			pipeline(const vk::graphics_pipeline_info& info)
+			: _pipeline{vk::make_unique<vk::pipeline>(info)} {
 			}
 
 
@@ -94,8 +89,8 @@ namespace vulkan {
 			// -- public accessors --------------------------------------------
 
 			/* layout */
-			auto layout(void) const noexcept -> const vulkan::pipeline_layout& {
-				return _layout;
+			auto layout(void) const noexcept -> const vk::pipeline_layout& {
+				return ve::pipeline_layout_library::get<"main">();
 			}
 
 
@@ -137,10 +132,10 @@ namespace vulkan {
 
 				// shader stages
 				const vk::array stages {
-					ve::shader_library::vertex_stage_info<"basic">(/* specialization */),
-					ve::shader_library::fragment_stage_info<"basic">(),
-					ve::shader_library::tesscontrol_stage_info<"subdivisor">(),
-					ve::shader_library::tesseval_stage_info<"evaluator">(),
+					ve::shader_library::vertex_stage_info<"planet">(/* specialization */),
+					ve::shader_library::fragment_stage_info<"planet">(),
+					ve::shader_library::hull_stage_info<"planet">(),
+					ve::shader_library::domain_stage_info<"planet">(),
 					
 				};
 
@@ -156,6 +151,7 @@ namespace vulkan {
 					// flags
 					0U,
 					// topology
+					//VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
 					VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
 					// primitive restart enable
 					VK_FALSE
@@ -228,7 +224,7 @@ namespace vulkan {
 					// rasterizer discard enable
 					.rasterizerDiscardEnable = VK_FALSE,
 					// polygon mode
-					.polygonMode = VK_POLYGON_MODE_LINE,
+					.polygonMode = VK_POLYGON_MODE_FILL,
 					// cull mode
 					.cullMode = VK_CULL_MODE_BACK_BIT,
 					// front face
@@ -357,21 +353,6 @@ namespace vulkan {
 					.pDynamicStates = dynamic_states,
 				};
 
-
-				// pipeline layout
-				vulkan::pipeline_layout layout{
-					ve::descriptor_set_layout_library::get<"main">(),
-
-					//vk::push_constant_range{
-					//	.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
-					//				| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-					//				| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
-					//				,
-					//	.offset = 0U,
-					//	.size = (sizeof(glm::mat4) * 3) + sizeof(glm::vec3)
-					//}
-				};
-
 				// pipeline info
 				vk::graphics_pipeline_info info {
 					// type of struct
@@ -403,7 +384,7 @@ namespace vulkan {
 					// dynamic state
 					.pDynamicState       = &dynamic_state_info,
 					// pipeline layout
-					.layout              = layout.get(),
+					.layout              = ve::pipeline_layout_library::get<"main">(),
 					// render pass
 					.renderPass          = render_pass,
 					// subpass
@@ -414,7 +395,7 @@ namespace vulkan {
 					.basePipelineIndex   = -1
 				};
 
-				return vulkan::pipeline{info, std::move(layout)};
+				return vulkan::pipeline{info};
 			}
 
 

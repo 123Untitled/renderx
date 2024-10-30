@@ -12,8 +12,7 @@
 #include "ve/time/delta.hpp"
 #include "ve/running.hpp"
 #include "ve/glfw/monitor.hpp"
-#include "ve/geometry/mesh_library.hpp"
-#include "ve/mouse_delta.hpp"
+#include "ve/glfw/events.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
@@ -23,10 +22,9 @@ ve::renderer::renderer(void)
 :
 	_queue{},
 	_smanager{},
-	_pool{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT},
-	_cmds{_pool.get(), _smanager.size()},
-	_memory{},
-	_sync{},
+	_pool{},
+	_cmds{_pool, _smanager.size()},
+	_sync{_smanager.size()},
 	_scene{_smanager} {
 }
 
@@ -37,43 +35,24 @@ ve::renderer::renderer(void)
 /* run */
 auto ve::renderer::run(void) -> void {
 
-	rx::umax last = rx::now();
-
-	static vk::u32 i = 0U;
+	vk::u32 i{0U};
 
 	// game loop
-	while (rx::running::state() == true &&
+	while (ve::running::state() == true &&
 			glfw::window::should_close() == false) {
 
-		rx::delta::update();
+		// update delta time
+		ve::delta::update();
 
 		// poll events
 		glfw::events::poll();
 
+
 		ve::mouse_delta::update();
-
-		// get current time (nanoseconds)
-		//rx::umax now = rx::now();
-
 		//glfw::compute_to_mouse_delta(_camera);
 
 
-
-
-		// compute fps
-		//float fps = 1.0f / rx::delta::time<float>();
-
-		//usleep(1'000'000 / 60);
-
-
-		//std::cout << "delta: " << rx::delta::time<float>() << " fps: " << fps << std::endl;
-
-		//last = now;
-
 		___self::_draw_frame();
-
-		// limit to 120 fps
-		//usleep(1'000'000 / 120);
 
 		//std::cout << "--------------- draw frame [" << i++ << "] ---------------" << std::endl;
 	}
@@ -86,6 +65,10 @@ auto ve::renderer::run(void) -> void {
 /* draw frame */
 auto ve::renderer::_draw_frame(void) -> void {
 
+	/* wait for current fence;
+	 *    - wait for the current frame to be finished rendering
+	 */
+
 	// wait for current fence
 	_sync.wait_current_fence();
 
@@ -94,18 +77,19 @@ auto ve::renderer::_draw_frame(void) -> void {
 	const auto& swapchain = _smanager.swapchain();
 
 	// here error not means program must stop
-	const vk::result status = swapchain.acquire_next_image(_sync.image_available(),
-															image_index);
+	const vk::result status = swapchain.acquire_next_image(
+									_sync.current_image_available(),
+									image_index);
+
+	/* acquire next image:
+	 *    - acquire next image from swapchain
+	 *    - check for status
+	 *    - recreate swapchain if needed
+	 */
 
 	if (status == VK_ERROR_OUT_OF_DATE_KHR) {
-
-		std::cout << "recreating swapchain (after acquire)" << std::endl;
-
-		auto extent = glfw::window::framebuffer_size();
-		//_camera.ratio((float)extent.width / (float)extent.height);
-		//_camera.update_projection();
 		_smanager.recreate();
-		return; // maybe goto start of the function ?
+		return;
 	}
 	else if (status != VK_SUCCESS && status != VK_SUBOPTIMAL_KHR) {
 		throw vk::exception{"failed to acquire next image", status};
@@ -134,37 +118,38 @@ auto ve::renderer::_draw_frame(void) -> void {
 
 	// -- submit command buffer -----------------------------------------------
 
+	/* reset current fence;
+	 *    - reset current fence to be used again
+	 */
+
 	// reset fence
 	_sync.reset_current_fence();
 
+
+	/* submit command buffer;
+	 *    - submit command buffer to queue
+	 *    - wait for current frame to be finished rendering
+	 */
+
 	// submit command buffers
-	_queue.submit(_sync.image_available(),
-				  _sync.render_finished(),
-				  _sync.fence(),
+	_queue.submit(_sync.current_image_available(),
+				  _sync.current_render_finished(),
+				  _sync.current_fence(),
 				  cmd);
 
 	// here error not means program must stop
 	const vk::result state = _queue.present(swapchain, image_index,
-											_sync.render_finished());
+											_sync.current_render_finished());
 
 	if (status == VK_ERROR_OUT_OF_DATE_KHR
 	  || status == VK_SUBOPTIMAL_KHR
 	  || glfw::window::resized() == true) {
-
-		std::cout << "recreating swapchain (after present)" << std::endl;
-
-		auto extent = glfw::window::framebuffer_size();
-		//_camera.ratio((float)extent.width / (float)extent.height);
-		//_camera.update_projection();
-
 		// recreate swapchain
 		_smanager.recreate();
 	}
 	else if (state != VK_SUCCESS) {
 		throw vk::exception{"failed to queue present", state};
 	}
-
-	//std::cout << "draw frame" << std::endl;
 
 	// next frame
 	++_sync;

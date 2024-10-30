@@ -64,8 +64,10 @@ namespace vulkan {
 			  _count((vk::u32)indices.size()),
 			  _alloc{vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())} {
 
+				  _alloc.map();
 				// copy data
 				_alloc.memcpy(indices.data());
+				_alloc.unmap();
 			}
 
 			/* u32 vector constructor */
@@ -75,8 +77,10 @@ namespace vulkan {
 			  _count((vk::u32)indices.size()),
 			  _alloc{vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())} {
 
+				  _alloc.map();
 				// copy data
 				_alloc.memcpy(indices.data());
+				_alloc.unmap();
 			}
 
 			/* deleted copy constructor */

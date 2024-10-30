@@ -39,9 +39,6 @@ namespace vulkan {
 			/* device */
 			vk::physical_device _pdevice;
 
-			/* surface formats */
-			//std::vector<vk::surface_format> _formats;
-
 
 		public:
 
@@ -118,6 +115,10 @@ namespace vulkan {
 
 			/* features */
 			auto features(void) const -> vk::physical_device_features;
+
+			/* max usable sample count */
+			auto max_usable_sample_count(void) const -> vk::u32;
+
 	}; // class physical_device
 
 

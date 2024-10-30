@@ -1,34 +1,13 @@
-#ifndef ___void_engine_renderer___
-#define ___void_engine_renderer___
+#ifndef ___ve_renderer___
+#define ___ve_renderer___
 
-//#include "ve/vertex/basic_vertex.hpp"
-
-#include "ve/vulkan/swapchain.hpp"
 #include "ve/vulkan/swapchain_manager.hpp"
-
-#include "ve/vulkan/semaphore.hpp"
-#include "ve/vulkan/fence.hpp"
-#include "ve/vulkan/command_pool.hpp"
-#include "ve/vulkan/pipeline/pipeline.hpp"
-#include "ve/vulkan/commands.hpp"
-#include "ve/vulkan/queue.hpp"
-
-//#include "vulkan/global/instance.hpp"
-#include "ve/vertex/vertex.hpp"
-#include "ve/vertex/position.hpp"
-
-#include "ve/vulkan/device_memory.hpp"
-#include "ve/vulkan/memory_buffer.hpp"
 #include "ve/vulkan/sync.hpp"
 
-#include "ve/vulkan/allocator.hpp"
-#include "ve/vulkan/index_buffer.hpp"
-#include "ve/vulkan/vertex_buffer.hpp"
-#include "ve/shapes/cuboid.hpp"
-#include "ve/mesh.hpp"
-#include "ve/object.hpp"
+#include "ve/vulkan/command_pool.hpp"
+#include "ve/vulkan/commands.hpp"
 
-#include "ve/glfw/events.hpp"
+#include "ve/vulkan/queue.hpp"
 
 #include "ve/scene/scene.hpp"
 
@@ -60,16 +39,13 @@ namespace ve {
 			vulkan::swapchain_manager _smanager;
 
 			/* command pool */
-			vulkan::command_pool _pool;
+			ve::command_pool _pool;
 
 			/* command buffers */
 			vulkan::commands<vulkan::primary> _cmds;
 
-			/* device memory */
-			vulkan::device_memory _memory;
-
 			/* sync */
-			vulkan::sync<3U> _sync;
+			ve::sync _sync;
 
 			/* scene */
 			ve::scene _scene;
@@ -116,4 +92,4 @@ namespace ve {
 
 } // namespace ve
 
-#endif // ___void_engine_renderer___
+#endif // ___ve_renderer___

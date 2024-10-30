@@ -1,4 +1,5 @@
 #include "ve/all.hpp"
+#include "ve/structures/vec.hpp"
 
 
 
@@ -84,41 +85,10 @@ struct test_binding {
 
 auto main(int, char**) -> int {
 
-	vulkan::descriptor_sets set{};
-
-
-	const vk::descriptor_set_layout_binding binding{
-		// binding in shader
-		.binding = 0U,
-		// type of descriptor
-		.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-		// may be an array in shader, so descriptorCount define how many
-		.descriptorCount = 1U,
-		// stage where the descriptor is going to be used
-		.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-		// used for texture sampling
-		.pImmutableSamplers = nullptr
-	};
-
-	vulkan::descriptor_set_layout::builder builder{};
-
-	builder.add_binding(binding);
-	builder.add_binding(1U, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1U);
-
-	auto layout = builder.build();
-
-	vulkan::descriptor_pool::builder pool_builder{};
-
-	pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
-	pool_builder.add_pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
-
-	auto pool = pool_builder.build();
-
-	//return 0;
 
 
 	::signal(SIGINT, [](int) {
-		rx::running::stop();
+		ve::running::stop();
 		ve::write("\n");
 	});
 

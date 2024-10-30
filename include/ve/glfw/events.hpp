@@ -77,7 +77,7 @@ namespace glfw {
 
 					// escape
 					case GLFW_KEY_ESCAPE:
-						rx::running::stop();
+						ve::running::stop();
 						break;
 				}
 			}
@@ -126,11 +126,11 @@ namespace glfw {
 				// set mouse callback
 				//::glfwSetCursorPosCallback(&window, &___self::mouse_callback);
 
-				//glfwSetInputMode(
-				//		&glfw::window::shared(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetInputMode(
+						&glfw::window::shared(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 				//glfwSetInputMode(&window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
 				//if (glfwRawMouseMotionSupported() == GLFW_FALSE) {
 				//	throw std::runtime_error("glfw: raw mouse motion is not supported.");
 				//}

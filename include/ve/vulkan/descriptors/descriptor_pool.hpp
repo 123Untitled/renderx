@@ -128,14 +128,14 @@ namespace vulkan {
 
 			// -- public modifiers --------------------------------------------
 
-			/* add pool size */
-			auto add_pool_size(const vk::descriptor_type&, const vk::u32&) -> void;
+			/* pool size */
+			auto pool_size(const vk::descriptor_type&, const vk::u32&) -> void;
 
-			/* set pool flags */
-			auto set_pool_flags(const vk::descriptor_pool_create_flags&) noexcept -> void;
+			/* pool flags */
+			auto pool_flags(const vk::descriptor_pool_create_flags&) noexcept -> void;
 
-			/* set max sets */
-			auto set_max_sets(const vk::u32&) noexcept -> void;
+			/* max sets */
+			auto max_sets(const vk::u32&) noexcept -> void;
 
 
 			// -- public methods ----------------------------------------------

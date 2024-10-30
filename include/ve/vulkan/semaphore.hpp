@@ -1,22 +1,13 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
+#ifndef ___ve_vulkan_semaphore___
+#define ___ve_vulkan_semaphore___
 
-#ifndef ___RENDERX_VULKAN_SEMAPHORE___
-#define ___RENDERX_VULKAN_SEMAPHORE___
-
+#include "ve/vk/unique.hpp"
 #include "ve/vk/typedefs.hpp"
 
 
-// -- V U L K A N -------------------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace vulkan {
+namespace ve {
 
 
 	// -- S E M A P H O R E ----------------------------------------------------
@@ -29,13 +20,13 @@ namespace vulkan {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = vulkan::semaphore;
+			using ___self = ve::semaphore;
 
 
 			// -- private members ---------------------------------------------
 
 			/* semaphore */
-			vk::semaphore _semaphore;
+			vk::unique<vk::semaphore> _semaphore;
 
 
 		public:
@@ -49,10 +40,10 @@ namespace vulkan {
 			semaphore(const ___self&) = delete;
 
 			/* move constructor */
-			semaphore(___self&&) noexcept;
+			semaphore(___self&&) noexcept = default;
 
 			/* destructor */
-			~semaphore(void) noexcept;
+			~semaphore(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -61,16 +52,16 @@ namespace vulkan {
 			auto operator=(const ___self&) -> ___self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self&;
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public accessors --------------------------------------------
 
-			/* underlying */
-			auto underlying(void) const noexcept -> const vk::semaphore&;
+			/* get */
+			auto get(void) const noexcept -> const vk::semaphore&;
 
 	}; // class semaphore
 
-} // namespace vulkan
+} // namespace ve
 
-#endif // ___RENDERX_VULKAN_SEMAPHORE___
+#endif // ___ve_vulkan_semaphore___

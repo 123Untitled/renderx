@@ -1,13 +1,13 @@
-#ifndef ___RENDERX_RUNNING_HPP___
-#define ___RENDERX_RUNNING_HPP___
+#ifndef ___ve_running___
+#define ___ve_running___
 
 //#include "concurrency/atomic.hpp"
 #include <atomic>
 
 
-// -- R X ---------------------------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- R U N N I N G -------------------------------------------------------
@@ -21,7 +21,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::running;
+			using ___self = ve::running;
 
 
 			// -- private members ---------------------------------------------
@@ -87,7 +87,6 @@ namespace rx {
 
 	}; // class running
 
-} // namespace ws
+} // namespace ve
 
-#endif // ___RUNNING_HPP___
-
+#endif // ___ve_running___

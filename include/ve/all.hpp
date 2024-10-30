@@ -46,5 +46,5 @@
 #include "ve/geometry/icosphere.hpp"
 #include "ve/math/pow.hpp"
 
-#include "ve/structures/vector3.hpp"
+//#include "ve/structures/vector3.hpp"
 #include "ve/structures/matrix.hpp"

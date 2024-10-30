@@ -1,5 +1,5 @@
-#ifndef ___void_engine_vulkan_descriptor_set_layout_library___
-#define ___void_engine_vulkan_descriptor_set_layout_library___
+#ifndef ___ve_vulkan_descriptor_set_layout_library___
+#define ___ve_vulkan_descriptor_set_layout_library___
 
 #include "ve/containers/static_map.hpp"
 #include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
@@ -26,7 +26,7 @@ namespace ve {
 			// -- private members ---------------------------------------------
 
 			ve::static_map<vulkan::descriptor_set_layout,
-				"main"> _layouts;
+				"camera", "object"> _layouts;
 
 
 			// -- private static methods --------------------------------------
@@ -42,21 +42,9 @@ namespace ve {
 
 			/* default constructor */
 			descriptor_set_layout_library(void)
-			: _layouts{} {
-
-				vulkan::descriptor_set_layout::builder builder;
-
-				// camera uniform
-				builder.add_binding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-									  VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-
-				// model uniform
-				builder.add_binding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-									  VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-
-				ve::get<"main">(_layouts) = builder.build();
+			: _layouts{
+				___self::_camera_layout(),
+				___self::_object_layout()} {
 			}
 
 			/* deleted copy constructor */
@@ -78,6 +66,82 @@ namespace ve {
 			auto operator=(___self&&) -> ___self& = delete;
 
 
+			// -- private static methods --------------------------------------
+
+			/* camera layout */
+			static auto _camera_layout(void) -> vulkan::descriptor_set_layout {
+
+				/*
+				vulkan::descriptor_set_layout::builder builder;
+
+				// camera uniform
+				builder.add_binding(
+						0,
+						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+
+				return builder.build();
+				*/
+
+				const vk::descriptor_set_layout_binding binding[1U]{
+					{
+						// binding
+						.binding = 0U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						// count
+						.descriptorCount = 1U,
+						// stage
+						//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+						.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT
+							//| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+							| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					}
+				};
+
+
+				return vulkan::descriptor_set_layout{binding};
+			}
+
+			/* object layout */
+			static auto _object_layout(void) -> vulkan::descriptor_set_layout {
+
+				/*
+				vulkan::descriptor_set_layout::builder builder;
+
+				// model uniform
+				builder.add_binding(
+						0,
+						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+						VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+
+				return builder.build();
+				*/
+
+				const vk::descriptor_set_layout_binding binding[1U]{
+					{
+						// binding
+						.binding = 0U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+						// count
+						.descriptorCount = 1U,
+						// stage
+						//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+						.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT
+									//| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					}
+				};
+
+				return vulkan::descriptor_set_layout{binding};
+			}
+
+
 		public:
 
 			// -- public static methods ---------------------------------------
@@ -85,11 +149,11 @@ namespace ve {
 			/* get */
 			template <ve::literal key>
 			static auto get(void) -> const vk::descriptor_set_layout& {
-				return ve::get<key>(_shared()._layouts).get();
+				return (ve::get<key>(___self::_shared()._layouts)).get();
 			}
 
 	}; // class descriptor_set_layout_library
 
 } // namespace ve
 
-#endif // ___void_engine_vulkan_descriptor_set_layout_library___
+#endif // ___ve_vulkan_descriptor_set_layout_library___

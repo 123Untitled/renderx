@@ -37,6 +37,8 @@ vulkan::device::device(void)
 	// pick physical device
 	_pdevice = ___self::_pick_physical_device(surface);
 
+	std::cout << "MAX SAMPLE COUNT: " << _pdevice.max_usable_sample_count() << std::endl;
+
 	// get queue family index
 	_family  = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
@@ -53,6 +55,8 @@ vulkan::device::device(void)
 		#if defined(ENGINE_OS_MACOS)
 		"VK_KHR_portability_subset",
 		#endif
+
+		"VK_KHR_shader_non_semantic_info"
 
 		//"VK_EXT_mesh_shader",
 	};

@@ -38,15 +38,6 @@ namespace vk {
 	}
 
 
-	// -- descriptor set layout -----------------------------------------------
-
-	/* destroy descriptor set layout */
-	inline auto destroy(const vk::descriptor_set_layout& layout) noexcept -> void {
-
-		::vk_destroy_descriptor_set_layout(
-				vulkan::device::logical(), layout, nullptr);
-	}
-
 
 	// -- buffer --------------------------------------------------------------
 
@@ -71,6 +62,16 @@ namespace vk {
 	}
 
 
+	// -- render pass ---------------------------------------------------------
+
+	/* destroy render pass */
+	inline auto destroy(const vk::render_pass& render_pass) noexcept -> void {
+
+		::vk_destroy_render_pass(
+				vulkan::device::logical(), render_pass, nullptr);
+	}
+
+
 	// -- pipeline ------------------------------------------------------------
 
 	/* destroy pipeline */
@@ -91,6 +92,16 @@ namespace vk {
 	}
 
 
+	// -- descriptor set layout -----------------------------------------------
+
+	/* destroy descriptor set layout */
+	inline auto destroy(const vk::descriptor_set_layout& layout) noexcept -> void {
+
+		::vk_destroy_descriptor_set_layout(
+				vulkan::device::logical(), layout, nullptr);
+	}
+
+
 	// -- descriptor pool -----------------------------------------------------
 
 	/* destroy descriptor pool */
@@ -98,6 +109,26 @@ namespace vk {
 
 		::vk_destroy_descriptor_pool(
 				vulkan::device::logical(), pool, nullptr);
+	}
+
+
+	// -- fence ---------------------------------------------------------------
+
+	/* destroy fence */
+	inline auto destroy(const vk::fence& fence) noexcept -> void {
+
+		::vk_destroy_fence(
+				vulkan::device::logical(), fence, nullptr);
+	}
+
+
+	// -- semaphore -----------------------------------------------------------
+
+	/* destroy semaphore */
+	inline auto destroy(const vk::semaphore& semaphore) noexcept -> void {
+
+		::vk_destroy_semaphore(
+				vulkan::device::logical(), semaphore, nullptr);
 	}
 
 

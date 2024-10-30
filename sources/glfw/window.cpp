@@ -30,7 +30,7 @@ auto glfw::window::_close_callback(::glfw_window* window) noexcept -> void {
 	void* user = ::glfw_get_window_user_pointer(window);
 
 
-	rx::running::stop();
+	ve::running::stop();
 
 	//if (user != nullptr)
 		//::glfw_set_window_should_close(window, GLFW_TRUE);

@@ -56,22 +56,6 @@ namespace vk {
 	}
 
 
-	// -- descriptor sets -----------------------------------------------------
-
-	/* create descriptor sets */
-	inline auto create(const vk::descriptor_set_allocate_info& info,
-						vk::descriptor_set* sets) -> vk::descriptor_set {
-
-		vk::descriptor_set set;
-
-		try_execute<"failed to allocate descriptor sets">(
-			::vk_allocate_descriptor_sets,
-			vulkan::device::logical(), &info, &set);
-
-		return set;
-	}
-
-
 	// -- buffer --------------------------------------------------------------
 
 	/* create buffer */
@@ -87,20 +71,6 @@ namespace vk {
 	}
 
 
-	// -- descriptor set layout -----------------------------------------------
-
-	/* create descriptor set layout */
-	inline auto create(const vk::descriptor_set_layout_info& info) -> vk::descriptor_set_layout {
-
-		vk::descriptor_set_layout layout;
-
-		try_execute<"failed to create descriptor set layout">(
-			::vk_create_descriptor_set_layout,
-			vulkan::device::logical(), &info, nullptr, &layout);
-
-		return layout;
-	}
-
 	// -- swapchain -----------------------------------------------------------
 
 	/* create swapchain */
@@ -113,6 +83,21 @@ namespace vk {
 			vulkan::device::logical(), &info, nullptr, &swapchain);
 
 		return swapchain;
+	}
+
+
+	// -- render pass ---------------------------------------------------------
+
+	/* create render pass */
+	inline auto create(const vk::render_pass_info& info) -> vk::render_pass {
+
+		vk::render_pass render_pass;
+
+		try_execute<"failed to create render pass">(
+			::vk_create_render_pass,
+			vulkan::device::logical(), &info, nullptr, &render_pass);
+
+		return render_pass;
 	}
 
 
@@ -158,6 +143,37 @@ namespace vk {
 	}
 
 
+	// -- descriptor sets -----------------------------------------------------
+
+	/* create descriptor sets */
+	inline auto create(const vk::descriptor_set_allocate_info& info,
+						vk::descriptor_set* sets) -> vk::descriptor_set {
+
+		vk::descriptor_set set;
+
+		try_execute<"failed to allocate descriptor sets">(
+			::vk_allocate_descriptor_sets,
+			vulkan::device::logical(), &info, &set);
+
+		return set;
+	}
+
+
+	// -- descriptor set layout -----------------------------------------------
+
+	/* create descriptor set layout */
+	inline auto create(const vk::descriptor_set_layout_info& info) -> vk::descriptor_set_layout {
+
+		vk::descriptor_set_layout layout;
+
+		try_execute<"failed to create descriptor set layout">(
+			::vk_create_descriptor_set_layout,
+			vulkan::device::logical(), &info, nullptr, &layout);
+
+		return layout;
+	}
+
+
 	// -- descriptor pool -----------------------------------------------------
 
 	/* create descriptor pool */
@@ -170,6 +186,36 @@ namespace vk {
 			vulkan::device::logical(), &info, nullptr, &pool);
 
 		return pool;
+	}
+
+
+	// -- fence ---------------------------------------------------------------
+
+	/* create fence */
+	inline auto create(const vk::fence_info& info) -> vk::fence {
+
+		vk::fence fence;
+
+		try_execute<"failed to create fence">(
+			::vk_create_fence,
+			vulkan::device::logical(), &info, nullptr, &fence);
+
+		return fence;
+	}
+
+
+	// -- semaphore -----------------------------------------------------------
+
+	/* create semaphore */
+	inline auto create(const vk::semaphore_info& info) -> vk::semaphore {
+
+		vk::semaphore semaphore;
+
+		try_execute<"failed to create semaphore">(
+			::vk_create_semaphore,
+			vulkan::device::logical(), &info, nullptr, &semaphore);
+
+		return semaphore;
 	}
 
 

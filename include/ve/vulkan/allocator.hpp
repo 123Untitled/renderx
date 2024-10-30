@@ -29,27 +29,25 @@ namespace vulkan {
 		/* data */
 		void* data;
 
-
-		/* unmap */
-		auto unmap(void) noexcept -> void {
-			::vk_unmap_memory(vulkan::device::logical(), memory);
-		}
-
-		/* memcpy */
+		/* memcpy (with offset) */
 		template <typename ___type>
-		auto memcpy(const ___type* src) noexcept -> void {
-
-			// map memory
-			vk::try_execute<"failed to map memory">(
-					::vk_map_memory, vulkan::device::logical(),
-					memory, offset, size,
-					0U /* reserved */, &data);
+		auto memcpy(const ___type* src, const vk::device_size& ofs = 0U) noexcept -> void {
 
 			// copy data
 			ve::memcpy(data, src, size);
+		}
 
-			// unmap memory
-			::vk_unmap_memory(vulkan::device::logical(), memory);
+		auto map(void) noexcept -> void {
+
+			// map memory
+			//vk::try_execute<"failed to map memory">(
+			//		::vk_map_memory, vulkan::device::logical(),
+			//		memory, offset, size,
+			//		0U /* reserved */, &data);
+		}
+
+		auto unmap(void) noexcept -> void {
+			//::vk_unmap_memory(vulkan::device::logical(), memory);
 		}
 
 	};
@@ -141,6 +139,9 @@ namespace vulkan {
 					/* offset */
 					vk::device_size _offset;
 
+					/* mapped */
+					void* _mapped;
+
 
 				public:
 
@@ -169,6 +170,13 @@ namespace vulkan {
 								vulkan::device::logical(), &info, nullptr, &_memory);
 
 						ve::hint::success("new memory block allocated");
+
+
+						// map memory
+						vk::try_execute<"failed to map memory">(
+								::vk_map_memory, vulkan::device::logical(),
+								_memory, 0U, ___DEFAULT_BLOCK_SIZE___,
+								0U /* reserved */, &_mapped);
 					}
 
 					/* deleted copy constructor */
@@ -179,6 +187,9 @@ namespace vulkan {
 
 					/* destructor */
 					~linear(void) noexcept {
+
+						// unmap memory
+						::vk_unmap_memory(vulkan::device::logical(), _memory);
 
 						// release device memory
 						::vk_free_memory(
@@ -217,7 +228,7 @@ namespace vulkan {
 								_memory,
 								requirements.size,
 								aligned_offset,
-								nullptr
+								(unsigned char*)_mapped + aligned_offset
 						};
 					}
 
