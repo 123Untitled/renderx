@@ -73,7 +73,7 @@ namespace ve {
 				_camera.update_projection();
 
 				_camera.position().z = -4.0f;
-				//_objects[0].scale() = glm::vec3{10.0f, 10.0f, 10.0f};
+				//_objects[0].scale() = glm::vec3{50.0f, 50.0f, 50.0f};
 
 
 				for (vk::u32 i = 0U; i < 3U; ++i) {
@@ -138,9 +138,9 @@ namespace ve {
 				_ubo_cam[image_index].update(_camera.uniform());
 
 
-				_objects[0].rotation().y += 0.26f * ve::delta::time();
-				_objects[0].rotation().x += 0.04f * ve::delta::time();
-				_objects[0].rotation().z += 0.02f * ve::delta::time();
+				//_objects[0].rotation().y += 0.26f * ve::delta::time();
+				_objects[0].rotation().x += 0.08f * ve::delta::time();
+				//_objects[0].rotation().z += 0.02f * ve::delta::time();
 
 
 				const auto& swapchain = _smanager.swapchain();
@@ -166,6 +166,9 @@ namespace ve {
 						_pipeline.layout(),
 						_sets[image_index][0U]);
 
+				// push constants
+				cmd.push_constants(_pipeline, ((float)rx::now() / 1'000'000.0f));
+				//cmd.push_constants(_pipeline, ve::delta::time());
 
 
 				{ // -- for each mesh -----------------------------------------------------
