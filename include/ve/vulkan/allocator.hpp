@@ -73,23 +73,27 @@ namespace vulkan {
 
 
 	/* gpu */
-	struct gpu final {
+	struct gpu_memory final {
 		static constexpr vk::memory_property_flags property = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		static constexpr bool mapping = false;
 	};
 
 	/* cpu */
-	struct cpu final {
+	struct cpu_memory final {
 		static constexpr vk::memory_property_flags property = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+		static constexpr bool mapping = true;
 	};
 
 	/* cpu coherent */
 	struct cpu_coherent final {
 		static constexpr vk::memory_property_flags property = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		static constexpr bool mapping = true;
 	};
 
 	/* cpu cached */
 	struct cpu_cached final {
 		static constexpr vk::memory_property_flags property = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+		static constexpr bool mapping = true;
 	};
 
 
@@ -172,11 +176,14 @@ namespace vulkan {
 						ve::hint::success("new memory block allocated");
 
 
-						// map memory
-						vk::try_execute<"failed to map memory">(
-								::vk_map_memory, vulkan::device::logical(),
-								_memory, 0U, ___DEFAULT_BLOCK_SIZE___,
-								0U /* reserved */, &_mapped);
+						// map memory (only if host visible)
+						if constexpr (___type::mapping) {
+							// map memory
+							vk::try_execute<"failed to map memory">(
+									::vk_map_memory, vulkan::device::logical(),
+									_memory, 0U, ___DEFAULT_BLOCK_SIZE___,
+									0U /* reserved */, &_mapped);
+						}
 					}
 
 					/* deleted copy constructor */
@@ -188,8 +195,10 @@ namespace vulkan {
 					/* destructor */
 					~linear(void) noexcept {
 
-						// unmap memory
-						::vk_unmap_memory(vulkan::device::logical(), _memory);
+						if constexpr (___type::mapping) {
+							// unmap memory
+							::vk_unmap_memory(vulkan::device::logical(), _memory);
+						}
 
 						// release device memory
 						::vk_free_memory(
@@ -331,6 +340,36 @@ namespace vulkan {
 				return alloc;
 			}
 
+			/* allocate image */
+			auto _allocate_image(const vk::image& image) -> vulkan::allocation {
+
+				vk::memory_requirements requirements;
+
+				// get image memory requirements
+				::vk_get_image_memory_requirements(
+						vulkan::device::logical(),
+						image,
+						&requirements);
+
+				// find memory type
+				const auto memory_type = ___self::_find_memory_type(requirements.memoryTypeBits/*, ___type::property*/);
+
+				// check if allocator is valid
+				if (_allocators[memory_type] == nullptr) {
+					_allocators[memory_type] = new linear{memory_type};
+				}
+
+				// allocate memory
+				auto alloc = _allocators[memory_type]->allocate(requirements);
+
+				// bind memory
+				vk::try_execute<"failed to bind image memory">(
+						::vk_bind_image_memory, vulkan::device::logical(),
+						image, alloc.memory, alloc.offset);
+
+				return alloc;
+			}
+
 
 
 			/* find memory type */
@@ -363,6 +402,11 @@ namespace vulkan {
 			/* allocate buffer */
 			static auto allocate_buffer(const vk::buffer& buffer) -> vulkan::allocation {
 				return ___self::_shared()._allocate_buffer(buffer);
+			}
+
+			/* allocate image */
+			static auto allocate_image(const vk::image& image) -> vulkan::allocation {
+				return ___self::_shared()._allocate_image(image);
 			}
 
 	};
