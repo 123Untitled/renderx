@@ -2,6 +2,7 @@
 #include "ve/vk/utils.hpp"
 #include "ve/vk/array.hpp"
 #include "ve/vulkan/device.hpp"
+#include "ve/vulkan/depth_buffer.hpp"
 
 #include <stdexcept>
 
@@ -97,26 +98,26 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 		},
 
 		// depth attachment
-		//vk::attachment_description {
-		//	// flags
-		//	0U,
-		//	// format (find depth format) !!!
-		//	find_supported_format(),
-		//	// samples (multisampling)
-		//	msaa_samples,
-		//	// load op
-		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
-		//	// store op
-		//	VK_ATTACHMENT_STORE_OP_STORE,
-		//	// stencil load op
-		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		//	// stencil store op
-		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		//	// initial layout
-		//	VK_IMAGE_LAYOUT_UNDEFINED,
-		//	// final layout
-		//	VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-		//},
+		vk::attachment_description {
+			// flags
+			0U,
+			// format
+			ve::depth_buffer::format(),
+			// samples (multisampling)
+			msaa_samples,
+			// load op
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			// store op
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			// stencil load op
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			// stencil store op
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			// initial layout
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			// final layout
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		},
 
 		//// resolve attachment
 		//vk::attachment_description {
@@ -156,13 +157,13 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 		},
 
 		// depth reference
-		//vk::attachment_reference {
-		//	// attachment (index)
-		//	1U,
-		//	// layout
-		//	VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-		//},
-		//
+		vk::attachment_reference {
+			// attachment (index)
+			1U,
+			// layout
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		},
+
 		//// resolve reference
 		//vk::attachment_reference {
 		//	// attachment (index)
@@ -195,8 +196,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			nullptr,
 			//&references[2],
 			// depth stencil attachment
-			nullptr,
-			//&references[1],
+			//nullptr,
+			&references[1],
 			// preserve attachment count
 			0U,
 			// preserve attachments

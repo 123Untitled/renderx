@@ -5,6 +5,7 @@
 #include "ve/vulkan/images.hpp"
 #include "ve/vulkan/image_views.hpp"
 #include "ve/vulkan/framebuffers.hpp"
+#include "ve/vulkan/depth_buffer.hpp"
 
 #include "ve/glfw/window.hpp"
 #include "ve/glfw/events.hpp"
@@ -56,6 +57,9 @@ namespace vulkan {
 
 			/* image views */
 			vulkan::image_views _views;
+
+			/* depth buffer */
+			ve::depth_buffer _depth_buffer;
 
 			/* framebuffers */
 			vulkan::framebuffers _frames;

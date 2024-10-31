@@ -7,6 +7,7 @@
 
 namespace ve {
 	class render_pass;
+	class depth_buffer;
 }
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -57,6 +58,7 @@ namespace vulkan {
 
 			/* create */
 			auto _create(const vulkan::image_views&,
+						 const ve::depth_buffer&,
 						 const ve::render_pass&,
 						 const vk::extent2D&) -> void;
 
@@ -77,6 +79,7 @@ namespace vulkan {
 
 			/* views / render_pass constructor */
 			framebuffers(const vulkan::image_views&,
+						 const ve::depth_buffer&,
 						 const ve::render_pass&,
 						 const vk::extent2D&);
 
@@ -112,6 +115,7 @@ namespace vulkan {
 
 			/* recreate */
 			auto recreate(const vulkan::image_views&,
+						  const ve::depth_buffer&,
 						  const ve::render_pass&,
 						  const vk::extent2D&) -> void;
 

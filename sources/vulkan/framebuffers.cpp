@@ -1,5 +1,6 @@
 #include "ve/vulkan/framebuffers.hpp"
 #include "ve/vulkan/image_views.hpp"
+#include "ve/vulkan/depth_buffer.hpp"
 #include "ve/vulkan/render_pass.hpp"
 #include "ve/vulkan/device.hpp"
 
@@ -23,6 +24,7 @@ auto vulkan::framebuffers::_destroy(void) noexcept -> void {
 
 /* create */
 auto vulkan::framebuffers::_create(const vulkan::image_views& views,
+								   const ve::depth_buffer& depth,
 								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent) -> void {
 
@@ -32,14 +34,28 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 	// create info
 	auto info = ___self::info(rpass, extent);
 
+	vk::array<vk::image_view, 2U> attachments {
+		nullptr,
+		depth.view()
+	};
+
+	// set attachment count
+	info.attachmentCount = attachments.size();
+
+	// set attachments
+	info.pAttachments = attachments.data();
+
 	// loop over views
 	for (; _size < views.size(); ++_size) {
 
 		// set number of attachments
-		info.attachmentCount = 1U;
+		//info.attachmentCount = 1U;
 
 		// set attachment
-		info.pAttachments = &(views[_size]);
+		//info.pAttachments = &(views[_size]);
+
+		// set image view
+		attachments[0] = views[_size];
 
 		// create framebuffer
 		vk::try_execute<"failed to create framebuffer">(
@@ -92,12 +108,13 @@ vulkan::framebuffers::framebuffers(void) noexcept
 
 /* views / render_pass constructor */
 vulkan::framebuffers::framebuffers(const vulkan::image_views& views,
+								   const ve::depth_buffer& depth,
 								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent)
 : _frames{ve::malloc<vk::framebuffer>(views.size())}, _size{0U} {
 
 	// create framebuffers
-	___self::_create(views, rpass, extent);
+	___self::_create(views, depth, rpass, extent);
 }
 
 /* move constructor */
@@ -160,6 +177,7 @@ auto vulkan::framebuffers::size(void) const noexcept -> size_type {
 
 /* recreate */
 auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
+									const ve::depth_buffer& depth,
 									const ve::render_pass& rpass,
 									const vk::extent2D& extent) -> void {
 
@@ -177,7 +195,7 @@ auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
 	}
 
 	// create views
-	___self::_create(views, rpass, extent);
+	___self::_create(views, depth, rpass, extent);
 }
 
 
