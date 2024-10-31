@@ -167,8 +167,8 @@ namespace ve {
 						_sets[image_index][0U]);
 
 				// push constants
-				cmd.push_constants(_pipeline, ((float)rx::now() / 1'000'000.0f));
-				//cmd.push_constants(_pipeline, ve::delta::time());
+				//cmd.push_constants(_pipeline, ((float)rx::now()));
+				cmd.push_constants(_pipeline, ve::delta::time());
 
 
 				{ // -- for each mesh -----------------------------------------------------

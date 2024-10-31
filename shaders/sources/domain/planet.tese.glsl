@@ -239,8 +239,16 @@ void main(void) {
 
 	interpoled_position = normalize(interpoled_position);
 
+
+	// Calculate distance between camera and interpolated position on the sphere surface
+	float camera_distance = length(cam.position - (model.model * vec4(interpoled_position, 1.0)).xyz);
+
+	// Adjust amplitude based on the proximity of the camera
+	float amplitude = mix(0.16, 0.01, smoothstep(0.5, 0.01, camera_distance));
+
+
 	const uint octaves = 1U;
-	const float amplitude = 0.06f;
+	//const float amplitude = 0.06f;
 	const float frequency = 10.5f;
 	const float lacunarity = 1.5f;
 	const float persistence = 0.8f;

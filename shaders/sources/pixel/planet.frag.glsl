@@ -25,10 +25,16 @@ vec3 adjust_saturation(const vec3 color, const float saturation) {
 }
 
 // Fonction pour générer un bruit pseudo-aléatoire basé sur les coordonnées du pixel
+/*
 float random(vec2 uv, float seed) {
 	// Générer un nombre pseudo-aléatoire à partir des coordonnées UV
 	return fract(sin(dot(uv.xy, vec2(12.9898, 78.233)) + seed) * 43758.5453);
+}*/
+
+float random(vec2 coord) {
+    return fract(sin(dot(coord.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
+
 
 void main(void) {
 
@@ -51,11 +57,12 @@ void main(void) {
 	vec3 light_direction = normalize(vec3(-0.0, -1.0, -1.0));
 
 	// material properties
-	vec3 material_diffuse = vec3(0.2, 0.22, 0.4);
+	vec3 material_diffuse = vec3(0.3, 0.3, 0.3);
+	//vec3 material_diffuse = vec3(0.2, 0.22, 0.4);
 	vec3 material_ambient = material_diffuse * 0.1;
 		//vec3(0.10) * material_diffuse;
 	vec3 material_specular = vec3(1.2);
-	float material_shininess = 10.0;
+	float material_shininess = 8.0;
 
 
 	// -- diffuse -------------------------------------------------------------
@@ -96,10 +103,6 @@ void main(void) {
 	diffuse += (rim*out_normal);
 
 
-	// -- dithering -----------------------------------------------------------
-
-	// generate dithering pattern
-	//float d = random(gl_FragCoord.xy, pc.time);
 
 
 	// luminance factor
@@ -119,4 +122,27 @@ void main(void) {
 
 	// output color
 	out_color = vec4((material_ambient + diffuse + specular), 1.0);
+
+
+
+	// -- dithering -----------------------------------------------------------
+
+	// compute luminance
+	const float luminance = dot(out_color.rgb, vec3(0.299, 0.587, 0.114));
+
+	// generate dithering pattern
+	float rand = random(gl_FragCoord.xy * pc.time);
+
+	// noise factor
+	const float noise_factor = mix(0.03, 1.0, pow(luminance, 2.0));
+
+	rand *= noise_factor;
+
+	vec3 dithering = vec3(rand);
+
+
+	// -- output --------------------------------------------------------------
+
+	// output color
+	out_color = out_color + vec4(dithering, 0.0);
 }
