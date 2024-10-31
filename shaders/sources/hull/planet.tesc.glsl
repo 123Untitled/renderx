@@ -36,24 +36,35 @@ void main(void) {
 
 
 	// minimal distance for high tessellation
-	const float near = 0.301f;
+	const float near = 0.01f;
 	// maximal distance for low tessellation
-	const float far = 1.0f;
+	const float far = 0.15f;
 
-	float factor = 35.0f;
+	float factor = 200.0f;
 
 
 	float avg_0 = (in_distance_to_camera[1] + in_distance_to_camera[2]) * 0.5;
 	float avg_1 = (in_distance_to_camera[2] + in_distance_to_camera[0]) * 0.5;
 	float avg_2 = (in_distance_to_camera[0] + in_distance_to_camera[1]) * 0.5;
 
+	/*
+	float tess_0 = clamp(exp((far - avg_0) / (far - near)) - 1.0, 1.0, factor);
+	float tess_1 = clamp(exp((far - avg_1) / (far - near)) - 1.0, 1.0, factor);
+	float tess_2 = clamp(exp((far - avg_2) / (far - near)) - 1.0, 1.0, factor);
+	*/
+
+	float tess_0 = clamp(log(1.0 + (far - avg_0) / (far - near)) * factor, 1.0, factor);
+	float tess_1 = clamp(log(1.0 + (far - avg_1) / (far - near)) * factor, 1.0, factor);
+	float tess_2 = clamp(log(1.0 + (far - avg_2) / (far - near)) * factor, 1.0, factor);
+	/*
 	float tess_0 = clamp((far - avg_0) / (far - near), 0.0, 1.0) * factor;
 	float tess_1 = clamp((far - avg_1) / (far - near), 0.0, 1.0) * factor;
 	float tess_2 = clamp((far - avg_2) / (far - near), 0.0, 1.0) * factor;
+	*/
 
-	tess_0 = (tess_0 < 1.0f) ? 1.0f : tess_0;
-	tess_1 = (tess_1 < 1.0f) ? 1.0f : tess_1;
-	tess_2 = (tess_2 < 1.0f) ? 1.0f : tess_2;
+	//tess_0 = (tess_0 < 1.0f) ? 1.0f : tess_0;
+	//tess_1 = (tess_1 < 1.0f) ? 1.0f : tess_1;
+	//tess_2 = (tess_2 < 1.0f) ? 1.0f : tess_2;
 
 	// outer tessellation levels
 	gl_TessLevelOuter[0] = tess_0;
