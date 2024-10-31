@@ -361,6 +361,12 @@ namespace vk {
 	/* image aspect flags */
 	using image_aspect_flags                 = ::VkImageAspectFlags;
 
+	/* sample count flags */
+	using sample_count_flags                 = ::VkSampleCountFlags;
+
+	/* sample count flag bits */
+	using sample_count_flag_bits             = ::VkSampleCountFlagBits;
+
 
 	// -- image view ----------------------------------------------------------
 

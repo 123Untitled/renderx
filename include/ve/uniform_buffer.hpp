@@ -251,7 +251,7 @@ namespace ve {
 			}
 
 			/* alignment */
-			auto alignment(void) const noexcept -> const vk::u32& {
+			auto alignment(void) const noexcept -> vk::u32 {
 				return _alignment;
 			}
 

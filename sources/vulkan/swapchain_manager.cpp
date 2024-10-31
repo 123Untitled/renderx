@@ -24,8 +24,9 @@ vulkan::swapchain_manager::swapchain_manager(void)
   _swapchain{_size, _format, _extent, _capabilities, _mode},
   _images{_swapchain},
   _views{_images, _format.format},
+  _multisampling{_extent},
   _depth_buffer{_extent},
-  _frames{_views, _depth_buffer, _render_pass, _extent} {
+  _frames{_views, _multisampling, _depth_buffer, _render_pass, _extent} {
 }
 
 
@@ -60,7 +61,7 @@ auto vulkan::swapchain_manager::recreate(void) -> void {
 	_swapchain.recreate(_size, _format, _extent, _capabilities, _mode);
 	   _images.recreate(_swapchain);
 	    _views.recreate(_images, _format.format);
-	   _frames.recreate(_views, _depth_buffer, _render_pass, _extent);
+	   _frames.recreate(_views, _multisampling, _depth_buffer, _render_pass, _extent);
 
 	//_frames = vulkan::framebuffers{_views, _render_pass, _extent};
 }

@@ -85,9 +85,11 @@ struct test_binding {
 
 #include "ve/vulkan/image.hpp"
 #include "ve/vulkan/depth_buffer.hpp"
+#include "ve/vulkan/multisampling.hpp"
 
 auto main(int, char**) -> int {
 
+	ve::multisampling multisampling{{4, 4}};
 	ve::image image;
 	ve::depth_buffer depth_buffer({800, 600});
 

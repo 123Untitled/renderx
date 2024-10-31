@@ -58,6 +58,9 @@ namespace vulkan {
 			/* image views */
 			vulkan::image_views _views;
 
+			/* multisampling */
+			ve::multisampling _multisampling;
+
 			/* depth buffer */
 			ve::depth_buffer _depth_buffer;
 

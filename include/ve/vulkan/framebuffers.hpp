@@ -7,6 +7,7 @@
 
 namespace ve {
 	class render_pass;
+	class multisampling;
 	class depth_buffer;
 }
 
@@ -58,6 +59,7 @@ namespace vulkan {
 
 			/* create */
 			auto _create(const vulkan::image_views&,
+						 const ve::multisampling&,
 						 const ve::depth_buffer&,
 						 const ve::render_pass&,
 						 const vk::extent2D&) -> void;
@@ -79,6 +81,7 @@ namespace vulkan {
 
 			/* views / render_pass constructor */
 			framebuffers(const vulkan::image_views&,
+						 const ve::multisampling&,
 						 const ve::depth_buffer&,
 						 const ve::render_pass&,
 						 const vk::extent2D&);
@@ -115,6 +118,7 @@ namespace vulkan {
 
 			/* recreate */
 			auto recreate(const vulkan::image_views&,
+						  const ve::multisampling&,
 						  const ve::depth_buffer&,
 						  const ve::render_pass&,
 						  const vk::extent2D&) -> void;

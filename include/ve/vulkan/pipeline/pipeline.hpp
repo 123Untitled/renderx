@@ -18,6 +18,7 @@
 #include "ve/vk/array.hpp"
 #include "ve/vulkan/specialization.hpp"
 #include "ve/vulkan/shader_module.hpp"
+#include "ve/vulkan/multisampling.hpp"
 #include "./pipeline_layout.hpp"
 
 #include "ve/vulkan/descriptors/descriptor_set_layout_library.hpp"
@@ -250,7 +251,7 @@ namespace vulkan {
 					// flags
 					.flags = 0U,
 					// rasterization samples
-					.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+					.rasterizationSamples = ve::multisampling::max(),
 					// sample shading enable
 					.sampleShadingEnable = VK_FALSE,
 					// min sample shading

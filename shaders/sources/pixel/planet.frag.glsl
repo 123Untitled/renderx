@@ -99,7 +99,7 @@ void main(void) {
 	// -- dithering -----------------------------------------------------------
 
 	// generate dithering pattern
-	float d = random(gl_FragCoord.xy, pc.time);
+	//float d = random(gl_FragCoord.xy, pc.time);
 
 
 	// luminance factor
@@ -109,10 +109,10 @@ void main(void) {
 	//d *= noise_factor;
 
 	// dithering pattern
-	vec4 dither = vec4(d, d, d, 1.0);
+	//vec4 dither = vec4(d, d, d, 1.0);
 
 	// add dithering
-	diffuse += dither.xyz;
+	//diffuse += dither.xyz;
 
 
 	// -- output --------------------------------------------------------------

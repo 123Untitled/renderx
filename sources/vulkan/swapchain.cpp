@@ -29,7 +29,7 @@ vulkan::swapchain::swapchain(const vk::u32& size,
 		.sType                 = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
 		// next structure
 		.pNext                 = nullptr,
-		// flags (none)
+		// flags
 		.flags                 = 0U,
 		// surface
 		.surface               = vulkan::surface::shared(),

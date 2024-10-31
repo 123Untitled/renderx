@@ -45,12 +45,13 @@ namespace ve {
 			image(const vk::u32& width,
 				  const vk::u32& height,
 				  const vk::format& format,
+				  const vk::sample_count_flag_bits& samples,
 				  const vk::image_tiling& tiling,
 				  const vk::image_usage_flags& usage,
 				  const vk::memory_property_flags& properties)
 
 			// create image
-			: _image{___self::_create_image(width, height, format, tiling, usage)},
+			: _image{___self::_create_image(width, height, format, samples, tiling, usage)},
 			// allocate memory
 			  _alloc{vulkan::allocator<vulkan::gpu_memory>::allocate_image(_image.get())} {
 			}
@@ -90,6 +91,7 @@ namespace ve {
 			static auto _create_image(const vk::u32& width,
 									  const vk::u32& height,
 									  const vk::format& format,
+									  const vk::sample_count_flag_bits& samples,
 									  const vk::image_tiling& tiling,
 									  const vk::image_usage_flags& usage) -> vk::unique<vk::image> {
 
@@ -115,7 +117,7 @@ namespace ve {
 					// array layers
 					.arrayLayers = 1,
 					// samples
-					.samples = VK_SAMPLE_COUNT_1_BIT,
+					.samples = samples,
 					// tiling
 					.tiling = tiling,
 					// usage

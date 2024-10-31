@@ -24,6 +24,7 @@ auto vulkan::framebuffers::_destroy(void) noexcept -> void {
 
 /* create */
 auto vulkan::framebuffers::_create(const vulkan::image_views& views,
+								   const ve::multisampling& multisampling,
 								   const ve::depth_buffer& depth,
 								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent) -> void {
@@ -34,9 +35,10 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 	// create info
 	auto info = ___self::info(rpass, extent);
 
-	vk::array<vk::image_view, 2U> attachments {
+	vk::array<vk::image_view, 3U> attachments {
+		multisampling.view(),
+		depth.view(),
 		nullptr,
-		depth.view()
 	};
 
 	// set attachment count
@@ -55,7 +57,7 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 		//info.pAttachments = &(views[_size]);
 
 		// set image view
-		attachments[0] = views[_size];
+		attachments[2] = views[_size];
 
 		// create framebuffer
 		vk::try_execute<"failed to create framebuffer">(
@@ -108,13 +110,14 @@ vulkan::framebuffers::framebuffers(void) noexcept
 
 /* views / render_pass constructor */
 vulkan::framebuffers::framebuffers(const vulkan::image_views& views,
+								   const ve::multisampling& multisampling,
 								   const ve::depth_buffer& depth,
 								   const ve::render_pass& rpass,
 								   const vk::extent2D& extent)
 : _frames{ve::malloc<vk::framebuffer>(views.size())}, _size{0U} {
 
 	// create framebuffers
-	___self::_create(views, depth, rpass, extent);
+	___self::_create(views, multisampling, depth, rpass, extent);
 }
 
 /* move constructor */
@@ -177,6 +180,7 @@ auto vulkan::framebuffers::size(void) const noexcept -> size_type {
 
 /* recreate */
 auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
+									const ve::multisampling& multisampling,
 									const ve::depth_buffer& depth,
 									const ve::render_pass& rpass,
 									const vk::extent2D& extent) -> void {
@@ -195,7 +199,7 @@ auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
 	}
 
 	// create views
-	___self::_create(views, depth, rpass, extent);
+	___self::_create(views, multisampling, depth, rpass, extent);
 }
 
 

@@ -4,6 +4,7 @@
 
 #include "ve/vulkan/image.hpp"
 #include "ve/vulkan/image_view.hpp"
+#include "ve/vulkan/multisampling.hpp"
 
 #include "ve/vk/array.hpp"
 #include "ve/vk/typedefs.hpp"
@@ -47,6 +48,7 @@ namespace ve {
 			/* constructor */
 			depth_buffer(const vk::extent2D& extent)
 			: _image{extent.width, extent.height, ve::depth_buffer::format(),
+				ve::multisampling::max(),
 				VK_IMAGE_TILING_OPTIMAL,
 				VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT},

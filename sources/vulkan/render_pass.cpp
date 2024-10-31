@@ -1,4 +1,5 @@
 #include "ve/vulkan/render_pass.hpp"
+#include "ve/vulkan/multisampling.hpp"
 #include "ve/vk/utils.hpp"
 #include "ve/vk/array.hpp"
 #include "ve/vulkan/device.hpp"
@@ -65,11 +66,6 @@ auto find_supported_format(void) -> vk::format {
 auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 
 
-	// msaa samples
-	const vk::sample_count_flag_bits msaa_samples = VK_SAMPLE_COUNT_1_BIT;
-
-
-
 	// -- attachments ---------------------------------------------------------
 
 	const vk::array attachments {
@@ -80,8 +76,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			0U,
 			// format (swapchain format)
 			VK_FORMAT_B8G8R8A8_SRGB,
-			// samples (multisampling)
-			msaa_samples,
+			// samples
+			ve::multisampling::max(),
 			// load op
 			VK_ATTACHMENT_LOAD_OP_CLEAR,
 			// store op
@@ -93,8 +89,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			// initial layout
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			// final layout
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-			//VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+			//VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		},
 
 		// depth attachment
@@ -104,7 +100,7 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			// format
 			ve::depth_buffer::format(),
 			// samples (multisampling)
-			msaa_samples,
+			ve::multisampling::max(),
 			// load op
 			VK_ATTACHMENT_LOAD_OP_CLEAR,
 			// store op
@@ -119,27 +115,27 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		},
 
-		//// resolve attachment
-		//vk::attachment_description {
-		//	// flags
-		//	0U,
-		//	// format (swapchain format)
-		//	VK_FORMAT_B8G8R8A8_SRGB,
-		//	// samples
-		//	VK_SAMPLE_COUNT_1_BIT,
-		//	// load op
-		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
-		//	// store op
-		//	VK_ATTACHMENT_STORE_OP_STORE,
-		//	// stencil load op
-		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		//	// stencil store op
-		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		//	// initial layout
-		//	VK_IMAGE_LAYOUT_UNDEFINED,
-		//	// final layout
-		//	VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-		//},
+		// resolve attachment
+		vk::attachment_description {
+			// flags
+			0U,
+			// format (swapchain format)
+			VK_FORMAT_B8G8R8A8_SRGB,
+			// samples
+			VK_SAMPLE_COUNT_1_BIT,
+			// load op
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			// store op
+			VK_ATTACHMENT_STORE_OP_STORE,
+			// stencil load op
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			// stencil store op
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			// initial layout
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			// final layout
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		},
 
 	};
 
@@ -164,13 +160,13 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		},
 
-		//// resolve reference
-		//vk::attachment_reference {
-		//	// attachment (index)
-		//	2U,
-		//	// layout
-		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-		//}
+		// resolve reference
+		vk::attachment_reference {
+			// attachment (index)
+			2U,
+			// layout
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		}
 	};
 
 
@@ -193,8 +189,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			// color attachments
 			&references[0],
 			// resolve attachments
-			nullptr,
-			//&references[2],
+			//nullptr,
+			&references[2],
 			// depth stencil attachment
 			//nullptr,
 			&references[1],
