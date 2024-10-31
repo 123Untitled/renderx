@@ -142,6 +142,7 @@ namespace ve {
 				};
 				}
 				// 6 vertices
+				/*
 				_vertices = {
 					{ 0,  0,  L},  // 0 - sommet supérieur
 					{ 0,  0, -L},  // 1 - sommet inférieur
@@ -165,6 +166,7 @@ namespace ve {
 					1, 3, 5,  // 6
 					1, 4, 3   // 7
 				};
+				*/
 
 
 
