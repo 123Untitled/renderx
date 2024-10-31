@@ -75,7 +75,6 @@ namespace ve {
 			/* default constructor */
 			icosphere(void) {
 
-				{
 				// 1.618033988749895 (golden ratio)
 				//constexpr float v = (1.0f + ve::sqrt_compile_time(5.0f)) / 2.0f;
 				constexpr float v = 1.618033988749895f;
@@ -86,6 +85,7 @@ namespace ve {
 				constexpr float l = L / v;
 
 
+				{
 
 				// -- vertices ------------------------------------------------
 
@@ -141,6 +141,31 @@ namespace ve {
 					// -------------------
 				};
 				}
+				// 6 vertices
+				_vertices = {
+					{ 0,  0,  L},  // 0 - sommet supérieur
+					{ 0,  0, -L},  // 1 - sommet inférieur
+					{ L,  0,  0},  // 2 - à droite
+					{-L,  0,  0},  // 3 - à gauche
+					{ 0,  L,  0},  // 4 - en haut
+					{ 0, -L,  0}   // 5 - en bas
+				};
+
+				// 8 triangles
+				_indices = {
+					// Triangles autour du sommet supérieur (0)
+					0, 4, 2,  // 0
+					0, 2, 5,  // 1
+					0, 5, 3,  // 2
+					0, 3, 4,  // 3
+
+					// Triangles autour du sommet inférieur (1)
+					1, 2, 4,  // 4
+					1, 5, 2,  // 5
+					1, 3, 5,  // 6
+					1, 4, 3   // 7
+				};
+
 
 
 				___self::_subdivide(4);
