@@ -150,37 +150,49 @@ float simplex(const vec3 vec) {
 	return 32.0f*(n0 + n1 + n2 + n3);
 }
 
+float hash(vec3 p) {
+	return fract(sin(dot(p ,vec3(127.1,311.7, 74.7))) * 43758.5453123);
+}
 
-/*
+float simple_noise(vec3 p) {
+	vec3 i = floor(p);
+	vec3 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+
+	return mix(mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+				mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+			mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+				mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+
+
 float fractal(const uint octaves,
 			  float amplitude,
 			  float frequency,
 			  const float lacunarity,
 			  const float persistence,
-			  const float x,
-			  const float y,
-			  const float z) {
+			  const vec3 vec) {
 
 	// lacunarity: the rate at which the frequency increases for each successive octave
 	// persistence: the rate at which the amplitude changes for each successive octave
 
 	float noise = 0.0f;
 	float denom  = 0.0f;
+	//float weight = 1.0f;
 
 	// loop over octaves
 	for (uint i = 0U; i < octaves; ++i) {
-		noise += (amplitude * simplex(x * frequency,
-									   y * frequency,
-									   z * frequency));
+
+		noise += (simple_noise(vec * frequency) * amplitude /** weight*/);
 		denom += amplitude;
 
 		frequency *= lacunarity;
 		amplitude *= persistence;
+		//weight *= persistence;
 	}
 
 	return (noise / denom);
 }
-*/
 
 
 
@@ -219,6 +231,7 @@ layout(location = 2) out vec3 out_view_position;
 
 void main(void) {
 
+
 	// retrieve control point position coordinates
 	vec3 interpoled_position = (gl_TessCoord.x * gl_in[0].gl_Position.xyz)
 							 + (gl_TessCoord.y * gl_in[1].gl_Position.xyz)
@@ -226,10 +239,15 @@ void main(void) {
 
 	interpoled_position = normalize(interpoled_position);
 
-	const float amplitude = 0.20f;
-	const float frequency = 2.0f;
+	const uint octaves = 1U;
+	const float amplitude = 0.06f;
+	const float frequency = 10.5f;
+	const float lacunarity = 1.5f;
+	const float persistence = 0.8f;
+
 
 	// get noise
+	//const float noise = fractal(octaves, amplitude, frequency, lacunarity, persistence, interpoled_position);
 	const float noise = simplex(interpoled_position * frequency) * amplitude;
 
 	// interpolate position
@@ -418,17 +436,3 @@ void main(void) {
 //				dot(p2,x2), dot(p3,x3) ) );
 //}
 //
-//float hash(vec3 p) {
-//	return fract(sin(dot(p ,vec3(127.1,311.7, 74.7))) * 43758.5453123);
-//}
-//
-//float simple_noise(vec3 p) {
-//	vec3 i = floor(p);
-//	vec3 f = fract(p);
-//	f = f * f * (3.0 - 2.0 * f);
-//
-//	return mix(mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
-//				mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
-//			mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
-//				mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
-//}
