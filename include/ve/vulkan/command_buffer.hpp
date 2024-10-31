@@ -194,12 +194,12 @@ namespace vulkan {
 						}
 					},
 					// depth
-					//vk::clear_value{
-					//	.depthStencil = {
-					//		.depth   = 1.0f,
-					//		.stencil = 0U
-					//	}
-					//}
+					vk::clear_value{
+						.depthStencil = {
+							.depth   = 1.0f,
+							.stencil = 0U
+						}
+					}
 				};
 
 				// area
