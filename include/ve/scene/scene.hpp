@@ -73,7 +73,8 @@ namespace ve {
 				_camera.projection().fov(70.0f);
 				_camera.update_projection();
 
-				_camera.position().z = -6.0f;
+				_camera.position().z = -4.0f;
+				//_objects[0].scale() = glm::vec3{10.0f, 10.0f, 10.0f};
 
 
 				for (vk::u32 i = 0U; i < 3U; ++i) {

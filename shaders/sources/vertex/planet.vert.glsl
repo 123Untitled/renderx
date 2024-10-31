@@ -9,7 +9,7 @@ layout(set = 0, binding = 0) uniform cam_uniform {
 
 layout(set = 1, binding = 0) uniform model_uniform {
 	mat4 model;
-} model;
+} obj;
 
 
 // -- input from cpu ----------------------------------------------------------
@@ -31,7 +31,7 @@ void main(void) {
 	gl_Position = vec4(in_position, 1.0f);
 
 	// compute model position
-	const vec4 model_position = model.model * vec4(in_position, 1.0f);
+	const vec4 model_position = obj.model * vec4(in_position, 1.0f);
 
 	// forward normal
 	out_normal = in_normal;

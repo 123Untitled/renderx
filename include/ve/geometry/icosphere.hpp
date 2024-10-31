@@ -143,7 +143,7 @@ namespace ve {
 				}
 
 
-				___self::_subdivide(2);
+				___self::_subdivide(4);
 				___self::_project_onto_sphere();
 				//___self::_recompute_normals();
 			}

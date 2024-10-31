@@ -7,7 +7,7 @@
 
 /* default constructor */
 ve::projection::projection(void) noexcept
-: _fov{90.0f}, _ratio{_4_3}, _near{0.001f}, _far{1000.0f} {
+: _fov{120.0f}, _ratio{_4_3}, _near{0.0001f}, _far{10000.0f} {
 }
 
 

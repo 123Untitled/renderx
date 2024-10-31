@@ -13,6 +13,88 @@
 namespace glfw {
 
 
+	class control final {
+
+
+		private:
+
+			// -- private types -----------------------------------------------
+
+			/* self type */
+			using ___self = glfw::control;
+
+
+			// -- private members ---------------------------------------------
+
+			/* floats */
+			float _floats[4U];
+
+			/* integers */
+			int _integers[4U];
+
+			/* booleans */
+			bool _booleans[4U];
+
+
+			// -- private static methods --------------------------------------
+
+			/* shared */
+			static auto shared(void) -> ___self& {
+				static ___self ___ins;
+				return ___ins;
+			}
+
+
+			// -- private lifecycle -------------------------------------------
+
+			/* default constructor */
+			control(void) noexcept
+			: _floats{}, _integers{}, _booleans{} {
+			}
+
+			/* deleted copy constructor */
+			control(const ___self&) = delete;
+
+			/* deleted move constructor */
+			control(___self&&) = delete;
+
+			/* destructor */
+			~control(void) noexcept = default;
+
+
+			// -- private assignment operators --------------------------------
+
+			/* deleted copy assignment operator */
+			auto operator=(const ___self&) -> ___self& = delete;
+
+			/* deleted move assignment operator */
+			auto operator=(___self&&) -> ___self& = delete;
+
+
+		public:
+
+			// -- public static methods ---------------------------------------
+
+			/* floats */
+			static auto floats(void) -> float (&)[4] {
+				return ___self::shared()._floats;
+			}
+
+			/* integers */
+			static auto integers(void) -> int (&)[4] {
+				return ___self::shared()._integers;
+			}
+
+			/* booleans */
+			static auto booleans(void) -> bool (&)[4] {
+				return ___self::shared()._booleans;
+			}
+
+	}; // class control
+
+	static_assert(sizeof(control) < 128U, "control: size is too large.");
+
+
 	// -- E V E N T S ---------------------------------------------------------
 
 	class events final {
@@ -79,6 +161,24 @@ namespace glfw {
 					case GLFW_KEY_ESCAPE:
 						ve::running::stop();
 						break;
+
+					// 1
+					case GLFW_KEY_1:
+						control::booleans()[0U] = action;
+						break;
+					// 2
+					case GLFW_KEY_2:
+						control::booleans()[1U] = action;
+						break;
+					// 3
+					case GLFW_KEY_3:
+						control::booleans()[2U] = action;
+						break;
+					// 4
+					case GLFW_KEY_4:
+						control::booleans()[3U] = action;
+						break;
+
 				}
 			}
 

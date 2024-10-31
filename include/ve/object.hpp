@@ -89,6 +89,11 @@ namespace rx {
 				return _transform.rotation();
 			}
 
+			/* scale */
+			inline auto scale(void) noexcept -> glm::vec3& {
+				return _transform.scale();
+			}
+
 			/* uniform buffer */
 			//inline auto uniform_buffer(void) noexcept -> ve::uniform_buffer& {
 			//	return _uniform_buffer;

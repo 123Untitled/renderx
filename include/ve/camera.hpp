@@ -80,7 +80,7 @@ namespace ve {
 
 			/* default constructor */
 			camera(void) noexcept
-			: _projection{}, _sensitivity{0.24f}, _velocity{5.0f},
+			: _projection{}, _sensitivity{0.24f}, _velocity{1.0f},
 			  _uniform{
 				  ._projection{_projection.matrix()},
 				  ._view{1.0f},
