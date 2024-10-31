@@ -62,6 +62,26 @@ namespace vk {
 	}
 
 
+	// -- image ---------------------------------------------------------------
+
+	/* destroy image */
+	inline auto destroy(const vk::image& image) noexcept -> void {
+
+		::vk_destroy_image(
+				vulkan::device::logical(), image, nullptr);
+	}
+
+
+	// -- image view ----------------------------------------------------------
+
+	/* destroy image view */
+	inline auto destroy(const vk::image_view& view) noexcept -> void {
+
+		::vk_destroy_image_view(
+				vulkan::device::logical(), view, nullptr);
+	}
+
+
 	// -- render pass ---------------------------------------------------------
 
 	/* destroy render pass */

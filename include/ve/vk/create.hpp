@@ -86,6 +86,36 @@ namespace vk {
 	}
 
 
+	// -- image ---------------------------------------------------------------
+
+	/* create image */
+	inline auto create(const vk::image_info& info) -> vk::image {
+
+		vk::image image;
+
+		try_execute<"failed to create image">(
+			::vk_create_image,
+			vulkan::device::logical(), &info, nullptr, &image);
+
+		return image;
+	}
+
+
+	// -- image view ----------------------------------------------------------
+
+	/* create image view */
+	inline auto create(const vk::image_view_info& info) -> vk::image_view {
+
+		vk::image_view view;
+
+		try_execute<"failed to create image view">(
+			::vk_create_image_view,
+			vulkan::device::logical(), &info, nullptr, &view);
+
+		return view;
+	}
+
+
 	// -- render pass ---------------------------------------------------------
 
 	/* create render pass */
