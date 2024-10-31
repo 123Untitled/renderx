@@ -71,12 +71,23 @@ namespace ve {
 			/* main layout */
 			static auto _main_layout(void) -> vulkan::pipeline_layout {
 
-				const vk::descriptor_set_layout layouts[] {
-					ve::descriptor_set_layout_library::get<"camera">(),
-					ve::descriptor_set_layout_library::get<"object">()
+
+				// create push constant range
+				const vk::push_constant_range range {
+					// stage flags
+					VK_SHADER_STAGE_FRAGMENT_BIT,
+					// offset
+					0U,
+					// size
+					sizeof(float)
 				};
 
-				return vulkan::pipeline_layout{layouts};
+				const vk::descriptor_set_layout layouts[] {
+					ve::descriptor_set_layout_library::get<"camera">(),
+					ve::descriptor_set_layout_library::get<"object">(),
+				};
+
+				return vulkan::pipeline_layout{layouts, range};
 			}
 
 
