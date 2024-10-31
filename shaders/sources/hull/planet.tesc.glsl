@@ -40,7 +40,7 @@ void main(void) {
 	// maximal distance for low tessellation
 	const float far = 1.0f;
 
-	float factor = 15.0f;
+	float factor = 35.0f;
 
 
 	float avg_0 = (in_distance_to_camera[1] + in_distance_to_camera[2]) * 0.5;

@@ -9,8 +9,8 @@ layout(location = 0) out vec4 out_color;
 
 void main(void) {
 
-	out_color = vec4(1.0, 1.0, 1.0, 1.0);
-	return;
+	//out_color = vec4(1.0, 1.0, 1.0, 1.0);
+	//return;
 
 	// Calcul des dérivées en espace écran
 	vec3 dFdxPos = dFdx(in_view_position);
@@ -35,14 +35,14 @@ void main(void) {
 	vec3 material_ambient = material_diffuse * 0.1;
 		//vec3(0.10) * material_diffuse;
 	vec3 material_specular = vec3(1.0);
-	float material_shininess = 64.0;
+	float material_shininess = 4.0;
 
 	// lambertian shading
 	vec3 diffuse = max(dot(normal, light_direction), 0.0) * material_diffuse;
 
 	// phong shading
 	vec3 reflection = reflect(-light_direction, normal);
-	vec3 specular = pow(max(dot(reflection, in_view_direction), 0.0), material_shininess) * material_specular;
+	vec3 specular = pow(max(dot(reflection, in_view_direction), 0.0), material_shininess) * material_specular * out_normal;
 
 	// output color
 	out_color = vec4((material_ambient + diffuse + specular), 1.0);
