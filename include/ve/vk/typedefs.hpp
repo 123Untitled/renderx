@@ -344,15 +344,6 @@ namespace vk {
 	using fence_create_flags                 = ::VkFenceCreateFlags;
 
 
-	// -- image view ----------------------------------------------------------
-
-	/* image view */
-	using image_view                         = ::VkImageView;
-
-	/* image view info */
-	using image_view_info                    = ::VkImageViewCreateInfo;
-
-
 	// -- image ---------------------------------------------------------------
 
 	/* image */
@@ -360,6 +351,24 @@ namespace vk {
 
 	/* image info */
 	using image_info                         = ::VkImageCreateInfo;
+
+	/* image tiling */
+	using image_tiling                       = ::VkImageTiling;
+
+	/* image usage flags */
+	using image_usage_flags                  = ::VkImageUsageFlags;
+
+	/* image aspect flags */
+	using image_aspect_flags                 = ::VkImageAspectFlags;
+
+
+	// -- image view ----------------------------------------------------------
+
+	/* image view */
+	using image_view                         = ::VkImageView;
+
+	/* image view info */
+	using image_view_info                    = ::VkImageViewCreateInfo;
 
 
 	// -- shader module -------------------------------------------------------
@@ -775,6 +784,9 @@ namespace vk {
 /* bind buffer memory */
 #define vk_bind_buffer_memory vkBindBufferMemory
 
+/* bind image memory */
+#define vk_bind_image_memory vkBindImageMemory
+
 /* map memory */
 #define vk_map_memory vkMapMemory
 
@@ -790,6 +802,9 @@ namespace vk {
 /* get buffer memory requirements */
 #define vk_get_buffer_memory_requirements vkGetBufferMemoryRequirements
 
+/* get image memory requirements */
+#define vk_get_image_memory_requirements vkGetImageMemoryRequirements
+
 /* get physical device memory properties */
 #define vk_get_physical_device_memory_properties vkGetPhysicalDeviceMemoryProperties
 
@@ -798,6 +813,12 @@ namespace vk {
 
 /* acquire next image khr */
 #define vk_acquire_next_image_khr vkAcquireNextImageKHR
+
+/* create image */
+#define vk_create_image vkCreateImage
+
+/* destroy image */
+#define vk_destroy_image vkDestroyImage
 
 
 // -- image view --------------------------------------------------------------

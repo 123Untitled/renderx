@@ -83,8 +83,13 @@ struct test_binding {
 	vk::descriptor_set_layout_binding binding;
 };
 
+#include "ve/vulkan/image.hpp"
+#include "ve/vulkan/depth_buffer.hpp"
+
 auto main(int, char**) -> int {
 
+	ve::image image;
+	ve::depth_buffer depth_buffer({800, 600});
 
 
 	::signal(SIGINT, [](int) {

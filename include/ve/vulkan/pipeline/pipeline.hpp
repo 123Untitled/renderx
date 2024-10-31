@@ -224,7 +224,7 @@ namespace vulkan {
 					// rasterizer discard enable
 					.rasterizerDiscardEnable = VK_FALSE,
 					// polygon mode
-					.polygonMode = VK_POLYGON_MODE_LINE,
+					.polygonMode = VK_POLYGON_MODE_FILL,
 					// cull mode
 					.cullMode = VK_CULL_MODE_BACK_BIT,
 					// front face

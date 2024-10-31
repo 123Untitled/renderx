@@ -1,5 +1,8 @@
 #include "ve/camera/projection.hpp"
 
+#define NEAR_DEFAULT 0.1f
+#define FAR_DEFAULT 100.0f
+#define FOV_DEFAULT 80.0f
 
 // -- P R O J E C T I O N -----------------------------------------------------
 
@@ -7,7 +10,7 @@
 
 /* default constructor */
 ve::projection::projection(void) noexcept
-: _fov{120.0f}, _ratio{_4_3}, _near{0.0001f}, _far{10000.0f} {
+: _fov{FOV_DEFAULT}, _ratio{_4_3}, _near{NEAR_DEFAULT}, _far{FAR_DEFAULT} {
 }
 
 

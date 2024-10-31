@@ -70,7 +70,6 @@ namespace ve {
 				_objects.emplace_back(rx::mesh_library::get<"icosphere">());
 
 				//_camera.ratio(rx::sdl::window::ratio());
-				_camera.projection().fov(70.0f);
 				_camera.update_projection();
 
 				_camera.position().z = -4.0f;
