@@ -78,7 +78,7 @@ namespace ve {
 
 			/* draw */
 			template <typename ___tb, typename ___constants>
-			auto draw(const vulkan::command_buffer<___tb>& encoder, const ___constants& constants) const -> void {
+			auto draw(const vulkan::command_buffer& encoder, const ___constants& constants) const -> void {
 
 				encoder.bind_vertex_buffer(_vertices);
 				encoder.bind_index_buffer(_indices);

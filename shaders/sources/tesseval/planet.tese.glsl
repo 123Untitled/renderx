@@ -1,5 +1,11 @@
 #version 450
 
+#include "voronoise.glsl"
+#include "worley.glsl"
+#include "gerstner_wave.glsl"
+#include "wavelet.glsl"
+//#include "curl.glsl"
+
 const uint _perms[256U] = {
 	151, 160, 137, 91, 90, 15,
 	131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
@@ -227,6 +233,7 @@ layout(location = 0) in vec3 in_normal[gl_MaxPatchVertices];
 layout(location = 0) out vec3 out_normal;
 layout(location = 1) out vec3 out_view_direction;
 layout(location = 2) out vec3 out_view_position;
+layout(location = 3) out float out_noise;
 
 
 void main(void) {
@@ -241,22 +248,28 @@ void main(void) {
 
 
 	// Calculate distance between camera and interpolated position on the sphere surface
-	float camera_distance = length(cam.position - (model.model * vec4(interpoled_position, 1.0)).xyz);
+	//float camera_distance = length(cam.position - (model.model * vec4(interpoled_position, 1.0)).xyz);
 
 	// Adjust amplitude based on the proximity of the camera
-	float amplitude = mix(0.16, 0.01, smoothstep(0.5, 0.01, camera_distance));
+	//float amplitude = mix(0.16, 0.01, smoothstep(0.5, 0.01, camera_distance));
 
 
 	const uint octaves = 1U;
-	//const float amplitude = 0.06f;
+	const float amplitude = 0.06f;
 	const float frequency = 10.5f;
-	const float lacunarity = 1.5f;
+	const float lacunarity = 2.5f;
 	const float persistence = 0.8f;
 
 
 	// get noise
-	//const float noise = fractal(octaves, amplitude, frequency, lacunarity, persistence, interpoled_position);
-	const float noise = simplex(interpoled_position * frequency) * amplitude;
+	float noise = 0.0f;
+	//noise = fractal(octaves, amplitude * 0.1, frequency*0.1, lacunarity, persistence, interpoled_position);
+	noise += simplex(interpoled_position * frequency) * amplitude;
+	noise += voronoise(interpoled_position * frequency, 1.15, 0.9) * (amplitude* 5.0f);
+	//noise += worley(interpoled_position * (frequency*1)) * (amplitude * 0.1f);
+	noise += wavelet(interpoled_position * frequency, 1.5f) * (amplitude * 0.3f);
+
+	out_noise = noise;
 
 	// interpolate position
 	vec3 perturbed_position = interpoled_position * (1.0 + noise);
@@ -283,6 +296,9 @@ void main(void) {
 
 	// output model position
 	out_view_position = model_position.xyz;
+
+
+	// compute height (distance between vertex and 0,0,0)
 }
 
 

@@ -1,31 +1,23 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
 #include "ve/renderer.hpp"
 #include "ve/time/delta.hpp"
 #include "ve/running.hpp"
 #include "ve/glfw/monitor.hpp"
 #include "ve/glfw/events.hpp"
+#include "ve/vulkan/pipeline/pipeline_library.hpp"
 
 
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
 ve::renderer::renderer(void)
-:
-	_queue{},
-	_smanager{},
-	_pool{},
-	_cmds{_pool, _smanager.size()},
-	_sync{_smanager.size()},
-	_scene{_smanager} {
+: _queue{},
+  _smanager{},
+  _pool{},
+  _cmds{_pool, _smanager.size(), VK_COMMAND_BUFFER_LEVEL_PRIMARY},
+  _sync{_smanager.size()},
+  _scene{_smanager},
+  _heightmap_compute{_smanager.swapchain().extent().width,
+					 _smanager.swapchain().extent().height} {
 }
 
 
@@ -96,7 +88,7 @@ auto ve::renderer::_draw_frame(void) -> void {
 	}
 
 
-	auto& cmd = _cmds[image_index];
+	auto cmd = _cmds[image_index];
 
 	// record command buffer (see flagbits)
 	cmd.reset();
@@ -107,11 +99,20 @@ auto ve::renderer::_draw_frame(void) -> void {
 	// start recording
 	cmd.begin();
 
+
+	_heightmap_compute.render(cmd);
+
+
 	// here call scene draw !!!
 	_scene.draw(image_index, cmd, _smanager);
 
-	// end render pass
-	cmd.end_render_pass();
+
+	/* here compute post processing
+
+
+
+
+	*/
 
 	// end recording
 	cmd.end();

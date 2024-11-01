@@ -41,6 +41,10 @@ namespace ve {
 			ve::static_map<vulkan::shader_module2, "planet">
 				_tesseval_modules;
 
+			/* compute modules */
+			ve::static_map<vulkan::shader_module2, "skybox_heightmap">
+				_compute_modules;
+
 
 			// -- private static methods --------------------------------------
 
@@ -70,6 +74,9 @@ namespace ve {
 
 				ve::get<"planet">(_tesseval_modules)
 					= vulkan::shader_module2{"shaders/spir-v/planet.tese.spv", VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT};
+
+				ve::get<"skybox_heightmap">(_compute_modules)
+					= vulkan::shader_module2{"shaders/spir-v/skybox_heightmap.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT};
 			}
 
 			/* deleted copy constructor */
@@ -118,6 +125,12 @@ namespace ve {
 			template <ve::literal ___key>
 			static auto domain_stage_info(void) -> vk::pipeline_shader_stage_info {
 				return ve::get<___key>(___self::_shared()._tesseval_modules).stage_info();
+			}
+
+			/* compute module */
+			template <ve::literal ___key>
+			static auto compute_stage_info(void) -> vk::pipeline_shader_stage_info {
+				return ve::get<___key>(___self::_shared()._compute_modules).stage_info();
 			}
 
 	}; // class shader_library

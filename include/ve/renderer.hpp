@@ -10,6 +10,7 @@
 #include "ve/vulkan/queue.hpp"
 
 #include "ve/scene/scene.hpp"
+#include "ve/heightmap_compute.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -42,13 +43,16 @@ namespace ve {
 			ve::command_pool _pool;
 
 			/* command buffers */
-			vulkan::commands<vulkan::primary> _cmds;
+			vulkan::commands _cmds;
 
 			/* sync */
 			ve::sync _sync;
 
 			/* scene */
 			ve::scene _scene;
+
+			/* heightmap compute */
+			ve::heightmap_compute _heightmap_compute;
 
 
 			// -- private methods ---------------------------------------------

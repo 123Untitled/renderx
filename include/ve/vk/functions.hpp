@@ -86,31 +86,6 @@ namespace vk {
 
 	// -- physical devices ----------------------------------------------------
 
-	/* get physical devices count */
-	inline auto get_physical_devices_count(const vk::instance& ___instance) -> vk::u32 {
-		vk::u32 ___count = 0U;
-		vk::try_execute<"failed to enumerate physical devices">(
-				::vk_enumerate_physical_devices,
-				___instance, &___count, nullptr);
-		return ___count;
-	}
-
-	/* enumerate physical devices */
-	template <typename T>
-	auto enumerate_physical_devices(const vk::instance& ___instance) -> std::vector<T> {
-
-		static_assert(sizeof(T) == sizeof(vk::physical_device),
-					  "T must be same size as vk::physical_device");
-
-		auto ___count = vk::get_physical_devices_count(___instance);
-		std::vector<T> ___devices;
-		___devices.resize(___count);
-		vk::try_execute<"failed to enumerate physical devices">(
-				::vk_enumerate_physical_devices,
-				___instance, &___count,
-				reinterpret_cast<vk::physical_device*>(___devices.data()));
-		return ___devices;
-	}
 
 	/* get device extension properties count */
 	inline auto get_device_extension_properties_count(const vk::physical_device& ___device,
@@ -146,36 +121,8 @@ namespace vk {
 		return ___features;
 	}
 
-	/* get physical device surface support */
-	inline auto get_physical_device_surface_support(const vk::physical_device& ___device,
-													const vk::surface& ___surface, vk::u32 ___family) -> bool {
-		vk::u32 ___present = VK_FALSE;
-		vk::try_execute<"failed to get physical device surface support">(
-				::vk_get_physical_device_surface_support_khr,
-				___device, ___family, ___surface, &___present);
-		return ___present == VK_TRUE;
-	}
 
 
-
-
-	// -- queue families ------------------------------------------------------
-
-	/* get physical device queue family properties count */
-	inline auto get_physical_device_queue_family_properties_count(const vk::physical_device& ___device) noexcept -> vk::u32 {
-		vk::u32 ___count = 0U;
-		::vkGetPhysicalDeviceQueueFamilyProperties(___device, &___count, nullptr);
-		return ___count;
-	}
-
-	/* get physical device queue family properties */
-	inline auto get_physical_device_queue_family_properties(const vk::physical_device& ___device) -> std::vector<vk::queue_family_properties> {
-		auto ___count = vk::get_physical_device_queue_family_properties_count(___device);
-		std::vector<vk::queue_family_properties> ___properties;
-		___properties.resize(___count);
-		::vkGetPhysicalDeviceQueueFamilyProperties(___device, &___count, ___properties.data());
-		return ___properties;
-	}
 
 
 

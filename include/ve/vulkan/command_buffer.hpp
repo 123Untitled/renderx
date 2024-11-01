@@ -1,15 +1,5 @@
-/* ------------------------------------------------------------------------- */
-/*        :::::::::  :::::::::: ::::    ::: :::::::::  :::::::::: :::::::::  */
-/*       :+:    :+: :+:        :+:+:   :+: :+:    :+: :+:        :+:    :+:  */
-/*      +:+    +:+ +:+        :+:+:+  +:+ +:+    +:+ +:+        +:+    +:+   */
-/*     +#++:++#:  +#++:++#   +#+ +:+ +#+ +#+    +:+ +#++:++#   +#++:++#:     */
-/*    +#+    +#+ +#+        +#+  +#+#+# +#+    +#+ +#+        +#+    +#+     */
-/*   #+#    #+# #+#        #+#   #+#+# #+#    #+# #+#        #+#    #+#      */
-/*  ###    ### ########## ###    #### #########  ########## ###    ###       */
-/* ------------------------------------------------------------------------- */
-
-#ifndef ___RENDERX_VULKAN_COMMAND_BUFFER___
-#define ___RENDERX_VULKAN_COMMAND_BUFFER___
+#ifndef ___ve_vulkan_command_buffer___
+#define ___ve_vulkan_command_buffer___
 
 #include "ve/vulkan/swapchain.hpp"
 #include "ve/vulkan/render_pass.hpp"
@@ -19,8 +9,6 @@
 #include "ve/vulkan/index_buffer.hpp"
 #include "ve/vulkan/vertex_buffer.hpp"
 
-#include "ve/vulkan/commands.hpp"
-
 
 // -- V U L K A N -------------------------------------------------------------
 
@@ -29,15 +17,7 @@ namespace vulkan {
 
 	// -- C O M M A N D  B U F F E R ------------------------------------------
 
-	template <typename ___type>
-	class __attribute__((packed)) command_buffer final {
-
-
-		// -- assertions ------------------------------------------------------
-
-		/* check for valid level type */
-		static_assert(vulkan::is_level<___type>,
-				"command_buffer: invalid level type");
+	class command_buffer final {
 
 
 		private:
@@ -45,30 +25,35 @@ namespace vulkan {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = vulkan::command_buffer<___type>;
+			using ___self = vulkan::command_buffer;
 
 
 			// -- private members ---------------------------------------------
 
 			/* buffer */
-			vk::command_buffer _cbuffer;
+			vk::command_buffer _buffer;
 
 
 		public:
 
 			// -- public lifecycle --------------------------------------------
 
-			/* deleted default constructor */
-			command_buffer(void) = delete;
+			/* default constructor */
+			command_buffer(void) noexcept = default;
+
+			/* buffer constructor */
+			command_buffer(const vk::command_buffer& buffer) noexcept
+			: _buffer{buffer} {
+			}
 
 			/* deleted copy constructor */
 			command_buffer(const ___self&) = delete;
 
-			/* deleted move constructor */
-			command_buffer(___self&&) = delete;
+			/* move constructor */
+			command_buffer(___self&&) noexcept = default;
 
-			/* deleted destructor */
-			~command_buffer(void) = delete;
+			/* destructor */
+			~command_buffer(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
@@ -76,8 +61,8 @@ namespace vulkan {
 			/* deleted copy assignment operator */
 			auto operator=(const ___self&) -> ___self& = delete;
 
-			/* deleted move assignment operator */
-			auto operator=(___self&&) -> ___self& = delete;
+			/* move assignment operator */
+			auto operator=(___self&&) noexcept -> ___self& = default;
 
 
 			// -- public methods ----------------------------------------------
@@ -97,27 +82,27 @@ namespace vulkan {
 				// try to reset command buffer
 				vk::try_execute<"failed to reset command buffer">(
 					::vk_reset_command_buffer,
-					_cbuffer, 0U);
+					_buffer, 0U);
 			}
 
 			/* execute secondary commands */
-			auto execute_secondary_commands(const vulkan::commands<vulkan::secondary>& cmds)
-				const noexcept -> void requires (std::same_as<___type, vulkan::primary>) {
-
-				/* If any element of pCommandBuffers was not recorded with the VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT flag,
-				   and it was recorded into any other primary command buffer which is currently in the executable or recording state,
-				   that primary command buffer becomes invalid.
-				   */
-
-				// execute secondary command buffers
-				::vk_cmd_execute_commands(
-						// command buffer
-						_cbuffer,
-						// command buffer count
-						cmds.size(),
-						// command buffers
-						cmds.data());
-			}
+			//auto execute_secondary_commands(const vulkan::commands& cmds)
+			//	const noexcept -> void {
+			//
+			//	/* If any element of pCommandBuffers was not recorded with the VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT flag,
+			//	   and it was recorded into any other primary command buffer which is currently in the executable or recording state,
+			//	   that primary command buffer becomes invalid.
+			//	   */
+			//
+			//	// execute secondary command buffers
+			//	::vk_cmd_execute_commands(
+			//			// command buffer
+			//			_buffer,
+			//			// command buffer count
+			//			cmds.size(),
+			//			// command buffers
+			//			cmds.data());
+			//}
 
 
 			/* begin */
@@ -168,7 +153,7 @@ namespace vulkan {
 				// try to begin command buffer
 				vk::try_execute<"failed to begin command buffer">(
 						::vk_begin_command_buffer,
-						_cbuffer, &info);
+						_buffer, &info);
 			}
 
 			/* end */
@@ -177,7 +162,7 @@ namespace vulkan {
 				// stop recording state, start executable state
 				vk::try_execute<"failed to end command buffer">(
 						::vk_end_command_buffer,
-						_cbuffer);
+						_buffer);
 			}
 
 			/* begin render pass */
@@ -228,7 +213,7 @@ namespace vulkan {
 				// begin render pass
 				::vk_cmd_begin_render_pass(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// render pass begin info
 						&info,
 						// subpass contents
@@ -239,7 +224,7 @@ namespace vulkan {
 			auto end_render_pass(void) const noexcept -> void {
 
 				// terminate render pass
-				::vk_cmd_end_render_pass(_cbuffer);
+				::vk_cmd_end_render_pass(_buffer);
 			}
 
 			/* set viewport */
@@ -258,7 +243,7 @@ namespace vulkan {
 				// set viewport
 				::vk_cmd_set_viewport(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// first viewport
 						0U,
 						// viewport count
@@ -280,7 +265,7 @@ namespace vulkan {
 				// set scissor
 				::vk_cmd_set_scissor(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// first scissor
 						0U,
 						// scissor count
@@ -301,7 +286,7 @@ namespace vulkan {
 				// bind vertex buffers
 				::vk_cmd_bind_vertex_buffers(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// first binding
 						0U,
 						// binding count
@@ -321,7 +306,7 @@ namespace vulkan {
 				// bind vertex buffers
 				::vk_cmd_bind_vertex_buffers(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// first binding
 						0U,
 						// binding count
@@ -338,7 +323,7 @@ namespace vulkan {
 				// bind index buffer
 				::vk_cmd_bind_index_buffer(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// buffer
 						ibuffer.underlying(),
 						// offset
@@ -354,7 +339,7 @@ namespace vulkan {
 				// draw
 				::vk_cmd_draw(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// vertex count
 						vertex_count,
 						// instance count
@@ -372,7 +357,7 @@ namespace vulkan {
 				// draw indexed
 				::vk_cmd_draw_indexed(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// index count
 						index_count,
 						// instance count
@@ -386,12 +371,50 @@ namespace vulkan {
 				);
 			}
 
-			/* bind pipeline */
-			auto bind_pipeline(const vk::pipeline& pipeline,
-										const vk::pipeline_bind_point& point
-										= VK_PIPELINE_BIND_POINT_GRAPHICS) const noexcept -> void {
-				::vk_cmd_bind_pipeline(_cbuffer, point, pipeline);
+			/* bind graphics pipeline */
+			auto bind_graphics_pipeline(const vk::pipeline&) const noexcept -> void;
+
+			/* bind compute pipeline */
+			auto bind_compute_pipeline(const vk::pipeline&) const noexcept -> void;
+
+			/* dispatch */
+			auto dispatch(const vk::u32, const vk::u32, const vk::u32) const noexcept -> void;
+
+			/* pipeline barrier */
+			auto pipeline_barrier(const vk::pipeline_stage_flags& src_stage,
+								  const vk::pipeline_stage_flags& dst_stage,
+								  const vk::dependency_flags& dependency,
+								  const vk::u32& memory_barrier_count,
+								  const vk::memory_barrier* memory_barriers,
+								  const vk::u32& buffer_memory_barrier_count,
+								  const vk::buffer_memory_barrier* buffer_memory_barriers,
+								  const vk::u32& image_memory_barrier_count,
+								  const vk::image_memory_barrier* image_memory_barriers) const noexcept -> void {
+
+				// pipeline barrier
+				::vk_cmd_pipeline_barrier(
+						// command buffer
+						_buffer,
+						// source stage
+						src_stage,
+						// destination stage
+						dst_stage,
+						// dependency flags
+						dependency,
+						// memory barrier count
+						memory_barrier_count,
+						// memory barriers
+						memory_barriers,
+						// buffer memory barrier count
+						buffer_memory_barrier_count,
+						// buffer memory barriers
+						buffer_memory_barriers,
+						// image memory barrier count
+						image_memory_barrier_count,
+						// image memory barriers
+						image_memory_barriers);
 			}
+
 
 			/* push constants */
 			template <typename ___constants>
@@ -404,7 +427,7 @@ namespace vulkan {
 				// push constants
 				::vk_cmd_push_constants(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// pipeline layout
 						pipeline.layout(),
 						// stage flags
@@ -429,7 +452,7 @@ namespace vulkan {
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// bind point
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
 						// pipeline layout
@@ -453,7 +476,7 @@ namespace vulkan {
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// bind point
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
 						// pipeline layout
@@ -484,7 +507,7 @@ namespace vulkan {
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
 						// command buffer
-						_cbuffer,
+						_buffer,
 						// bind point
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
 						// pipeline layout
@@ -501,6 +524,100 @@ namespace vulkan {
 						dynamic_offsets);
 			}
 
+			auto bind_compute_descriptor_sets(const vk::pipeline_layout& layout,
+											  // first set
+											  const vk::u32& first_set,
+											  // descriptor set count
+											  const vk::u32& set_count,
+											  // descriptor sets
+											  const vk::descriptor_set* sets,
+											  // dynamic offset count
+											  const vk::u32& dynamic_offset_count = 0U,
+											  // dynamic offsets
+											  const vk::u32* dynamic_offsets = nullptr
+											  ) const noexcept -> void {
+
+				// bind descriptor sets
+				::vk_cmd_bind_descriptor_sets(
+						// command buffer
+						_buffer,
+						// bind point
+						VK_PIPELINE_BIND_POINT_COMPUTE,
+						// pipeline layout
+						layout,
+						// first set
+						first_set,
+						// descriptor set count
+						set_count,
+						// descriptor sets
+						sets,
+						// dynamic offset count
+						dynamic_offset_count,
+						// dynamic offsets
+						dynamic_offsets);
+			}
+
+
+			/*
+			void vkCmdResolveImage(
+					VkCommandBuffer                             commandBuffer,
+					VkImage                                     srcImage,
+					VkImageLayout                               srcImageLayout,
+					VkImage                                     dstImage,
+					VkImageLayout                               dstImageLayout,
+					uint32_t                                    regionCount,
+					const VkImageResolve*                       pRegions);
+					*/
+
+
+			/* resolve image */
+			auto resolve_image(const vk::image& src,
+							   const vk::image& dst,
+							   const vk::extent3D& extent) const noexcept -> void {
+
+				// region
+				const vk::image_resolve region {
+					// src subresource
+					.srcSubresource = vk::image_subresource_layers{
+						.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+						.mipLevel       = 0U,
+						.baseArrayLayer = 0U,
+						.layerCount     = 1U
+					},
+					// src offset
+					.srcOffset = vk::offset3D{0, 0, 0},
+					// dst subresource
+					.dstSubresource = vk::image_subresource_layers{
+						.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+						.mipLevel       = 0U,
+						.baseArrayLayer = 0U,
+						.layerCount     = 1U
+					},
+					// dst offset
+					.dstOffset = vk::offset3D{0, 0, 0},
+					// extent
+					.extent = extent
+				};
+
+				// resolve image
+				::vk_cmd_resolve_image(
+						// command buffer
+						_buffer,
+						// src image
+						src,
+						// src image layout
+						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+						// dst image
+						dst,
+						// dst image layout
+						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+						// region count
+						1U,
+						// regions
+						&region);
+			}
+
+
 
 			/* record */
 			template <typename ___pconst, typename ___t>
@@ -513,23 +630,23 @@ namespace vulkan {
 						const ___pconst& constants) const -> void {
 
 				// begin recording
-				___self::begin();
+				this->begin();
 
 				// begin render pass
-				___self::begin_render_pass(swapchain, render_pass, framebuffer);
+				this->begin_render_pass(swapchain, render_pass, framebuffer);
 
 				// set viewport
-				___self::set_viewport(swapchain);
+				this->set_viewport(swapchain.extent());
 
 				// set scissor
-				___self::set_scissor(swapchain);
+				this->set_scissor(swapchain.extent());
 
 
 				// for earch mesh
 				{
 
 					// bind graphics pipeline
-					___self::bind_pipeline(pipeline);
+					bind_graphics_pipeline(pipeline);
 
 
 					// bind vertex buffer
@@ -557,16 +674,13 @@ namespace vulkan {
 			}
 
 
-			// -- public accessors --------------------------------------------
+			// -- public conversion operators ---------------------------------
 
-			/* underlying */
-			auto underlying(void) const noexcept -> const vk::command_buffer& {
-				return _cbuffer;
-			}
+			/* const vk::command_buffer& conversion operator */
+			operator const vk::command_buffer&(void) const noexcept;
 
 	}; // class command_buffer
 
-
 } // namespace vulkan
 
-#endif // ___RENDERX_VULKAN_COMMAND_BUFFER___
+#endif // ___ve_vulkan_command_buffer___

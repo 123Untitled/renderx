@@ -27,22 +27,66 @@ declare -r inc_dir=$cwd_dir'/include'
 # spir-v directory
 declare -r spv_dir=$cwd_dir'/spir-v'
 
+# dependencies directory
+declare -r dep_dir=$cwd_dir'/.deps'
+
 
 # -- F I L E S ----------------------------------------------------------------
 
 # this script
 declare -r script=${0:a}
 
+# log file
+declare -r log_file=$cwd_dir'/.log'
+
+# source files
+declare -r srcs=($src_dir'/'**'/'*'.glsl'(.N))
 
 
+# -- C O M P I L E R ----------------------------------------------------------
 
-# -- H L S L ------------------------------------------------------------------
+# compiler
+declare -r cc='glslc'
 
-# function to check required tools
+# language
+declare -r lang='glsl'
+
+# optimization
+declare -r opt='0'
+
+# standard
+declare -r std='450'
+
+# format
+declare -r fmt='bin'
+
+# environment
+declare -r env='vulkan1.3'
+
+# target
+declare -r target='spv1.5'
+
+
+# compiler flags
+local -r cflags=('-x'$lang
+				 '-O'$opt
+				 '-Werror'
+				 '-I'$inc_dir
+				 '-mfmt='$fmt
+				 '-std='$std
+				 '--target-env='$env
+				 '--target-spv='$target)
+
+
+# -- F U N C T I O N S --------------------------------------------------------
+
+
+# -- check tools --------------------------------------------------------------
+
 function _check_tools() {
 
 	# required tools
-	local -r required=('slangc' 'glslc' 'dxc')
+	local -r required=('glslc')
 	
 	# loop over required tools
 	for tool in $required; do
@@ -55,195 +99,129 @@ function _check_tools() {
 	done
 }
 
-# need compilation
+
+# -- need compilation ---------------------------------------------------------
+
 function _need_compilation() {
 
-	# source file: $1
-	# spir-v file: $2
+	# $1: spir-v file
+	# $2: dependency file
 
-	if [[ -f $2 ]] && [[ $2 -nt $1 ]] && [[ $2 -nt $script ]]; then
-		return 1
+	# check if object or dependency file is missing
+	if [[ ! -f $1 ]] || [[ ! -f $2 ]] || [[ $script -nt $1 ]]; then
+		return 0
 	fi
 
-	return 0
-}
+	# loop over words in dependency file
+	for word in ${=$(<$2)}; do
 
+		# check if word is not target or escape
+		if [[ $word != '\' ]] && [[ $word != *':' ]]; then
 
-function _compile_hlsl() {
-
-	# source files
-	local -r srcs=($src_dir'/'**'/'*'.hlsl'(.N))
-
-	# count of compiled files
-	local count=0
-
-	# compiler
-	local -r cc='dxc'
-
-	# dxcflags
-	local dxcflags=('-E' 'main'
-					 '-fdiagnostics-format=clang'
-					 '-HV' '2021'
-					 '-I'$inc_dir
-					 '-WX'
-					 '-Zi'
-					 '-O0'
-					 '-spirv'
-					 '-fspv-entrypoint-name=' 'main'
-					 '-fspv-target-env=vulkan1.2'
-					 '-fspv-use-legacy-buffer-matrix-order'
-				 )
-
-					 #'-fspv-use-vulkan-memory-model'
-					 #'-fspv-use-dx-layout'
-
-	local -A profiles
-
-	# vertex shader profile
-	profiles[vs]='vs_6_8'
-	# pixel shader profile
-	profiles[ps]='ps_6_8'
-	# hull shader profile
-	profiles[hs]='hs_6_8'
-	# domain shader profile
-	profiles[ds]='ds_6_8'
-	# geometry shader profile
-	profiles[gs]='gs_6_8'
-	# compute shader profile
-	profiles[cs]='cs_6_8'
-
-
-	# loop over glsl files
-	for file in $srcs; do
-
-		# file have this pattern: 'filename.[vs|ps|hs|ds|gs|cs].hlsl'
-
-		# extract stage
-		local stage=${file:t:r:e}
-
-		# check if shader type is valid
-		if [[ ! -v profiles[$stage] ]]; then
-			echo 'invalid shader type' $stype
-			continue
-		fi
-
-		# create spir-v path
-		local spv=$spv_dir'/'${file:t:r}'.spv'
-
-		# check if need compilation
-		_need_compilation $file $spv || continue
-
-
-		if $cc '-T' $profiles[$stage] $dxcflags $file -Fo $spv; then
-			echo -n $success'[✓]'$reset
-			count=$((count + 1))
-		else
-			echo -n $error'[x]'$reset
-			break
+			# check if dependency is missing
+			[[ $word -nt $1 ]] && return 0
 		fi
 	done
 
-	# print success
-	if [[ $count -gt 0 ]]; then
-		echo '\n'$info'[>]'$reset $count 'spir-v compiled.'
-	fi
+	# no need to compile
+	return 1
 }
 
 
-function _compile_glsl() {
+# -- compile ------------------------------------------------------------------
 
-	# source files
-	local -r srcs=($src_dir'/'**'/'*'.glsl'(.N))
+function _compile() {
 
 	# count of compiled files
 	local count=0
-
-	# compiler
-	local -r cc='glslc'
-
-	# glslc flags
-	local -r glflags=('-x' 'glsl' '-Werror' '-O0'
-					  '-mfmt=bin'
-					  '-std=450'
-					  '--target-env=vulkan1.3'
-					  '--target-spv=spv1.5'
-				)
 
 	# loop over glsl files
 	for file in $srcs; do
 
 		# file have this pattern: 'filename.[vert|frag|tesc|tese|geom|comp].glsl'
 
-		# extract shader type
-		local stype=${file:t:r:e}
+		# extract stage
+		local stage='-fshader-stage='${file:t:r:e}
 
 		# create spir-v path
 		local spv=$spv_dir'/'${file:t:r}'.spv'
 
-		# check if need compilation
-		_need_compilation $file $spv || continue
+		# create dependency path
+		local dep=$dep_dir'/'${file:t:r}'.d'
 
-		if $cc '-fshader-stage='$stype $glflags $file -o $spv; then
-			echo -n $success'[✓]'$reset
+		# check if need compilation
+		_need_compilation $spv $dep || continue
+
+
+		# compile glsl to spir-v
+		if $cc $stage $cflags -MD -MF $dep -MT $spv -o $spv $file &> $log_file; then
+			echo $success'[✓]'$reset ${file:t}
 			count=$((count + 1))
 		else
-			echo -n $error'[x]'$reset
-			break
+			[[ $count -gt 0 ]] && echo
+			echo $error'[x]'$reset ${file:t}
+			local -r log_content=$(<$log_file)
+			echo ${log_content#$file:}
+			exit 1
 		fi
 	done
 
 	# print success
 	if [[ $count -gt 0 ]]; then
 		echo '\n'$info'[>]'$reset $count 'spir-v compiled.'
+	else
+		echo $info'[>]'$reset 'shaders are up to date.'
 	fi
 }
 
 
+# -- prepare ------------------------------------------------------------------
 
 function _prepare() {
 
 	# create folder
-	if ! mkdir -p $spv_dir; then
+	if ! mkdir -p $spv_dir $dep_dir; then
 		echo 'failed to create spir-v directory.'
 	fi
 }
 
+
+# -- clean --------------------------------------------------------------------
+
+# clean generated files
 function _clean() {
 
 	# remove all spir-v files
-	local -r deleted=$(rm -vrf $spv_dir | wc -l)
+	local -r deleted=$(rm -vrf $spv_dir $dep_dir $log_file | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
 }
 
 
+# -- build --------------------------------------------------------------------
+
+function _build() {
+
+	# check required tools
+	_check_tools
+
+	# prepare spir-v directory
+	_prepare
+
+	# compile glsl files
+	_compile
+}
+
+
 # -- M A I N ------------------------------------------------------------------
-
-# check required tools
-_check_tools
-
-# prepare spir-v directory
-_prepare
 
 case $1 in
 
 	clean|clear|fclean|rm)
 		_clean
 		;;
-	slang)
-		echo 'not implemented yet.'
-		;;
-	glsl)
-		_compile_glsl
-		;;
-	hlsl)
-		_compile_hlsl
-		;;
 	*)
-		_compile_glsl
-		_compile_hlsl
+		_build
 		;;
 esac
-
-

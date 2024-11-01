@@ -36,9 +36,9 @@ void main(void) {
 
 
 	// minimal distance for high tessellation
-	const float near = 0.01f;
+	const float near = 0.21f;
 	// maximal distance for low tessellation
-	const float far = 0.15f;
+	const float far = 0.35f;
 
 	float factor = 200.0f;
 

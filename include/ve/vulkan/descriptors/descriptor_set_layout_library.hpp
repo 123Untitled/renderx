@@ -26,7 +26,7 @@ namespace ve {
 			// -- private members ---------------------------------------------
 
 			ve::static_map<vulkan::descriptor_set_layout,
-				"camera", "object"> _layouts;
+				"camera", "object", "skybox_heightmap"> _layouts;
 
 
 			// -- private static methods --------------------------------------
@@ -44,7 +44,8 @@ namespace ve {
 			descriptor_set_layout_library(void)
 			: _layouts{
 				___self::_camera_layout(),
-				___self::_object_layout()} {
+				___self::_object_layout(),
+				___self::_skybox_heightmap()} {
 			}
 
 			/* deleted copy constructor */
@@ -71,18 +72,6 @@ namespace ve {
 			/* camera layout */
 			static auto _camera_layout(void) -> vulkan::descriptor_set_layout {
 
-				/*
-				vulkan::descriptor_set_layout::builder builder;
-
-				// camera uniform
-				builder.add_binding(
-						0,
-						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-						VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-
-				return builder.build();
-				*/
-
 				const vk::descriptor_set_layout_binding binding[1U]{
 					{
 						// binding
@@ -108,18 +97,6 @@ namespace ve {
 			/* object layout */
 			static auto _object_layout(void) -> vulkan::descriptor_set_layout {
 
-				/*
-				vulkan::descriptor_set_layout::builder builder;
-
-				// model uniform
-				builder.add_binding(
-						0,
-						VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-						VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-
-				return builder.build();
-				*/
-
 				const vk::descriptor_set_layout_binding binding[1U]{
 					{
 						// binding
@@ -133,6 +110,27 @@ namespace ve {
 						.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT
 									//| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
 									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					}
+				};
+
+				return vulkan::descriptor_set_layout{binding};
+			}
+
+			/* skybox heightmap layout */
+			static auto _skybox_heightmap(void) -> vulkan::descriptor_set_layout {
+
+				const vk::descriptor_set_layout_binding binding[1U]{
+					{
+						// binding
+						.binding = 0U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, // use for writing to image (heightmap)
+						// count
+						.descriptorCount = 1U,
+						// stage
+						.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT,
 						// immutable samplers
 						.pImmutableSamplers = nullptr
 					}

@@ -1,15 +1,5 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#ifndef ___RENDERX_VULKAN_INSTANCE___
-#define ___RENDERX_VULKAN_INSTANCE___
+#ifndef ___ve_vulkan_instance___
+#define ___ve_vulkan_instance___
 
 #include "ve/vk/unique.hpp"
 #include "ve/vulkan/physical_device.hpp"
@@ -138,10 +128,10 @@ namespace vulkan {
 			static auto shared(void) -> const vk::instance&;
 
 			/* physical devices */
-			static auto physical_devices(void) -> const std::vector<vulkan::physical_device>&;
+			static auto physical_devices(void) -> std::vector<vk::physical_device>;
 
 	}; // class instance
 
 } // namespace vulkan
 
-#endif // ___RENDERX_VULKAN_INSTANCE___
+#endif // ___ve_vulkan_instance___

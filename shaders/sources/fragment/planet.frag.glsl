@@ -1,5 +1,8 @@
 #version 450
 
+#extension GL_EXT_debug_printf : enable
+#extension GL_EXT_spirv_intrinsics : enable
+
 
 layout(push_constant) uniform push_constants {
 	float time;
@@ -8,8 +11,10 @@ layout(push_constant) uniform push_constants {
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec3 in_view_direction;
 layout(location = 2) in vec3 in_view_position;
+layout(location = 3) in float in_noise;
 
 layout(location = 0) out vec4 out_color;
+
 
 /* ajust saturation */
 vec3 adjust_saturation(const vec3 color, const float saturation) {
@@ -54,15 +59,21 @@ void main(void) {
 
 
 	// light direction
-	vec3 light_direction = normalize(vec3(-0.0, -1.0, -1.0));
+	vec3 light_direction = normalize(vec3(-0.0, -0.0, -1.0));
+	float light_intensity = 0.6;
+
+	vec3 material_diffuse = vec3(0.7);
+			//0.9 - (1.0 - (in_noise * 3.0)),
+			//0.3 - (1.0 - (in_noise * 6.0)),
+			//0.1 - (1.0 - (in_noise * 9.0))
+			//) * 0.7;
 
 	// material properties
-	vec3 material_diffuse = vec3(0.3, 0.3, 0.3);
-	//vec3 material_diffuse = vec3(0.2, 0.22, 0.4);
-	vec3 material_ambient = material_diffuse * 0.1;
-		//vec3(0.10) * material_diffuse;
-	vec3 material_specular = vec3(1.2);
-	float material_shininess = 8.0;
+	//vec3 material_diffuse = vec3(0.3 * (1.0 - in_noise * 9.0),
+	//							 0.6 * (1.0 - in_noise * 6.0),
+	//							 0.9 * (1.0 - in_noise * 3.0));
+		//vec3(1.0, 1.0, 1.0) *
+	vec3 material_ambient = vec3(0.002);
 
 
 	// -- diffuse -------------------------------------------------------------
@@ -74,12 +85,15 @@ void main(void) {
 	const float shadow_factor = (1.0f - lamb);
 
 	// compute diffuse color
-	vec3 diffuse = material_diffuse * lamb;
+	vec3 diffuse = material_diffuse * lamb * light_intensity;
 
 	// Appliquer une saturation plus élevée dans les zones d'ombre
-	float saturation_boost = 1.0 + (shadow_factor * 7.0);  // Par exemple, augmenter la saturation dans l'ombre
+	float saturation_boost = 1.0 + (shadow_factor * 2.0);  // Par exemple, augmenter la saturation dans l'ombre
 
-	vec3 shadow_color = adjust_saturation(diffuse, saturation_boost);
+	vec3 shadow_color = adjust_saturation(
+			diffuse
+			//(out_normal*0.2) * diffuse
+			, saturation_boost);
 
 	diffuse = mix(diffuse, shadow_color, shadow_factor);
 
@@ -87,20 +101,26 @@ void main(void) {
 	// -- specular ------------------------------------------------------------
 
 	// phong shading
+	vec3 specular_color = vec3(1.0, 0.8, 1.0);
+	float specular_intensity = 1.0;
+	float specular_shininess = 64.0;
 	vec3 reflection = reflect(-light_direction, normal);
-	vec3 specular = pow(max(dot(reflection, in_view_direction), 0.0), material_shininess) * material_specular * out_normal;
+	float specular_value = pow(max(dot(reflection, in_view_direction), 0.0), specular_shininess);
+	vec3 specular = specular_value * specular_intensity * specular_color * light_intensity;
 
 
 	// -- rim light -----------------------------------------------------------
 
 	// rim light
-	float rim_strength = 1.8;
+	float rim_strength = 1.5;
+	float rim_shininess = 6.0;
+	vec3 rim_color = vec3(0.0, 1, 1);
 	float rim = smoothstep(0.0, 1.0, pow(
 						 1.0 - max(
-							dot(in_view_direction, normal), 0.0), material_shininess)
+							dot(in_view_direction, normal), 0.0), rim_shininess)
 	) * rim_strength;
 
-	diffuse += (rim*out_normal);
+	diffuse += vec3(rim) * rim_color;
 
 
 
@@ -121,7 +141,7 @@ void main(void) {
 	// -- output --------------------------------------------------------------
 
 	// output color
-	out_color = vec4((material_ambient + diffuse + specular), 1.0);
+	out_color = vec4((diffuse + specular + material_ambient), 1.0);
 
 
 
@@ -134,7 +154,7 @@ void main(void) {
 	float rand = random(gl_FragCoord.xy * pc.time);
 
 	// noise factor
-	const float noise_factor = mix(0.03, 1.0, pow(luminance, 2.0));
+	const float noise_factor = mix(0.13, 1.0, pow(luminance, 2.0));
 
 	rand *= noise_factor;
 
@@ -144,5 +164,5 @@ void main(void) {
 	// -- output --------------------------------------------------------------
 
 	// output color
-	out_color = out_color + vec4(dithering, 0.0);
+	//out_color = out_color + vec4(dithering, 0.0);
 }

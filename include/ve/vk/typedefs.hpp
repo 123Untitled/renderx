@@ -25,8 +25,6 @@
 #include <vector>
 
 
-//#include <vector>
-
 // -- V K  N A M E S P A C E --------------------------------------------------
 
 namespace vk {
@@ -123,7 +121,7 @@ namespace vk {
 	using device                             = ::VkDevice;
 
 	/* device info */
-	using device_info                        = ::VkDeviceCreateInfo;
+	using device_create_info                 = ::VkDeviceCreateInfo;
 
 	/* device queue info */
 	using device_queue_info                  = ::VkDeviceQueueCreateInfo;
@@ -263,10 +261,8 @@ namespace vk {
 	/* graphics pipeline info */
 	using graphics_pipeline_info             = ::VkGraphicsPipelineCreateInfo;
 
-
 	/* pipeline bind point */
 	using pipeline_bind_point                = ::VkPipelineBindPoint;
-
 
 	/* pipeline shader stage info */
 	using pipeline_shader_stage_info         = ::VkPipelineShaderStageCreateInfo;
@@ -304,12 +300,20 @@ namespace vk {
 	/* pipeline dynamic state info */
 	using pipeline_dynamic_state_info        = ::VkPipelineDynamicStateCreateInfo;
 
-
 	/* pipeline stage flags */
 	using pipeline_stage_flags               = ::VkPipelineStageFlags;
 
 	/* primitive topology */
 	using primitive_topology                  = ::VkPrimitiveTopology;
+
+
+	// -- compute pipeline ----------------------------------------------------
+
+	/* compute pipeline info */
+	using compute_pipeline_info              = ::VkComputePipelineCreateInfo;
+
+	/* compute pipeline create flags */
+	using compute_pipeline_create_flags      = ::VkPipelineCreateFlags;
 
 
 
@@ -351,6 +355,15 @@ namespace vk {
 
 	/* image info */
 	using image_info                         = ::VkImageCreateInfo;
+
+	/* image layout */
+	using image_layout                       = ::VkImageLayout;
+
+	/* image resolve */
+	using image_resolve                      = ::VkImageResolve;
+
+	/* image subresource layers */
+	using image_subresource_layers           = ::VkImageSubresourceLayers;
 
 	/* image tiling */
 	using image_tiling                       = ::VkImageTiling;
@@ -465,6 +478,20 @@ namespace vk {
 	/* mapped memory range */
 	using mapped_memory_range                = ::VkMappedMemoryRange;
 
+	/* memory barrier */
+	using memory_barrier                     = ::VkMemoryBarrier;
+
+	/* image memory barrier */
+	using image_memory_barrier               = ::VkImageMemoryBarrier;
+
+	/* buffer memory barrier */
+	using buffer_memory_barrier              = ::VkBufferMemoryBarrier;
+
+
+
+	/* dependency flags */
+	using dependency_flags                   = ::VkDependencyFlags;
+
 
 
 	// -- vertex --------------------------------------------------------------
@@ -495,6 +522,9 @@ namespace vk {
 	/* offset2D */
 	using offset2D                           = ::VkOffset2D;
 
+	/* offset3D */
+	using offset3D                           = ::VkOffset3D;
+
 
 	/* format */
 	using format                             = ::VkFormat;
@@ -504,6 +534,9 @@ namespace vk {
 
 	/* extent2D */
 	using extent2D                           = ::VkExtent2D;
+
+	/* extent3D */
+	using extent3D                           = ::VkExtent3D;
 
 	/* clear value */
 	using clear_value                        = ::VkClearValue;
@@ -545,6 +578,9 @@ namespace vk {
 
 	/* descriptor buffer info */
 	using descriptor_buffer_info             = ::VkDescriptorBufferInfo;
+
+	/* descriptor image info */
+	using descriptor_image_info              = ::VkDescriptorImageInfo;
 
 	/* write descriptor info */
 	using write_descriptor_set               = ::VkWriteDescriptorSet;
@@ -700,6 +736,15 @@ namespace vk {
 /* cmd set scissor */
 #define vk_cmd_set_scissor vkCmdSetScissor
 
+/* cmd dispatch */
+#define vk_cmd_dispatch vkCmdDispatch
+
+/* cmd resolve image */
+#define vk_cmd_resolve_image vkCmdResolveImage
+
+/* cmd pipeline barrier */
+#define vk_cmd_pipeline_barrier vkCmdPipelineBarrier
+
 
 // -- render pass -------------------------------------------------------------
 
@@ -724,6 +769,9 @@ namespace vk {
 /* create pipeline */
 #define vk_create_graphics_pipelines vkCreateGraphicsPipelines
 
+/* create compute pipeline */
+#define vk_create_compute_pipelines vkCreateComputePipelines
+
 /* destroy pipeline */
 #define vk_destroy_pipeline vkDestroyPipeline
 
@@ -735,6 +783,7 @@ namespace vk {
 
 /* destroy pipeline layout */
 #define vk_destroy_pipeline_layout vkDestroyPipelineLayout
+
 
 
 // -- descriptor pool ---------------------------------------------------------
@@ -879,8 +928,19 @@ namespace vk {
 #define vk_destroy_semaphore vkDestroySemaphore
 
 
+// -- physical device ---------------------------------------------------------
+
 /* get physical device format properties */
 #define vk_get_physical_device_format_properties vkGetPhysicalDeviceFormatProperties
+
+/* get physical device queue family properties */
+#define vk_get_physical_device_queue_family_properties vkGetPhysicalDeviceQueueFamilyProperties
+
+#define vk_get_physical_device_surface_capabilities_khr vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+#define vk_get_physical_device_surface_support_khr vkGetPhysicalDeviceSurfaceSupportKHR
+#define vk_get_physical_device_surface_formats_khr vkGetPhysicalDeviceSurfaceFormatsKHR
+#define vk_get_physical_device_surface_present_modes_khr vkGetPhysicalDeviceSurfacePresentModesKHR
+#define vk_get_swapchain_images_khr vkGetSwapchainImagesKHR
 
 
 
@@ -894,11 +954,6 @@ namespace vk {
 
 // -- get ---------------------------------------------------------------------
 
-#define vk_get_physical_device_surface_capabilities_khr vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-#define vk_get_physical_device_surface_support_khr vkGetPhysicalDeviceSurfaceSupportKHR
-#define vk_get_physical_device_surface_formats_khr vkGetPhysicalDeviceSurfaceFormatsKHR
-#define vk_get_physical_device_surface_present_modes_khr vkGetPhysicalDeviceSurfacePresentModesKHR
-#define vk_get_swapchain_images_khr vkGetSwapchainImagesKHR
 
 
 #endif // ENGINE_VK_TYPEDEFS_HEADER

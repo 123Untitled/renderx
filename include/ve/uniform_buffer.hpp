@@ -144,7 +144,7 @@ namespace ve {
 			static auto _compute_alignment(void) -> vk::device_size {
 
 				// get min ubo alignment
-				const auto ubo_alignment = vulkan::device::min_uniform_buffer_offset_alignment();
+				const auto ubo_alignment = ve::physical_device::shared().min_uniform_buffer_offset_alignment();
 
 				// aligned size
 				auto alignment = sizeof(T);

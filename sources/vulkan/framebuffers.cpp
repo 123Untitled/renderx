@@ -50,12 +50,6 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 	// loop over views
 	for (; _size < views.size(); ++_size) {
 
-		// set number of attachments
-		//info.attachmentCount = 1U;
-
-		// set attachment
-		//info.pAttachments = &(views[_size]);
-
 		// set image view
 		attachments[2] = views[_size];
 

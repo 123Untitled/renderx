@@ -29,7 +29,7 @@ namespace vk {
 	// -- device --------------------------------------------------------------
 
 	/* create device */
-	inline auto create(const vk::device_info& info) -> vk::device {
+	inline auto create(const vk::device_create_info& info) -> vk::device {
 
 		vk::device device;
 
@@ -153,6 +153,21 @@ namespace vk {
 			nullptr,
 			// pipeline
 			&pipeline);
+
+		return pipeline;
+	}
+
+
+	// -- compute pipeline ----------------------------------------------------
+
+	/* create compute pipeline */
+	inline auto create(const vk::compute_pipeline_info& info) -> vk::pipeline {
+
+		vk::pipeline pipeline;
+
+		try_execute<"failed to create compute pipeline">(
+			::vk_create_compute_pipelines,
+			vulkan::device::logical(), nullptr, 1U, &info, nullptr, &pipeline);
 
 		return pipeline;
 	}

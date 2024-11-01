@@ -51,9 +51,9 @@ namespace ve {
 				ve::multisampling::max(),
 				VK_IMAGE_TILING_OPTIMAL,
 				VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+				VK_IMAGE_LAYOUT_UNDEFINED,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT},
 			 _view{_image, ve::depth_buffer::format(), VK_IMAGE_ASPECT_DEPTH_BIT} {
-
 			}
 
 			/* deleted copy constructor */

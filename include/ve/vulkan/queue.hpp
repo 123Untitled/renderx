@@ -48,6 +48,9 @@ namespace vulkan {
 			/* default constructor */
 			queue(void);
 
+			/* family and index constructor */
+			queue(const vk::u32&, const vk::u32& = 0U);
+
 
 			// -- public static methods ---------------------------------------
 
@@ -57,10 +60,10 @@ namespace vulkan {
 
 			// -- public methods ----------------------------------------------
 
-			auto submit(const vk::semaphore& wait,
-						const vk::semaphore& signal,
-						const vk::fence& fence,
-						const vulkan::command_buffer<vulkan::primary>&) const -> void;
+			auto submit(const vk::semaphore&,
+						const vk::semaphore&,
+						const vk::fence&,
+						const vk::command_buffer&) const -> void;
 
 			/* present */
 			auto present(const vulkan::swapchain&,

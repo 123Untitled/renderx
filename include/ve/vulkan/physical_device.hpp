@@ -1,30 +1,12 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#pragma once
-
-#ifndef ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER
-#define ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER
+#ifndef ___ve_vulkan_physical_device___
+#define ___ve_vulkan_physical_device___
 
 #include "ve/vk/typedefs.hpp"
 
 
-// -- V U L K A N  N A M E S P A C E ------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace vulkan {
-
-
-	// -- forward declarations ------------------------------------------------
-
-	/* surface */
-	class surface;
+namespace ve {
 
 
 	// -- P H Y S I C A L  D E V I C E ----------------------------------------
@@ -34,46 +16,55 @@ namespace vulkan {
 
 		private:
 
+			// -- public types ------------------------------------------------
+
+			/* self type */
+			using _self = ve::physical_device;
+
+
 			// -- private members ---------------------------------------------
 
 			/* device */
 			vk::physical_device _pdevice;
 
 
-		public:
+			// -- private static methods --------------------------------------
 
-			// -- public types ------------------------------------------------
+			/* shared */
+			static auto _shared(void) -> _self& {
+				static _self instance{};
+				return instance;
+			}
 
-			/* self type */
-			using self = vulkan::physical_device;
 
-
-			// -- public lifecycle --------------------------------------------
+			// -- private lifecycle -------------------------------------------
 
 			/* default constructor */
-			physical_device(void) noexcept;
+			physical_device(void);
 
-			/* vk::physical_device constructor */
+			/* physical device constructor */
 			physical_device(const vk::physical_device&) noexcept;
 
-			/* copy constructor */
-			physical_device(const self&) noexcept = default;
+			/* deleted copy constructor */
+			physical_device(const _self&) = delete;
 
-			/* move constructor */
-			physical_device(self&&) noexcept = default;
+			/* deleted move constructor */
+			physical_device(_self&&) = delete;
 
 			/* destructor */
 			~physical_device(void) noexcept = default;
 
 
-			// -- public assignment operators ---------------------------------
+			// -- private assignment operators --------------------------------
 
-			/* copy assignment operator */
-			auto operator=(const self&) noexcept -> self& = default;
+			/* deleted copy assignment operator */
+			auto operator=(const _self&) -> _self& = delete;
 
 			/* move assignment operator */
-			auto operator=(self&&) noexcept -> self& = default;
+			auto operator=(_self&&) noexcept -> _self& = default;
 
+
+		public:
 
 			// -- public conversion operators ---------------------------------
 
@@ -82,9 +73,6 @@ namespace vulkan {
 
 
 			// -- public accessors --------------------------------------------
-
-			/* find queue family */
-			auto find_queue_family(const vk::surface&, const vk::queue_flags_bits) const -> vk::u32;
 
 			/* supports swapchain */
 			auto supports_swapchain(void) const noexcept -> bool;
@@ -95,9 +83,6 @@ namespace vulkan {
 			/* have present modes */
 			auto have_present_modes(void) const -> bool;
 
-			/* is support surface and queue family */
-			auto is_support_surface_and_queue_family(const vk::surface&, const vk::u32) const -> bool;
-
 			/* extension properties */
 			auto extension_properties(void) const -> std::vector<vk::extension_properties>;
 
@@ -105,28 +90,49 @@ namespace vulkan {
 			auto surface_capabilities(void) const -> vk::surface_capabilities;
 
 			/* surface formats */
-			auto surface_formats() const -> std::vector<vk::surface_format>;
+			auto surface_formats(void) const -> std::vector<vk::surface_format>;
 
 			/* surface present modes */
 			auto surface_present_modes(void) const -> std::vector<vk::present_mode>;
 
 			/* properties */
-			auto properties(void) const -> vk::physical_device_properties;
+			auto properties(void) const noexcept -> vk::physical_device_properties;
 
 			/* features */
 			auto features(void) const -> vk::physical_device_features;
 
-			/* max usable sample count */
-			auto max_usable_sample_count(void) const -> vk::u32;
+			/* queue family properties */
+			auto queue_family_properties(void) const -> std::vector<vk::queue_family_properties>;
+
+
+			/* minimum uniform buffer offset alignment */
+			auto min_uniform_buffer_offset_alignment(void) const noexcept -> vk::device_size {
+				return properties().limits.minUniformBufferOffsetAlignment;
+			}
+
+			/* max uniform buffer range */
+			auto max_uniform_buffer_range(void) const noexcept -> vk::device_size {
+				return properties().limits.maxUniformBufferRange;
+			}
+
+
+			// -- public static methods ---------------------------------------
+
+			/* shared */
+			static auto shared(void) -> const _self& {
+				return _self::_shared();
+			}
+
+
+		private:
+
+			// -- private static methods --------------------------------------
+
+			/* pick physical device */
+			static auto _pick_physical_device(void) -> vk::physical_device;
 
 	}; // class physical_device
 
-
-	// -- assertions ----------------------------------------------------------
-
-	static_assert(sizeof(vulkan::physical_device) == sizeof(vk::physical_device),
-		"vk::physical_device size mismatch");
-
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_PHYSICAL_DEVICE_HEADER
+#endif // ___ve_vulkan_physical_device___

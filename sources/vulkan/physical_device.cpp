@@ -1,4 +1,5 @@
 #include "ve/vulkan/physical_device.hpp"
+#include "ve/vulkan/instance.hpp"
 
 #include "ve/vulkan/device.hpp"
 #include "ve/vulkan/surface.hpp"
@@ -9,12 +10,12 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-vulkan::physical_device::physical_device(void) noexcept
-: _pdevice{nullptr} {
+ve::physical_device::physical_device(void)
+: _pdevice{_self::_pick_physical_device()} {
 }
 
-/* vk::physical_device constructor */
-vulkan::physical_device::physical_device(const vk::physical_device& pdevice) noexcept
+/* physical device constructor */
+ve::physical_device::physical_device(const vk::physical_device& pdevice) noexcept
 : _pdevice{pdevice} {
 }
 
@@ -22,31 +23,16 @@ vulkan::physical_device::physical_device(const vk::physical_device& pdevice) noe
 // -- public conversion operators ---------------------------------------------
 
 /* vk::physical_device conversion operator */
-vulkan::physical_device::operator const vk::physical_device&(void) const noexcept {
+ve::physical_device::operator const vk::physical_device&(void) const noexcept {
 	return _pdevice;
 }
 
 
 // -- public accessors --------------------------------------------------------
 
-/* find queue family */
-auto vulkan::physical_device::find_queue_family(const vk::surface& surface,
-												const vk::queue_flags_bits flags) const -> vk::u32 {
-	// get queue families properties
-	static const auto properties = vk::get_physical_device_queue_family_properties(_pdevice);
-
-	for (vk::u32 i = 0U; i < properties.size(); ++i) {
-		// check queue flags
-		if (properties[i].queueFlags & flags
-		&& is_support_surface_and_queue_family(surface, i)) {
-			return i;
-		}
-	}
-	throw engine::exception{"failed to find suitable queue family"};
-}
 
 /* supports swapchain */
-auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
+auto ve::physical_device::supports_swapchain(void) const noexcept -> bool {
 	auto extensions = vk::enumerate_device_extension_properties(_pdevice);
 
 	for (const auto& extension : extensions) {
@@ -57,7 +43,7 @@ auto vulkan::physical_device::supports_swapchain(void) const noexcept -> bool {
 }
 
 /* have surface formats */
-auto vulkan::physical_device::have_surface_formats(void) const -> bool {
+auto ve::physical_device::have_surface_formats(void) const -> bool {
 
 	vk::u32 count = 0U;
 
@@ -70,7 +56,7 @@ auto vulkan::physical_device::have_surface_formats(void) const -> bool {
 }
 
 /* have present modes */
-auto vulkan::physical_device::have_present_modes(void) const -> bool {
+auto ve::physical_device::have_present_modes(void) const -> bool {
 
 	vk::u32 count = 0U;
 
@@ -81,19 +67,13 @@ auto vulkan::physical_device::have_present_modes(void) const -> bool {
 	return count > 0U;
 }
 
-/* is support surface and queue family */
-auto vulkan::physical_device::is_support_surface_and_queue_family(const vk::surface& surface,
-																  const vk::u32 family) const -> bool {
-	return vk::get_physical_device_surface_support(_pdevice, surface, family);
-}
-
 /* extension properties */
-auto vulkan::physical_device::extension_properties(void) const -> std::vector<vk::extension_properties> {
+auto ve::physical_device::extension_properties(void) const -> std::vector<vk::extension_properties> {
 	return vk::enumerate_device_extension_properties(_pdevice);
 }
 
 /* surface capabilities */
-auto vulkan::physical_device::surface_capabilities(void) const -> vk::surface_capabilities {
+auto ve::physical_device::surface_capabilities(void) const -> vk::surface_capabilities {
 
 	vk::surface_capabilities capabilities;
 
@@ -106,7 +86,7 @@ auto vulkan::physical_device::surface_capabilities(void) const -> vk::surface_ca
 
 
 /* surface formats */
-auto vulkan::physical_device::surface_formats() const -> std::vector<vk::surface_format> {
+auto ve::physical_device::surface_formats() const -> std::vector<vk::surface_format> {
 
 	vk::u32 count = 0U;
 
@@ -127,7 +107,7 @@ auto vulkan::physical_device::surface_formats() const -> std::vector<vk::surface
 }
 
 /* surface present modes */
-auto vulkan::physical_device::surface_present_modes(void) const -> std::vector<vk::present_mode> {
+auto ve::physical_device::surface_present_modes(void) const -> std::vector<vk::present_mode> {
 
 	vk::u32 count = 0U;
 
@@ -146,34 +126,112 @@ auto vulkan::physical_device::surface_present_modes(void) const -> std::vector<v
 }
 
 /* properties */
-auto vulkan::physical_device::properties(void) const -> vk::physical_device_properties {
+auto ve::physical_device::properties(void) const noexcept -> vk::physical_device_properties {
 	vk::physical_device_properties properties;
 	::vkGetPhysicalDeviceProperties(_pdevice, &properties);
 	return properties;
 }
 
 /* features */
-auto vulkan::physical_device::features(void) const -> vk::physical_device_features {
+auto ve::physical_device::features(void) const -> vk::physical_device_features {
 	return vk::get_physical_device_features(_pdevice);
 }
 
-/* max usable sample count */
-auto vulkan::physical_device::max_usable_sample_count(void) const -> vk::u32 {
 
-	const auto count = properties().limits.framebufferColorSampleCounts;
+/* queue family properties */
+auto ve::physical_device::queue_family_properties(void) const -> std::vector<vk::queue_family_properties> {
 
-	if (count & VK_SAMPLE_COUNT_64_BIT)
-		return VK_SAMPLE_COUNT_64_BIT;
-	if (count & VK_SAMPLE_COUNT_32_BIT)
-		return VK_SAMPLE_COUNT_32_BIT;
-	if (count & VK_SAMPLE_COUNT_16_BIT)
-		return VK_SAMPLE_COUNT_16_BIT;
-	if (count & VK_SAMPLE_COUNT_8_BIT)
-		return VK_SAMPLE_COUNT_8_BIT;
-	if (count & VK_SAMPLE_COUNT_4_BIT)
-		return VK_SAMPLE_COUNT_4_BIT;
-	if (count & VK_SAMPLE_COUNT_2_BIT)
-		return VK_SAMPLE_COUNT_2_BIT;
+	vk::u32 count{0U};
 
-	return VK_SAMPLE_COUNT_1_BIT;
+	// get queue family properties count
+	::vk_get_physical_device_queue_family_properties(
+			_pdevice, &count, nullptr);
+
+	// reserve space
+	std::vector<vk::queue_family_properties> properties;
+	properties.resize(count);
+
+	// get queue family properties
+	::vk_get_physical_device_queue_family_properties(
+			_pdevice, &count, properties.data());
+
+	// done
+	return properties;
 }
+
+
+// -- private static methods --------------------------------------------------
+
+/* pick physical device */
+auto ve::physical_device::_pick_physical_device(void) -> vk::physical_device {
+
+	// get surface
+	const vk::surface& surface = vulkan::surface::shared();
+
+	// get physical devices
+	const auto pdevices = vulkan::instance::physical_devices();
+
+	enum : unsigned {
+		_ppd_swapchain = 0b0001,
+		_ppd_surface   = 0b0010,
+		_ppd_present   = 0b0100,
+		_ppd_gpu       = 0b1000
+	};
+	enum : unsigned {
+		_ppd_swapchain_shift = 0,
+		_ppd_surface_shift   = 1,
+		_ppd_present_shift   = 2,
+		_ppd_gpu_shift       = 3
+	};
+
+	unsigned ppd = 0U;
+
+	// loop over devices
+	for (const auto& device : pdevices) {
+
+		_self pdevice{device};
+
+		auto capabilities = pdevice.surface_capabilities();
+		auto properties   = pdevice.properties();
+		auto features     = pdevice.features();
+
+		// check if physical device supports tesselation shaders
+		if (features.tessellationShader == true)
+			;
+
+		// check if physical device supports swapchain
+		ppd |= (static_cast<unsigned>(pdevice.supports_swapchain()) << _ppd_swapchain_shift);
+
+		// check if physical device has surface formats
+		ppd |= (static_cast<unsigned>(pdevice.have_surface_formats()) << _ppd_surface_shift);
+
+		// check if physical device has present modes
+		ppd |= (static_cast<unsigned>(pdevice.have_present_modes()) << _ppd_present_shift);
+
+		// check if physical device is a gpu
+		//if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		// || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+			ppd |= (1U << _ppd_gpu_shift);
+
+		if (pdevice.supports_swapchain())
+			std::cout << "swapchain support" << std::endl;
+
+		if (pdevice.have_surface_formats())
+			std::cout << "surface formats" << std::endl;
+
+		if (pdevice.have_present_modes())
+			std::cout << "present mode" << std::endl;
+
+		std::cout << "gpu: " << properties.deviceType << std::endl;
+
+
+
+		// check if physical device is suitable
+		if (ppd == 0b1111)
+			return pdevice;
+	}
+
+	// no suitable physical device found
+	throw std::runtime_error{"failed to find suitable physical device"};
+}
+// &&  features.geometryShader == true) {

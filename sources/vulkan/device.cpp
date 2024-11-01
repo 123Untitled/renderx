@@ -3,6 +3,7 @@
 #include "ve/vulkan/queue.hpp"
 #include "ve/vulkan/instance.hpp"
 #include "ve/vulkan/validation_layers.hpp"
+#include "ve/vulkan/queue_family_library.hpp"
 
 #include <stdexcept>
 
@@ -27,26 +28,24 @@ auto vulkan::device::_shared(void) -> ___self& {
 
 /* default constructor */
 vulkan::device::device(void)
-: _ldevice{nullptr},
-  _pdevice{nullptr},
-  _family{0U}, _priority{1.0f} {
+: _ldevice{nullptr}, _family{0U}, _priority{1.0f} {
 
 	// get surface
 	auto& surface = vulkan::surface::shared();
 
-	// pick physical device
-	_pdevice = ___self::_pick_physical_device(surface);
-
-	std::cout << "MAX SAMPLE COUNT: " << _pdevice.max_usable_sample_count() << std::endl;
+	// get physical device
+	auto& pdevice = ve::physical_device::shared();
 
 	// get queue family index
-	_family  = _pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
+	//_family = pdevice.find_queue_family(surface, VK_QUEUE_GRAPHICS_BIT);
 
 	// create device queue info
-	const auto queue_info = vulkan::queue::info(_family, _priority);
+	//const auto queue_info = vulkan::queue::info(_family, _priority);
+
+	const auto queue_info = ve::queue_family_library::info();
 
 	// get physical device features
-	const auto features = _pdevice.features();
+	const auto features = pdevice.features();
 
 	// setup extensions
 	constexpr vk::array extensions {
@@ -56,8 +55,7 @@ vulkan::device::device(void)
 		"VK_KHR_portability_subset",
 		#endif
 
-		"VK_KHR_shader_non_semantic_info"
-
+		//"VK_KHR_shader_non_semantic_info"
 		//"VK_EXT_mesh_shader",
 	};
 
@@ -66,15 +64,8 @@ vulkan::device::device(void)
 	constexpr auto layers = vulkan::validation_layers::layers();
 	#endif
 
-
-	//VkPhysicalDeviceIndexTypeUint8FeaturesEXT index_type_uint8_features {
-	//	.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT,
-	//	.pNext = nullptr,
-	//	.indexTypeUint8 = VK_TRUE
-	//};
-
-	// device info
-	const vk::device_info info {
+	// create info
+	const vk::device_create_info info {
 		// structure type
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		// next structure
@@ -82,20 +73,23 @@ vulkan::device::device(void)
 		// flags
 		.flags                   = 0U,
 		// number of queue create infos
-		.queueCreateInfoCount    = 1U,
+		.queueCreateInfoCount    = queue_info.size(),
 		// queue create infos
-		.pQueueCreateInfos       = &queue_info,
+		.pQueueCreateInfos       = queue_info.data(),
 		// number of enabled layers
+
 		#if defined(ENGINE_VL_DEBUG)
 		.enabledLayerCount       = layers.size(),
 		// enabled layers
 		.ppEnabledLayerNames     = layers.data(),
+
 		#else
 		// number of enabled layers
 		.enabledLayerCount       = 0U,
 		// enabled layers
 		.ppEnabledLayerNames     = nullptr,
 		#endif
+
 		// number of enabled extensions
 		.enabledExtensionCount   = extensions.size(),
 		// enabled extensions
@@ -106,7 +100,7 @@ vulkan::device::device(void)
 
 	// create logical device
 	vk::try_execute<"failed to create device">(
-			::vk_create_device, _pdevice, &info, nullptr, &_ldevice);
+			::vk_create_device, pdevice, &info, nullptr, &_ldevice);
 }
 
 /* destructor */
@@ -125,8 +119,8 @@ auto vulkan::device::logical(void) -> const vk::device& {
 }
 
 /* physical */
-auto vulkan::device::physical(void) -> const vulkan::physical_device& {
-	return ___self::_shared()._pdevice;
+auto vulkan::device::physical(void) -> const ve::physical_device& {
+	return ve::physical_device::shared();
 }
 
 /* queue family */
@@ -148,78 +142,3 @@ auto vulkan::device::wait_idle(void) -> void {
 	// warning:
 	// this function must not be called from a destructor
 }
-
-
-// -- private static methods --------------------------------------------------
-
-#include <iostream>
-
-/* pick physical device */
-auto vulkan::device::_pick_physical_device(const vk::surface& surface) -> vulkan::physical_device {
-
-	// get physical devices
-	const auto& pdevices = vulkan::instance::physical_devices();
-
-	enum : unsigned {
-		_ppd_swapchain = 0b0001,
-		_ppd_surface   = 0b0010,
-		_ppd_present   = 0b0100,
-		_ppd_gpu       = 0b1000
-	};
-	enum : unsigned {
-		_ppd_swapchain_shift = 0,
-		_ppd_surface_shift   = 1,
-		_ppd_present_shift   = 2,
-		_ppd_gpu_shift       = 3
-	};
-
-	unsigned ppd = 0U;
-
-	// loop over devices
-	for (const auto& pdevice : pdevices) {
-
-		auto capabilities = pdevice.surface_capabilities();
-		auto properties   = pdevice.properties();
-		auto features     = pdevice.features();
-
-		// check if physical device supports tesselation shaders
-		if (features.tessellationShader == true)
-			ve::hint::success("tesselation shader supported");
-
-		// check if physical device supports swapchain
-		ppd |= (static_cast<unsigned>(pdevice.supports_swapchain()) << _ppd_swapchain_shift);
-
-		// check if physical device has surface formats
-		ppd |= (static_cast<unsigned>(pdevice.have_surface_formats()) << _ppd_surface_shift);
-
-		// check if physical device has present modes
-		ppd |= (static_cast<unsigned>(pdevice.have_present_modes()) << _ppd_present_shift);
-
-		// check if physical device is a gpu
-		//if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		// || properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
-			ppd |= (1U << _ppd_gpu_shift);
-
-		if (pdevice.supports_swapchain())
-			std::cout << "swapchain support" << std::endl;
-
-		if (pdevice.have_surface_formats())
-			std::cout << "surface formats" << std::endl;
-
-		if (pdevice.have_present_modes())
-			std::cout << "present mode" << std::endl;
-
-		std::cout << "gpu: " << properties.deviceType << std::endl;
-
-
-		
-
-		// check if physical device is suitable
-		if (ppd == 0b1111)
-			return pdevice;
-	}
-
-	// no suitable physical device found
-	throw std::runtime_error{"failed to find suitable physical device"};
-}
-// &&  features.geometryShader == true) {

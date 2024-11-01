@@ -1,17 +1,5 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#pragma once
-
-#ifndef ENGINE_VULKAN_PIPELINE_HEADER
-#define ENGINE_VULKAN_PIPELINE_HEADER
+#ifndef ___ve_vulkan_pipeline___
+#define ___ve_vulkan_pipeline___
 
 #include "ve/vk/typedefs.hpp"
 #include "ve/vertex/vertex.hpp"
@@ -24,11 +12,7 @@
 #include "ve/vulkan/descriptors/descriptor_set_layout_library.hpp"
 #include "ve/vulkan/descriptors/pipeline_layout_library.hpp"
 
-
 #include "ve/libraries/shader_library.hpp"
-
-
-#include <glm/glm.hpp>
 
 
 // -- V U L K A N  N A M E S P A C E ------------------------------------------
@@ -62,11 +46,12 @@ namespace vulkan {
 			/* default constructor */
 			pipeline(void) noexcept = default;
 
-			/* info constructor */
-			pipeline(const vk::graphics_pipeline_info& info)
-			: _pipeline{vk::make_unique<vk::pipeline>(info)} {
-			}
+			/* graphics pipeline constructor */
+			pipeline(const vk::graphics_pipeline_info&);
 
+			/* compute pipeline constructor */
+			pipeline(const vk::pipeline_shader_stage_info&,
+					 const vk::pipeline_layout&);
 
 			/* deleted copy constructor */
 			pipeline(const ___self&) = delete;
@@ -98,9 +83,17 @@ namespace vulkan {
 			// -- public conversion operators ---------------------------------
 
 			/* vk::pipeline conversion operator */
-			operator const vk::pipeline&(void) const noexcept {
-				return _pipeline;
-			}
+			operator const vk::pipeline&(void) const noexcept;
+
+
+		private:
+
+			// -- private static methods --------------------------------------
+
+			/* create compute pipeline */
+			static auto _create_compute_pipeline(
+					const vk::pipeline_shader_stage_info&,
+					const vk::pipeline_layout&) -> vk::unique<vk::pipeline>;
 
 	}; // class pipeline
 
@@ -399,13 +392,8 @@ namespace vulkan {
 				return vulkan::pipeline{info};
 			}
 
-
-
-
-
 	}; // class pipeline_builder
-
 
 } // namespace vulkan
 
-#endif // ENGINE_VULKAN_PIPELINE_HEADER
+#endif // ___ve_vulkan_pipeline___

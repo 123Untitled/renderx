@@ -1,17 +1,7 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
+#ifndef ___ve_vulkan_device___
+#define ___ve_vulkan_device___
 
-#ifndef ___ENGINE_VULKAN_DEVICE___
-#define ___ENGINE_VULKAN_DEVICE___
-
-#include "ve/vk/typedefs.hpp"
+//#include "ve/vk/unique.hpp"
 #include "ve/vulkan/physical_device.hpp"
 #include "ve/vulkan/surface.hpp"
 
@@ -39,9 +29,6 @@ namespace vulkan {
 			/* logical device */
 			vk::device _ldevice;
 
-			/* physical device */
-			vulkan::physical_device _pdevice;
-
 			/* queue family */
 			vk::u32 _family;
 
@@ -53,9 +40,6 @@ namespace vulkan {
 
 			/* shared */
 			static auto _shared(void) -> ___self&;
-
-			/* pick physical device */
-			static auto _pick_physical_device(const vk::surface&) -> vulkan::physical_device;
 
 
 			// -- private lifecycle -------------------------------------------
@@ -90,22 +74,10 @@ namespace vulkan {
 			static auto logical(void) -> const vk::device&;
 
 			/* physical */
-			static auto physical(void) -> const vulkan::physical_device&;
+			static auto physical(void) -> const ve::physical_device&;
 
 			/* queue family */
 			static auto family(void) -> const vk::u32&;
-
-			/* minimum uniform buffer offset alignment */
-			static auto min_uniform_buffer_offset_alignment(void) -> vk::device_size {
-				return ___self::_shared()._pdevice.properties().limits.minUniformBufferOffsetAlignment;
-			}
-
-			/* max uniform buffer range */
-			static auto max_uniform_buffer_range(void) -> vk::device_size {
-				return ___self::_shared()._pdevice.properties().limits.maxUniformBufferRange;
-			}
-
-
 
 
 			// -- public static methods ---------------------------------------

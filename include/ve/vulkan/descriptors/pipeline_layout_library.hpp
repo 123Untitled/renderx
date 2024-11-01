@@ -27,7 +27,9 @@ namespace ve {
 			// -- private members ---------------------------------------------
 
 			ve::static_map<vulkan::pipeline_layout,
-				"main"> _layouts;
+				"main",
+				"skybox_heightmap"
+				> _layouts;
 
 
 			// -- private static methods --------------------------------------
@@ -44,7 +46,8 @@ namespace ve {
 			/* default constructor */
 			pipeline_layout_library(void)
 			: _layouts{
-				___self::_main_layout()} {
+				___self::_main_layout(),
+				___self::_skybox_heightmap()} {
 			}
 
 			/* deleted copy constructor */
@@ -71,7 +74,6 @@ namespace ve {
 			/* main layout */
 			static auto _main_layout(void) -> vulkan::pipeline_layout {
 
-
 				// create push constant range
 				const vk::push_constant_range range {
 					// stage flags
@@ -88,6 +90,16 @@ namespace ve {
 				};
 
 				return vulkan::pipeline_layout{layouts, range};
+			}
+
+			/* skybox heightmap layout */
+			static auto _skybox_heightmap(void) -> vulkan::pipeline_layout {
+
+				const vk::descriptor_set_layout layouts[] {
+					ve::descriptor_set_layout_library::get<"skybox_heightmap">()
+				};
+
+				return vulkan::pipeline_layout{layouts};
 			}
 
 

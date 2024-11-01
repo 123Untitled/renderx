@@ -1,10 +1,7 @@
 #ifndef ___ve_vulkan_image_view___
 #define ___ve_vulkan_image_view___
 
-
 #include "ve/vk/unique.hpp"
-#include "ve/vk/typedefs.hpp"
-#include "ve/vulkan/device.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -39,13 +36,9 @@ namespace ve {
 			image_view(void) noexcept = default;
 
 			/* parameter constructor */
-			image_view(const vk::image& image,
-					   const vk::format& format,
-					   const vk::image_aspect_flags& aspect)
-			: _view{ve::image_view::_create_image_view(image, format, aspect)} {
-
-				/* VK_IMAGE_ASPECT_COLOR_BIT */
-			}
+			image_view(const vk::image&,
+					   const vk::format&,
+					   const vk::image_aspect_flags&);
 
 			/* deleted copy constructor */
 			image_view(const ___self&) = delete;
@@ -69,8 +62,20 @@ namespace ve {
 			// -- public conversion operators ---------------------------------
 
 			/* const vk::image_view& conversion operator */
-			operator const vk::image_view&(void) const noexcept {
-				return _view.get();
+			operator const vk::image_view&(void) const noexcept;
+
+
+			// -- public accessors --------------------------------------------
+
+			/* descriptor image info */
+			auto descriptor_image_info(const vk::image_layout& layout
+					= VK_IMAGE_LAYOUT_GENERAL
+					) const noexcept -> vk::descriptor_image_info {
+				return vk::descriptor_image_info{
+					.sampler = nullptr,
+					.imageView = _view.get(),
+					.imageLayout = layout
+				};
 			}
 
 
@@ -79,45 +84,10 @@ namespace ve {
 			// -- private static methods --------------------------------------
 
 			/* create image view */
-			static auto _create_image_view(const vk::image& image,
-										   const vk::format& format,
-										   const vk::image_aspect_flags& aspect
-										) -> vk::unique<vk::image_view> {
-
-				// create info
-				const vk::image_view_info info{
-					// structure type
-					.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-					// next structure
-					.pNext = nullptr,
-					// flags
-					.flags = 0U,
-					// image
-					.image = image,
-					// view type
-					.viewType = VK_IMAGE_VIEW_TYPE_2D,
-					// format
-					.format = format,
-					// components
-					.components = {
-						.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-						.a = VK_COMPONENT_SWIZZLE_IDENTITY
-					},
-					// subresource range
-					.subresourceRange = {
-						.aspectMask = aspect,
-						.baseMipLevel = 0U,
-						.levelCount = 1U,
-						.baseArrayLayer = 0U,
-						.layerCount = 1U
-					}
-				};
-
-				// create image view
-				return vk::make_unique<vk::image_view>(info);
-			}
+			static auto _create_image_view(const vk::image&,
+										   const vk::format&,
+										   const vk::image_aspect_flags&
+										) -> vk::unique<vk::image_view>;
 
 	}; // class image_view
 

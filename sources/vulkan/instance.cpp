@@ -124,12 +124,7 @@ vulkan::instance::instance(void)
 			_instance, &messenger_info, nullptr, &_messenger);
 	#endif
 
-	auto p = ___self::extension_properties();
-
-	for (const auto& e : p) {
-		ve::write(e.extensionName);
-		ve::write("\n");
-	}
+	//auto p = ___self::extension_properties();
 }
 
 /* destructor */
@@ -170,9 +165,26 @@ auto vulkan::instance::shared(void) -> const vk::instance& {
 }
 
 /* physical devices */
-auto vulkan::instance::physical_devices(void) -> const std::vector<vulkan::physical_device>& {
-	static auto __pdevices = vk::enumerate_physical_devices<vulkan::physical_device>(___self::shared());
-	return __pdevices;
+auto vulkan::instance::physical_devices(void) -> std::vector<vk::physical_device> {
+
+	vk::u32 count{0U};
+
+	// get physical devices count
+	vk::try_execute<"failed to enumerate physical devices">(
+			::vk_enumerate_physical_devices,
+			___self::shared(), &count, nullptr);
+
+	// reserve space
+	std::vector<vk::physical_device> devices;
+	devices.resize(count);
+
+	// get physical devices
+	vk::try_execute<"failed to enumerate physical devices">(
+			::vk_enumerate_physical_devices,
+			___self::shared(), &count, devices.data());
+
+	// done
+	return devices;
 }
 
 

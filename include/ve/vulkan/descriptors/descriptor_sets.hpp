@@ -260,19 +260,6 @@ namespace vulkan {
 					const vk::descriptor_type& type
 					) -> void {
 
-				std::cout << "write at index: " << index << std::endl;
-
-				/*
-				vk::descriptor_buffer_info buffer_info{
-					.buffer = nullptr, // buffer
-					.offset = 0U,
-					.range = sizeof(0) // must be size of uniform buffer object or struct ) // can be VK_WHOLE_SIZE
-				};
-				*/
-
-				std::cout << "address: " << _sets[index] << std::endl;
-
-
 				const vk::write_descriptor_set wdset{
 					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 					.pNext = nullptr,
@@ -300,6 +287,37 @@ namespace vulkan {
 						nullptr);
 			}
 
+			/* write */
+			auto write(const vk::u32& index, const vk::descriptor_image_info& iinfo,
+					const vk::descriptor_type& type
+					) -> void {
+
+				const vk::write_descriptor_set wdset{
+					.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+					.pNext = nullptr,
+					.dstSet = _sets[index],
+					.dstBinding = 0U,
+					.dstArrayElement = 0U,
+					.descriptorCount = 1U,
+					.descriptorType = type,
+					.pImageInfo = &iinfo,
+					.pBufferInfo = nullptr,
+					.pTexelBufferView = nullptr
+				};
+
+				// update
+				::vk_update_descriptor_sets(
+						// logical device
+						vulkan::device::logical(),
+						// descriptor write count
+						1U,
+						// descriptor writes
+						&wdset,
+						// descriptor copy count
+						0U,
+						// descriptor copies
+						nullptr);
+			}
 
 
 		private:

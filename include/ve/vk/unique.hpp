@@ -62,6 +62,11 @@ namespace vk {
 			: _data{nullptr} {
 			}
 
+			/* nullptr constructor */
+			unique(ve::null) noexcept
+			: _data{nullptr} {
+			}
+
 			/* deleted copy constructor */
 			unique(const ___self&) = delete;
 

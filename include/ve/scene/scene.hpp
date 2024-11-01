@@ -35,6 +35,7 @@ namespace ve {
 
 			// -- private members ---------------------------------------------
 
+
 			/* camera */
 			ve::camera _camera;
 
@@ -129,7 +130,7 @@ namespace ve {
 
 			/* draw */
 			auto draw(const vk::u32 image_index,
-					  vulkan::command_buffer<vulkan::primary>& cmd,
+					  vulkan::command_buffer& cmd,
 					  const vulkan::swapchain_manager& _smanager) -> void {
 
 
@@ -159,7 +160,7 @@ namespace ve {
 				cmd.set_scissor(swapchain.extent());
 
 				// bind pipeline
-				cmd.bind_pipeline(_pipeline);
+				cmd.bind_graphics_pipeline(_pipeline);
 
 				// bind camera descriptor
 				cmd.bind_descriptor_sets(
@@ -212,6 +213,9 @@ namespace ve {
 						cmd.draw_indexed(_objects[i].mesh().indices().count());
 					}
 				}
+
+				// end render pass
+				cmd.end_render_pass();
 
 				//throw std::runtime_error{"scene draw"};
 

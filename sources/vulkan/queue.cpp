@@ -19,8 +19,32 @@ vulkan::queue::queue(void) /* noexcept */ // may throw because shared device may
 : _queue{nullptr} {
 
 	// get device queue
-	::vk_get_device_queue(vulkan::device::logical(),
-						  vulkan::device::family(), 0U, &_queue);
+	::vk_get_device_queue(
+			// logical device
+			vulkan::device::logical(),
+			// queue family index
+			vulkan::device::family(),
+			// queue index
+			0U,
+			// queue
+			&_queue);
+}
+
+/* family and index constructor */
+vulkan::queue::queue(const vk::u32& family,
+					 const vk::u32& index) {
+/* uninitalized queue */
+
+	// get device queue
+	::vk_get_device_queue(
+			// logical device
+			vulkan::device::logical(),
+			// queue family index
+			family,
+			// queue index
+			index,
+			// queue
+			&_queue);
 }
 
 
@@ -40,7 +64,7 @@ auto vulkan::queue::info(const vk::u32 index,
 	};
 }
 
-#include "ve/vulkan/command_buffer.hpp"
+//#include "ve/vulkan/command_buffer.hpp"
 
 // -- public methods ----------------------------------------------------------
 
@@ -49,7 +73,7 @@ auto vulkan::queue::info(const vk::u32 index,
 auto vulkan::queue::submit(const vk::semaphore& wait,
 						   const vk::semaphore& signal,
 						   const vk::fence& fence,
-						   const vulkan::command_buffer<vulkan::primary>& cmd) const -> void {
+						   const vk::command_buffer& cmd) const -> void {
 
 
 	const vk::pipeline_stage_flags wait_stages[] = {
@@ -69,7 +93,7 @@ auto vulkan::queue::submit(const vk::semaphore& wait,
 		// command buffer count
 		.commandBufferCount   = 1U,
 		// command buffers
-		.pCommandBuffers      = &(cmd.underlying()),
+		.pCommandBuffers      = &cmd,
 		// signal semaphores
 		.signalSemaphoreCount = 1U,
 		.pSignalSemaphores    = &(signal)

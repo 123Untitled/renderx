@@ -89,6 +89,12 @@ struct test_binding {
 
 auto main(int, char**) -> int {
 
+
+
+
+
+
+
 	ve::multisampling multisampling{{4, 4}};
 	ve::image image;
 	ve::depth_buffer depth_buffer({800, 600});

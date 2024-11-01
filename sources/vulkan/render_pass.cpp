@@ -25,41 +25,6 @@ ve::render_pass::operator const vk::render_pass&(void) const noexcept {
 
 
 
-auto find_supported_format(void) -> vk::format {
-
-	const vk::array<vk::format, 3U> candidates {
-		VK_FORMAT_D32_SFLOAT,
-		VK_FORMAT_D32_SFLOAT_S8_UINT,
-		VK_FORMAT_D24_UNORM_S8_UINT
-	};
-
-	const vk::image_tiling tiling{VK_IMAGE_TILING_OPTIMAL};
-
-	vk::format_feature_flags features{VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT};
-
-	vk::physical_device pdevice = vulkan::device::physical();
-
-
-	for (vk::u32 i = 0U; i < candidates.size(); ++i) {
-
-		vk::format_properties props;
-
-		::vk_get_physical_device_format_properties(pdevice, candidates[i], &props);
-
-		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
-			return candidates[i];
-
-		}
-
-		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
-			return candidates[i];
-		}
-	}
-
-	throw std::runtime_error("failed to find supported format!");
-}
-
-
 // -- private static methods --------------------------------------------------
 
 /* create render pass */
@@ -189,10 +154,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			// color attachments
 			&references[0],
 			// resolve attachments
-			//nullptr,
 			&references[2],
 			// depth stencil attachment
-			//nullptr,
 			&references[1],
 			// preserve attachment count
 			0U,

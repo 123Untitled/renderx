@@ -59,6 +59,8 @@ namespace ve {
 	using imax = std::intmax_t;
 
 
+	using null = decltype(nullptr);
+
 }
 
 #endif // ___RENDERX_TYPES___
