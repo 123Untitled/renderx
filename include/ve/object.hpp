@@ -1,17 +1,19 @@
-#ifndef ___RENDERX_OBJECT___
-#define ___RENDERX_OBJECT___
+#ifndef ___ve_object___
+#define ___ve_object___
 
 #include "ve/mesh.hpp"
 #include "ve/transform.hpp"
 #include "ve/uniform_buffer.hpp"
+#include "ve/vulkan/descriptor/set.hpp"
+#include "ve/vulkan/descriptor/descriptor_set_layout_library.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 
-// -- R X ---------------------------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace rx {
+namespace ve {
 
 
 	// -- O B J E C T ---------------------------------------------------------
@@ -24,7 +26,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::object;
+			using self = ve::object;
 
 
 			// -- private members ---------------------------------------------
@@ -39,7 +41,11 @@ namespace rx {
 			glm::mat4 _model;
 
 			/* uniform buffer */
-			//ve::uniform_buffer _uniform_buffer;
+			ve::uniform_buffer _ubo;
+
+			/* descriptor set */
+			vk::descriptor::set _set;
+
 
 
 		public:
@@ -48,12 +54,24 @@ namespace rx {
 
 			/* default constructor */
 			object(void) noexcept
-			: _mesh{nullptr}, _transform{}, _model{glm::mat4{1.0f}} {
+			: _mesh{nullptr}, _transform{}, _model{glm::mat4{1.0f}},
+			  _ubo{_model},
+			  _set{ve::descriptor_set_layout_library::get<"planet">()} {
+
+				// write descriptor set
+				_set.write(_ubo.descriptor_buffer_info(),
+							VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			}
 
 			/* mesh constructor */
 			object(const ve::mesh& ___mesh) noexcept
-			: _mesh{&___mesh}, _transform{}, _model{glm::mat4{1.0f}} {
+			: _mesh{&___mesh}, _transform{}, _model{glm::mat4{1.0f}},
+			  _ubo{_model},
+			  _set{ve::descriptor_set_layout_library::get<"planet">()} {
+
+				// write descriptor set
+				_set.write(_ubo.descriptor_buffer_info(),
+							VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			}
 
 
@@ -63,7 +81,20 @@ namespace rx {
 			inline auto update(void) noexcept -> void {
 
 				_model = _transform.model();
-				//_uniform_buffer.update(_model);
+				_ubo.update(_model);
+			}
+
+
+			/* render */
+			auto render(const vulkan::command_buffer& encoder,
+						const ::vk_pipeline_layout& layout) const noexcept -> void {
+
+				// bind descriptor sets
+				_set.bind(encoder, layout, 1U); // set 1
+
+				encoder.bind_vertex_buffer(_mesh->vertices());
+				encoder.bind_index_buffer(_mesh->indices());
+				encoder.draw_indexed(_mesh->indices().count());
 			}
 
 			/* mesh */
@@ -102,6 +133,6 @@ namespace rx {
 	}; // class object
 
 
-} // namespace rx
+} // namespace ve
 
-#endif // ___RENDERX_OBJECT___
+#endif // ___ve_object___

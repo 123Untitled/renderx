@@ -138,8 +138,8 @@ fi
 # -- C O M P I L E R  S E T T I N G S -----------------------------------------
 
 # compiler
-#local -r cxx='clang++'
-local -r cxx='/opt/homebrew/opt/llvm/bin/clang++'
+local -r cxx='clang++'
+#local -r cxx='/opt/homebrew/opt/llvm/bin/clang++'
 
 # cxx flags
 local -r cxxflags=('-std=c++2a' '-O0'

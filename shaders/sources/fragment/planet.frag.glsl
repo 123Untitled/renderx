@@ -4,10 +4,6 @@
 #extension GL_EXT_spirv_intrinsics : enable
 
 
-layout(push_constant) uniform push_constants {
-	float time;
-} pc;
-
 layout(location = 0) in vec3 in_normal;
 layout(location = 1) in vec3 in_view_direction;
 layout(location = 2) in vec3 in_view_position;
@@ -91,8 +87,8 @@ void main(void) {
 	float saturation_boost = 1.0 + (shadow_factor * 2.0);  // Par exemple, augmenter la saturation dans l'ombre
 
 	vec3 shadow_color = adjust_saturation(
-			diffuse
-			//(out_normal*0.2) * diffuse
+			//diffuse
+			(out_normal*0.2) * diffuse
 			, saturation_boost);
 
 	diffuse = mix(diffuse, shadow_color, shadow_factor);
@@ -113,7 +109,7 @@ void main(void) {
 
 	// rim light
 	float rim_strength = 1.5;
-	float rim_shininess = 8.0;
+	float rim_shininess = 4.0;
 	vec3 rim_color = out_normal;
 	float rim = smoothstep(0.0, 1.0, pow(
 						 1.0 - max(
@@ -144,25 +140,4 @@ void main(void) {
 	out_color = vec4((diffuse + specular + material_ambient), 1.0);
 
 
-
-	// -- dithering -----------------------------------------------------------
-
-	// compute luminance
-	const float luminance = dot(out_color.rgb, vec3(0.299, 0.587, 0.114));
-
-	// generate dithering pattern
-	float rand = random(gl_FragCoord.xy * pc.time);
-
-	// noise factor
-	const float noise_factor = mix(0.13, 1.0, pow(luminance, 2.0));
-
-	rand *= noise_factor;
-
-	vec3 dithering = vec3(rand);
-
-
-	// -- output --------------------------------------------------------------
-
-	// output color
-	//out_color = out_color + vec4(dithering, 0.0);
 }

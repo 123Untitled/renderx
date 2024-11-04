@@ -75,7 +75,7 @@ namespace ve {
 			ve::camera _camera;
 
 			/* planet */
-			rx::object _planet;
+			ve::object _planet;
 
 			/* uniform buffer */
 			ve::uniform_buffer_long<glm::mat4> _ubo;
@@ -103,7 +103,7 @@ namespace ve {
 			  _sets{}
 
 			{
-				_planet = rx::object{rx::mesh_library::get<"icosphere">()};
+				_planet = ve::object{rx::mesh_library::get<"icosphere">()};
 
 				//_camera.ratio(rx::sdl::window::ratio());
 				_camera.update_projection();
@@ -112,14 +112,14 @@ namespace ve {
 				//_objects[0].scale() = glm::vec3{50.0f, 50.0f, 50.0f};
 
 
-				_ubo = ve::uniform_buffer_long<glm::mat4>{1U};
-				_ubo.update(0U, _planet.model());
+				//_ubo = ve::uniform_buffer_long<glm::mat4>{1U};
+				//_ubo.update(0U, _planet.model());
 
 
 				// -- set layouts ---------------------------------------------
 
 				_sets.push_back(ve::descriptor_set_layout_library::get<"skybox_compute">());
-				_sets.push_back(ve::descriptor_set_layout_library::get<"planet">());
+				//_sets.push_back(ve::descriptor_set_layout_library::get<"planet">());
 
 				// skybox compute
 				_sets[0U].write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_GENERAL),
@@ -127,8 +127,8 @@ namespace ve {
 
 
 				// planet
-				_sets[1U].write(_ubo.descriptor_buffer_info(),
-								VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+				//_sets[1U].write(_ubo.descriptor_buffer_info(),
+				//				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			}
 
 
@@ -145,12 +145,8 @@ namespace ve {
 				compute_skybox(cmd);
 
 
-				_camera.update_rotation(ve::mouse_delta::dx(), ve::mouse_delta::dy());
-				_camera.update();
 
-
-				_planet.rotation().x += 0.08f * ve::delta::time();
-
+				update();
 
 
 
@@ -161,53 +157,37 @@ namespace ve {
 				const auto& frames      = _smanager.frames();
 
 				// begin render pass
-				cmd.begin_render_pass(swapchain,
-						render_pass,
-						frames[image_index]);
+				cmd.begin_render_pass(swapchain.extent(),
+									  render_pass,
+									  frames[image_index]);
 
 				// dynamic viewport
-				cmd.set_viewport(swapchain.extent());
-
-				// dynamic scissor
-				cmd.set_scissor(swapchain.extent());
+				cmd.set_viewport_and_scissor(swapchain.extent());
 
 				// bind pipeline
 				cmd.bind_graphics_pipeline(
 						vk::pipeline::library::get<"planet">());
 
+
+				// -- render --------------------------------------------------
+
 				// bind camera descriptor
 				_camera.render(cmd, vk::pipeline_layout_library::get<"main">());
+				_planet.render(cmd, vk::pipeline_layout_library::get<"main">());
 
-
-				// push constants (time)
-				cmd.push_constants(
-						vk::pipeline_layout_library::get<"main">(),
-						ve::delta::time());
-
-
-				// -- planet --------------------------------------------------
-
-				// update planet
-				_planet.update();
-
-				// update uniform buffer
-				_ubo.update(0U, _planet.model());
-
-
-				_sets[1U].bind(cmd, vk::pipeline_layout_library::get<"main">(), 1U);
-
-
-				// bind vertex buffer
-				cmd.bind_vertex_buffer(_planet.mesh().vertices());
-
-				// bind index buffer
-				cmd.bind_index_buffer(_planet.mesh().indices());
-
-				// draw indexed
-				cmd.draw_indexed(_planet.mesh().indices().count());
 
 				// end render pass
 				cmd.end_render_pass();
+			}
+
+			/* update */
+			auto update(void) -> void {
+
+				_camera.update_rotation(ve::mouse_delta::dx(), ve::mouse_delta::dy());
+				_camera.update();
+
+				_planet.rotation().x += 0.08f * ve::delta::time();
+				_planet.update();
 			}
 
 

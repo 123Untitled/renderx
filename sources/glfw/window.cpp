@@ -123,6 +123,8 @@ glfw::window::window(void)
 
 
 
+
+
 	// create window
 	_window = ::glfw_create_window(800, 600, "グラフィックエンジン", nullptr, nullptr);
 

@@ -75,22 +75,12 @@ namespace vk {
 			/* main layout */
 			static auto _main_layout(void) -> vk::pipeline::layout {
 
-				// create push constant range
-				const vk::push_constant_range range {
-					// stage flags
-					VK_SHADER_STAGE_FRAGMENT_BIT,
-					// offset
-					0U,
-					// size
-					sizeof(float)
-				};
-
 				const ::vk_descriptor_set_layout layouts[] {
 					ve::descriptor_set_layout_library::get<"camera">(),
 					ve::descriptor_set_layout_library::get<"planet">(),
 				};
 
-				return vk::pipeline::layout{layouts, range};
+				return vk::pipeline::layout{layouts};
 			}
 
 

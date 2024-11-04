@@ -10,6 +10,7 @@ layout(location = 0) in vec3 in_normal[gl_MaxPatchVertices];
 layout(location = 1) in float in_distance_to_camera[gl_MaxPatchVertices];
 
 layout(location = 0) out vec3 out_normal[];
+layout(location = 1) out float out_distance_to_camera[];
 
 
 // gl_PatchVerticesIn:
@@ -26,6 +27,10 @@ void main(void) {
 
 	// forward position
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+
+	// forward distance
+	out_distance_to_camera[gl_InvocationID] = in_distance_to_camera[gl_InvocationID];
+
 
 	// forward normal
 	out_normal[gl_InvocationID] = in_normal[gl_InvocationID];
