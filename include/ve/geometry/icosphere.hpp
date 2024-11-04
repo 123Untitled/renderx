@@ -141,8 +141,8 @@ namespace ve {
 					// -------------------
 				};
 				}
-				// 6 vertices
 				/*
+				// 6 vertices
 				_vertices = {
 					{ 0,  0,  L},  // 0 - sommet supérieur
 					{ 0,  0, -L},  // 1 - sommet inférieur
@@ -170,7 +170,7 @@ namespace ve {
 
 
 
-				___self::_subdivide(5);
+				___self::_subdivide(2);
 				___self::_project_onto_sphere();
 				//___self::_recompute_normals();
 			}

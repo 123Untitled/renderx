@@ -39,8 +39,8 @@ float random(vec2 coord) {
 
 void main(void) {
 
-	//out_color = vec4(1.0, 1.0, 1.0, 1.0);
-	//return;
+	out_color = vec4(1.0, 1.0, 1.0, 1.0);
+	return;
 
 	// Calcul des dérivées en espace écran
 	vec3 dFdxPos = dFdx(in_view_position);
