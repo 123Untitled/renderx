@@ -79,14 +79,16 @@ namespace vk::descriptor {
 			/* bind */
 			auto bind(const vk::command_buffer& encoder,
 					  const ::vk_pipeline_layout& layout,
-					  const vk::u32& first_set = 0U) const noexcept -> void {
+					  const vk::u32& first_set = 0U,
+					  const vk::pipeline_bind_point& point = VK_PIPELINE_BIND_POINT_GRAPHICS
+					  ) const noexcept -> void {
 
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
 						// command buffer
 						encoder,
 						// bind point
-						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						point,
 						// pipeline layout
 						layout,
 						// first set

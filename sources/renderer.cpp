@@ -15,7 +15,7 @@ ve::renderer::renderer(void)
   _pool{},
   _cmds{_pool, _smanager.size(), VK_COMMAND_BUFFER_LEVEL_PRIMARY},
   _sync{1U/*_smanager.size()*/},
-  _scene{_smanager} {
+  _scene{_smanager.swapchain().extent()} {
 }
 
 

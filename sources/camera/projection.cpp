@@ -10,7 +10,7 @@
 
 /* default constructor */
 ve::projection::projection(void) noexcept
-: _fov{FOV_DEFAULT}, _ratio{_4_3}, _near{NEAR_DEFAULT}, _far{FAR_DEFAULT} {
+: _fov{FOV_DEFAULT}, _ratio{_cinemascope}, _near{NEAR_DEFAULT}, _far{FAR_DEFAULT} {
 }
 
 
