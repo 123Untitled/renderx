@@ -123,10 +123,18 @@ glfw::window::window(void)
 
 
 
+	// compute window size with 2:39 aspect ratio
+	const float width = 1000;
+	const float height = width / 2.39f;
+
+
 
 
 	// create window
-	_window = ::glfw_create_window(800, 600, "グラフィックエンジン", nullptr, nullptr);
+	_window = ::glfw_create_window((int)width,
+								   (int)height,
+								   "グラフィックエンジン",
+								   nullptr, nullptr);
 
 	if (_window == nullptr)
 		throw engine::exception{"failed to create glfw window."};
