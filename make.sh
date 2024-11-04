@@ -412,14 +412,67 @@ function _install_dependencies() {
 function _generate_compile_db() {
 
 	# use custom script to generate compile database
-	node $cwd_dir'/generate_cdb.js' $cwd_dir "$srcs" "$objs" "$cxx" "$cxxflags"
+	#node $cwd_dir'/generate_cdb.js' $cwd_dir "$srcs" "$objs" "$cxx" "$cxxflags"
 
 	# use ninja to generate compile database
 	#ninja -f $ninja -t compdb > $compile_db
 
+
+	local content='[\n'
+
+	for file in $srcs; do
+
+		# current directory
+		content+='\t{\n\t\t"directory": "'$cwd_dir'",'
+
+		# source file
+		content+='\n\t\t"file": "'$file'",'
+
+		# output file
+		content+='\n\t\t"output": "'${file%.cpp}'.o",'
+
+		# arguments
+		content+='\n\t\t"arguments": [\n\t\t\t"'$cxx'",\n'
+
+		# cxx flags
+		for flag in $cxxflags; do
+			content+='\t\t\t"'$flag'",\n'
+		done
+
+		# source file
+		content+='\t\t\t"-c",\n\t\t\t"'$file'",\n'
+
+		# output file
+		content+='\t\t\t"-o",\n\t\t\t"'${file%.cpp}'.o"\n\t\t]\n\t},\n'
+	done
+
+	# erase last comma with newline
+	content[-3]='\'
+	content[-2]='n'
+	content[-1]=']'
+
+	# write to compile db
+	if ! echo $content > $compile_db; then
+		echo 'error while generating' $error'compile_commands.json'$reset
+		exit 1
+	fi
+
 	# print success
 	print $success'[+]'$reset ${compile_db:t}
 }
+
+# generate compile_commands.json
+#define GENERATE_CDB
+#CONTENT='[\n'
+#for FILE in $(SRCS); do
+#CONTENT+='\t{\n\t\t"directory": "'$$(pwd)'",\n\t\t"file": "'$$FILE'",\n\t\t"output": "'$${FILE%.cpp}.o'",\n\t\t"arguments": [\n\t\t\t"$(CXX)",\n'
+#	for FLAG in $(CXXFLAGS); do
+#		CONTENT+='\t\t\t"'$$FLAG'",\n'
+#	done
+#	CONTENT+='\t\t\t"-c",\n\t\t\t"'$$FILE'",\n\t\t\t"-o",\n\t\t\t"'$${FILE%.cpp}'.o"\n\t\t]\n\t},\n'
+#done
+#echo $${CONTENT%',\n'}'\n]' > $@
+#endef
 
 # compile db
 function _compile_database() {
@@ -491,8 +544,6 @@ function _fclean() {
 
 
 # -- M A I N ------------------------------------------------------------------
-
-
 
 
 _check_tools
