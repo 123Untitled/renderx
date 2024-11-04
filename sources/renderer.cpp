@@ -14,10 +14,8 @@ ve::renderer::renderer(void)
   _smanager{},
   _pool{},
   _cmds{_pool, _smanager.size(), VK_COMMAND_BUFFER_LEVEL_PRIMARY},
-  _sync{_smanager.size()},
-  _scene{_smanager},
-  _heightmap_compute{_smanager.swapchain().extent().width,
-					 _smanager.swapchain().extent().height} {
+  _sync{1U/*_smanager.size()*/},
+  _scene{_smanager} {
 }
 
 
@@ -98,9 +96,6 @@ auto ve::renderer::_draw_frame(void) -> void {
 
 	// start recording
 	cmd.begin();
-
-
-	_heightmap_compute.render(cmd);
 
 
 	// here call scene draw !!!

@@ -12,6 +12,20 @@
 #include "ve/vulkan/fence.hpp"
 #include "ve/vulkan/allocator.hpp"
 
+#include "ve/structures/vec.hpp"
+
+
+#include "ve/vulkan/descriptor/pool.hpp"
+#include "ve/vulkan/descriptor/sets.hpp"
+
+
+#include "ve/vulkan/pipeline/layout.hpp"
+
+#include "ve/vulkan/image.hpp"
+#include "ve/vulkan/depth_buffer.hpp"
+#include "ve/vulkan/multisampling.hpp"
+
+#include "ve/vulkan/barrier/memory_barrier.hpp"
 #include "ve/vk/typedefs.hpp"
 
 #include "ve/os.hpp"
@@ -22,13 +36,11 @@
 #include "ve/vertex/normal.hpp"
 
 #include "ve/exceptions.hpp"
-#include "ve/libraries/shader_library.hpp"
 
 #include "ve/system/directory.hpp"
 
 #include "ve/renderer.hpp"
 
-#include "ve/libraries/shader_library.hpp"
 
 #include "ve/object.hpp"
 #include "ve/transform.hpp"

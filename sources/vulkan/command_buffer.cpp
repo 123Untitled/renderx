@@ -9,7 +9,7 @@
 // -- public methods ----------------------------------------------------------
 
 /* bind graphics pipeline */
-auto vulkan::command_buffer::bind_graphics_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
+auto vulkan::command_buffer::bind_graphics_pipeline(const ::vk_pipeline& pipeline) const noexcept -> void {
 
 	// bind pipeline
 	::vk_cmd_bind_pipeline(
@@ -17,7 +17,7 @@ auto vulkan::command_buffer::bind_graphics_pipeline(const vk::pipeline& pipeline
 }
 
 /* bind compute pipeline */
-auto vulkan::command_buffer::bind_compute_pipeline(const vk::pipeline& pipeline) const noexcept -> void {
+auto vulkan::command_buffer::bind_compute_pipeline(const ::vk_pipeline& pipeline) const noexcept -> void {
 
 	// bind pipeline
 	::vk_cmd_bind_pipeline(

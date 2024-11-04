@@ -2,6 +2,7 @@
 #define ___ve_vulkan_physical_device___
 
 #include "ve/vk/typedefs.hpp"
+#include <vector>
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------

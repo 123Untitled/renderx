@@ -1,7 +1,6 @@
 #ifndef ___ve_structures_vec___
 #define ___ve_structures_vec___
 
-#include "ve/types.hpp"
 #include "ve/math/sqrt.hpp"
 #include <utility>
 #include <iostream>
@@ -14,7 +13,7 @@ namespace ve {
 
 	// -- V E C ---------------------------------------------------------------
 
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	class vec final {
 
 
@@ -269,7 +268,7 @@ namespace ve {
 			vec(void) noexcept = default;
 
 			/* variadic constructor */
-			template <typename... Ts>
+			template <typename... Ts> requires (sizeof...(Ts) <= N)
 			vec(Ts&&... args) noexcept
 			: _data{std::forward<Ts>(args)...} {
 			}
@@ -360,6 +359,16 @@ namespace ve {
 			/* w */
 			auto w(void) const noexcept -> const value_type& requires (N > 3U) {
 				return _data[3];
+			}
+
+			/* xy */
+			auto xy(void) const noexcept -> ve::vec<value_type, 2U> requires (N > 1U) {
+				return ve::vec<value_type, 2U>{_data[0U], _data[1U]};
+			}
+
+			/* xyz */
+			auto xyz(void) const noexcept -> ve::vec<value_type, 3U> requires (N > 2U) {
+				return ve::vec<value_type, 3U>{_data[0U], _data[1U], _data[2U]};
 			}
 
 
@@ -540,25 +549,25 @@ namespace ve {
 	// -- non-member arithmetic operators -------------------------------------
 
 	/* addition operator */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator+(const ve::vec<T, N>& v1, const ve::vec<T, N>& v2) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::add(v1._data, v2._data);
 	}
 
 	/* subtraction operator */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator-(const ve::vec<T, N>& v1, const ve::vec<T, N>& v2) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::sub(v1._data, v2._data);
 	}
 
 	/* multiplication operator */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator*(const ve::vec<T, N>& v1, const ve::vec<T, N>& v2) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::mul(v1._data, v2._data);
 	}
 
 	/* division operator */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator/(const ve::vec<T, N>& v1, const ve::vec<T, N>& v2) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::div(v1._data, v2._data);
 	}
@@ -567,56 +576,56 @@ namespace ve {
 	// -- non-member arithmetic operators (scalar) ----------------------------
 
 	/* addition operator (scalar) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator+(const ve::vec<T, N>& v,
 				   const T& s) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::add(v._data, s);
 	}
 
 	/* addition operator (scalar, inverted) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator+(const T& s,
 				   const ve::vec<T, N>& v) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::add(v._data, s);
 	}
 
 	/* subtraction operator (scalar) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator-(const ve::vec<T, N>& v,
 				   const T& s) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::sub(v._data, s);
 	}
 
 	/* subtraction operator (scalar, inverted) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator-(const T& s,
 				   const ve::vec<T, N>& v) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::sub(v._data, s);
 	}
 
 	/* multiplication operator (scalar) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator*(const ve::vec<T, N>& v,
 				   const T& s) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::mul(v._data, s);
 	}
 
 	/* multiplication operator (scalar, inverted) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator*(const T& s,
 				   const ve::vec<T, N>& v) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::mul(v._data, s);
 	}
 
 	/* division operator (scalar) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator/(const ve::vec<T, N>& v,
 				   const T& s) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::div(v._data, s);
 	}
 
 	/* division operator (scalar, inverted) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto operator/(const T& s,
 				   const ve::vec<T, N>& v) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::div(v._data, s);
@@ -626,19 +635,19 @@ namespace ve {
 	// -- non-member functions ------------------------------------------------
 
 	/* dot */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto dot(const ve::vec<T, N>& lhs, const ve::vec<T, N>& rhs) noexcept -> T {
 		return ve::vec<T, N>::_sequence::dot(lhs._data, rhs._data);
 	}
 
 	/* length */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto length(const ve::vec<T, N>& lhs) noexcept -> T {
 		return ve::sqrt(ve::vec<T, N>::_sequence::dot(lhs._data, lhs._data));
 	}
 
 	/* normalize */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto normalize(const ve::vec<T, N>& lhs) noexcept -> ve::vec<T, N> {
 		const auto len = ve::length(lhs);
 		return (len != 0.0f) ? vec<T, N>::_sequence::div(lhs._data, len)
@@ -646,19 +655,19 @@ namespace ve {
 	}
 
 	/* distance */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto distance(const ve::vec<T, N>& lhs, const ve::vec<T, N>& rhs) noexcept -> T {
 		return ve::length(lhs - rhs);
 	}
 
 	/* lerp (mix) */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto lerp(const ve::vec<T, N>& lhs, const ve::vec<T, N>& rhs, const T t) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::lerp(lhs._data, rhs._data, t);
 	}
 
 	/* midpoint */
-	template <typename T, ve::size_t N>
+	template <typename T, unsigned N>
 	auto midpoint(const ve::vec<T, N>& lhs, const ve::vec<T, N>& rhs) noexcept -> ve::vec<T, N> {
 		return ve::vec<T, N>::_sequence::midpoint(lhs._data, rhs._data);
 	}

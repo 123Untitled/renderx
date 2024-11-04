@@ -11,15 +11,15 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* default constructor */
-ve::render_pass::render_pass(void)
-: _render_pass{___self::_create_render_pass()} {
+vk::render_pass::render_pass(void)
+: _render_pass{self::_create_render_pass()} {
 }
 
 
 // -- public conversion operators ---------------------------------------------
 
-/* const vk::render_pass& conversion operator */
-ve::render_pass::operator const vk::render_pass&(void) const noexcept {
+/* const reference conversion operator */
+vk::render_pass::operator const ::vk_render_pass&(void) const noexcept {
 	return _render_pass;
 }
 
@@ -28,7 +28,7 @@ ve::render_pass::operator const vk::render_pass&(void) const noexcept {
 // -- private static methods --------------------------------------------------
 
 /* create render pass */
-auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
+auto vk::render_pass::_create_render_pass(void) -> vk::unique<::vk_render_pass> {
 
 
 	// -- attachments ---------------------------------------------------------
@@ -152,11 +152,11 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 			// color attachment count
 			1U,
 			// color attachments
-			&references[0],
+			&references[0U],
 			// resolve attachments
-			&references[2],
+			&references[2U],
 			// depth stencil attachment
-			&references[1],
+			&references[1U],
 			// preserve attachment count
 			0U,
 			// preserve attachments
@@ -192,8 +192,8 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 	};
 
 
-	// render pass info
-	vk::render_pass_info info {
+	// create info
+	const ::vk_render_pass_create_info info {
 		// structure type
 		VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
 		// next structure
@@ -215,5 +215,25 @@ auto ve::render_pass::_create_render_pass(void) -> vk::unique<vk::render_pass> {
 	};
 
 	// create render pass
-	return vk::make_unique<vk::render_pass>(info);
+	return vk::make_unique<::vk_render_pass>(info);
+}
+
+
+
+// -- L I B R A R Y -----------------------------------------------------------
+
+// -- private static methods --------------------------------------------------
+
+/* shared */
+auto vk::render_pass::library::_shared(void) -> self& {
+	static self instance;
+	return instance;
+}
+
+
+// -- private lifecycle -------------------------------------------------------
+
+/* default constructor */
+vk::render_pass::library::library(void)
+: _render_passes{vk::render_pass{}} {
 }

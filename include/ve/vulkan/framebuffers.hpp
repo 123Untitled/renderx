@@ -5,8 +5,8 @@
 #include "ve/types.hpp"
 #include "ve/vk/typedefs.hpp"
 
+
 namespace ve {
-	class render_pass;
 	class multisampling;
 	class depth_buffer;
 }
@@ -61,14 +61,14 @@ namespace vulkan {
 			auto _create(const vulkan::image_views&,
 						 const ve::multisampling&,
 						 const ve::depth_buffer&,
-						 const ve::render_pass&,
+						 const ::vk_render_pass&,
 						 const vk::extent2D&) -> void;
 
 
 			// -- public static methods ---------------------------------------
 
 			/* info */
-			static auto info(const ve::render_pass&,
+			static auto info(const ::vk_render_pass&,
 							 const vk::extent2D&) noexcept -> vk::framebuffer_info;
 
 
@@ -83,7 +83,7 @@ namespace vulkan {
 			framebuffers(const vulkan::image_views&,
 						 const ve::multisampling&,
 						 const ve::depth_buffer&,
-						 const ve::render_pass&,
+						 const ::vk_render_pass&,
 						 const vk::extent2D&);
 
 			/* uncopyable */
@@ -120,7 +120,7 @@ namespace vulkan {
 			auto recreate(const vulkan::image_views&,
 						  const ve::multisampling&,
 						  const ve::depth_buffer&,
-						  const ve::render_pass&,
+						  const ::vk_render_pass&,
 						  const vk::extent2D&) -> void;
 
 

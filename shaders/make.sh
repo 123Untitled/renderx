@@ -158,7 +158,6 @@ function _compile() {
 			echo $success'[✓]'$reset ${file:t}
 			count=$((count + 1))
 		else
-			[[ $count -gt 0 ]] && echo
 			echo $error'[x]'$reset ${file:t}
 			local -r log_content=$(<$log_file)
 			echo ${log_content#$file:}
@@ -168,7 +167,7 @@ function _compile() {
 
 	# print success
 	if [[ $count -gt 0 ]]; then
-		echo '\n'$info'[>]'$reset $count 'spir-v compiled.'
+		echo $info'[>]'$reset $count 'spir-v compiled.'
 	else
 		echo $info'[>]'$reset 'shaders are up to date.'
 	fi

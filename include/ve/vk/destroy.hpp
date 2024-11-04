@@ -85,17 +85,27 @@ namespace vk {
 	// -- render pass ---------------------------------------------------------
 
 	/* destroy render pass */
-	inline auto destroy(const vk::render_pass& render_pass) noexcept -> void {
+	inline auto destroy(const ::vk_render_pass& render_pass) noexcept -> void {
 
 		::vk_destroy_render_pass(
 				vulkan::device::logical(), render_pass, nullptr);
 	}
 
 
+	// -- shader module -------------------------------------------------------
+
+	/* destroy shader module */
+	inline auto destroy(const ::vk_shader_module& module) noexcept -> void {
+
+		::vk_destroy_shader_module(
+				vulkan::device::logical(), module, nullptr);
+	}
+
+
 	// -- pipeline ------------------------------------------------------------
 
 	/* destroy pipeline */
-	inline auto destroy(const vk::pipeline& pipeline) noexcept -> void {
+	inline auto destroy(const ::vk_pipeline& pipeline) noexcept -> void {
 
 		::vk_destroy_pipeline(
 				vulkan::device::logical(), pipeline, nullptr);
@@ -105,7 +115,7 @@ namespace vk {
 	// -- pipeline layout -----------------------------------------------------
 
 	/* destroy pipeline layout */
-	inline auto destroy(const vk::pipeline_layout& layout) noexcept -> void {
+	inline auto destroy(const ::vk_pipeline_layout& layout) noexcept -> void {
 
 		::vk_destroy_pipeline_layout(
 				vulkan::device::logical(), layout, nullptr);
@@ -115,7 +125,7 @@ namespace vk {
 	// -- descriptor set layout -----------------------------------------------
 
 	/* destroy descriptor set layout */
-	inline auto destroy(const vk::descriptor_set_layout& layout) noexcept -> void {
+	inline auto destroy(const ::vk_descriptor_set_layout& layout) noexcept -> void {
 
 		::vk_destroy_descriptor_set_layout(
 				vulkan::device::logical(), layout, nullptr);
@@ -125,7 +135,7 @@ namespace vk {
 	// -- descriptor pool -----------------------------------------------------
 
 	/* destroy descriptor pool */
-	inline auto destroy(const vk::descriptor_pool& pool) noexcept -> void {
+	inline auto destroy(const ::vk_descriptor_pool& pool) noexcept -> void {
 
 		::vk_destroy_descriptor_pool(
 				vulkan::device::logical(), pool, nullptr);

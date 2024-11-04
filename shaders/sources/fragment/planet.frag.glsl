@@ -60,9 +60,9 @@ void main(void) {
 
 	// light direction
 	vec3 light_direction = normalize(vec3(-0.0, -0.0, -1.0));
-	float light_intensity = 0.6;
+	float light_intensity = 1.0;
 
-	vec3 material_diffuse = vec3(0.7);
+	vec3 material_diffuse = vec3(0.8);
 			//0.9 - (1.0 - (in_noise * 3.0)),
 			//0.3 - (1.0 - (in_noise * 6.0)),
 			//0.1 - (1.0 - (in_noise * 9.0))
@@ -113,8 +113,8 @@ void main(void) {
 
 	// rim light
 	float rim_strength = 1.5;
-	float rim_shininess = 6.0;
-	vec3 rim_color = vec3(0.0, 1, 1);
+	float rim_shininess = 8.0;
+	vec3 rim_color = out_normal;
 	float rim = smoothstep(0.0, 1.0, pow(
 						 1.0 - max(
 							dot(in_view_direction, normal), 0.0), rim_shininess)

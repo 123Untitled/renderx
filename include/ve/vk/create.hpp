@@ -119,9 +119,9 @@ namespace vk {
 	// -- render pass ---------------------------------------------------------
 
 	/* create render pass */
-	inline auto create(const vk::render_pass_info& info) -> vk::render_pass {
+	inline auto create(const ::vk_render_pass_create_info& info) -> ::vk_render_pass {
 
-		vk::render_pass render_pass;
+		::vk_render_pass render_pass;
 
 		try_execute<"failed to create render pass">(
 			::vk_create_render_pass,
@@ -131,12 +131,27 @@ namespace vk {
 	}
 
 
+	// -- shader module -------------------------------------------------------
+
+	/* create shader module */
+	inline auto create(const ::vk_shader_module_create_info& info) -> ::vk_shader_module {
+
+		::vk_shader_module module;
+
+		try_execute<"failed to create shader module">(
+			::vk_create_shader_module,
+			vulkan::device::logical(), &info, nullptr, &module);
+
+		return module;
+	}
+
+
 	// -- pipeline ------------------------------------------------------------
 
 	/* create pipeline */
-	inline auto create(const vk::graphics_pipeline_info& info) -> vk::pipeline {
+	inline auto create(const ::vk_graphics_pipeline_create_info& info) -> ::vk_pipeline {
 
-		vk::pipeline pipeline;
+		::vk_pipeline pipeline;
 
 		try_execute<"failed to create graphics pipeline">(
 			// function
@@ -161,9 +176,9 @@ namespace vk {
 	// -- compute pipeline ----------------------------------------------------
 
 	/* create compute pipeline */
-	inline auto create(const vk::compute_pipeline_info& info) -> vk::pipeline {
+	inline auto create(const vk::compute_pipeline_info& info) -> ::vk_pipeline {
 
-		vk::pipeline pipeline;
+		::vk_pipeline pipeline;
 
 		try_execute<"failed to create compute pipeline">(
 			::vk_create_compute_pipelines,
@@ -176,9 +191,9 @@ namespace vk {
 	// -- pipeline layout -----------------------------------------------------
 
 	/* create pipeline layout */
-	inline auto create(const vk::pipeline_layout_info& info) -> vk::pipeline_layout {
+	inline auto create(const ::vk_pipeline_layout_create_info& info) -> ::vk_pipeline_layout {
 
-		vk::pipeline_layout layout;
+		::vk_pipeline_layout layout;
 
 		try_execute<"failed to create pipeline layout">(
 			::vk_create_pipeline_layout,
@@ -191,6 +206,7 @@ namespace vk {
 	// -- descriptor sets -----------------------------------------------------
 
 	/* create descriptor sets */
+	/*
 	inline auto create(const vk::descriptor_set_allocate_info& info,
 						vk::descriptor_set* sets) -> vk::descriptor_set {
 
@@ -202,14 +218,15 @@ namespace vk {
 
 		return set;
 	}
+	*/
 
 
 	// -- descriptor set layout -----------------------------------------------
 
 	/* create descriptor set layout */
-	inline auto create(const vk::descriptor_set_layout_info& info) -> vk::descriptor_set_layout {
+	inline auto create(const ::vk_descriptor_set_layout_create_info& info) -> ::vk_descriptor_set_layout {
 
-		vk::descriptor_set_layout layout;
+		::vk_descriptor_set_layout layout;
 
 		try_execute<"failed to create descriptor set layout">(
 			::vk_create_descriptor_set_layout,
@@ -222,9 +239,9 @@ namespace vk {
 	// -- descriptor pool -----------------------------------------------------
 
 	/* create descriptor pool */
-	inline auto create(const vk::descriptor_pool_info& info) -> vk::descriptor_pool {
+	inline auto create(const ::vk_descriptor_pool_create_info& info) -> ::vk_descriptor_pool {
 
-		vk::descriptor_pool pool;
+		::vk_descriptor_pool pool;
 
 		try_execute<"failed to create descriptor pool">(
 			::vk_create_descriptor_pool,

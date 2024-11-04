@@ -12,6 +12,7 @@
 #define ___ENGINE_VULKAN_ARRAY_HEADER___
 
 #include "ve/vk/typedefs.hpp"
+#include <type_traits>
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------

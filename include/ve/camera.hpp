@@ -6,6 +6,10 @@
 
 #include "ve/camera/projection.hpp"
 
+#include "ve/uniform_buffer.hpp"
+#include "ve/vulkan/descriptor/set.hpp"
+#include "ve/vulkan/descriptor/descriptor_set_layout_library.hpp"
+
 #include "ve/structures/vec.hpp"
 
 #include <glm/glm.hpp>
@@ -70,8 +74,11 @@ namespace ve {
 			/* direction */
 			glm::vec3 _direction;
 
+			/* uniform buffer */
+			ve::uniform_buffer _ubo;
 
-			// -- private methods ---------------------------------------------
+			/* descriptor set */
+			vk::descriptor::set _set;
 
 
 		public:
@@ -79,7 +86,7 @@ namespace ve {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			camera(void) noexcept
+			camera(void)
 			: _projection{}, _sensitivity{0.24f}, _velocity{1.0f},
 			  _uniform{
 				  ._projection{_projection.matrix()},
@@ -87,7 +94,14 @@ namespace ve {
 				  ._position{0.0f},
 			  },
 			  _rotation{0.0f},
-			  _direction{0.0f} {
+			  _direction{0.0f},
+			  _ubo{_uniform},
+			  _set{ve::descriptor_set_layout_library::get<"camera">()} {
+
+
+				// write descriptor set
+				_set.write(_ubo.descriptor_buffer_info(),
+							VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			}
 
 			/* deleted copy constructor */
@@ -164,6 +178,17 @@ namespace ve {
 				update_view();
 				//update_projection();
 				//_uniform_buffer.update(_uniform);
+
+				// update uniform buffer
+				_ubo.update(_uniform);
+			}
+
+			/* render */
+			auto render(const vk::command_buffer& encoder,
+						const ::vk_pipeline_layout& layout) const noexcept -> void {
+
+				// bind descriptor sets
+				_set.bind(encoder, layout, 0U);
 			}
 
 

@@ -1,6 +1,7 @@
 #ifndef ___ve_vulkan_command_buffer___
 #define ___ve_vulkan_command_buffer___
 
+#include "ve/vk/array.hpp"
 #include "ve/vulkan/swapchain.hpp"
 #include "ve/vulkan/render_pass.hpp"
 #include "ve/vulkan/buffer.hpp"
@@ -167,7 +168,7 @@ namespace vulkan {
 
 			/* begin render pass */
 			auto begin_render_pass(const vulkan::swapchain& swapchain,
-								   const ve::render_pass& render_pass,
+								   const ::vk_render_pass& render_pass,
 								   const vk::framebuffer& framebuffer) const noexcept -> void {
 
 				// clear color
@@ -188,12 +189,12 @@ namespace vulkan {
 				};
 
 				// area
-				const vk::rect2D area{
+				const ::vk_rect2D area{
 					.offset = vk::offset2D{0, 0},
 					.extent = swapchain.extent()
 				};
 
-				const vk::render_pass_begin_info info {
+				const ::vk_render_pass_begin_info info {
 					// type of structure
 					.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 					// pointer to next structure
@@ -231,7 +232,7 @@ namespace vulkan {
 			auto set_viewport(const vk::extent2D& extent) const noexcept -> void {
 
 				// create viewport
-				const vk::viewport viewport {
+				const ::vk_viewport viewport {
 					.x        = 0.0f,
 					.y        = 0.0f,
 					.width    = static_cast<float>(extent.width),
@@ -255,7 +256,7 @@ namespace vulkan {
 			/* set scissor */
 			auto set_scissor(const vk::extent2D& extent) const noexcept -> void {
 
-				const vk::rect2D scissor {
+				const ::vk_rect2D scissor {
 					// offset
 					vk::offset2D{0, 0},
 					// extent
@@ -372,10 +373,10 @@ namespace vulkan {
 			}
 
 			/* bind graphics pipeline */
-			auto bind_graphics_pipeline(const vk::pipeline&) const noexcept -> void;
+			auto bind_graphics_pipeline(const ::vk_pipeline&) const noexcept -> void;
 
 			/* bind compute pipeline */
-			auto bind_compute_pipeline(const vk::pipeline&) const noexcept -> void;
+			auto bind_compute_pipeline(const ::vk_pipeline&) const noexcept -> void;
 
 			/* dispatch */
 			auto dispatch(const vk::u32, const vk::u32, const vk::u32) const noexcept -> void;
@@ -418,7 +419,7 @@ namespace vulkan {
 
 			/* push constants */
 			template <typename ___constants>
-			auto push_constants(const vulkan::pipeline& pipeline,
+			auto push_constants(const ::vk_pipeline_layout& layout,
 					            const ___constants& constants) const noexcept -> void {
 
 				//static_assert(sizeof(___constants) <= 128U,
@@ -429,7 +430,7 @@ namespace vulkan {
 						// command buffer
 						_buffer,
 						// pipeline layout
-						pipeline.layout(),
+						layout,
 						// stage flags
 						//VK_SHADER_STAGE_VERTEX_BIT
 						//|
@@ -446,8 +447,8 @@ namespace vulkan {
 			}
 
 			/* bind descriptor sets */
-			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
-									  const vk::descriptor_set& set) const noexcept -> void {
+			auto bind_descriptor_sets(const ::vk_pipeline_layout& layout,
+									  const ::vk_descriptor_set& set) const noexcept -> void {
 
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
@@ -469,8 +470,8 @@ namespace vulkan {
 						nullptr);
 			}
 
-			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
-									  const vk::descriptor_set& set,
+			auto bind_descriptor_sets(const ::vk_pipeline_layout& layout,
+									  const ::vk_descriptor_set& set,
 									  const vk::u32& dynamic_offsets) const noexcept -> void {
 
 				// bind descriptor sets
@@ -493,16 +494,16 @@ namespace vulkan {
 						&dynamic_offsets);
 			}
 
-			auto bind_descriptor_sets(const vk::pipeline_layout& layout,
+			auto bind_descriptor_sets(const ::vk_pipeline_layout& layout,
 									// first set
 									const vk::u32& first_set,
 									// descriptor set count
 									const vk::u32& set_count,
 									// descriptor sets
-									  const vk::descriptor_set* sets,
+									const ::vk_descriptor_set* sets,
 									// dynamic offset count
-									  const vk::u32& dynamic_offset_count,
-									  const vk::u32* dynamic_offsets) const noexcept -> void {
+									const vk::u32& dynamic_offset_count,
+									const vk::u32* dynamic_offsets) const noexcept -> void {
 
 				// bind descriptor sets
 				::vk_cmd_bind_descriptor_sets(
@@ -524,13 +525,13 @@ namespace vulkan {
 						dynamic_offsets);
 			}
 
-			auto bind_compute_descriptor_sets(const vk::pipeline_layout& layout,
+			auto bind_compute_descriptor_sets(const ::vk_pipeline_layout& layout,
 											  // first set
 											  const vk::u32& first_set,
 											  // descriptor set count
 											  const vk::u32& set_count,
 											  // descriptor sets
-											  const vk::descriptor_set* sets,
+											  const ::vk_descriptor_set* sets,
 											  // dynamic offset count
 											  const vk::u32& dynamic_offset_count = 0U,
 											  // dynamic offsets
@@ -615,62 +616,6 @@ namespace vulkan {
 						1U,
 						// regions
 						&region);
-			}
-
-
-
-			/* record */
-			template <typename ___pconst, typename ___t>
-			auto record(const vulkan::swapchain& swapchain,
-						const ve::render_pass& render_pass,
-						const vk::framebuffer& framebuffer,
-						const vulkan::pipeline& pipeline,
-						const vulkan::vertex_buffer& vbuffer,
-						const vulkan::index_buffer& ibuffer,
-						const ___pconst& constants) const -> void {
-
-				// begin recording
-				this->begin();
-
-				// begin render pass
-				this->begin_render_pass(swapchain, render_pass, framebuffer);
-
-				// set viewport
-				this->set_viewport(swapchain.extent());
-
-				// set scissor
-				this->set_scissor(swapchain.extent());
-
-
-				// for earch mesh
-				{
-
-					// bind graphics pipeline
-					bind_graphics_pipeline(pipeline);
-
-
-					// bind vertex buffer
-					___self::bind_vertex_buffer(vbuffer);
-
-					// bind index buffer
-					___self::bind_index_buffer(ibuffer);
-
-					// push constants
-					___self::push_constants(pipeline, constants);
-
-					// indexed draw
-					___self::draw_indexed(ibuffer.count());
-
-					// draw
-					//___self::cmd_draw(vbuffer.count());
-
-				}
-
-				// end render pass
-				___self::end_render_pass();
-
-				// end recording
-				___self::end();
 			}
 
 

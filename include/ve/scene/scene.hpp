@@ -7,10 +7,18 @@
 #include "ve/object.hpp"
 #include "ve/geometry/mesh_library.hpp"
 #include "ve/mouse_delta.hpp"
-#include "ve/vulkan/descriptors/descriptor_sets.hpp"
-#include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
-#include "ve/vulkan/descriptors/descriptor_pool.hpp"
-#include "ve/vulkan/descriptors/descriptor_set_layout_library.hpp"
+
+#include "ve/vulkan/descriptor/sets.hpp"
+#include "ve/vulkan/descriptor/layout.hpp"
+#include "ve/vulkan/descriptor/pool.hpp"
+#include "ve/vulkan/descriptor/allocator.hpp"
+
+#include "ve/vulkan/descriptor/descriptor_set_layout_library.hpp"
+
+#include "ve/vulkan/pipeline/library.hpp"
+
+#include "ve/vulkan/pipeline/pipeline_layout_library.hpp"
+#include "ve/vulkan/barrier/memory_barrier.hpp"
 
 #include "ve/types.hpp"
 
@@ -18,6 +26,21 @@
 // -- V E  N A M E S P A C E --------------------------------------------------
 
 namespace ve {
+
+
+	class bindable {
+
+
+		private:
+
+
+			// -- private members ---------------------------------------------
+
+			/* descriptor sets */
+			vk::descriptor::set _set;
+
+
+	};
 
 
 	// -- S C E N E -----------------------------------------------------------
@@ -35,24 +58,29 @@ namespace ve {
 
 			// -- private members ---------------------------------------------
 
+			/* **** skybox **** */
+
+			/* extent */
+			vk::extent2D _extent;
+
+			/* image */
+			ve::image _image;
+
+			/* view */
+			ve::image_view _view;
+
+
 
 			/* camera */
 			ve::camera _camera;
 
-			/* pipeline */
-			vulkan::pipeline _pipeline;
-
-			/* objects */
-			std::vector<rx::object> _objects;
-
-			/* descriptor sets */
-			vulkan::descriptor_sets _sets[3U];
+			/* planet */
+			rx::object _planet;
 
 			/* uniform buffer */
-			ve::uniform_buffer_long<glm::mat4> _ubo[3U];
+			ve::uniform_buffer_long<glm::mat4> _ubo;
 
-			/* uniform buffer */
-			ve::uniform_buffer _ubo_cam[3U];
+			std::vector<vk::descriptor::set> _sets;
 
 
 		public:
@@ -60,15 +88,22 @@ namespace ve {
 			// -- public lifecycle --------------------------------------------
 
 			/* default constructor */
-			scene(const vulkan::swapchain_manager& _smanager)
-			: _camera{},
-			  _pipeline{
-				  vulkan::pipeline_builder<ve::vert3x>::build(
-						  _smanager.render_pass())}
+			scene(const vulkan::swapchain_manager& smanager)
+			: _extent{smanager.swapchain().extent()},
+			  _image{_extent.width, _extent.height,
+					 VK_FORMAT_R32_SFLOAT,
+					 VK_SAMPLE_COUNT_1_BIT,
+					 VK_IMAGE_TILING_OPTIMAL,
+					 VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+					 VK_IMAGE_LAYOUT_UNDEFINED,
+					 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT},
+			  _view{_image, VK_FORMAT_R32_SFLOAT, VK_IMAGE_ASPECT_COLOR_BIT},
+
+			_camera{},
+			  _sets{}
+
 			{
-				// add cube object
-				//_objects.emplace_back(rx::mesh_library::get<"fibonacci_sphere">());
-				_objects.emplace_back(rx::mesh_library::get<"icosphere">());
+				_planet = rx::object{rx::mesh_library::get<"icosphere">()};
 
 				//_camera.ratio(rx::sdl::window::ratio());
 				_camera.update_projection();
@@ -77,51 +112,23 @@ namespace ve {
 				//_objects[0].scale() = glm::vec3{50.0f, 50.0f, 50.0f};
 
 
-				for (vk::u32 i = 0U; i < 3U; ++i) {
-					_ubo[i] = ve::uniform_buffer_long<glm::mat4>{(vk::u32)_objects.size()};
-					_ubo_cam[i] = ve::uniform_buffer{_camera.uniform()};
-				}
+				_ubo = ve::uniform_buffer_long<glm::mat4>{1U};
+				_ubo.update(0U, _planet.model());
 
 
-				for (vk::u32 x = 0U; x < 3U; ++x) {
-					for (vk::u32 i = 0U; i < (vk::u32)_objects.size(); ++i) {
-						_ubo[x].update(i, _objects[i].model());
-					}
-					_ubo_cam[x].update(_camera.uniform());
-				}
-					//for (vk::u32 i = 0U; i < (vk::u32)_objects.size(); ++i) {
-					//	_ubo.update(i, _objects[i].model());
-					//}
+				// -- set layouts ---------------------------------------------
+
+				_sets.push_back(ve::descriptor_set_layout_library::get<"skybox_compute">());
+				_sets.push_back(ve::descriptor_set_layout_library::get<"planet">());
+
+				// skybox compute
+				_sets[0U].write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_GENERAL),
+								VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 
 
-				// -- descriptor sets -----------------------------------------
-
-				for (vk::u32 x = 0U; x < 3U; ++x) {
-					// create descriptor pool
-					vulkan::descriptor_pool::builder pbuilder{};
-
-					pbuilder.max_sets(2U);
-
-					// add pool size (camera)
-					pbuilder.pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1U);
-					// add pool size (objects)
-					pbuilder.pool_size(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1U);
-
-					// create descriptor sets
-					_sets[x] = vulkan::descriptor_sets{pbuilder};
-
-					_sets[x].reserve(2U);
-
-					_sets[x].push(ve::descriptor_set_layout_library::get<"camera">());
-					_sets[x].push(ve::descriptor_set_layout_library::get<"object">());
-
-					_sets[x].write(0U, _ubo_cam[x].descriptor_buffer_info(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-					_sets[x].write(1U, _ubo[x].descriptor_buffer_info(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
-				}
-
-				std::cout << "\x1b[32mSCENE INITIALIZED\x1b[0m" << std::endl;
-				//throw std::runtime_error{"scene init"};
-
+				// planet
+				_sets[1U].write(_ubo.descriptor_buffer_info(),
+								VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 			}
 
 
@@ -134,19 +141,24 @@ namespace ve {
 					  const vulkan::swapchain_manager& _smanager) -> void {
 
 
+				// compute skybox
+				compute_skybox(cmd);
+
+
 				_camera.update_rotation(ve::mouse_delta::dx(), ve::mouse_delta::dy());
 				_camera.update();
-				_ubo_cam[image_index].update(_camera.uniform());
 
 
-				//_objects[0].rotation().y += 0.26f * ve::delta::time();
-				_objects[0].rotation().x += 0.08f * ve::delta::time();
-				//_objects[0].rotation().z += 0.02f * ve::delta::time();
+				_planet.rotation().x += 0.08f * ve::delta::time();
 
 
-				const auto& swapchain = _smanager.swapchain();
+
+
+				// -- begin render pass ---------------------------------------
+
+				const auto& swapchain   = _smanager.swapchain();
 				const auto& render_pass = _smanager.render_pass();
-				const auto& frames = _smanager.frames();
+				const auto& frames      = _smanager.frames();
 
 				// begin render pass
 				cmd.begin_render_pass(swapchain,
@@ -160,65 +172,92 @@ namespace ve {
 				cmd.set_scissor(swapchain.extent());
 
 				// bind pipeline
-				cmd.bind_graphics_pipeline(_pipeline);
+				cmd.bind_graphics_pipeline(
+						vk::pipeline::library::get<"planet">());
 
 				// bind camera descriptor
-				cmd.bind_descriptor_sets(
-						_pipeline.layout(),
-						_sets[image_index][0U]);
-
-				// push constants
-				//cmd.push_constants(_pipeline, ((float)rx::now()));
-				cmd.push_constants(_pipeline, ve::delta::time());
+				_camera.render(cmd, vk::pipeline_layout_library::get<"main">());
 
 
-				{ // -- for each mesh -----------------------------------------------------
-
-					for (ve::u32 i = 0U; i < (ve::u32)_objects.size(); ++i) {
-
-						// update object
-						_objects[i].update();
-
-						// update uniform buffer
-						_ubo[image_index].update(i, _objects[i].model());
+				// push constants (time)
+				cmd.push_constants(
+						vk::pipeline_layout_library::get<"main">(),
+						ve::delta::time());
 
 
-						auto offset = _ubo[image_index].alignment(i);
+				// -- planet --------------------------------------------------
 
-						cmd.bind_descriptor_sets(
-								_pipeline.layout(),
-								// first set
-								1U, // set in layout shader
-								// descriptor set count
-								1U,
-								// descriptor sets
-								&_sets[image_index][1U],
-								// dynamic offset count
-								1U,
-								// dynamic offsets
-								&offset);
+				// update planet
+				_planet.update();
+
+				// update uniform buffer
+				_ubo.update(0U, _planet.model());
 
 
+				_sets[1U].bind(cmd, vk::pipeline_layout_library::get<"main">(), 1U);
 
 
-						// bind vertex buffer
-						cmd.bind_vertex_buffer(_objects[i].mesh().vertices());
+				// bind vertex buffer
+				cmd.bind_vertex_buffer(_planet.mesh().vertices());
 
-						// bind index buffer
-						cmd.bind_index_buffer(_objects[i].mesh().indices());
+				// bind index buffer
+				cmd.bind_index_buffer(_planet.mesh().indices());
 
-
-
-						// draw indexed
-						cmd.draw_indexed(_objects[i].mesh().indices().count());
-					}
-				}
+				// draw indexed
+				cmd.draw_indexed(_planet.mesh().indices().count());
 
 				// end render pass
 				cmd.end_render_pass();
+			}
 
-				//throw std::runtime_error{"scene draw"};
 
+			/* compute skybox */
+			auto compute_skybox(vulkan::command_buffer& cmd) -> void {
+
+				// image write barrier
+				ve::memory_barrier::image imb {
+					VK_ACCESS_NONE,
+					VK_ACCESS_SHADER_WRITE_BIT,
+					VK_IMAGE_LAYOUT_UNDEFINED,
+					VK_IMAGE_LAYOUT_GENERAL,
+					_image,
+					VK_IMAGE_ASPECT_COLOR_BIT
+				};
+
+				// barrier
+				imb.pipeline_barrier(cmd,
+						VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+
+				// bind compute pipeline
+				cmd.bind_compute_pipeline(
+						vk::pipeline::library::get<"skybox_compute">());
+
+				::vk_descriptor_set set = *_sets.data();
+
+				// bind descriptor sets
+				cmd.bind_compute_descriptor_sets(
+						vk::pipeline_layout_library::get<"skybox_compute">(),
+						0U, 1U, &set);
+
+				// group x
+				const vk::u32 gx = (_extent.width + 15U) / 16U;
+				// group y
+				const vk::u32 gy = (_extent.height + 15U) / 16U;
+
+				// dispatch
+				cmd.dispatch(gx, gy, 1U);
+
+				// transition to read only
+				imb.access_masks(VK_ACCESS_SHADER_WRITE_BIT,
+								 VK_ACCESS_SHADER_READ_BIT)
+				   .layouts(VK_IMAGE_LAYOUT_GENERAL,
+						    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+				// barrier
+				imb.pipeline_barrier(cmd,
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+						VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 			}
 
 	}; // class scene

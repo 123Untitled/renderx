@@ -2,11 +2,12 @@
 #define ___ve_vulkan_render_pass___
 
 #include "ve/vk/unique.hpp"
+#include "ve/containers/static_map.hpp"
 
 
-// -- V E  N A M E S P A C E --------------------------------------------------
+// -- V K  N A M E S P A C E --------------------------------------------------
 
-namespace ve {
+namespace vk {
 
 
 	// -- R E N D E R  P A S S ------------------------------------------------
@@ -19,13 +20,13 @@ namespace ve {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = ve::render_pass;
+			using self = vk::render_pass;
 
 
 			// -- private members ---------------------------------------------
 
 			/* render pass */
-			vk::unique<vk::render_pass> _render_pass;
+			vk::unique<::vk_render_pass> _render_pass;
 
 
 		public:
@@ -42,10 +43,10 @@ namespace ve {
 			render_pass(void);
 
 			/* deleted copy constructor */
-			render_pass(const ___self&) = delete;
+			render_pass(const self&) = delete;
 
 			/* move constructor */
-			render_pass(___self&&) noexcept = default;
+			render_pass(self&&) noexcept = default;
 
 			/* destructor */
 			~render_pass(void) noexcept = default;
@@ -54,16 +55,16 @@ namespace ve {
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public conversion operators ---------------------------------
 
-			/* const vk::render_pass& conversion operator */
-			operator const vk::render_pass&(void) const noexcept;
+			/* const reference conversion operator */
+			operator const ::vk_render_pass&(void) const noexcept;
 
 
 		private:
@@ -71,14 +72,22 @@ namespace ve {
 			// -- private static methods --------------------------------------
 
 			/* create render pass */
-			static auto _create_render_pass(void) -> vk::unique<vk::render_pass>;
+			static auto _create_render_pass(void) -> vk::unique<::vk_render_pass>;
+
+
+		public:
+
+			// -- forward declarations ----------------------------------------
+
+			/* library */
+			class library;
 
 	}; // class render_pass
 
 
-	// -- B U I L D E R -------------------------------------------------------
+	// -- L I B R A R Y -------------------------------------------------------
 
-	class render_pass::builder final {
+	class render_pass::library final {
 
 
 		private:
@@ -86,70 +95,59 @@ namespace ve {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = ve::render_pass::builder;
+			using self = vk::render_pass::library;
 
 
 			// -- private members ---------------------------------------------
 
-			/* attachment descriptions */
-			std::vector<vk::attachment_description> _attachments;
-
-			/* attachment references */
-			std::vector<vk::attachment_reference> _references;
-
-			/* subpasses */
-			std::vector<vk::subpass_description> _subpasses;
-
-			/* dependencies */
-			std::vector<vk::subpass_dependency> _dependencies;
+			/* render passes */
+			ve::static_map<vk::render_pass,
+				"main"
+				> _render_passes;
 
 
-		public:
+			// -- private static methods --------------------------------------
 
-			// -- public lifecycle --------------------------------------------
+			/* shared */
+			static auto _shared(void) -> self&;
+
+
+			// -- private lifecycle -------------------------------------------
 
 			/* default constructor */
-			builder(void) = default;
+			library(void);
 
 			/* deleted copy constructor */
-			builder(const ___self&) = delete;
+			library(const self&) = delete;
 
-			/* move constructor */
-			builder(___self&&) noexcept = default;
+			/* deleted move constructor */
+			library(self&&) = delete;
 
 			/* destructor */
-			~builder(void) noexcept = default;
+			~library(void) noexcept = default;
 
 
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
-			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
-
-
-			// -- public modifiers --------------------------------------------
-
-			/* add attachment */
-			auto add_attachment(const vk::attachment_description& attachment) -> ___self&;
-
-			/* add reference */
-			auto add_reference(const vk::attachment_reference& reference) -> ___self&;
-
-			/* add subpass */
-			auto add_subpass(const vk::subpass_description& subpass) -> ___self&;
-
-			/* add dependency */
-			auto add_dependency(const vk::subpass_dependency& dependency) -> ___self&;
-
-			/* build */
-			auto build(void) -> ve::render_pass;
+			/* deleted move assignment operator */
+			auto operator=(self&&) -> self& = delete;
 
 
-	}; // class render_pass::builder
+		public:
 
-} // namespace ve
+			// -- public static methods ---------------------------------------
+
+			/* get */
+			template <ve::literal key>
+			static auto get(void) -> const ::vk_render_pass& {
+				return ve::get<key>(self::_shared()._render_passes);
+			}
+
+	}; // class library
+
+} // namespace vk
 
 #endif // ___ve_vulkan_render_pass___

@@ -20,7 +20,7 @@ namespace ve {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = ve::uniform_buffer;
+			using self = ve::uniform_buffer;
 
 
 			// -- private members ---------------------------------------------
@@ -44,17 +44,14 @@ namespace ve {
 			: _buffer{sizeof(T), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT},
 			  _alloc{vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())} {
 
-				_alloc.map();
-				_alloc.memcpy(&data, 0U);
-				// copy data
-				//_alloc.memcpy(&data);
+				_alloc.memcpy(&data);
 			}
 
 			/* deleted copy constructor */
-			uniform_buffer(const ___self&) = delete;
+			uniform_buffer(const self&) = delete;
 
 			/* move constructor */
-			uniform_buffer(___self&&) noexcept = default;
+			uniform_buffer(self&&) noexcept = default;
 
 			/* destructor */
 			~uniform_buffer(void) noexcept = default;
@@ -63,10 +60,10 @@ namespace ve {
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public accessors --------------------------------------------
@@ -77,23 +74,13 @@ namespace ve {
 			}
 
 			/* descriptor buffer info */
-			auto descriptor_buffer_info(void) const noexcept -> vk::descriptor_buffer_info {
-				return vk::descriptor_buffer_info{
+			auto descriptor_buffer_info(void) const noexcept -> ::vk_descriptor_buffer_info {
+				return ::vk_descriptor_buffer_info{
 					.buffer = _buffer.underlying(),
 					.offset = 0U,
-					.range = VK_WHOLE_SIZE
+					.range  = VK_WHOLE_SIZE
 				};
 			}
-
-			/* descriptor buffer info */
-			//auto descriptor_buffer_info(void) const noexcept -> vk::descriptor_buffer_info {
-			//	return vk::descriptor_buffer_info{
-			//		.buffer = _uniform_buffer.get(),
-			//		.offset = 0U,
-			//		.range = sizeof(uniform)
-			//	};
-			//}
-
 
 			// -- public methods ----------------------------------------------
 
@@ -235,10 +222,10 @@ namespace ve {
 			}
 
 			/* descriptor buffer info */
-			auto descriptor_buffer_info(void) const noexcept -> vk::descriptor_buffer_info {
+			auto descriptor_buffer_info(void) const noexcept -> ::vk_descriptor_buffer_info {
 
 				// dynamic offset
-				return vk::descriptor_buffer_info{
+				return ::vk_descriptor_buffer_info{
 					.buffer = _buffer.underlying(),
 					.offset = 0U,
 					.range = _alignment

@@ -147,6 +147,11 @@ auto vulkan::swapchain_manager::_pick_extent(const vk::surface_capabilities& cap
 /* pick count */
 auto vulkan::swapchain_manager::_pick_count(const vk::surface_capabilities& capabilities) noexcept -> vk::u32 {
 
+	// more images: more buffering, less tearing, more input lag
+	// less images: less buffering, more tearing, less input lag
+
+	return capabilities.minImageCount;
+
 	// +1 for triple buffering
 	vk::u32 count = capabilities.minImageCount + 1U;
 

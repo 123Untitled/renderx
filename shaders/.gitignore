@@ -1,5 +1,11 @@
 # ignore spir-v directory
-spir-v
+/spir-v
 
 # ignore spv files
-**/*.spv
+/**/*.spv
+
+# ignore dependency files
+/.deps
+
+# ignore log file
+/.log

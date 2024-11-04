@@ -1,28 +1,7 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
+#ifndef ___ve_vulkan_typedefs___
+#define ___ve_vulkan_typedefs___
 
-#pragma once
-
-#ifndef ENGINE_VK_TYPEDEFS_HEADER
-#define ENGINE_VK_TYPEDEFS_HEADER
-
-#include "ve/os.hpp"
-
-// vulkan headers
-#include <vulkan/vulkan.h>
-
-#if defined(RENDERX_OS_LINUX)
-	#include <vulkan/vulkan_wayland.h>
-#endif
-
-#include <vector>
+#include "ve/vulkan/vulkan.hpp"
 
 
 // -- V K  N A M E S P A C E --------------------------------------------------
@@ -42,13 +21,22 @@ namespace vk {
 	/* 64bit float type */
 	using f64 = double;
 
+}
+
+/* structure type */
+using vk_structure_type = VkStructureType;
+
+/* vk flags */
+using vk_flags = VkFlags;
+
+/* bool32 */
+using vk_bool32 = VkBool32;
+
+namespace vk {
+
 
 	/* device size */
 	using device_size = ::VkDeviceSize;
-
-	/* vector type */
-	//template <typename T>
-	//using vector = std::vector<T>;
 
 
 	/* result */
@@ -145,7 +133,7 @@ namespace vk {
 	using surface_capabilities               = ::VkSurfaceCapabilitiesKHR;
 
 	/* wayland surface create info */
-	#if defined(RENDERX_OS_LINUX)
+	#if defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	using wayland_surface_create_info_khr    = ::VkWaylandSurfaceCreateInfoKHR;
 	#endif
 
@@ -220,17 +208,22 @@ namespace vk {
 	using command_buffer_reset_flags         = ::VkCommandBufferResetFlags;
 
 
-	// -- renderpass ----------------------------------------------------------
+}
 
-	/* renderpass */
-	using render_pass                        = ::VkRenderPass;
+// -- renderpass ----------------------------------------------------------
 
-	/* renderpass info */
-	using render_pass_info                    = ::VkRenderPassCreateInfo;
+/* renderpass */
+using vk_render_pass = VkRenderPass;
 
-	/* renderpass begin info */
-	using render_pass_begin_info              = ::VkRenderPassBeginInfo;
+/* renderpass create info */
+using vk_render_pass_create_info = VkRenderPassCreateInfo;
 
+/* renderpass begin info */
+using vk_render_pass_begin_info = ::VkRenderPassBeginInfo;
+
+
+
+namespace vk {
 
 	// -- subpass -------------------------------------------------------------
 
@@ -246,65 +239,141 @@ namespace vk {
 
 	// -- pipeline ------------------------------------------------------------
 
-	/* pipeline */
-	using pipeline                           = ::VkPipeline;
 
-	/* pipeline info */
-	using pipeline_info                      = ::VkGraphicsPipelineCreateInfo;
 
-	/* pipeline layout */
-	using pipeline_layout                    = ::VkPipelineLayout;
-
-	/* pipeline layout info */
-	using pipeline_layout_info               = ::VkPipelineLayoutCreateInfo;
-
-	/* graphics pipeline info */
-	using graphics_pipeline_info             = ::VkGraphicsPipelineCreateInfo;
 
 	/* pipeline bind point */
 	using pipeline_bind_point                = ::VkPipelineBindPoint;
 
-	/* pipeline shader stage info */
-	using pipeline_shader_stage_info         = ::VkPipelineShaderStageCreateInfo;
 
-	/* shader stage flags */
-	using shader_stage_flags                 = ::VkShaderStageFlags;
+}
 
-	/* pipeline input assembly state info */
-	using pipeline_input_assembly_state_info = ::VkPipelineInputAssemblyStateCreateInfo;
 
-	/* pipeline tesselation state info */
-	using pipeline_tesselation_state_info    = ::VkPipelineTessellationStateCreateInfo;
+// -- pipeline ----------------------------------------------------------------
 
-	/* pipeline viewport state info */
-	using pipeline_viewport_state_info       = ::VkPipelineViewportStateCreateInfo;
+/* pipeline */
+using vk_pipeline = VkPipeline;
 
-	/* pipeline rasterization state info */
-	using pipeline_rasterization_state_info  = ::VkPipelineRasterizationStateCreateInfo;
+/* pipeline shader stage create info */
+using vk_pipeline_shader_stage_create_info = VkPipelineShaderStageCreateInfo;
 
-	/* pipeline multisample state info */
-	using pipeline_multisample_state_info    = ::VkPipelineMultisampleStateCreateInfo;
+/* pipeline info */
+using vk_graphics_pipeline_create_info = VkGraphicsPipelineCreateInfo;
 
-	/* pipeline depth stencil state info */
-	using pipeline_depth_stencil_state_info  = ::VkPipelineDepthStencilStateCreateInfo;
+/* pipeline layout */
+using vk_pipeline_layout = VkPipelineLayout;
 
-	/* pipeline color blend state info */
-	using pipeline_color_blend_state_info    = ::VkPipelineColorBlendStateCreateInfo;
+/* pipeline layout info */
+using vk_pipeline_layout_create_info = VkPipelineLayoutCreateInfo;
 
-	/* pipeline color blend attachment state */
-	using pipeline_color_blend_attachment_state = ::VkPipelineColorBlendAttachmentState;
 
-	/* dynamic state */
-	using dynamic_state                      = ::VkDynamicState;
+/* pipeline vertex input state create info */
+using vk_pipeline_vertex_input_state_create_info = VkPipelineVertexInputStateCreateInfo;
 
-	/* pipeline dynamic state info */
-	using pipeline_dynamic_state_info        = ::VkPipelineDynamicStateCreateInfo;
+/* vertex input binding description */
+using vk_vertex_input_binding_description = VkVertexInputBindingDescription;
+
+/* vertex input rate */
+using vk_vertex_input_rate = VkVertexInputRate;
+
+/* vertex input attribute description */
+using vk_vertex_input_attribute_description = VkVertexInputAttributeDescription;
+
+/* format */
+using vk_format = VkFormat;
+
+
+/* pipeline input assembly state create info */
+using vk_pipeline_input_assembly_state_create_info = VkPipelineInputAssemblyStateCreateInfo;
+
+/* primitive topology */
+using vk_primitive_topology = VkPrimitiveTopology;
+
+
+/* pipeline tesselation state create info */
+using vk_pipeline_tesselation_state_create_info = VkPipelineTessellationStateCreateInfo;
+
+
+/* pipeline viewport state create info */
+using vk_pipeline_viewport_state_create_info = VkPipelineViewportStateCreateInfo;
+
+
+/* pipeline rasterization state create info */
+using vk_pipeline_rasterization_state_create_info = VkPipelineRasterizationStateCreateInfo;
+
+/* pipeline rasterization state create flags */
+using vk_pipeline_rasterization_state_create_flags = VkPipelineRasterizationStateCreateFlags;
+
+
+/* polygon mode */
+using vk_polygon_mode = VkPolygonMode;
+
+/* cull mode flags */
+using vk_cull_mode_flags = VkCullModeFlags;
+
+/* front face */
+using vk_front_face = VkFrontFace;
+
+/* pipeline multisample state create info */
+using vk_pipeline_multisample_state_create_info = VkPipelineMultisampleStateCreateInfo;
+
+/* sample count flag bits */
+using vk_sample_count_flag_bits = VkSampleCountFlagBits;
+
+/* sample count flags */
+using vk_sample_count_flags = VkSampleCountFlags;
+
+/* sample mask */
+using vk_sample_mask = VkSampleMask;
+
+/* pipeline depth stencil state create info */
+using vk_pipeline_depth_stencil_state_create_info  = VkPipelineDepthStencilStateCreateInfo;
+
+/* compare op */
+using vk_compare_op = VkCompareOp;
+
+/* stencil op */
+using vk_stencil_op = VkStencilOp;
+
+/* stencil op state */
+using vk_stencil_op_state = VkStencilOpState;
+
+/* pipeline color blend state create info */
+using vk_pipeline_color_blend_state_create_info = VkPipelineColorBlendStateCreateInfo;
+
+/* pipeline color blend attachment state */
+using vk_pipeline_color_blend_attachment_state = ::VkPipelineColorBlendAttachmentState;
+
+/* blend factor */
+using vk_blend_factor = ::VkBlendFactor;
+
+/* blend op */
+using vk_blend_op = ::VkBlendOp;
+
+/* color component flags */
+using vk_color_component_flags = ::VkColorComponentFlags;
+
+
+
+// ...
+
+
+/* dynamic state */
+using vk_dynamic_state = VkDynamicState;
+
+/* pipeline dynamic state info */
+using vk_pipeline_dynamic_state_create_info = VkPipelineDynamicStateCreateInfo;
+
+
+namespace vk {
+
+
+
+
+
 
 	/* pipeline stage flags */
 	using pipeline_stage_flags               = ::VkPipelineStageFlags;
-
-	/* primitive topology */
-	using primitive_topology                  = ::VkPrimitiveTopology;
 
 
 	// -- compute pipeline ----------------------------------------------------
@@ -390,19 +459,30 @@ namespace vk {
 	using image_view_info                    = ::VkImageViewCreateInfo;
 
 
-	// -- shader module -------------------------------------------------------
+}
 
-	/* shader module */
-	using shader_module                      = ::VkShaderModule;
 
-	/* shader module info */
-	using shader_module_info                 = ::VkShaderModuleCreateInfo;
+// -- shader module -----------------------------------------------------------
 
-	/* shader stage flag bits */
-	using shader_stage_flag_bits             = ::VkShaderStageFlagBits;
+/* shader module */
+using vk_shader_module
+	= VkShaderModule;
 
-	/* specialization info */
-	using specialization_info                = ::VkSpecializationInfo;
+/* shader module info */
+using vk_shader_module_create_info
+	= VkShaderModuleCreateInfo;
+
+/* shader stage flag bits */
+using vk_shader_stage_flag_bits
+	= VkShaderStageFlagBits;
+
+/* shader stage flags */
+using vk_shader_stage_flags = VkShaderStageFlags;
+
+
+namespace vk {
+/* specialization info */
+using specialization_info                = ::VkSpecializationInfo;
 
 	/* specialization map entry */
 	using specialization_map_entry           = ::VkSpecializationMapEntry;
@@ -478,6 +558,9 @@ namespace vk {
 	/* mapped memory range */
 	using mapped_memory_range                = ::VkMappedMemoryRange;
 
+
+	// -- memory barrier ------------------------------------------------------
+
 	/* memory barrier */
 	using memory_barrier                     = ::VkMemoryBarrier;
 
@@ -486,6 +569,9 @@ namespace vk {
 
 	/* buffer memory barrier */
 	using buffer_memory_barrier              = ::VkBufferMemoryBarrier;
+
+	/* access flags */
+	using access_flags                       = ::VkAccessFlags;
 
 
 
@@ -506,18 +592,22 @@ namespace vk {
 	using pipeline_vertex_input_state_info   = ::VkPipelineVertexInputStateCreateInfo;
 
 
-	/* primitive topology */
-	using primitive_topology                 = ::VkPrimitiveTopology;
+}
 
 
-	/* viewport */
-	using viewport                           = ::VkViewport;
 
-	/* rect2D */
-	using rect2D                             = ::VkRect2D;
+/* viewport */
+using vk_viewport = VkViewport;
 
-	/* scissor */
-	using scissor = vk::rect2D;
+/* rect2D */
+using vk_rect2D = VkRect2D;
+
+/* scissor */
+using vk_scissor = ::vk_rect2D;
+
+namespace vk {
+
+
 
 	/* offset2D */
 	using offset2D                           = ::VkOffset2D;
@@ -556,50 +646,61 @@ namespace vk {
 	using format_feature_flags               = ::VkFormatFeatureFlags;
 
 
-	// -- descriptor set layout -----------------------------------------------
 
-	/* descriptor set */
-	using descriptor_set                     = ::VkDescriptorSet;
-
-	/* descriptor set layout */
-	using descriptor_set_layout              = ::VkDescriptorSetLayout;
-
-	/* descriptor set layout binding */
-	using descriptor_set_layout_binding      = ::VkDescriptorSetLayoutBinding;
-
-	/* descriptor type */
-	using descriptor_type                    = ::VkDescriptorType;
-
-	/* descriptor set layout info */
-	using descriptor_set_layout_info         = ::VkDescriptorSetLayoutCreateInfo;
-
-	/* descriptor set allocate info */
-	using descriptor_set_allocate_info       = ::VkDescriptorSetAllocateInfo;
-
-	/* descriptor buffer info */
-	using descriptor_buffer_info             = ::VkDescriptorBufferInfo;
-
-	/* descriptor image info */
-	using descriptor_image_info              = ::VkDescriptorImageInfo;
-
-	/* write descriptor info */
-	using write_descriptor_set               = ::VkWriteDescriptorSet;
+}
 
 
-	// -- descriptor pool -----------------------------------------------------
+// -- descriptor set ----------------------------------------------------------
 
-	/* descriptor pool */
-	using descriptor_pool                    = ::VkDescriptorPool;
+/* descriptor set */
+using vk_descriptor_set = VkDescriptorSet;
 
-	/* descriptor pool size */
-	using descriptor_pool_size               = ::VkDescriptorPoolSize;
+/* descriptor set allocate info */
+using vk_descriptor_set_allocate_info = VkDescriptorSetAllocateInfo;
 
-	/* descriptor pool info */
-	using descriptor_pool_info               = ::VkDescriptorPoolCreateInfo;
+/* descriptor buffer info */
+using vk_descriptor_buffer_info = VkDescriptorBufferInfo;
 
-	/* descriptor pool create flags */
-	using descriptor_pool_create_flags       = ::VkDescriptorPoolCreateFlags;
+/* descriptor image info */
+using vk_descriptor_image_info = ::VkDescriptorImageInfo;
 
+/* write descriptor info */
+using vk_write_descriptor_set = ::VkWriteDescriptorSet;
+
+
+// -- descriptor set layout ---------------------------------------------------
+
+/* descriptor set layout */
+using vk_descriptor_set_layout = VkDescriptorSetLayout;
+
+/* descriptor set layout binding */
+using vk_descriptor_set_layout_binding = VkDescriptorSetLayoutBinding;
+
+/* descriptor type */
+using vk_descriptor_type = VkDescriptorType;
+
+/* descriptor set layout create info */
+using vk_descriptor_set_layout_create_info = VkDescriptorSetLayoutCreateInfo;
+
+
+// -- descriptor pool ---------------------------------------------------------
+
+/* descriptor pool */
+using vk_descriptor_pool = VkDescriptorPool;
+
+/* descriptor pool size */
+using vk_descriptor_pool_size = VkDescriptorPoolSize;
+
+/* descriptor pool create info */
+using vk_descriptor_pool_create_info = VkDescriptorPoolCreateInfo;
+
+/* descriptor pool create flags */
+using vk_descriptor_pool_create_flags = VkDescriptorPoolCreateFlags;
+
+
+
+
+namespace vk {
 
 	// -- push constant -------------------------------------------------------
 

@@ -2,7 +2,7 @@
 #define ___ve_vulkan_descriptor_set_layout_library___
 
 #include "ve/containers/static_map.hpp"
-#include "ve/vulkan/descriptors/descriptor_set_layout.hpp"
+#include "ve/vulkan/descriptor/layout.hpp"
 
 
 // -- V E ---------------------------------------------------------------------
@@ -25,8 +25,12 @@ namespace ve {
 
 			// -- private members ---------------------------------------------
 
-			ve::static_map<vulkan::descriptor_set_layout,
-				"camera", "object", "skybox_heightmap"> _layouts;
+			ve::static_map<vk::descriptor::set::layout,
+				"camera",
+				"planet",
+				"skybox_compute",
+				"skybox_render"
+					> _layouts;
 
 
 			// -- private static methods --------------------------------------
@@ -45,7 +49,8 @@ namespace ve {
 			: _layouts{
 				___self::_camera_layout(),
 				___self::_object_layout(),
-				___self::_skybox_heightmap()} {
+				___self::_skybox_compute(),
+				___self::_skybox_render()} {
 			}
 
 			/* deleted copy constructor */
@@ -70,9 +75,10 @@ namespace ve {
 			// -- private static methods --------------------------------------
 
 			/* camera layout */
-			static auto _camera_layout(void) -> vulkan::descriptor_set_layout {
+			static auto _camera_layout(void) -> vk::descriptor::set::layout {
 
-				const vk::descriptor_set_layout_binding binding[1U]{
+				// bindings
+				const ::vk_descriptor_set_layout_binding binding[1U]{
 					{
 						// binding
 						.binding = 0U,
@@ -81,52 +87,52 @@ namespace ve {
 						// count
 						.descriptorCount = 1U,
 						// stage
-						//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-						.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT
-							//| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
-							| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-						// immutable samplers
-						.pImmutableSamplers = nullptr
-					}
-				};
-
-
-				return vulkan::descriptor_set_layout{binding};
-			}
-
-			/* object layout */
-			static auto _object_layout(void) -> vulkan::descriptor_set_layout {
-
-				const vk::descriptor_set_layout_binding binding[1U]{
-					{
-						// binding
-						.binding = 0U,
-						// type
-						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-						// count
-						.descriptorCount = 1U,
-						// stage
-						//.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-						.stageFlags =  VK_SHADER_STAGE_VERTEX_BIT
-									//| VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT
+						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
 									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
 						// immutable samplers
 						.pImmutableSamplers = nullptr
 					}
 				};
 
-				return vulkan::descriptor_set_layout{binding};
+				// create descriptor set layout
+				return vk::descriptor::set::layout{binding};
 			}
 
-			/* skybox heightmap layout */
-			static auto _skybox_heightmap(void) -> vulkan::descriptor_set_layout {
+			/* object layout */
+			static auto _object_layout(void) -> vk::descriptor::set::layout {
 
-				const vk::descriptor_set_layout_binding binding[1U]{
+				// bindings
+				const ::vk_descriptor_set_layout_binding binding[1U]{
 					{
 						// binding
 						.binding = 0U,
 						// type
-						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, // use for writing to image (heightmap)
+						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						//.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+						// count
+						.descriptorCount = 1U,
+						// stage
+						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT
+									| VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					}
+				};
+
+				// create descriptor set layout
+				return vk::descriptor::set::layout{binding};
+			}
+
+			/* skybox compute */
+			static auto _skybox_compute(void) -> vk::descriptor::set::layout {
+
+				// bindings
+				const ::vk_descriptor_set_layout_binding binding[1U]{
+					{
+						// binding
+						.binding = 0U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
 						// count
 						.descriptorCount = 1U,
 						// stage
@@ -136,7 +142,47 @@ namespace ve {
 					}
 				};
 
-				return vulkan::descriptor_set_layout{binding};
+				// create descriptor set layout
+				return vk::descriptor::set::layout{binding};
+			}
+
+			/* skybox render */
+			static auto _skybox_render(void) -> vk::descriptor::set::layout {
+
+				// bindings
+				const ::vk_descriptor_set_layout_binding binding[2U]{
+
+					// skybox
+					{
+						// binding
+						.binding = 0U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+						// count
+						.descriptorCount = 1U, // count is for array
+						// stage
+						.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					},
+
+					// camera
+					{
+						// binding
+						.binding = 1U,
+						// type
+						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						// count
+						.descriptorCount = 1U,
+						// stage
+						.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+						// immutable samplers
+						.pImmutableSamplers = nullptr
+					}
+				};
+
+				// create descriptor set layout
+				return vk::descriptor::set::layout{binding};
 			}
 
 
@@ -146,8 +192,8 @@ namespace ve {
 
 			/* get */
 			template <ve::literal key>
-			static auto get(void) -> const vk::descriptor_set_layout& {
-				return (ve::get<key>(___self::_shared()._layouts)).get();
+			static auto get(void) -> const ::vk_descriptor_set_layout& {
+				return ve::get<key>(___self::_shared()._layouts);
 			}
 
 	}; // class descriptor_set_layout_library

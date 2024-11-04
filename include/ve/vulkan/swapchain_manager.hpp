@@ -47,7 +47,7 @@ namespace vulkan {
 			vk::u32 _size;
 
 			/* render pass */
-			ve::render_pass _render_pass;
+			vk::render_pass _render_pass;
 
 			/* swapchain */
 			vulkan::swapchain _swapchain;
@@ -102,7 +102,7 @@ namespace vulkan {
 			}
 
 			/* render pass */
-			auto render_pass(void) const noexcept -> const ve::render_pass& {
+			auto render_pass(void) const noexcept -> const vk::render_pass& {
 				return _render_pass;
 			}
 

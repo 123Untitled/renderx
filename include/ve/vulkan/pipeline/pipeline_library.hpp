@@ -1,10 +1,8 @@
-#ifndef ___ve_vulken_pipeline_library___
-#define ___ve_vulken_pipeline_library___
+#ifndef ___ve_vvulken_pipeline_library___
+#define ___ve_vvulken_pipeline_library___
 
-#include "ve/vk/typedefs.hpp"
 #include "ve/containers/static_map.hpp"
-#include "ve/vulkan/pipeline/pipeline.hpp"
-#include "ve/libraries/shader_library.hpp"
+#include "ve/vulkan/pipeline/builder.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -27,8 +25,8 @@ namespace ve {
 
 			// -- private members ---------------------------------------------
 
-			ve::static_map<vulkan::pipeline,
-				"main_graphics",
+			ve::static_map<vk::pipeline,
+				"planet",
 				"skybox_heightmap_compute"
 				> _pipelines;
 
@@ -47,7 +45,7 @@ namespace ve {
 			/* default constructor */
 			pipeline_library(void)
 			: _pipelines{
-				self::_main_graphics(),
+				self::_planet(),
 				self::_skybox_heightmap_compute()} {
 			}
 
@@ -72,20 +70,24 @@ namespace ve {
 
 			// -- private static methods --------------------------------------
 
-			/* main graphics */
-			static auto _main_graphics(void) -> vulkan::pipeline {
+			/* planet */
+			static auto _planet(void) -> vk::pipeline {
 
 				return {};
+				//return vk::pipeline::builder::planet();
 			}
 
 
 			/* skybox heightmap compute */
-			static auto _skybox_heightmap_compute(void) -> vulkan::pipeline {
+			static auto _skybox_heightmap_compute(void) -> vk::pipeline {
 
-				return vulkan::pipeline{
-					ve::shader_library::compute_stage_info<"skybox_heightmap">(),
-					ve::pipeline_layout_library::get<"skybox_heightmap">()
-				};
+				return {};
+				//const vk::comp_module m{"shaders/spir-v/skybox_heightmap.comp.spv"};
+				//
+				//return vk::pipeline{
+				//	m.stage_info(),
+				//	ve::pipeline_layout_library::get<"skybox_heightmap">()
+				//};
 			}
 
 
@@ -95,7 +97,7 @@ namespace ve {
 
 			/* get */
 			template <ve::literal key>
-			static auto get(void) -> const vk::pipeline& {
+			static auto get(void) -> const ::vk_pipeline& {
 				return (ve::get<key>(self::_shared()._pipelines));
 			}
 

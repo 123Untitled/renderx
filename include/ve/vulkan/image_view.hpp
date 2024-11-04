@@ -68,10 +68,9 @@ namespace ve {
 			// -- public accessors --------------------------------------------
 
 			/* descriptor image info */
-			auto descriptor_image_info(const vk::image_layout& layout
-					= VK_IMAGE_LAYOUT_GENERAL
-					) const noexcept -> vk::descriptor_image_info {
-				return vk::descriptor_image_info{
+			auto descriptor_image_info(const vk::image_layout& layout = VK_IMAGE_LAYOUT_GENERAL
+					) const noexcept -> ::vk_descriptor_image_info {
+				return ::vk_descriptor_image_info{
 					.sampler = nullptr,
 					.imageView = _view.get(),
 					.imageLayout = layout

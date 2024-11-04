@@ -1,12 +1,12 @@
 #include "ve/vulkan/framebuffers.hpp"
 #include "ve/vulkan/image_views.hpp"
 #include "ve/vulkan/depth_buffer.hpp"
-#include "ve/vulkan/render_pass.hpp"
 #include "ve/vulkan/device.hpp"
 
 #include "ve/vk/utils.hpp"
 
 #include "ve/memory/malloc.hpp"
+
 
 // -- private methods ---------------------------------------------------------
 
@@ -26,7 +26,7 @@ auto vulkan::framebuffers::_destroy(void) noexcept -> void {
 auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 								   const ve::multisampling& multisampling,
 								   const ve::depth_buffer& depth,
-								   const ve::render_pass& rpass,
+								   const ::vk_render_pass& rpass,
 								   const vk::extent2D& extent) -> void {
 
 	// create guard
@@ -67,7 +67,7 @@ auto vulkan::framebuffers::_create(const vulkan::image_views& views,
 // -- private static methods --------------------------------------------------
 
 /* info */
-auto vulkan::framebuffers::info(const ve::render_pass& render_pass,
+auto vulkan::framebuffers::info(const ::vk_render_pass& render_pass,
 								const vk::extent2D& extent) noexcept -> vk::framebuffer_info {
 
 	// return info
@@ -106,7 +106,7 @@ vulkan::framebuffers::framebuffers(void) noexcept
 vulkan::framebuffers::framebuffers(const vulkan::image_views& views,
 								   const ve::multisampling& multisampling,
 								   const ve::depth_buffer& depth,
-								   const ve::render_pass& rpass,
+								   const ::vk_render_pass& rpass,
 								   const vk::extent2D& extent)
 : _frames{ve::malloc<vk::framebuffer>(views.size())}, _size{0U} {
 
@@ -176,7 +176,7 @@ auto vulkan::framebuffers::size(void) const noexcept -> size_type {
 auto vulkan::framebuffers::recreate(const vulkan::image_views& views,
 									const ve::multisampling& multisampling,
 									const ve::depth_buffer& depth,
-									const ve::render_pass& rpass,
+									const ::vk_render_pass& rpass,
 									const vk::extent2D& extent) -> void {
 
 	// destroy
