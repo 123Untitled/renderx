@@ -108,7 +108,6 @@ namespace ve {
 				/* update */
 				static auto update(const double cx, const double cy) noexcept -> void {
 
-					return;
 					self& ins = self::_shared();
 
 					ins._dx = cx - ins._lx;
@@ -117,6 +116,13 @@ namespace ve {
 					// update last known position
 					ins._lx = cx;
 					ins._ly = cy;
+
+
+					for (const auto* obs : ins._observers) {
+
+						(*obs->mouse_moved)(ins._dx, ins._dy);
+
+					}
 
 				}
 
