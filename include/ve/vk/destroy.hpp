@@ -82,6 +82,16 @@ namespace vk {
 	}
 
 
+	// -- sampler -------------------------------------------------------------
+
+	/* destroy sampler */
+	inline auto destroy(const ::vk_sampler& sampler) noexcept -> void {
+
+		::vk_destroy_sampler(
+				vulkan::device::logical(), sampler, nullptr);
+	}
+
+
 	// -- render pass ---------------------------------------------------------
 
 	/* destroy render pass */

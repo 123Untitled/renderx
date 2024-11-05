@@ -6,7 +6,15 @@
 #include "ve/vulkan/descriptor/allocator.hpp"
 #include "ve/singleton.hpp"
 
+#include "ve/geometry/skybox.hpp"
+
 auto main(int, char**) -> int {
+
+
+	ve::mesh::skybox skybox;
+
+
+
 
 
 	::signal(SIGINT, [](int) {

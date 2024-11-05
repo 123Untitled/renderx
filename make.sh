@@ -155,6 +155,8 @@ local -r cxxflags=('-std=c++2a' '-O0'
 				   '-fdiagnostics-show-location=once'
 				   '-fdiagnostics-show-template-tree'
 				   '-Wshadow'
+				   '-Wno-gnu-anonymous-struct'
+				   '-Wno-nested-anon-types'
 				   '-I'$inc_dir
 				   '-I'$VULKAN_SDK'/include'
 				   '-I'$ext_dir'/glfw/include'

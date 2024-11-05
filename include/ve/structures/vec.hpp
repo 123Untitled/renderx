@@ -269,8 +269,8 @@ namespace ve {
 
 			/* variadic constructor */
 			template <typename... Ts> requires (sizeof...(Ts) <= N)
-			vec(Ts&&... args) noexcept
-			: _data{std::forward<Ts>(args)...} {
+			vec(const Ts&... args) noexcept
+			: _data{static_cast<value_type>(args)...} {
 			}
 
 			/* array constructor */
@@ -331,6 +331,16 @@ namespace ve {
 				return _data[0];
 			}
 
+			/* u */
+			auto u(const value_type& value) noexcept -> void {
+				_data[0U] = value;
+			}
+
+			/* u */
+			auto u(void) const noexcept -> const value_type& {
+				return _data[0];
+			}
+
 			/* y */
 			auto y(void) noexcept -> value_type& requires (N > 1U) {
 				return _data[1];
@@ -338,6 +348,16 @@ namespace ve {
 
 			/* y */
 			auto y(void) const noexcept -> const value_type& requires (N > 1U) {
+				return _data[1];
+			}
+
+			/* v */
+			auto v(const value_type& value) noexcept -> void requires (N > 1U) {
+				_data[1U] = value;
+			}
+
+			/* v */
+			auto v(void) const noexcept -> const value_type& requires (N > 1U) {
 				return _data[1];
 			}
 

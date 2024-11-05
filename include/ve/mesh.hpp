@@ -100,6 +100,11 @@ namespace ve {
 			}
 
 
+			// -- forward declarations ----------------------------------------
+
+			/* skybox */
+			class skybox;
+
 	}; // class mesh
 
 } // namespace rx

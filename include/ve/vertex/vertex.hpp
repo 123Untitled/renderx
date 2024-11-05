@@ -29,8 +29,6 @@
 #include "ve/meta/index_sequence.hpp"
 #include "ve/meta/type_at.hpp"
 
-//#include "ve/structures/vector3.hpp"
-//#include "ve/structures/vector2.hpp"
 #include "ve/structures/vec.hpp"
 
 #include <iostream>
@@ -43,7 +41,7 @@ namespace ve {
 
 	// -- V E R T E X ---------------------------------------------------------
 
-	template <typename... ___types>
+	template <typename... Ts>
 	class vertex final {
 
 
@@ -60,29 +58,29 @@ namespace ve {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = ve::vertex<___types...>;
+			using self = ve::vertex<Ts...>;
 
 			/* sequence type */
-			template <size_type... ___idxs>
-			using ___sequence = ve::index_sequence<___idxs...>;
+			template <size_type... Is>
+			using sequence = ve::index_sequence<Is...>;
 
 			/* make sequence type */
-			using ___make_sequence = ve::make_index_sequence<sizeof...(___types)>;
+			using make_sequence = ve::make_index_sequence<sizeof...(Ts)>;
 
 			/* type at */
-			template <size_type ___idx>
-			using ___type_at = ve::type_at<___idx, ___types...>;
+			template <size_type I>
+			using type_at = ve::type_at<I, Ts...>;
 
 
 
 			/* index of */
-			template <typename ___type>
+			template <typename T>
 			static consteval auto index_of(void) noexcept -> size_type {
 
 				size_type idx{0U};
 				bool found{false};
 
-				((std::same_as<___type, ___types> ? found = true : found ? true : ++idx), ...);
+				((std::same_as<T, Ts> ? found = true : found ? true : ++idx), ...);
 				return idx;
 			}
 
@@ -90,87 +88,87 @@ namespace ve {
 			// -- private structs ---------------------------------------------
 
 			/* wrapper */
-			template <size_type ___idx, typename ___type>
-			struct ___wrapper {
+			template <size_type, typename T>
+			struct wrapper {
 
 
 				// -- members -------------------------------------------------
 
 				/* value */
-				___type value;
+				T value;
 
 			}; // struct __wrapper
 
 
 			/* implementation */
 			template <typename>
-			struct ___impl;
+			struct impl;
 
 			/* implementation */
-			template <size_type... ___idxs>
-			struct ___impl<___sequence<___idxs...>> final : public ___wrapper<___idxs, ___types>... {
+			template <size_type... Is>
+			struct impl<sequence<Is...>> final : public wrapper<Is, Ts>... {
 
 				// -- types ---------------------------------------------------
 
 				/* self type */
-				using ___self = ___impl<___sequence<___idxs...>>;
+				using self = impl<sequence<Is...>>;
 
 
 				// -- lifecycle -----------------------------------------------
 
 				/* constructor */
-				constexpr ___impl(void) noexcept = default;
+				constexpr impl(void) noexcept = default;
 
 				/* variadic constructor */
-				template <typename... ___params>
-				constexpr ___impl(___params&&... ___args) noexcept
-				: ___wrapper<___idxs, ___types>{std::forward<___params>(___args)}... {
+				template <typename... Params>
+				constexpr impl(Params&&... ___args) noexcept
+				: wrapper<Is, Ts>{std::forward<Params>(___args)}... {
 				}
 
 				/* copy constructor */
-				constexpr ___impl(const ___impl&) noexcept = default;
+				constexpr impl(const impl&) noexcept = default;
 
 				/* move constructor */
-				constexpr ___impl(___impl&&) noexcept = default;
+				constexpr impl(impl&&) noexcept = default;
 
 				/* destructor */
-				constexpr ~___impl(void) noexcept = default;
+				constexpr ~impl(void) noexcept = default;
 
 
 				// -- assignment operators ------------------------------------
 
 				/* copy assignment operator */
-				constexpr auto operator=(const ___self&) noexcept -> ___self& = default;
+				constexpr auto operator=(const self&) noexcept -> self& = default;
 
 				/* move assignment operator */
-				constexpr auto operator=(___self&&) noexcept -> ___self& = default;
+				constexpr auto operator=(self&&) noexcept -> self& = default;
 
-			}; // struct ___impl
+			}; // struct impl
 
 
 			/* impl type */
-			using ___impl_type = ___impl<___make_sequence>;
+			using impl_type = impl<make_sequence>;
 
 
 			// -- private members ---------------------------------------------
 
 			/* impl */
-			___impl_type _impl;
+			impl_type _impl;
 
 
 			/* wrapper at */
-			template <size_type ___idx>
-			using ___wrapper_at = ___wrapper<___idx, ___type_at<___idx>>;
+			template <size_type I>
+			using wrapper_at = wrapper<I, type_at<I>>;
 
 
 			/* compute offset */
 			template <size_type ___idx, size_type ___ite, size_type ___off>
-			static consteval auto ___compute_offset(void) noexcept -> size_type {
+			static consteval auto _compute_offset(void) noexcept -> size_type {
 				// end of recursion
 				if constexpr (___ite == ___idx)
 					return ___off;
 				// recursive call
-				else return ___compute_offset<___idx, ___ite + 1, ___off + sizeof(___wrapper_at<___ite>)>();
+				else return ___compute_offset<___idx, ___ite + 1, ___off + sizeof(wrapper_at<___ite>)>();
 			}
 
 			/* offset at */
@@ -183,8 +181,8 @@ namespace ve {
 			struct ___descriptions;
 
 			/* descriptions */
-			template <size_type... ___idxs>
-			struct ___descriptions<___sequence<___idxs...>> final {
+			template <size_type... Is>
+			struct ___descriptions<sequence<Is...>> final {
 
 
 				// -- lifecycle -----------------------------------------------
@@ -196,16 +194,16 @@ namespace ve {
 				// -- static members ------------------------------------------
 
 				/* descriptions */
-				static constexpr vk::vertex_input_attribute_description _descriptions[sizeof...(___types)] {
+				static constexpr vk::vertex_input_attribute_description _descriptions[sizeof...(Ts)] {
 					{
 						// shader location
-						.location = ___idxs,
+						.location = Is,
 						// binding index
 						.binding  = 0U,
 						// format
-						.format   = ___type_at<___idxs>::format(),
+						.format   = type_at<Is>::format(),
 						// offset
-						.offset   = ___offset_at<___idxs>
+						.offset   = ___offset_at<Is>
 					}...
 				};
 
@@ -213,7 +211,7 @@ namespace ve {
 
 
 			/* description type */
-			using ___descriptions_type = ___descriptions<___make_sequence>;
+			using ___descriptions_type = ___descriptions<make_sequence>;
 
 
 			// -- private static members --------------------------------------
@@ -223,7 +221,7 @@ namespace ve {
 				// binding index
 				0U,
 				// stride
-				sizeof(___impl_type),
+				sizeof(impl_type),
 				// input rate
 				VK_VERTEX_INPUT_RATE_VERTEX // pass data to shader for each vertex
 			};
@@ -241,7 +239,7 @@ namespace ve {
 				// vertex binding description
 				&_binding,
 				// vertex attribute description count
-				sizeof...(___types),
+				sizeof...(Ts),
 				// vertex attribute description
 				___descriptions_type::_descriptions
 			};
@@ -261,10 +259,10 @@ namespace ve {
 			}
 
 			/* copy constructor */
-			constexpr vertex(const ___self&) noexcept = default;
+			constexpr vertex(const self&) noexcept = default;
 
 			/* move constructor */
-			constexpr vertex(___self&&) noexcept = default;
+			constexpr vertex(self&&) noexcept = default;
 
 			/* destructor */
 			constexpr ~vertex(void) noexcept = default;
@@ -273,10 +271,10 @@ namespace ve {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			constexpr auto operator=(const ___self&) noexcept -> ___self& = default;
+			constexpr auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			constexpr auto operator=(___self&&) noexcept -> ___self& = default;
+			constexpr auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public accessors --------------------------------------------
@@ -296,7 +294,7 @@ namespace ve {
 
 			/* pipeline vertex input state info */
 			static constexpr auto info(void) noexcept -> const vk::pipeline_vertex_input_state_info& {
-				return ___self::_info;
+				return self::_info;
 			}
 
 			/* print info */
@@ -316,7 +314,7 @@ namespace ve {
 				std::cout << "    input rate: " << _binding.inputRate << std::endl;
 				std::cout << "  vertex attribute descriptions:" << std::endl;
 
-				for (size_type i = 0; i < sizeof...(___types); ++i) {
+				for (size_type i = 0; i < sizeof...(Ts); ++i) {
 					std::cout << "    attribute " << i << ":" << std::endl;
 					std::cout << "      location: " << ___descriptions_type::_descriptions[i].location << std::endl;
 					std::cout << "      binding: " << ___descriptions_type::_descriptions[i].binding << std::endl;
@@ -333,15 +331,15 @@ namespace ve {
 			auto get(void) -> ___type& {
 
 				// get index
-				constexpr size_type i = ___self::template index_of<___type>();
+				constexpr size_type i = self::template index_of<___type>();
 
-				return static_cast<___self::___wrapper_at<i>&>(_impl).value;
+				return static_cast<self::wrapper_at<i>&>(_impl).value;
 			}
 
 			template <size_type i>
-			auto get(void) -> typename ___self::___type_at<i>& {
+			auto get(void) -> typename self::type_at<i>& {
 
-				return static_cast<typename ___self::___wrapper_at<i>&>(_impl).value;
+				return static_cast<typename self::wrapper_at<i>&>(_impl).value;
 			}
 
 	}; // class vertex
@@ -353,6 +351,12 @@ namespace ve {
 	template <typename... ___types>
 	vertex(___types...) -> vertex<___types...>;
 
+
+	inline void test() {
+
+		ve::vertex<ve::vec3<float>,
+				   ve::vec2<float>> v{};
+	}
 
 
 	// -- I S  V E R T E X ----------------------------------------------------
@@ -508,6 +512,21 @@ namespace ve {
 
 
 	}; // class vert3x
+
+
+
+	class vertex_with_uv final {
+
+
+		public:
+
+			ve::vec3f position;
+
+			ve::vec2f uv;
+
+
+	}; // class vertex_with_uv
+
 
 } // namespace ve
 

@@ -116,6 +116,21 @@ namespace vk {
 	}
 
 
+	// -- sampler -------------------------------------------------------------
+
+	/* create sampler */
+	inline auto create(const ::vk_sampler_create_info& info) -> ::vk_sampler {
+
+		::vk_sampler sampler;
+
+		try_execute<"failed to create sampler">(
+			::vk_create_sampler,
+			vulkan::device::logical(), &info, nullptr, &sampler);
+
+		return sampler;
+	}
+
+
 	// -- render pass ---------------------------------------------------------
 
 	/* create render pass */

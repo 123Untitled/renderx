@@ -3,6 +3,8 @@
 
 #include "ve/vulkan/image.hpp"
 #include "ve/vulkan/image_view.hpp"
+#include "ve/vulkan/sampler.hpp"
+
 #include "ve/vulkan/descriptor/descriptor_set_layout_library.hpp"
 
 #include "ve/vulkan/descriptor/pool.hpp"
@@ -47,8 +49,15 @@ namespace ve {
 			/* view */
 			ve::image_view _view;
 
-			/* descriptor set */
-			vk::descriptor::set _set;
+			/* sampler */
+			vk::sampler _sampler;
+
+			/* compute descriptor set */
+			vk::descriptor::set _compute_set;
+
+			/* render descriptor set */
+			vk::descriptor::set _render_set;
+
 
 
 		public:
@@ -68,15 +77,15 @@ namespace ve {
 			  _view{_image, VK_FORMAT_R32_SFLOAT, VK_IMAGE_ASPECT_COLOR_BIT},
 
 			  // create descriptor layout
-			  _set{ve::descriptor_set_layout_library::get<"skybox_compute">()} {
+			  _compute_set{ve::descriptor_set_layout_library::get<"skybox_compute">()},
+			  _render_set{ve::descriptor_set_layout_library::get<"skybox_render">()} {
 
 
-				_set.write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_GENERAL),
+				_compute_set.write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_GENERAL),
 								VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 
-				//_sets.push(render_layout);
-				//_sets[1U].write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
-				//				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+				_render_set.write(_view.descriptor_image_info(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _sampler),
+								VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 			}
 
 
@@ -107,8 +116,7 @@ namespace ve {
 				cmd.bind_compute_pipeline(cp);
 
 				// bind descriptor sets
-				_set.bind(cmd, cl, 0U, VK_PIPELINE_BIND_POINT_COMPUTE);
-				//cmd.bind_compute_descriptor_sets(cl, 0U, 1U, &_set);
+				_compute_set.bind(cmd, cl, 0U, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 				// group x
 				const vk::u32 gx = (_extent.width + 15U) / 16U;

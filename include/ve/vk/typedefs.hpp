@@ -462,6 +462,24 @@ namespace vk {
 }
 
 
+// -- sampler -----------------------------------------------------------------
+
+/* sampler */
+using vk_sampler = VkSampler;
+
+/* sampler create info */
+using vk_sampler_create_info = VkSamplerCreateInfo;
+
+/* sampler address mode */
+using vk_sampler_address_mode = VkSamplerAddressMode;
+
+/* sampler mip map mode */
+using vk_sampler_mip_map_mode = VkSamplerMipmapMode;
+
+/* sampler filter */
+using vk_sampler_filter = VkFilter;
+
+
 // -- shader module -----------------------------------------------------------
 
 /* shader module */
@@ -984,6 +1002,15 @@ namespace vk {
 
 /* destroy image view */
 #define vk_destroy_image_view vkDestroyImageView
+
+
+// -- sampler -----------------------------------------------------------------
+
+/* create sampler */
+#define vk_create_sampler vkCreateSampler
+
+/* destroy sampler */
+#define vk_destroy_sampler vkDestroySampler
 
 
 // -- framebuffer -------------------------------------------------------------

@@ -29,7 +29,8 @@ namespace ve {
 				"camera",
 				"planet",
 				"skybox_compute",
-				"skybox_render"
+				"skybox_render",
+				"skybox_camera"
 					> _layouts;
 
 
@@ -50,7 +51,9 @@ namespace ve {
 				___self::_camera_layout(),
 				___self::_object_layout(),
 				___self::_skybox_compute(),
-				___self::_skybox_render()} {
+				___self::_skybox_render(),
+				___self::_skybox_camera()
+			} {
 			}
 
 			/* deleted copy constructor */
@@ -150,7 +153,7 @@ namespace ve {
 			static auto _skybox_render(void) -> vk::descriptor::set::layout {
 
 				// bindings
-				const ::vk_descriptor_set_layout_binding binding[2U]{
+				const ::vk_descriptor_set_layout_binding binding[1U]{
 
 					// skybox
 					{
@@ -164,12 +167,23 @@ namespace ve {
 						.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
 						// immutable samplers
 						.pImmutableSamplers = nullptr
-					},
+					}
+				};
+
+				// create descriptor set layout
+				return vk::descriptor::set::layout{binding};
+			}
+
+			/* skybox camera */
+			static auto _skybox_camera(void) -> vk::descriptor::set::layout {
+
+				// bindings
+				const ::vk_descriptor_set_layout_binding binding[1U]{
 
 					// camera
 					{
 						// binding
-						.binding = 1U,
+						.binding = 0U,
 						// type
 						.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 						// count
@@ -184,7 +198,6 @@ namespace ve {
 				// create descriptor set layout
 				return vk::descriptor::set::layout{binding};
 			}
-
 
 		public:
 

@@ -59,7 +59,7 @@ namespace ve {
 				_planet = ve::object{rx::mesh_library::get<"icosphere">()};
 
 				_camera.update_projection();
-				_camera.position().z = -4.0f;
+				_camera.position().z = -2.0f;
 			}
 
 
