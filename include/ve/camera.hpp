@@ -181,6 +181,7 @@ namespace ve {
 			/* mouse moved */
 			auto mouse_moved(const double& x, const double& y) noexcept -> void override {
 				update_rotation(x, y);
+				update_direction();
 			}
 
 
@@ -189,9 +190,10 @@ namespace ve {
 			/* update */
 			auto update(void) noexcept -> void {
 				//update_rotation();
-				update_direction();
+
 				update_position();
 				update_view();
+
 				//update_projection();
 				//_uniform_buffer.update(_uniform);
 

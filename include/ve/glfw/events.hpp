@@ -234,6 +234,16 @@ namespace glfw {
 						self::_mouse_callback);
 
 
+				double cx, cy;
+
+				// retrieve position
+				::glfw_get_cursor_pos(&glfw::window::shared(),
+						&cx, &cy);
+				// init mouse delta
+				ve::mouse::delta::update(cx, cy);
+
+
+
 				// set mouse callback
 				//::glfwSetCursorPosCallback(&window, &self::mouse_callback);
 
