@@ -118,10 +118,9 @@ namespace ve {
 					ins._ly = cy;
 
 
-					for (const auto* obs : ins._observers) {
-
-						(*obs->mouse_moved)(ins._dx, ins._dy);
-
+					for (auto* obs : ins._observers) {
+						// call mouse moved
+						obs->mouse_moved(ins._dx, ins._dy);
 					}
 
 				}
