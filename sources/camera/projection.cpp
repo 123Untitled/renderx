@@ -2,7 +2,7 @@
 
 #define NEAR_DEFAULT 0.001f
 #define FAR_DEFAULT 1000.0f
-#define FOV_DEFAULT 100.0f
+#define FOV_DEFAULT 80.0f
 
 // -- P R O J E C T I O N -----------------------------------------------------
 

@@ -38,7 +38,7 @@ auto ve::renderer::run(void) -> void {
 		glfw::events::poll();
 
 
-		ve::mouse_delta::update();
+		ve::mouse::delta::update();
 		//glfw::compute_to_mouse_delta(_camera);
 
 
@@ -67,7 +67,7 @@ auto ve::renderer::_draw_frame(void) -> void {
 	const auto& swapchain = _smanager.swapchain();
 
 	// here error not means program must stop
-	const vk::result status = swapchain.acquire_next_image(
+	const ::vk_result status = swapchain.acquire_next_image(
 									_sync.current_image_available(),
 									image_index);
 
@@ -134,7 +134,7 @@ auto ve::renderer::_draw_frame(void) -> void {
 				  cmd);
 
 	// here error not means program must stop
-	const vk::result state = _queue.present(swapchain, image_index,
+	const ::vk_result state = _queue.present(swapchain, image_index,
 											_sync.current_render_finished());
 
 	if (status == VK_ERROR_OUT_OF_DATE_KHR

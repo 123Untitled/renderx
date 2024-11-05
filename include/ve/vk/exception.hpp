@@ -1,15 +1,5 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#ifndef ___RENDERX_VULKAN_EXCEPTION___
-#define ___RENDERX_VULKAN_EXCEPTION___
+#ifndef ___ve_vulkan_exception___
+#define ___ve_vulkan_exception___
 
 #include "ve/diagnostics/exception.hpp"
 #include "ve/vk/typedefs.hpp"
@@ -30,7 +20,7 @@ namespace vk {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using ___self = vk::exception;
+			using self = vk::exception;
 
 
 			// -- private members ---------------------------------------------
@@ -45,7 +35,7 @@ namespace vk {
 			// -- private static methods --------------------------------------
 
 			/* strerror */
-			static auto _strerror(const vk::result&) noexcept -> const char*;
+			static auto _strerror(const ::vk_result&) noexcept -> const char*;
 
 
 		public:
@@ -56,15 +46,15 @@ namespace vk {
 			exception(void) = delete;
 
 			/* where and what constructor */
-			exception(const char* where, const vk::result what) noexcept
-			: _where{where != nullptr ? where : "unknown"}, _what{___self::_strerror(what)} {
+			exception(const char* where, const ::vk_result& what) noexcept
+			: _where{where != nullptr ? where : "unknown"}, _what{self::_strerror(what)} {
 			}
 
 			/* copy constructor */
-			exception(const ___self&) noexcept = default;
+			exception(const self&) noexcept = default;
 
 			/* move constructor */
-			exception(___self&&) noexcept = default;
+			exception(self&&) noexcept = default;
 
 			/* destructor */
 			~exception(void) noexcept = default;
@@ -73,10 +63,10 @@ namespace vk {
 			// -- public assignment operators ---------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
 			/* deleted move assignment operator */
-			auto operator=(___self&&) -> ___self& = delete;
+			auto operator=(self&&) -> self& = delete;
 
 
 			// -- public methods ----------------------------------------------
@@ -86,6 +76,6 @@ namespace vk {
 
 	}; // class exception
 
-} // namespace vulkan
+} // namespace vk
 
-#endif // ___RENDERX_VULKAN_EXCEPTION___
+#endif // ___ve_vulkan_exception___

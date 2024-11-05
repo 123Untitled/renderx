@@ -108,7 +108,7 @@ auto vulkan::queue::submit(const vk::semaphore& wait,
 /* present */
 auto vulkan::queue::present(const vulkan::swapchain& swapchain,
 							const vk::u32&           image_index,
-							const vk::semaphore&     wait) const -> vk::result {
+							const vk::semaphore&     wait) const -> ::vk_result {
 
 	// create present info
 	const vk::present_info info{
@@ -131,7 +131,7 @@ auto vulkan::queue::present(const vulkan::swapchain& swapchain,
 	};
 
 	// here error not means program must stop
-	const vk::result state = ::vk_queue_present_khr(_queue, &info);
+	const ::vk_result state = ::vk_queue_present_khr(_queue, &info);
 
 	return state;
 }

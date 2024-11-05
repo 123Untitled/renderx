@@ -68,7 +68,7 @@ namespace vulkan {
 			/* present */
 			auto present(const vulkan::swapchain&,
 						 const vk::u32&,
-						 const vk::semaphore&) const -> vk::result;
+						 const vk::semaphore&) const -> ::vk_result;
 
 
 			/* wait idle */

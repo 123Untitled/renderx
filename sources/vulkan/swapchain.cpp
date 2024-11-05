@@ -72,10 +72,10 @@ vulkan::swapchain::swapchain(const vk::u32& size,
 
 /* acquire next image */
 auto vulkan::swapchain::acquire_next_image(const vk::semaphore& semaphore,
-												 vk::u32& img_index) const -> vk::result {
+												 vk::u32& img_index) const -> ::vk_result {
 
 	// acquire next image
-	const vk::result status = ::vk_acquire_next_image_khr(vulkan::device::logical(),
+	const ::vk_result status = ::vk_acquire_next_image_khr(vulkan::device::logical(),
 														  _swapchain,
 														  UINT64_MAX /* timeout */,
 														  semaphore,

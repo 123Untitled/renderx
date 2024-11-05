@@ -4,7 +4,7 @@
 // -- public lifecycle --------------------------------------------------------
 
 /* parameters constructor */
-vulkan::buffer::buffer(const vk::device_size& size,
+vulkan::buffer::buffer(const ::vk_device_size& size,
 					   const vk::buffer_usage_flags& usage)
 : _buffer{vk::make_unique<vk::buffer>(
 		// create buffer info

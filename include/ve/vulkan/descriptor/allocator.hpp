@@ -180,7 +180,7 @@ namespace vk::descriptor {
 				::vk_descriptor_set set;
 
 				// allocate descriptor set
-				vk::result result = ::vk_allocate_descriptor_sets(
+				::vk_result result = ::vk_allocate_descriptor_sets(
 					vulkan::device::logical(), &info, &set);
 
 				// check result

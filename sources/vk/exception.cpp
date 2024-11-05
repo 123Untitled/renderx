@@ -1,13 +1,3 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
 #include "ve/memory/memcpy.hpp"
 #include "ve/vk/exception.hpp"
 
@@ -15,7 +5,7 @@
 // -- private static methods --------------------------------------------------
 
 /* strerror */
-auto vk::exception::_strerror(const vk::result& result) noexcept -> const char* {
+auto vk::exception::_strerror(const ::vk_result& result) noexcept -> const char* {
 
 	switch (result) {
 

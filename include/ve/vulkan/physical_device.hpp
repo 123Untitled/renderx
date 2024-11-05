@@ -107,12 +107,12 @@ namespace ve {
 
 
 			/* minimum uniform buffer offset alignment */
-			auto min_uniform_buffer_offset_alignment(void) const noexcept -> vk::device_size {
+			auto min_uniform_buffer_offset_alignment(void) const noexcept -> ::vk_device_size {
 				return properties().limits.minUniformBufferOffsetAlignment;
 			}
 
 			/* max uniform buffer range */
-			auto max_uniform_buffer_range(void) const noexcept -> vk::device_size {
+			auto max_uniform_buffer_range(void) const noexcept -> ::vk_device_size {
 				return properties().limits.maxUniformBufferRange;
 			}
 

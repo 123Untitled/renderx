@@ -244,7 +244,7 @@ namespace vulkan {
 			auto bind_vertex_buffers(const vk::buffer (&___buffs)[___size]) const noexcept -> void {
 
 				// offsets
-				const vk::device_size ___ofs[___size]{}; // zero offsets
+				const ::vk_device_size ___ofs[___size]{}; // zero offsets
 
 				// bind vertex buffers
 				::vk_cmd_bind_vertex_buffers(
@@ -264,7 +264,7 @@ namespace vulkan {
 			auto bind_vertex_buffer(const vulkan::vertex_buffer& buffer) const noexcept -> void {
 
 				// offsets
-				const vk::device_size ___ofs{0U};
+				const ::vk_device_size ___ofs{0U};
 
 				// bind vertex buffers
 				::vk_cmd_bind_vertex_buffers(

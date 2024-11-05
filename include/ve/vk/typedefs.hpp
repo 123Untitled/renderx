@@ -20,8 +20,8 @@ namespace vk {
 
 	/* 64bit float type */
 	using f64 = double;
-
 }
+
 
 /* structure type */
 using vk_structure_type = VkStructureType;
@@ -32,15 +32,18 @@ using vk_flags = VkFlags;
 /* bool32 */
 using vk_bool32 = VkBool32;
 
+/* device size */
+using vk_device_size = VkDeviceSize;
+
+/* result */
+using vk_result = VkResult;
+
+
+
 namespace vk {
 
 
-	/* device size */
-	using device_size = ::VkDeviceSize;
 
-
-	/* result */
-	using result                             = ::VkResult;
 
 	/* bool32 */
 	using bool32                             = ::VkBool32;

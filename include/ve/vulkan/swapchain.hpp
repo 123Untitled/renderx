@@ -106,7 +106,7 @@ namespace vulkan {
 
 			/* acquire next image */
 			auto acquire_next_image(const vk::semaphore&,
-									vk::u32&) const -> vk::result;
+									vk::u32&) const -> ::vk_result;
 
 
 

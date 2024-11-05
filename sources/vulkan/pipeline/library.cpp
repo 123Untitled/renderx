@@ -67,7 +67,7 @@ static auto _planet(void) -> vk::pipeline {
 
 	// rasterization
 	constexpr auto rasterization = vk::pipeline::rasterization_state{}
-									.polygon_mode(VK_POLYGON_MODE_LINE)
+									.polygon_mode(VK_POLYGON_MODE_FILL)
 									.cull_mode(VK_CULL_MODE_BACK_BIT)
 									.front_face(VK_FRONT_FACE_CLOCKWISE);
 

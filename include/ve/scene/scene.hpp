@@ -114,7 +114,8 @@ namespace ve {
 			/* update */
 			auto update(void) -> void {
 
-				_camera.update_rotation(ve::mouse_delta::dx(), ve::mouse_delta::dy());
+				_camera.update_rotation(ve::mouse::delta::dx(),
+										ve::mouse::delta::dy());
 				_camera.update();
 
 				_planet.rotation().x += 0.08f * ve::delta::time();

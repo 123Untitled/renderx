@@ -21,17 +21,17 @@ namespace vulkan {
 		vk::device_memory memory;
 
 		/* size */
-		vk::device_size size;
+		::vk_device_size size;
 
 		/* offset */
-		vk::device_size offset;
+		::vk_device_size offset;
 
 		/* data */
 		void* data;
 
 		/* memcpy (with offset) */
 		template <typename ___type>
-		auto memcpy(const ___type* src, const vk::device_size& ofs = 0U) noexcept -> void {
+		auto memcpy(const ___type* src, const ::vk_device_size& ofs = 0U) noexcept -> void {
 
 			// copy data
 			ve::memcpy(data, src, size);
@@ -114,7 +114,7 @@ namespace vulkan {
 			// -- private constants -------------------------------------------
 
 			/* default block size */
-			enum : vk::device_size {
+			enum : ::vk_device_size {
 				___DEFAULT_BLOCK_SIZE___ = 256U * 1024U * 1024U
 			};
 
@@ -141,7 +141,7 @@ namespace vulkan {
 					vk::device_memory _memory;
 
 					/* offset */
-					vk::device_size _offset;
+					::vk_device_size _offset;
 
 					/* mapped */
 					void* _mapped;
@@ -221,7 +221,7 @@ namespace vulkan {
 					auto allocate(const vk::memory_requirements& requirements) -> vulkan::allocation {
 
 
-						vk::device_size aligned_offset = (_offset + requirements.alignment - 1U)
+						::vk_device_size aligned_offset = (_offset + requirements.alignment - 1U)
 														& ~(requirements.alignment - 1U);
 
 						// check if memory is out of bounds

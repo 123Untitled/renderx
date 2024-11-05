@@ -130,6 +130,21 @@ namespace ve {
 			}
 
 
+			auto to_vertex(void) const -> std::vector<ve::vertex<ve::vec3f, ve::vec2f>> {
+				if (_vertices.size() != _uvs.size())
+					throw;
+
+				std::vector<ve::vertex<ve::vec3f, ve::vec2f>> vec;
+
+				for (std::size_t i = 0U; i < _vertices.size(); ++i) {
+
+					vec.emplace_back(ve::vec3f{_vertices[i]},
+									 ve::vec2f{_uvs[i]});
+				}
+
+				return vec;
+			}
+
 
 	}; // class skybox
 

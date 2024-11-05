@@ -18,7 +18,7 @@ namespace vk {
 
 		// assert return type is vk::result
 		static_assert(std::same_as<decltype(___func(std::forward<___params>(___args)...)),
-								   vk::result>, "invalid return type");
+								   ::vk_result>, "invalid return type");
 
 		// execute function
 		if (auto ___result = ___func(std::forward<___params>(___args)...); ___result != VK_SUCCESS)

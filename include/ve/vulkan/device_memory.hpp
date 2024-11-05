@@ -71,14 +71,15 @@ namespace vulkan {
 			// -- public methods ----------------------------------------------
 
 			/* bind */
-			auto bind(const vk::buffer&, const vk::device_size& = 0U) const -> void;
+			auto bind(const vk::buffer&, const ::vk_device_size& = 0U) const -> void;
 
 			/* bind */
-			auto bind(const vulkan::buffer&, const vk::device_size& = 0U) const -> void;
+			auto bind(const vulkan::buffer&, const ::vk_device_size& = 0U) const -> void;
 
 			/* map */
 			template <typename ___type>
-			auto map(const vk::device_size& ___offset = 0U, const vk::device_size& ___size = VK_WHOLE_SIZE) const -> ___type* {
+			auto map(const ::vk_device_size& offset = 0U,
+					 const ::vk_device_size& size = VK_WHOLE_SIZE) const -> ___type* {
 
 				void* data;
 
@@ -87,8 +88,8 @@ namespace vulkan {
 						::vk_map_memory,
 						vulkan::device::logical(),
 						_memory,
-						___offset,
-						___size,
+						offset,
+						size,
 						0U, // flags (reserved for future use, not implemented yet by the Vulkan API)
 						&data // data pointer to store the mapped memory
 				);
@@ -106,16 +107,16 @@ namespace vulkan {
 			}
 
 			/* flush */
-			auto flush(const vk::device_size& ___offset = 0U, const vk::device_size& ___size = VK_WHOLE_SIZE) -> void {
-
+			auto flush(const ::vk_device_size& offset = 0U,
+					   const ::vk_device_size& size = VK_WHOLE_SIZE) -> void {
 
 				// create memory range
 				const vk::mapped_memory_range range{
 					.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
 					.pNext  = nullptr,
 					.memory = _memory,
-					.offset = ___offset,
-					.size   = ___size
+					.offset = offset,
+					.size   = size
 				};
 
 				// flush memory
@@ -129,15 +130,15 @@ namespace vulkan {
 			}
 
 			/* invalidate */
-			auto invalidate(const vk::device_size& ___offset = 0U, const vk::device_size& ___size = VK_WHOLE_SIZE) -> void {
+			auto invalidate(const ::vk_device_size& offset = 0U, const ::vk_device_size& size = VK_WHOLE_SIZE) -> void {
 
 				// create memory range
 				const vk::mapped_memory_range range{
 					.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
 					.pNext  = nullptr,
 					.memory = _memory,
-					.offset = ___offset,
-					.size   = ___size
+					.offset = offset,
+					.size   = size
 				};
 
 				// invalidate memory

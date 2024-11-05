@@ -89,7 +89,7 @@ auto vulkan::device_memory::operator=(___self&& ___ot) noexcept -> ___self& {
 // -- public methods ----------------------------------------------------------
 
 /* bind buffer memory */
-auto vulkan::device_memory::bind(const vk::buffer& ___buffer, const vk::device_size& ___offset) const -> void {
+auto vulkan::device_memory::bind(const vk::buffer& ___buffer, const ::vk_device_size& ___offset) const -> void {
 
 	// bind buffer to memory
 	vk::try_execute<"failed to bind buffer memory">(
@@ -103,7 +103,7 @@ auto vulkan::device_memory::bind(const vk::buffer& ___buffer, const vk::device_s
 }
 
 /* bind */
-auto vulkan::device_memory::bind(const vulkan::buffer& ___buffer, const vk::device_size& ___offset) const -> void {
+auto vulkan::device_memory::bind(const vulkan::buffer& ___buffer, const ::vk_device_size& ___offset) const -> void {
 
 	// bind buffer to memory
 	___self::bind(___buffer.underlying(), ___offset);

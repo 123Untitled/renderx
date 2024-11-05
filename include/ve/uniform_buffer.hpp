@@ -112,7 +112,7 @@ namespace ve {
 			// -- private members ---------------------------------------------
 
 			/* alignment */
-			vk::device_size _alignment;
+			::vk_device_size _alignment;
 
 			/* count */
 			vk::u32 _count;
@@ -128,7 +128,7 @@ namespace ve {
 			// -- private static methods --------------------------------------
 
 			/* compute alignment */
-			static auto _compute_alignment(void) -> vk::device_size {
+			static auto _compute_alignment(void) -> ::vk_device_size {
 
 				// get min ubo alignment
 				const auto ubo_alignment = ve::physical_device::shared().min_uniform_buffer_offset_alignment();

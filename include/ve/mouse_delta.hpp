@@ -8,77 +8,106 @@
 
 namespace ve {
 
-
-	class mouse_delta final {
-
-
-		private:
-
-			// -- private types -----------------------------------------------
-
-			/* self type */
-			using ___self = ve::mouse_delta;
+	namespace mouse {
 
 
-			/* mouse position */
-			double _lx, _ly;
+		class observer {
 
-			/* mouse delta */
-			double _dx, _dy;
+			public:
 
+				observer(void) noexcept = default;
+				observer(const observer&) noexcept = default;
+				observer(observer&&) noexcept = default;
+				virtual ~observer(void) noexcept = default;
 
-			// -- private static methods --------------------------------------
-
-			/* shared */
-			static auto _shared(void) -> ___self& {
-				static ___self ___ins;
-				return ___ins;
-			}
+				virtual auto mouse_moved(const double&, const double&) noexcept -> void = 0;
+		};
 
 
-			// -- private lifecycle -------------------------------------------
+		class delta final {
 
-			/* default constructor */
-			mouse_delta(void) noexcept
-			: _lx{0.0}, _ly{0.0},
-			  _dx{0.0}, _dy{0.0} {
-			}
 
-		public:
+			private:
 
-			/* update */
-			static auto update(void) noexcept -> void {
+				// -- private types -----------------------------------------------
 
-				___self& ins = ___self::_shared();
+				/* self type */
+				using self = ve::mouse::delta;
 
-				double cx, cy;
 
-				// retrieve position
-				::glfw_get_cursor_pos(&glfw::window::shared(),
-						&cx, &cy);
+				/* mouse position */
+				double _lx, _ly;
 
-				ins._dx = cx - ins._lx;
-				ins._dy = cy - ins._ly;
+				/* mouse delta */
+				double _dx, _dy;
 
-				// update last known position
-				ins._lx = cx;
-				ins._ly = cy;
 
-				//if (ins._dx != 0.0 || ins._dy != 0.0)
-				//	std::cout << "dx: " << ins._dx << " dy: " << ins._dy << std::endl;
-			}
+				// -- private static methods --------------------------------------
 
-			/* dx */
-			static auto dx(void) noexcept -> double {
-				return ___self::_shared()._dx;
-			}
+				/* shared */
+				static auto _shared(void) -> self& {
+					static self instance;
+					return instance;
+				}
 
-			/* dy */
-			static auto dy(void) noexcept -> double {
-				return ___self::_shared()._dy;
-			}
 
-	}; // class mouse_delta
+				// -- private lifecycle -------------------------------------------
+
+				/* default constructor */
+				delta(void) noexcept
+				: _lx{0.0}, _ly{0.0}, _dx{0.0}, _dy{0.0} {
+				}
+
+
+			public:
+
+				/* update */
+				static auto update(void) noexcept -> void {
+
+					self& ins = self::_shared();
+
+					double cx, cy;
+
+					// retrieve position
+					::glfw_get_cursor_pos(&glfw::window::shared(),
+							&cx, &cy);
+
+					ins._dx = cx - ins._lx;
+					ins._dy = cy - ins._ly;
+
+					// update last known position
+					ins._lx = cx;
+					ins._ly = cy;
+				}
+
+				/* update */
+				static auto update(const double cx, const double cy) noexcept -> void {
+
+					return;
+					self& ins = self::_shared();
+
+					ins._dx = cx - ins._lx;
+					ins._dy = cy - ins._ly;
+
+					// update last known position
+					ins._lx = cx;
+					ins._ly = cy;
+
+				}
+
+				/* dx */
+				static auto dx(void) noexcept -> double {
+					return self::_shared()._dx;
+				}
+
+				/* dy */
+				static auto dy(void) noexcept -> double {
+					return self::_shared()._dy;
+				}
+
+		}; // class delta
+
+	} // namespace mouse
 
 } // namespace ve
 

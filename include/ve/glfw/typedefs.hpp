@@ -52,5 +52,6 @@
 #define glfw_get_required_instance_extensions glfwGetRequiredInstanceExtensions
 #define glfw_get_cursor_pos glfwGetCursorPos
 #define glfw_set_key_callback glfwSetKeyCallback
+#define glfw_set_cursor_pos_callback glfwSetCursorPosCallback
 
 #endif // ___RENDERX_GLFW_TYPEDEF___

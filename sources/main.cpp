@@ -13,6 +13,7 @@ auto main(int, char**) -> int {
 
 	ve::mesh::skybox skybox;
 
+	skybox.to_vertex();
 
 
 

@@ -131,12 +131,4 @@ namespace vk {
 
 } // namespace vk
 
-
-inline void test(void) {
-
-	// exemple of use
-
-
-}
-
 #endif // ___ve_vulkan_pipeline_vertex_input_state___

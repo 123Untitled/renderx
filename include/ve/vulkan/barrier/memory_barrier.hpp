@@ -370,8 +370,8 @@ namespace ve {
 				   const vk::u32& src_queue_family,
 				   const vk::u32& dst_queue_family,
 				   const vk::buffer& buffer,
-				   const vk::device_size& offset,
-				   const vk::device_size& size) noexcept
+				   const ::vk_device_size& offset,
+				   const ::vk_device_size& size) noexcept
 			: _barrier{
 				// structure type
 				.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,

@@ -5,12 +5,15 @@
 #include "ve/glfw/window.hpp"
 #include "ve/running.hpp"
 
+#include "ve/mouse_delta.hpp"
+
 #include <iostream>
 
 
 // -- G L F W  N A M E S P A C E ----------------------------------------------
 
 namespace glfw {
+
 
 
 	class control final {
@@ -21,7 +24,7 @@ namespace glfw {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = glfw::control;
+			using self = glfw::control;
 
 
 			// -- private members ---------------------------------------------
@@ -39,8 +42,8 @@ namespace glfw {
 			// -- private static methods --------------------------------------
 
 			/* shared */
-			static auto shared(void) -> ___self& {
-				static ___self ___ins;
+			static auto shared(void) -> self& {
+				static self ___ins;
 				return ___ins;
 			}
 
@@ -53,10 +56,10 @@ namespace glfw {
 			}
 
 			/* deleted copy constructor */
-			control(const ___self&) = delete;
+			control(const self&) = delete;
 
 			/* deleted move constructor */
-			control(___self&&) = delete;
+			control(self&&) = delete;
 
 			/* destructor */
 			~control(void) noexcept = default;
@@ -65,10 +68,10 @@ namespace glfw {
 			// -- private assignment operators --------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
 			/* deleted move assignment operator */
-			auto operator=(___self&&) -> ___self& = delete;
+			auto operator=(self&&) -> self& = delete;
 
 
 		public:
@@ -77,22 +80,23 @@ namespace glfw {
 
 			/* floats */
 			static auto floats(void) -> float (&)[4] {
-				return ___self::shared()._floats;
+				return self::shared()._floats;
 			}
 
 			/* integers */
 			static auto integers(void) -> int (&)[4] {
-				return ___self::shared()._integers;
+				return self::shared()._integers;
 			}
 
 			/* booleans */
 			static auto booleans(void) -> bool (&)[4] {
-				return ___self::shared()._booleans;
+				return self::shared()._booleans;
 			}
 
 	}; // class control
 
 	static_assert(sizeof(control) < 128U, "control: size is too large.");
+
 
 
 	// -- E V E N T S ---------------------------------------------------------
@@ -105,7 +109,7 @@ namespace glfw {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = glfw::events;
+			using self = glfw::events;
 
 
 			// -- private members ---------------------------------------------
@@ -117,13 +121,16 @@ namespace glfw {
 			// -- private static methods --------------------------------------
 
 			/* shared */
-			static auto shared(void) -> ___self& {
-				static ___self ___ins;
+			static auto shared(void) -> self& {
+				static self ___ins;
 				return ___ins;
 			}
 
 			/* mouse callback */
-			static auto mouse_callback(GLFWwindow* window, double x, double y) -> void {
+			static auto _mouse_callback(GLFWwindow* window, double x, double y) -> void {
+
+				ve::mouse::delta::update(x, y);
+				//std::cout << "x: " << x << "y: " << y << std::endl;
 				//// get instance
 				//auto instance = static_cast<glfw::window*>(::glfwGetWindowUserPointer(window));
 				// set mouse position
@@ -192,15 +199,15 @@ namespace glfw {
 				switch (action) {
 
 					case GLFW_PRESS:
-						___self::shared()._handle_key<true>(key);
+						self::shared()._handle_key<true>(key);
 						break;
 
 					case GLFW_RELEASE:
-						___self::shared()._handle_key<false>(key);
+						self::shared()._handle_key<false>(key);
 						break;
 
 					case GLFW_REPEAT:
-						___self::shared()._handle_key<true>(key);
+						self::shared()._handle_key<true>(key);
 						break;
 
 					default:
@@ -220,27 +227,31 @@ namespace glfw {
 
 				// set key callback
 				::glfw_set_key_callback(&window,
-						___self::_key_callback);
+						self::_key_callback);
+
+				// get mouse callback
+				::glfw_set_cursor_pos_callback(&window,
+						self::_mouse_callback);
 
 
 				// set mouse callback
-				//::glfwSetCursorPosCallback(&window, &___self::mouse_callback);
+				//::glfwSetCursorPosCallback(&window, &self::mouse_callback);
 
-				glfwSetInputMode(
-						&glfw::window::shared(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetInputMode(&window,
+						GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
-				//glfwSetInputMode(&window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-				//if (glfwRawMouseMotionSupported() == GLFW_FALSE) {
-				//	throw std::runtime_error("glfw: raw mouse motion is not supported.");
-				//}
+				if (glfwRawMouseMotionSupported() == GLFW_TRUE) {
+					glfwSetInputMode(&window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+					std::cout << "\x1b[33mRaw mouse motion enabled\x1b[0m" << std::endl;
+				}
 			}
 
 			/* deleted copy constructor */
-			events(const ___self&) = delete;
+			events(const self&) = delete;
 
 			/* deleted move constructor */
-			events(___self&&) = delete;
+			events(self&&) = delete;
 
 			/* destructor */
 			~events(void) noexcept = default;
@@ -249,10 +260,10 @@ namespace glfw {
 			// -- private assignment operators --------------------------------
 
 			/* deleted copy assignment operator */
-			auto operator=(const ___self&) -> ___self& = delete;
+			auto operator=(const self&) -> self& = delete;
 
 			/* deleted move assignment operator */
-			auto operator=(___self&&) -> ___self& = delete;
+			auto operator=(self&&) -> self& = delete;
 
 
 		public:
@@ -271,7 +282,7 @@ namespace glfw {
 
 			/* arrows */
 			static auto arrows(void) -> const bool (&)[4] {
-				return ___self::shared()._arrows;
+				return self::shared()._arrows;
 			}
 
 	}; // class events

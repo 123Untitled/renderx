@@ -37,7 +37,7 @@ namespace vulkan {
 			buffer(void) noexcept = default;
 
 			/* parameters constructor */
-			buffer(const vk::device_size&, const vk::buffer_usage_flags&);
+			buffer(const ::vk_device_size&, const vk::buffer_usage_flags&);
 
 			/* deleted copy constructor */
 			buffer(const ___self&) = delete;

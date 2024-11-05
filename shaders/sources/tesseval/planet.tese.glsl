@@ -69,7 +69,7 @@ void main(void) {
 	// get noise
 	float noise = 0.0f;
 	//noise = fractal(octaves, amplitude * 0.1, frequency*0.1, lacunarity, persistence, interpoled_position);
-	//noise += simplex(interpoled_position * frequency) * amplitude;
+	noise += simplex(interpoled_position * frequency) * amplitude;
 	//noise += voronoise(interpoled_position * frequency, 1.15, 0.9) * (amplitude* 5.0f);
 	//noise += worley(interpoled_position * (frequency*1)) * (amplitude * 0.1f);
 	//noise += wavelet(interpoled_position * frequency, 1.5f) * (amplitude * 0.3f);
