@@ -1,7 +1,8 @@
 #ifndef ___void_engine_mouse_delta___
 #define ___void_engine_mouse_delta___
 
-#include "ve/glfw/events.hpp"
+#include <vector>
+//#include "ve/glfw/events.hpp"
 
 
 // -- V E  N A M E S P A C E --------------------------------------------------
@@ -16,9 +17,11 @@ namespace ve {
 			public:
 
 				observer(void) noexcept = default;
-				observer(const observer&) noexcept = default;
+				observer(const observer&) = delete;
 				observer(observer&&) noexcept = default;
 				virtual ~observer(void) noexcept = default;
+				auto operator=(const observer&) -> observer& = delete;
+				auto operator=(observer&&) noexcept -> observer& = default;
 
 				virtual auto mouse_moved(const double&, const double&) noexcept -> void = 0;
 		};
@@ -41,6 +44,8 @@ namespace ve {
 				/* mouse delta */
 				double _dx, _dy;
 
+				std::vector<observer*> _observers;
+
 
 				// -- private static methods --------------------------------------
 
@@ -61,9 +66,28 @@ namespace ve {
 
 			public:
 
+				/* subscribe */
+				static auto subscribe(observer* obs) noexcept -> void {
+					self::_shared()._observers.push_back(obs);
+				}
+
+				/* unsubscribe */
+				static auto unsubscribe(observer* obs) noexcept -> void {
+
+					auto& _observers = self::_shared()._observers;
+
+					for (auto it = _observers.begin(); it != _observers.end(); ++it) {
+						if (*it == obs) {
+							_observers.erase(it);
+							break;
+						}
+					}
+				}
+
 				/* update */
 				static auto update(void) noexcept -> void {
 
+					/*
 					self& ins = self::_shared();
 
 					double cx, cy;
@@ -78,6 +102,7 @@ namespace ve {
 					// update last known position
 					ins._lx = cx;
 					ins._ly = cy;
+					*/
 				}
 
 				/* update */

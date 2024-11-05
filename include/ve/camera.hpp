@@ -16,6 +16,7 @@
 #include "ve/transform.hpp"
 
 #include "ve/time/delta.hpp"
+#include "ve/mouse_delta.hpp"
 #include "ve/glfw/events.hpp"
 #include "ve/glfw/window.hpp"
 
@@ -30,7 +31,7 @@ namespace ve {
 
 	// -- C A M E R A ---------------------------------------------------------
 
-	class camera final {
+	class camera final : public ve::mouse::observer {
 
 
 		private:
@@ -102,16 +103,23 @@ namespace ve {
 				// write descriptor set
 				_set.write(_ubo.descriptor_buffer_info(),
 							VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+
+				// subscribe to mouse events
+				ve::mouse::delta::subscribe(this);
 			}
 
 			/* deleted copy constructor */
-			camera(const ___self&) = delete;
+			camera(const ___self&) noexcept = delete;
 
 			/* move constructor */
 			camera(___self&&) noexcept = default;
 
 			/* destructor */
-			~camera(void) noexcept = default;
+			~camera(void) noexcept {
+
+				// unsubscribe from mouse events
+				ve::mouse::delta::unsubscribe(this);
+			}
 
 
 			// -- public assignment operators ---------------------------------
@@ -166,6 +174,14 @@ namespace ve {
 			//		.range = sizeof(uniform)
 			//	};
 			//}
+
+
+			// -- public overrides --------------------------------------------
+
+			/* mouse moved */
+			auto mouse_moved(const double& x, const double& y) noexcept -> void override {
+				update_rotation(x, y);
+			}
 
 
 			// -- public methods ----------------------------------------------
