@@ -522,7 +522,12 @@ function _handle_compilation {
 	exit 0
 }
 
-max_jobs=$(sysctl -n hw.ncpu)
+declare -g max_jobs=''
+if [[ $os =~ 'Darwin' ]]; then
+	max_jobs=$(sysctl -n hw.ncpu)
+elif [[ $os =~ 'Linux' ]]; then
+	max_jobs=$(nproc)
+fi
 
 
 
@@ -581,7 +586,7 @@ function _compile {
 	if [[ $count -eq 0 ]]; then
 		echo $info'[>]'$reset 'nothing to compile'
 	else
-		echo '\n'$info'[+]'$reset 'compiled' $count 'files'
+		echo '\r\x1b[2K'$info'[+]'$reset 'compiled' $count 'files'
 	fi
 }
 
