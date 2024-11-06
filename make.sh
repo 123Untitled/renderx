@@ -76,10 +76,10 @@ declare -rg git_dir=$cwd_dir'/.git'
 # -- F I L E S ----------------------------------------------------------------
 
 # source files
-local -r srcs=($src_dir'/'**'/'*'.cpp'(.N))
+declare -rg srcs=($src_dir'/'**'/'*'.cpp'(.N))
 
 # object files
-local -r objs=(${srcs/%.cpp/.o})
+declare -rg objs=(${srcs/%.cpp/.o})
 
 
 # -- V U L K A N --------------------------------------------------------------
@@ -131,7 +131,7 @@ if [[ $os =~ 'Linux' ]]; then
 
 # macos dependencies
 elif [[ $os =~ 'Darwin' ]]; then
-	local -r os_dependencies=('-framework Cocoa' '-framework IOKit')
+	local -r os_dependencies=('-framework' 'Cocoa' '-framework' 'IOKit')
 fi
 
 
@@ -289,106 +289,106 @@ function _install_dependency() {
 }
 
 
-# generate ninja file
-function _generate_ninja() {
-
-	# check ninja file exists and is up to date
-	[[ -f $ninja ]] && [[ $ninja -nt $script ]] && return
-
-	# file content
-	local file='\n'
-
-
-	# -- logo -----------------------------------------------------------------
-
-	file+='# -----------------------------------------------------------------------------\n'
-	file+='# ░▒▓███████▓▒░░▒▓█▓▒░▒▓███████▓▒░       ░▒▓█▓▒░░▒▓██████▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓████████▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░\n'
-	file+='# -----------------------------------------------------------------------------\n\n'
-
-
-	# minimal version
-	file+='# minimal version of Ninja required by this file\n'
-	file+='ninja_required_version = 1.10\n\n'
-
-	# build directory
-	file+='# build directory\n'
-	file+='builddir = '$ninja_dir'\n\n'
-
-	file+='# ninja file\n'
-	file+='ninja = '$ninja'\n\n'
-	file+='# compiler and flags\n'
-
-	if ! command -v ccache > '/dev/null'; then
-		file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
-	else
-		file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
-	fi
-
-
-	# -- rules ----------------------------------------------------------------
-
-	file+='# -- R U L E S ----------------------------------------------------------------\n\n'
-
-	file+='# rule to compile source files\n'
-	file+='rule compile\n'
-	file+='  command = $cxx $cxxflags -MT $out -MMD -MP -MF $out.d -c $in -o $out\n'
-	file+='  description = compile $in\n'
-	file+='  depfile = $out.d\n'
-	file+='  deps = gcc\n\n'
-
-	file+='# rule to link object files\n'
-	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n\n'
-
-
-	# -- builds ---------------------------------------------------------------
-
-	file+='# -- B U I L D S --------------------------------------------------------------\n\n'
-
-
-	# -- sources --------------------------------------------------------------
-
-	# loop over source files
-	for ((i = 1; i <= $#srcs; ++i)); do
-		file+='# compile '${srcs[$i]:t:r}'\n'
-		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | $ninja\n\n'
-	done
-
-
-	# -- executable -----------------------------------------------------------
-
-	# link
-	file+='# link\n'
-	file+='build '$executable': $\n  link '$objs'\n\n'
-
-	## all target
-	file+='# all target\n'
-	file+='build all: phony '$executable'\n\n'
-
-	# default target
-	file+='# default target\n'
-	file+='default all'
-
-	# create ninja directory
-	mkdir -p $ninja_dir
-
-	# write to ninja file
-	echo $file > $ninja
-
-	# print success
-	print $success'[+]'$reset ${ninja:t}
-}
-
-
-# ninja
-function _ninja() {
-	ninja -f $ninja
-}
+## generate ninja file
+#function _generate_ninja() {
+#
+#	# check ninja file exists and is up to date
+#	[[ -f $ninja ]] && [[ $ninja -nt $script ]] && return
+#
+#	# file content
+#	local file='\n'
+#
+#
+#	# -- logo -----------------------------------------------------------------
+#
+#	file+='# -----------------------------------------------------------------------------\n'
+#	file+='# ░▒▓███████▓▒░░▒▓█▓▒░▒▓███████▓▒░       ░▒▓█▓▒░░▒▓██████▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓████████▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
+#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░\n'
+#	file+='# -----------------------------------------------------------------------------\n\n'
+#
+#
+#	# minimal version
+#	file+='# minimal version of Ninja required by this file\n'
+#	file+='ninja_required_version = 1.10\n\n'
+#
+#	# build directory
+#	file+='# build directory\n'
+#	file+='builddir = '$ninja_dir'\n\n'
+#
+#	file+='# ninja file\n'
+#	file+='ninja = '$ninja'\n\n'
+#	file+='# compiler and flags\n'
+#
+#	if ! command -v ccache > '/dev/null'; then
+#		file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+#	else
+#		file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
+#	fi
+#
+#
+#	# -- rules ----------------------------------------------------------------
+#
+#	file+='# -- R U L E S ----------------------------------------------------------------\n\n'
+#
+#	file+='# rule to compile source files\n'
+#	file+='rule compile\n'
+#	file+='  command = $cxx $cxxflags -MT $out -MMD -MP -MF $out.d -c $in -o $out\n'
+#	file+='  description = compile $in\n'
+#	file+='  depfile = $out.d\n'
+#	file+='  deps = gcc\n\n'
+#
+#	file+='# rule to link object files\n'
+#	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n\n'
+#
+#
+#	# -- builds ---------------------------------------------------------------
+#
+#	file+='# -- B U I L D S --------------------------------------------------------------\n\n'
+#
+#
+#	# -- sources --------------------------------------------------------------
+#
+#	# loop over source files
+#	for ((i = 1; i <= $#srcs; ++i)); do
+#		file+='# compile '${srcs[$i]:t:r}'\n'
+#		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | $ninja\n\n'
+#	done
+#
+#
+#	# -- executable -----------------------------------------------------------
+#
+#	# link
+#	file+='# link\n'
+#	file+='build '$executable': $\n  link '$objs'\n\n'
+#
+#	## all target
+#	file+='# all target\n'
+#	file+='build all: phony '$executable'\n\n'
+#
+#	# default target
+#	file+='# default target\n'
+#	file+='default all'
+#
+#	# create ninja directory
+#	mkdir -p $ninja_dir
+#
+#	# write to ninja file
+#	echo $file > $ninja
+#
+#	# print success
+#	print $success'[+]'$reset ${ninja:t}
+#}
+#
+#
+## ninja
+#function _ninja() {
+#	ninja -f $ninja
+#}
 
 # install dependencies
 function _install_dependencies() {
@@ -411,15 +411,11 @@ function _install_dependencies() {
 
 }
 
+
+# -- C O M P I L E  D A T A B A S E -------------------------------------------
+
 # generate compile database
 function _generate_compile_db() {
-
-	# use custom script to generate compile database
-	#node $cwd_dir'/generate_cdb.js' $cwd_dir "$srcs" "$objs" "$cxx" "$cxxflags"
-
-	# use ninja to generate compile database
-	#ninja -f $ninja -t compdb > $compile_db
-
 
 	local content='[\n'
 
@@ -464,18 +460,6 @@ function _generate_compile_db() {
 	print $success'[+]'$reset ${compile_db:t}
 }
 
-# generate compile_commands.json
-#define GENERATE_CDB
-#CONTENT='[\n'
-#for FILE in $(SRCS); do
-#CONTENT+='\t{\n\t\t"directory": "'$$(pwd)'",\n\t\t"file": "'$$FILE'",\n\t\t"output": "'$${FILE%.cpp}.o'",\n\t\t"arguments": [\n\t\t\t"$(CXX)",\n'
-#	for FLAG in $(CXXFLAGS); do
-#		CONTENT+='\t\t\t"'$$FLAG'",\n'
-#	done
-#	CONTENT+='\t\t\t"-c",\n\t\t\t"'$$FILE'",\n\t\t\t"-o",\n\t\t\t"'$${FILE%.cpp}'.o"\n\t\t]\n\t},\n'
-#done
-#echo $${CONTENT%',\n'}'\n]' > $@
-#endef
 
 # compile db
 function _compile_database() {
@@ -499,6 +483,136 @@ function _compile_database() {
 }
 
 
+
+# -- C O M P I L A T I O N ----------------------------------------------------
+
+function _check_dependency {
+	# check if object or dependency file is missing
+	if [[ ! -f $1 ]] || [[ ! -f $2 ]] || [[ $script -nt $1 ]]; then
+		return 0
+	fi
+	# loop over words in dependency file
+	for word in ${=$(<$2)}; do
+		# check if word is not target or escape
+		if [[ $word != '\' ]] && [[ $word != *':' ]]; then
+			# check if dependency is missing
+			[[ $word -nt $1 ]] && return 0
+		fi
+	done
+	return 1
+}
+
+
+function _handle_compilation {
+
+	# $1 source file
+	# $2 object file
+	# $3 dependency file
+
+	# compile source file
+	$cxx $cxxflags -MT $2 -MMD -MF $3 -c $1 -o $2
+
+	# check if compilation failed
+	if [[ $? -ne 0 ]]; then
+		echo -n $error'[x]'$reset
+		exit 1
+	fi
+
+	echo -n '\r\x1b[2K'$success'[✓]'$reset ${1:t}
+	exit 0
+}
+
+max_jobs=$(sysctl -n hw.ncpu)
+
+
+
+function _wait_processes {
+
+	# loop over pids
+	for pid in $1; do
+		# wait for pid
+		wait $pid
+		# check if compilation failed
+		if [[ $? -ne 0 ]]; then
+			wait
+			exit 1
+		fi
+	done
+}
+
+
+function _compile {
+
+	# number of compiled files
+	local count=0
+
+	# array of pids
+	local pids=()
+
+	# loop over source files
+	for src in $srcs; do
+
+		# add object file extension
+		local obj=${src%.cpp}'.o'
+
+		# add dependency file extension
+		local dep=${src%.cpp}'.d'
+
+		# check if source file is modified
+		if ! _check_dependency $obj $dep; then
+			continue
+		fi
+
+		if [[ ${#pids[@]} -eq $max_jobs ]]; then
+			_wait_processes $pids
+			pids=()
+		fi
+
+		count=$((count + 1))
+
+		_handle_compilation $src $obj $dep &
+
+		pids+=($!)
+	done
+
+	# wait for remaining pids
+	_wait_processes $pids
+
+	if [[ $count -eq 0 ]]; then
+		echo $info'[>]'$reset 'nothing to compile'
+	else
+		echo '\n'$info'[+]'$reset 'compiled' $count 'files'
+	fi
+}
+
+
+# -- L I N K  F U N C T I O N S -----------------------------------------------
+
+
+function _link {
+
+	# loop over object files
+	for obj in $objs; do
+
+		# check if object file is newer than target
+		if [[ $obj -nt $executable ]]; then
+
+			# link object files
+			if $cxx $objs '-o' $executable $ldflags; then
+				echo $success'[+]'$reset 'linked' ${executable:t}
+			else
+				echo $error'[x]'$reset 'linking failed'
+				exit 1
+			fi
+			return
+		fi
+	done
+
+	echo $info'[>]'$reset ${executable:t} 'is up to date'
+}
+
+
+
 # build
 function _build() {
 
@@ -509,13 +623,16 @@ function _build() {
 	$sha_dir'/make.sh'
 
 	# generate ninja file
-	_generate_ninja
+	#_generate_ninja
 
 	# generate compile database
 	_compile_database
 
 	# build
-	_ninja
+	_compile
+	#_ninja
+
+	_link
 }
 
 
