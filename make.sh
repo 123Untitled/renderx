@@ -203,8 +203,8 @@ function _repository() {
 function _check_tools() {
 
 	# required tools
-	local -r required=('uname' 'git' 'curl' 'tar'
-					   'cmake' 'rm' 'mkdir' 'wc'
+	local -r required=('uname' 'git' 'make' 'cmake'
+					   'rm' 'mkdir' 'wc' 'wait'
 					   'clang++' 'glslc')
 	
 	# optional tools
@@ -232,63 +232,6 @@ function _check_tools() {
 
 # install dependency
 function _install_dependency() {
-
-	# library name
-	local -r name=$1
-
-	# version
-	local -r version=$2
-
-	# github url
-	local -r url='https://github.com/'$3'/'$name'/archive/refs/tags/'$version'.tar.gz'
-
-	# archive path
-	local -r archive=$cwd_dir'/'$name'.tar.gz'
-
-	# repo directory
-	local -r repo=$cwd_dir'/'$name
-
-	# build directory
-	local -r build=$repo'/build'
-
-	# install prefix
-	local -r prefix=$ext_dir'/'$name
-
-	# cmake flags
-	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix '-DCMAKE_BUILD_TYPE=Release' ${@:4})
-
-
-	# return if already installed
-	[[ -d $prefix ]] && return
-
-	# create external and build directories
-	mkdir -p $ext_dir $build
-
-	# download if not present
-	if [[ ! -f $archive ]]; then
-		echo -n $success
-		curl --progress-bar --location $url --output $archive
-		echo -n $reset
-	fi
-
-	# extract
-	tar --extract --strip-components=1 --file $archive --directory $repo
-
-	# configure
-	cmake -S $repo -B $build $flags -G 'Ninja'
-
-	# build and install
-	ninja -C $build install
-
-	# cleanup
-	rm -rf $repo $archive
-
-	# print success
-	echo $success'[+]'$reset $name $version
-}
-
-# install dependency
-function _install_dependency2() {
 
 	# owner
 	local -r owner=$1
@@ -322,16 +265,14 @@ function _install_dependency2() {
 
 	# clone if not present
 	if [[ ! -f $repo ]]; then
-		echo -n $success
 		git clone --branch=$branch --single-branch --depth=1 $url $repo
-		echo -n $reset
 	fi
 
 	# configure
-	cmake -S $repo -B $build $flags -G 'Ninja'
+	cmake -S $repo -B $build $flags -G 'Unix Makefiles'
 
 	# build and install
-	ninja -C $build install
+	make --directory=$build --jobs=$max_jobs install
 
 	# cleanup
 	rm -rf $repo
@@ -345,14 +286,14 @@ function _install_dependency2() {
 function _install_dependencies() {
 
 	# install glfw
-	_install_dependency2 'glfw' 'glfw' 'master' '-DBUILD_SHARED_LIBS=OFF' \
+	_install_dependency 'glfw' 'glfw' 'master' '-DBUILD_SHARED_LIBS=OFF' \
 												'-DGLFW_LIBRARY_TYPE=STATIC' \
 												'-DGLFW_BUILD_EXAMPLES=OFF' \
 												'-DGLFW_BUILD_TESTS=OFF' \
 												'-DGLFW_BUILD_DOCS=OFF'
 
 	# install glm
-	_install_dependency2 'g-truc' 'glm' 'master' '-DBUILD_SHARED_LIBS=OFF' \
+	_install_dependency 'g-truc' 'glm' 'master' '-DBUILD_SHARED_LIBS=OFF' \
 												 '-DGLM_BUILD_TESTS=OFF'
 }
 
@@ -571,8 +512,6 @@ function _build() {
 
 	# install dependencies
 	_install_dependencies
-
-	exit 0
 
 	# compile shaders
 	$sha_dir'/make.sh'
