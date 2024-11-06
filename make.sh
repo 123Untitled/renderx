@@ -48,9 +48,6 @@ declare -rg executable=$cwd_dir'/'$project
 # compile commands database
 declare -rg compile_db=$cwd_dir'/compile_commands.json'
 
-# ninja file
-declare -rg ninja=$cwd_dir'/build.ninja'
-
 
 # -- D I R E C T O R I E S ----------------------------------------------------
 
@@ -66,9 +63,6 @@ declare -rg sha_dir=$cwd_dir'/shaders'
 # external directory
 declare -rg ext_dir=$cwd_dir'/.external'
 
-# ninja directory
-declare -rg ninja_dir=$cwd_dir'/.ninja'
-
 # git directory
 declare -rg git_dir=$cwd_dir'/.git'
 
@@ -80,6 +74,9 @@ declare -rg srcs=($src_dir'/'**'/'*'.cpp'(.N))
 
 # object files
 declare -rg objs=(${srcs/%.cpp/.o})
+
+# dependency files
+declare -rg deps=(${objs/%.o/.d})
 
 
 # -- V U L K A N --------------------------------------------------------------
@@ -206,7 +203,7 @@ function _check_tools() {
 
 	# required tools
 	local -r required=('uname' 'git' 'curl' 'tar'
-					   'cmake' 'ninja' 'rm' 'mkdir' 'wc'
+					   'cmake' 'rm' 'mkdir' 'wc'
 					   'clang++' 'glslc')
 	
 	# optional tools
@@ -289,114 +286,8 @@ function _install_dependency() {
 }
 
 
-## generate ninja file
-#function _generate_ninja() {
-#
-#	# check ninja file exists and is up to date
-#	[[ -f $ninja ]] && [[ $ninja -nt $script ]] && return
-#
-#	# file content
-#	local file='\n'
-#
-#
-#	# -- logo -----------------------------------------------------------------
-#
-#	file+='# -----------------------------------------------------------------------------\n'
-#	file+='# ░▒▓███████▓▒░░▒▓█▓▒░▒▓███████▓▒░       ░▒▓█▓▒░░▒▓██████▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓████████▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░\n'
-#	file+='# ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░\n'
-#	file+='# -----------------------------------------------------------------------------\n\n'
-#
-#
-#	# minimal version
-#	file+='# minimal version of Ninja required by this file\n'
-#	file+='ninja_required_version = 1.10\n\n'
-#
-#	# build directory
-#	file+='# build directory\n'
-#	file+='builddir = '$ninja_dir'\n\n'
-#
-#	file+='# ninja file\n'
-#	file+='ninja = '$ninja'\n\n'
-#	file+='# compiler and flags\n'
-#
-#	if ! command -v ccache > '/dev/null'; then
-#		file+='cxx = '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
-#	else
-#		file+='cxx = ccache '$cxx'\ncxxflags = '$cxxflags'\nldflags = '$ldflags'\n\n'
-#	fi
-#
-#
-#	# -- rules ----------------------------------------------------------------
-#
-#	file+='# -- R U L E S ----------------------------------------------------------------\n\n'
-#
-#	file+='# rule to compile source files\n'
-#	file+='rule compile\n'
-#	file+='  command = $cxx $cxxflags -MT $out -MMD -MP -MF $out.d -c $in -o $out\n'
-#	file+='  description = compile $in\n'
-#	file+='  depfile = $out.d\n'
-#	file+='  deps = gcc\n\n'
-#
-#	file+='# rule to link object files\n'
-#	file+='rule link\n  command = $cxx $in -o $out $ldflags\n  description = link $out\n\n\n'
-#
-#
-#	# -- builds ---------------------------------------------------------------
-#
-#	file+='# -- B U I L D S --------------------------------------------------------------\n\n'
-#
-#
-#	# -- sources --------------------------------------------------------------
-#
-#	# loop over source files
-#	for ((i = 1; i <= $#srcs; ++i)); do
-#		file+='# compile '${srcs[$i]:t:r}'\n'
-#		file+='build '$objs[$i]': $\n  compile '$srcs[$i]' | $ninja\n\n'
-#	done
-#
-#
-#	# -- executable -----------------------------------------------------------
-#
-#	# link
-#	file+='# link\n'
-#	file+='build '$executable': $\n  link '$objs'\n\n'
-#
-#	## all target
-#	file+='# all target\n'
-#	file+='build all: phony '$executable'\n\n'
-#
-#	# default target
-#	file+='# default target\n'
-#	file+='default all'
-#
-#	# create ninja directory
-#	mkdir -p $ninja_dir
-#
-#	# write to ninja file
-#	echo $file > $ninja
-#
-#	# print success
-#	print $success'[+]'$reset ${ninja:t}
-#}
-#
-#
-## ninja
-#function _ninja() {
-#	ninja -f $ninja
-#}
-
 # install dependencies
 function _install_dependencies() {
-
-	# install ninja
-	#_install_dependency 'ninja' 'v1.12.1' 'ninja-build' '-DBUILD_TESTING=OFF' \
-	#													'-DCMAKE_BUILD_TYPE=Release' \
-	#													'-DNINJA_BUILD_BINARY=ON'
 
 	# install glfw
 	_install_dependency 'glfw' '3.4' 'glfw' '-DBUILD_SHARED_LIBS=OFF' \
@@ -509,8 +400,12 @@ function _handle_compilation {
 	# $2 object file
 	# $3 dependency file
 
+	if command -v ccache > '/dev/null'; then
+		ccache $cxx $cxxflags -MT $2 -MMD -MF $3 -c $1 -o $2
+	else
+		$cxx $cxxflags -MT $2 -MMD -MF $3 -c $1 -o $2
+	fi
 	# compile source file
-	$cxx $cxxflags -MT $2 -MMD -MF $3 -c $1 -o $2
 
 	# check if compilation failed
 	if [[ $? -ne 0 ]]; then
@@ -627,16 +522,11 @@ function _build() {
 	# compile shaders
 	$sha_dir'/make.sh'
 
-	# generate ninja file
-	#_generate_ninja
-
 	# generate compile database
 	_compile_database
 
 	# build
 	_compile
-	#_ninja
-
 	_link
 }
 
@@ -648,7 +538,7 @@ function _clean() {
 	$sha_dir'/make.sh' 'rm'
 
 	# remove all intermediate files
-	local -r deleted=$(rm -rfv $objs $ninja $ninja_dir $compile_db | wc -l)
+	local -r deleted=$(rm -rfv $objs $deps $compile_db | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
@@ -661,7 +551,7 @@ function _fclean() {
 	$sha_dir'/make.sh' 'rm'
 
 	# remove all build files
-	local -r deleted=$(rm -rfv $objs $executable $ninja_dir $ninja $ext_dir $compile_db '.cache' | wc -l)
+	local -r deleted=$(rm -rfv $objs $deps $executable $ext_dir $compile_db '.cache' | wc -l)
 
 	# print success
 	echo $info'[x]'$reset 'full cleaned ('${deleted##* } 'files)'
@@ -690,12 +580,6 @@ case $1 in
 	# fclean
 	fclean | purge)
 		_fclean
-		;;
-
-	# ninja
-	ninja)
-		touch $script
-		_generate_ninja
 		;;
 
 	# lldb
