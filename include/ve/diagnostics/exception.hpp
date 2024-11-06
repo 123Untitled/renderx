@@ -1,8 +1,10 @@
-#ifndef ___DIAGNOSTICS_EXCEPTION___
-#define ___DIAGNOSTICS_EXCEPTION___
+#ifndef ___ve_diagnostics_exception___
+#define ___ve_diagnostics_exception___
 
 
-namespace rx {
+// -- V E  N A M E S P A C E --------------------------------------------------
+
+namespace ve {
 
 
 	// -- E X C E P T I O N ---------------------------------------------------
@@ -15,7 +17,7 @@ namespace rx {
 			// -- private types -----------------------------------------------
 
 			/* self type */
-			using ___self = rx::exception;
+			using self = ve::exception;
 
 
 		public:
@@ -26,10 +28,10 @@ namespace rx {
 			exception(void) noexcept = default;
 
 			/* copy constructor */
-			exception(const ___self&) noexcept = default;
+			exception(const self&) noexcept = default;
 
 			/* move constructor */
-			exception(___self&&) noexcept = default;
+			exception(self&&) noexcept = default;
 
 			/* destructor */
 			virtual ~exception(void) noexcept = default;
@@ -38,10 +40,10 @@ namespace rx {
 			// -- public assignment operators ---------------------------------
 
 			/* copy assignment operator */
-			auto operator=(const ___self&) noexcept -> ___self& = default;
+			auto operator=(const self&) noexcept -> self& = default;
 
 			/* move assignment operator */
-			auto operator=(___self&&) noexcept -> ___self& = default;
+			auto operator=(self&&) noexcept -> self& = default;
 
 
 			// -- public interface --------------------------------------------
@@ -51,6 +53,6 @@ namespace rx {
 
 	}; // class exception
 
-} // namespace rx
+} // namespace ve
 
-#endif // ___DIAGNOSTICS_EXCEPTION___
+#endif // ___ve_diagnostics_exception___

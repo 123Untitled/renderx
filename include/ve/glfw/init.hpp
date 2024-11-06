@@ -44,7 +44,7 @@ namespace glfw {
 			init(void) {
 
 				if (::glfw_init() == GLFW_FALSE)
-					throw engine::exception{"failed to initialize glfw."};
+					throw ve::exception{"failed to initialize glfw."};
 			}
 
 			/* deleted copy constructor */

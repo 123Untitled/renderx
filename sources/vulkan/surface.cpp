@@ -71,7 +71,7 @@ vulkan::surface::surface(void)
 
 	// create surface
 	if (::glfw_create_window_surface(instance, &window, nullptr, &_surface) != VK_SUCCESS)
-		throw engine::exception{"failed to create vulkan surface."};
+		throw ve::exception{"failed to create vulkan surface."};
 
 }
 //#endif // RENDERX_OS_LINUX

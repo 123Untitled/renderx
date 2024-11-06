@@ -42,17 +42,8 @@ auto main(int, char**) -> int {
 		return EXIT_FAILURE;
 	}
 
-	catch (const engine::exception& except) {
+	catch (const ve::exception& except) {
 		except.print();
-		return EXIT_FAILURE;
-	}
-
-	catch (const char* except) {
-		std::cerr << except << std::endl;
-		return EXIT_FAILURE;
-	}
-	catch (const std::string& except) {
-		std::cerr << except << std::endl;
 		return EXIT_FAILURE;
 	}
 

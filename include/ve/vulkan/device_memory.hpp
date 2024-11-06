@@ -175,7 +175,7 @@ namespace vulkan {
 					}
 				}
 
-				throw engine::exception{"failed to find suitable memory type"};
+				throw ve::exception{"failed to find suitable memory type"};
 			}
 
 

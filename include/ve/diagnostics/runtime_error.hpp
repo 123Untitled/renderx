@@ -1,18 +1,15 @@
-#ifndef ___ve_vulkan_exception___
-#define ___ve_vulkan_exception___
-
-#include "ve/diagnostics/exception.hpp"
-#include "ve/vk/typedefs.hpp"
+#ifndef ___ve_diagnostics_runtime_error___
+#define ___ve_diagnostics_runtime_error___
 
 
-// -- V K  N A M E S P A C E --------------------------------------------------
+// -- V E  N A M E S P A C E --------------------------------------------------
 
-namespace vk {
+namespace ve {
 
 
-	// -- E X C E P T I O N ---------------------------------------------------
+	// -- R U N T I M E  E R R O R --------------------------------------------
 
-	class exception final : public ve::exception {
+	class runtime_error final {
 
 
 		private:
@@ -20,22 +17,13 @@ namespace vk {
 			// -- public types ------------------------------------------------
 
 			/* self type */
-			using self = vk::exception;
+			using self = vk::runtime_error;
 
 
 			// -- private members ---------------------------------------------
 
-			/* where */
-			const char* _where;
-
 			/* what */
 			const char* _what;
-
-
-			// -- private static methods --------------------------------------
-
-			/* strerror */
-			static auto _strerror(const ::vk_result&) noexcept -> const char*;
 
 
 		public:
@@ -46,8 +34,8 @@ namespace vk {
 			exception(void) = delete;
 
 			/* where and what constructor */
-			exception(const char* where, const ::vk_result& what) noexcept
-			: _where{where != nullptr ? where : "unknown"}, _what{self::_strerror(what)} {
+			exception(const char* what) noexcept
+			: _where{what != nullptr ? what : "unknown"}, _what{self::_strerror(what)} {
 			}
 
 			/* copy constructor */
@@ -74,8 +62,9 @@ namespace vk {
 			/* what */
 			auto what(void) const noexcept -> const char* override;
 
-	}; // class exception
 
-} // namespace vk
+	}; // class runtime_error
 
-#endif // ___ve_vulkan_exception___
+} // namespace ve
+
+#endif // ___ve_diagnostics_runtime_error___
