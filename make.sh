@@ -119,16 +119,17 @@ if [[ -z $VULKAN_SDK ]]; then
 fi
 
 
-
 # -- O S  D E P E N D E N C I E S ---------------------------------------------
 
 # linux dependencies
 if [[ $os =~ 'Linux' ]]; then
-	local -r os_dependencies=('-lwayland-client' '-lX11' '-lXxf86vm' '-lXrandr' '-lpthread' '-lXi' '-ldl')
+	declare -rg os_dependencies=('-lwayland-client' '-lX11' '-lXxf86vm' '-lXrandr' '-lpthread' '-lXi' '-ldl')
+	declare -rg max_jobs=$(nproc)
 
 # macos dependencies
 elif [[ $os =~ 'Darwin' ]]; then
-	local -r os_dependencies=('-framework' 'Cocoa' '-framework' 'IOKit')
+	declare -rg os_dependencies=('-framework' 'Cocoa' '-framework' 'IOKit')
+	declare -rg max_jobs=$(sysctl -n hw.ncpu)
 fi
 
 
@@ -256,6 +257,7 @@ function _install_dependency() {
 	# cmake flags
 	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix '-DCMAKE_BUILD_TYPE=Release' ${@:4})
 
+
 	# return if already installed
 	[[ -d $prefix ]] && return
 
@@ -285,21 +287,73 @@ function _install_dependency() {
 	echo $success'[+]'$reset $name $version
 }
 
+# install dependency
+function _install_dependency2() {
+
+	# owner
+	local -r owner=$1
+
+	# library name
+	local -r name=$2
+
+	# branch
+	local -r branch=$3
+
+	# github url
+	local -r url='https://github.com/'$owner'/'$name'.git'
+
+	# repo directory
+	local -r repo=$cwd_dir'/'$name
+
+	# build directory
+	local -r build=$repo'/build'
+
+	# install prefix
+	local -r prefix=$ext_dir'/'$name
+
+	# cmake flags
+	local -r flags=('-DCMAKE_INSTALL_PREFIX='$prefix '-DCMAKE_BUILD_TYPE=Release' ${@:4})
+
+	# return if already installed
+	[[ -d $prefix ]] && return
+
+	# create external and build directories
+	mkdir -p $ext_dir
+
+	# clone if not present
+	if [[ ! -f $repo ]]; then
+		echo -n $success
+		git clone --branch=$branch --single-branch --depth=1 $url $repo
+		echo -n $reset
+	fi
+
+	# configure
+	cmake -S $repo -B $build $flags -G 'Ninja'
+
+	# build and install
+	ninja -C $build install
+
+	# cleanup
+	rm -rf $repo
+
+	# print success
+	echo $success'[+]'$reset $name $version
+}
+
 
 # install dependencies
 function _install_dependencies() {
 
 	# install glfw
-	_install_dependency 'glfw' '3.4' 'glfw' '-DBUILD_SHARED_LIBS=OFF' \
-											'-DGLFW_LIBRARY_TYPE=STATIC' \
-											'-DGLFW_BUILD_EXAMPLES=OFF' \
-											'-DGLFW_BUILD_TESTS=OFF' \
-											'-DGLFW_BUILD_DOCS=OFF'
+	_install_dependency2 'glfw' 'glfw' 'master' '-DBUILD_SHARED_LIBS=OFF' \
+												'-DGLFW_LIBRARY_TYPE=STATIC' \
+												'-DGLFW_BUILD_EXAMPLES=OFF' \
+												'-DGLFW_BUILD_TESTS=OFF' \
+												'-DGLFW_BUILD_DOCS=OFF'
 
 	# install glm
-	_install_dependency 'glm' '1.0.1' 'g-truc' '-DBUILD_SHARED_LIBS=OFF' \
-											   '-DGLM_BUILD_TESTS=OFF'
-
+	_install_dependency2 'g-truc' 'glm' 'master' '-DBUILD_SHARED_LIBS=OFF' \
+												 '-DGLM_BUILD_TESTS=OFF'
 }
 
 
@@ -417,19 +471,10 @@ function _handle_compilation {
 	exit 0
 }
 
-declare -g max_jobs=''
-if [[ $os =~ 'Darwin' ]]; then
-	max_jobs=$(sysctl -n hw.ncpu)
-elif [[ $os =~ 'Linux' ]]; then
-	max_jobs=$(nproc)
-fi
-
-
-
 function _wait_processes {
 
 	# loop over pids
-	for pid in $1; do
+	for pid in $@; do
 		# wait for pid
 		wait $pid
 		# check if compilation failed
@@ -488,26 +533,34 @@ function _compile {
 
 # -- L I N K  F U N C T I O N S -----------------------------------------------
 
-
 function _link {
+
+	# link object files
+	if $cxx $objs '-o' $executable $ldflags; then
+		echo $success'[+]'$reset 'linked' ${executable:t}
+	else
+		echo $error'[x]'$reset 'linking failed'
+		exit 1
+	fi
+}
+
+function _handle_link {
+
+	if [[ ! -f $executable ]]; then
+		_link
+	fi
 
 	# loop over object files
 	for obj in $objs; do
 
 		# check if object file is newer than target
 		if [[ $obj -nt $executable ]]; then
-
-			# link object files
-			if $cxx $objs '-o' $executable $ldflags; then
-				echo $success'[+]'$reset 'linked' ${executable:t}
-			else
-				echo $error'[x]'$reset 'linking failed'
-				exit 1
-			fi
+			_link
 			return
 		fi
 	done
 
+	# no link required
 	echo $info'[>]'$reset ${executable:t} 'is up to date'
 }
 
@@ -519,6 +572,8 @@ function _build() {
 	# install dependencies
 	_install_dependencies
 
+	exit 0
+
 	# compile shaders
 	$sha_dir'/make.sh'
 
@@ -527,7 +582,7 @@ function _build() {
 
 	# build
 	_compile
-	_link
+	_handle_link
 }
 
 
