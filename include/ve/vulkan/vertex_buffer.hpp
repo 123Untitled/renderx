@@ -45,13 +45,30 @@ namespace vulkan {
 			vertex_buffer(void) noexcept = default;
 
 			/* vector constructor */
-			template <typename... ___params>
 			vertex_buffer(const std::vector<ve::vert3x>& vertices)
 			:
 			  // create buffer
 			  _buffer(sizeof(ve::vert3x) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT),
 			  // set vertex count
 			  _count((vk::u32)vertices.size()),
+			  // allocate memory
+			  _alloc(vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())) {
+
+				  _alloc.map();
+				// copy data
+				_alloc.memcpy(vertices.data());
+
+				_alloc.unmap();
+			}
+
+			/* vector constructor */
+			template <typename T>
+			vertex_buffer(const std::vector<T>& vertices)
+			:
+			  // create buffer
+			  _buffer(sizeof(T) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT),
+			  // set vertex count
+			  _count(static_cast<vk::u32>(vertices.size())),
 			  // allocate memory
 			  _alloc(vulkan::allocator<vulkan::cpu_coherent>::allocate_buffer(_buffer.underlying())) {
 

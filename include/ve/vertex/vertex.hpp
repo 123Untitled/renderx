@@ -391,15 +391,11 @@ namespace ve {
 
 
 		public:
-		using vector3 = glm::vec3;
-		using vector2 = glm::vec2;
+			using vector3 = glm::vec3;
+			using vector2 = glm::vec2;
 
 			vector3 position;
 			vector3 normal;
-			//vector2 uv;
-			//ve::vector3 position;
-			//ve::vector3 normal;
-			//ve::vector2 uv;
 
 
 			// -- public lifecycle --------------------------------------------
@@ -515,14 +511,103 @@ namespace ve {
 
 
 
-	class vertex_with_uv final {
-
+	// packed
+	class __attribute__((packed)) vertex_with_uv final {
 
 		public:
 
-			ve::vec3f position;
+			using vector3 = ve::vec3f;
+			using vector2 = ve::vec2f;
 
-			ve::vec2f uv;
+			vector3 position;
+			vector2 uv;
+
+
+			// -- public lifecycle --------------------------------------------
+
+			/* default constructor */
+			vertex_with_uv(void) noexcept = default;
+
+			/* position constructor */
+			vertex_with_uv(const float x, const float y, const float z) noexcept
+			: position{x, y, z}, uv{0.0f, 0.0f} {
+			}
+
+			/* position, uv constructor */
+			vertex_with_uv(const float x, const float y, const float z,
+						   const float u, const float v) noexcept
+			: position{x, y, z}, uv{u, v} {
+			}
+
+			/* position constructor */
+			vertex_with_uv(const vector3& position) noexcept
+			: position{position}, uv{0.0f, 0.0f} {
+			}
+
+			/* position, uv constructor */
+			vertex_with_uv(const vector3& position, const vector2& uv) noexcept
+			: position{position}, uv{uv} {
+			}
+
+			~vertex_with_uv(void) noexcept = default;
+
+
+			/* pipeline vertex input state info */
+			static auto info(void) noexcept -> const vk::pipeline_vertex_input_state_info& {
+
+				/* vertex input binding description */
+				static constexpr vk::vertex_input_binding_description _binding{
+					// binding index
+					0U,
+					// stride
+					sizeof(vertex_with_uv),
+					// input rate
+					VK_VERTEX_INPUT_RATE_VERTEX // pass data to shader for each vertex
+				};
+
+				static vk::vertex_input_attribute_description _descriptions[] {
+					{
+						// shader location
+						.location = 0U,
+						// binding index
+						.binding  = 0U,
+						// format
+						.format   = VK_FORMAT_R32G32B32_SFLOAT,
+						// offset
+						.offset   = offsetof(vertex_with_uv, position)
+					},
+					{
+						// shader location
+						.location = 1U,
+						// binding index
+						.binding  = 0U,
+						// format
+						.format   = VK_FORMAT_R32G32_SFLOAT,
+						// offset
+						.offset   = offsetof(vertex_with_uv, uv)
+					},
+				};
+
+				/* vertex input state info */
+				static vk::pipeline_vertex_input_state_info info{
+					// structure type
+					VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+					// next structure
+					nullptr,
+					// flags
+					0U,
+					// binding description count
+					1U,
+					// vertex binding description
+					&_binding,
+					// vertex attribute description count
+					2U,
+					// vertex attribute description
+					_descriptions
+				};
+
+				return info;
+			}
 
 
 	}; // class vertex_with_uv

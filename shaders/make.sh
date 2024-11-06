@@ -155,7 +155,7 @@ function _compile() {
 
 		# compile glsl to spir-v
 		if $cc $stage $cflags -MD -MF $dep -MT $spv -o $spv $file &> $log_file; then
-			echo $success'[✓]'$reset ${file:t}
+			echo -n '\r\x1b[2K'$info'[✓]'$reset ${file:t}
 			count=$((count + 1))
 		else
 			echo $error'[x]'$reset ${file:t}
@@ -167,9 +167,9 @@ function _compile() {
 
 	# print success
 	if [[ $count -gt 0 ]]; then
-		echo $info'[>]'$reset $count 'spir-v compiled.'
+		echo '\r\x1b[2K'$success'[+]'$reset $count 'spir-v compiled.'
 	else
-		echo $info'[>]'$reset 'shaders are up to date.'
+		echo $success'[>]'$reset 'shaders are up to date.'
 	fi
 }
 

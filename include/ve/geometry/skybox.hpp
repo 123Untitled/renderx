@@ -49,7 +49,6 @@ namespace ve {
 		v.r = 0.0f;
 
 		v.u = 0.0f;
-
 	}
 
 
@@ -66,11 +65,13 @@ namespace ve {
 			/* self type */
 			using self = ve::mesh::skybox;
 
+			using vec3 = ve::vertex_with_uv::vector3;
+			using vec2 = ve::vertex_with_uv::vector2;
+
 
 			// -- private members ---------------------------------------------
 
-			std::vector<ve::vec3f> _vertices;
-			std::vector<ve::vec2f> _uvs;
+			std::vector<ve::vertex_with_uv> _vertices;
 
 
 		public:
@@ -106,12 +107,11 @@ namespace ve {
 
 
 				for (auto& vertex : _vertices) {
-					_uvs.push_back(_compute_uv(vertex));
-				}
+					vertex.uv = _compute_uv(vertex.position); }
 			}
 
 
-			static auto _compute_uv(const ve::vec3f& vec) noexcept -> ve::vec2f {
+			static auto _compute_uv(const vec3& vec) noexcept -> vec2 {
 
 				// normalize
 				const auto n = ve::normalize(vec);
@@ -130,21 +130,20 @@ namespace ve {
 			}
 
 
-			auto to_vertex(void) const -> std::vector<ve::vertex<ve::vec3f, ve::vec2f>> {
-				if (_vertices.size() != _uvs.size())
-					throw;
-
-				std::vector<ve::vertex<ve::vec3f, ve::vec2f>> vec;
-
-				for (std::size_t i = 0U; i < _vertices.size(); ++i) {
-
-					vec.emplace_back(ve::vec3f{_vertices[i]},
-									 ve::vec2f{_uvs[i]});
-				}
-
-				return vec;
-			}
-
+			//auto to_vertex(void) const -> std::vector<ve::vertex<ve::vec3f, ve::vec2f>> {
+			//	if (_vertices.size() != _uvs.size())
+			//		throw;
+			//
+			//	std::vector<ve::vertex<ve::vec3f, ve::vec2f>> vec;
+			//
+			//	for (std::size_t i = 0U; i < _vertices.size(); ++i) {
+			//
+			//		vec.emplace_back(ve::vec3f{_vertices[i]},
+			//						 ve::vec2f{_uvs[i]});
+			//	}
+			//
+			//	return vec;
+			//}
 
 	}; // class skybox
 

@@ -408,7 +408,7 @@ function _handle_compilation {
 		exit 1
 	fi
 
-	echo -n '\r\x1b[2K'$success'[✓]'$reset ${1:t}
+	echo -n '\r\x1b[2K'$info'[✓]'$reset ${1:t}
 	exit 0
 }
 
@@ -465,9 +465,9 @@ function _compile {
 	_wait_processes $pids
 
 	if [[ $count -eq 0 ]]; then
-		echo $info'[>]'$reset 'nothing to compile'
+		echo $success'[>]'$reset 'nothing to compile'
 	else
-		echo '\r\x1b[2K'$info'[+]'$reset 'compiled' $count 'files'
+		echo '\r\x1b[2K'$success'[+]'$reset $count 'cxx compiled.'
 	fi
 }
 
@@ -502,7 +502,7 @@ function _handle_link {
 	done
 
 	# no link required
-	echo $info'[>]'$reset ${executable:t} 'is up to date'
+	echo $success'[>]'$reset ${executable:t} 'is up to date'
 }
 
 
@@ -513,11 +513,11 @@ function _build() {
 	# install dependencies
 	_install_dependencies
 
-	# compile shaders
-	$sha_dir'/make.sh'
-
 	# generate compile database
 	_compile_database
+
+	# compile shaders
+	$sha_dir'/make.sh'
 
 	# build
 	_compile
