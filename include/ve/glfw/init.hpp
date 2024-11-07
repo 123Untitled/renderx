@@ -1,20 +1,8 @@
-/*****************************************************************************/
-/*                                                                           */
-/*          ░  ░░░░  ░  ░░░░  ░  ░░░░░░░  ░░░░  ░░      ░░   ░░░  ░          */
-/*          ▒  ▒▒▒▒  ▒  ▒▒▒▒  ▒  ▒▒▒▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒  ▒    ▒▒  ▒          */
-/*          ▓▓  ▓▓  ▓▓  ▓▓▓▓  ▓  ▓▓▓▓▓▓▓     ▓▓▓▓  ▓▓▓▓  ▓  ▓  ▓  ▓          */
-/*          ███    ███  ████  █  ███████  ███  ██        █  ██    █          */
-/*          ████  █████      ██        █  ████  █  ████  █  ███   █          */
-/*                                                                           */
-/*****************************************************************************/
-
-#pragma once
-
-#ifndef ___ENGINE_GLFW_INIT_HPP___
-#define ___ENGINE_GLFW_INIT_HPP___
+#ifndef ___ve_glfw_init___
+#define ___ve_glfw_init___
 
 #include "ve/glfw/glfw.hpp"
-#include "ve/exceptions.hpp"
+#include "ve/diagnostics/runtime_error.hpp"
 #include "ve/glfw/typedefs.hpp"
 
 
@@ -44,7 +32,7 @@ namespace glfw {
 			init(void) {
 
 				if (::glfw_init() == GLFW_FALSE)
-					throw ve::exception{"failed to initialize glfw."};
+					throw ve::runtime_error{"failed to initialize glfw."};
 			}
 
 			/* deleted copy constructor */
@@ -72,4 +60,4 @@ namespace glfw {
 
 } // namespace glfw
 
-#endif // ___ENGINE_GLFW_INIT_HPP___
+#endif // ___ve_glfw_init___

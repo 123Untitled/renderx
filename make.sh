@@ -128,7 +128,7 @@ if [[ $os =~ 'Linux' ]]; then
 
 # macos dependencies
 elif [[ $os =~ 'Darwin' ]]; then
-	declare -rg os_dependencies=('-framework' 'Cocoa' '-framework' 'IOKit')
+	declare -rg os_dependencies=('-framework' 'Cocoa' '-framework' 'IOKit' '-framework' 'Metal' '-framework' 'QuartzCore')
 	declare -rg max_jobs=$(sysctl -n hw.ncpu)
 fi
 

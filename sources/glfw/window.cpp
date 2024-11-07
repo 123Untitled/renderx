@@ -1,6 +1,7 @@
 #include "ve/glfw/window.hpp"
 #include "ve/glfw/system.hpp"
-#include "ve/exceptions.hpp"
+
+#include <iostream>
 
 #include "ve/running.hpp"
 
@@ -137,7 +138,7 @@ glfw::window::window(void)
 								   nullptr, nullptr);
 
 	if (_window == nullptr)
-		throw ve::exception{"failed to create glfw window."};
+		throw ve::runtime_error{"failed to create glfw window."};
 
 
 	::glfw_set_window_user_pointer(_window, this);
@@ -223,7 +224,7 @@ auto glfw::window::framebuffer_size(void) -> vk::extent2D {
 
 	// check for error
 	if (x == 0 || y == 0)
-		throw ve::exception{"failed to get framebuffer size."};
+		throw ve::runtime_error{"failed to get framebuffer size."};
 
 	// return extent
 	return vk::extent2D{

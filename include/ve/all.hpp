@@ -35,7 +35,6 @@
 #include "ve/vertex/rotation.hpp"
 #include "ve/vertex/normal.hpp"
 
-#include "ve/exceptions.hpp"
 
 #include "ve/system/directory.hpp"
 

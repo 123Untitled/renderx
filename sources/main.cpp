@@ -31,22 +31,17 @@ auto main(int, char**) -> int {
 		renderer.run();
 
 	}
-	// vulkan catch block
-	catch (const vk::exception& except) {
+	// ve exceptions
+	catch (const ve::exception& except) {
 		std::cerr << except.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-
+	// std exceptions
 	catch (const std::exception& except) {
 		std::cerr << except.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	catch (const ve::exception& except) {
-		except.print();
-		return EXIT_FAILURE;
-	}
-
+	// unknown exceptions
 	catch (...) {
 		std::cerr << "unknown exception" << std::endl;
 		return EXIT_FAILURE;

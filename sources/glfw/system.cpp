@@ -1,5 +1,5 @@
 #include "ve/glfw/system.hpp"
-#include "ve/exceptions.hpp"
+#include "ve/diagnostics/runtime_error.hpp"
 #include "ve/os.hpp"
 #include "ve/vk/typedefs.hpp"
 #include "ve/glfw/typedefs.hpp"
@@ -32,7 +32,7 @@ glfw::system::system(void)
 
 	// check vulkan support
 	if (::glfw_vulkan_supported() == GLFW_FALSE)
-		throw ve::exception{"glfw: vulkan is not supported."};
+		throw ve::runtime_error{"glfw: vulkan is not supported."};
 
 	// set error callback
 	static_cast<void>(::glfw_set_error_callback(___self::_error_callback));
@@ -48,7 +48,7 @@ auto glfw::system::_vulkan_required_extensions(void) -> std::vector<const char*>
 	const char** extensions = ::glfw_get_required_instance_extensions(&count);
 
 	if (extensions == nullptr)
-		throw ve::exception{"failed to get glfw required instance extensions."};
+		throw ve::runtime_error{"failed to get glfw required instance extensions."};
 
 	std::vector<const char*> result;
 	result.reserve(count);

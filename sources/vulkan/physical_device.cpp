@@ -4,7 +4,8 @@
 #include "ve/vulkan/device.hpp"
 #include "ve/vulkan/surface.hpp"
 #include "ve/vk/functions.hpp"
-#include "ve/exceptions.hpp"
+
+#include <iostream>
 
 
 // -- public lifecycle --------------------------------------------------------

@@ -7,6 +7,8 @@
 #include "ve/vulkan/validation_layers.hpp"
 #include "ve/os.hpp"
 
+#include <iostream>
+
 
 // -- private static methods --------------------------------------------------
 

@@ -2,7 +2,7 @@
 #define ___ENGINE_VULKAN_DEVICE_MEMORY___
 
 #include "ve/memory/memcpy.hpp"
-#include "ve/exceptions.hpp"
+#include "ve/diagnostics/runtime_error.hpp"
 #include "ve/vulkan/device.hpp"
 #include "ve/vertex/vertex.hpp"
 #include "ve/vk/utils.hpp"
@@ -175,7 +175,7 @@ namespace vulkan {
 					}
 				}
 
-				throw ve::exception{"failed to find suitable memory type"};
+				throw ve::runtime_error{"failed to find suitable memory type"};
 			}
 
 

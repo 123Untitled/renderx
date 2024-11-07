@@ -1,8 +1,7 @@
-#include "ve/exceptions.hpp"
+#include "ve/diagnostics/runtime_error.hpp"
 #include "ve/vulkan/surface.hpp"
 
 #include "ve/vulkan/instance.hpp"
-#include "ve/vk/exception.hpp"
 
 #include "ve/glfw/window.hpp"
 
@@ -71,7 +70,7 @@ vulkan::surface::surface(void)
 
 	// create surface
 	if (::glfw_create_window_surface(instance, &window, nullptr, &_surface) != VK_SUCCESS)
-		throw ve::exception{"failed to create vulkan surface."};
+		throw ve::runtime_error{"failed to create vulkan surface."};
 
 }
 //#endif // RENDERX_OS_LINUX
