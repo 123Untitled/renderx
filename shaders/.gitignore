@@ -2,10 +2,10 @@
 /spir-v
 
 # ignore spv files
-/**/*.spv
+/spir-v/**/*.spv
 
 # ignore dependency files
-/.deps
+/sources/**/*.d
 
 # ignore log file
 /.log
