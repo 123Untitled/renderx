@@ -1,6 +1,6 @@
 #!/usr/bin/env -S zsh --no-rcs --no-globalrcs --pipefail
 
-# this script compiles directx shader files to spir-v files
+# this script compiles glsl shader files to spir-v files
 
 
 # -- C O L O R S --------------------------------------------------------------
@@ -11,6 +11,17 @@ local -r warning='\x1b[33m'
 local -r info='\x1b[34m'
 local -r dim='\x1b[90m'
 local -r reset='\x1b[0m'
+
+
+# -- A S C I I ----------------------------------------------------------------
+
+#echo $success\
+#' ▗▄▄▖▗▖ ▗▖ ▗▄▖ ▗▄▄▄ ▗▄▄▄▖▗▄▄▖  ▗▄▄▖\n'\
+#'▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌  █▐▌   ▐▌ ▐▌▐▌   \n'\
+#' ▝▀▚▖▐▛▀▜▌▐▛▀▜▌▐▌  █▐▛▀▀▘▐▛▀▚▖ ▝▀▚▖\n'\
+#'▗▄▄▞▘▐▌ ▐▌▐▌ ▐▌▐▙▄▄▀▐▙▄▄▖▐▌ ▐▌▗▄▄▞▘\n'$reset
+
+
 
 
 # -- D I R E C T O R I E S ----------------------------------------------------
@@ -27,9 +38,6 @@ declare -r inc_dir=$cwd_dir'/include'
 # spir-v directory
 declare -r spv_dir=$cwd_dir'/spir-v'
 
-# dependencies directory
-declare -r dep_dir=$cwd_dir'/.deps'
-
 
 # -- F I L E S ----------------------------------------------------------------
 
@@ -41,6 +49,16 @@ declare -r log_file=$cwd_dir'/.log'
 
 # source files
 declare -r srcs=($src_dir'/'**'/'*'.glsl'(.N))
+
+# dependency files
+declare -r deps=(${srcs/%'.glsl'/'.d'})
+
+
+# check for glsl files
+if [[ ${#srcs[@]} -eq 0 ]]; then
+	echo $error'[x]'$reset 'no glsl files found.'
+	exit 1
+fi
 
 
 # -- C O M P I L E R ----------------------------------------------------------
@@ -86,7 +104,7 @@ local -r cflags=('-x'$lang
 function _check_tools() {
 
 	# required tools
-	local -r required=('glslc')
+	local -r required=('glslc' 'mkdir' 'rm' 'echo')
 	
 	# loop over required tools
 	for tool in $required; do
@@ -133,12 +151,10 @@ function _need_compilation() {
 function _compile() {
 
 	# count of compiled files
-	local count=0
+	local -i count=0
 
 	# loop over glsl files
 	for file in $srcs; do
-
-		# file have this pattern: 'filename.[vert|frag|tesc|tese|geom|comp].glsl'
 
 		# extract stage
 		local stage='-fshader-stage='${file:t:r:e}
@@ -147,22 +163,22 @@ function _compile() {
 		local spv=$spv_dir'/'${file:t:r}'.spv'
 
 		# create dependency path
-		local dep=$dep_dir'/'${file:t:r}'.d'
+		local dep=${file:r}'.d'
 
 		# check if need compilation
 		_need_compilation $spv $dep || continue
 
-
 		# compile glsl to spir-v
 		if $cc $stage $cflags -MD -MF $dep -MT $spv -o $spv $file &> $log_file; then
 			echo -n '\r\x1b[2K'$info'[✓]'$reset ${file:t}
-			count=$((count + 1))
-		else
-			echo $error'[x]'$reset ${file:t}
-			local -r log_content=$(<$log_file)
-			echo ${log_content#$file:}
-			exit 1
+			count=$((++count))
+			continue
 		fi
+
+		echo $error'[x]'$reset ${file:t}
+		local -r log_content=$(<$log_file)
+		echo ${log_content#$file:}
+		exit 1
 	done
 
 	# print success
@@ -179,7 +195,7 @@ function _compile() {
 function _prepare() {
 
 	# create folder
-	if ! mkdir -p $spv_dir $dep_dir; then
+	if ! mkdir -p $spv_dir; then
 		echo 'failed to create spir-v directory.'
 	fi
 }
@@ -191,11 +207,20 @@ function _prepare() {
 function _clean() {
 
 	# remove all spir-v files
-	local -r deleted=$(rm -vrf $spv_dir $dep_dir $log_file | wc -l)
+	local -r deleted=($(rm -vrf $spv_dir $deps $log_file))
+
+	# number of deleted files
+	local -r count=${#deleted[@]}
+
+	if [[ $count -eq 0 ]]; then
+		echo $info'[>]'$reset 'nothing to clean.'
+		return
+	fi
 
 	# print success
-	echo $info'[x]'$reset 'cleaned ('${deleted##* } 'files)'
+	echo $info'[x]'$reset $count 'files deleted.'
 }
+
 
 
 # -- build --------------------------------------------------------------------
@@ -217,7 +242,7 @@ function _build() {
 
 case $1 in
 
-	clean|clear|fclean|rm)
+	clean | clear | fclean | rm)
 		_clean
 		;;
 	*)
